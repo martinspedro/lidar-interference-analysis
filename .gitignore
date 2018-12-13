@@ -9,6 +9,7 @@ msg_gen/
 srv_gen/
 build_isolated/
 devel_isolated/
+doc
 
 # ROS Message folders
 msg/*Action.msg
