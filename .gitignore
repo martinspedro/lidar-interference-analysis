@@ -9,7 +9,7 @@ msg_gen/
 srv_gen/
 build_isolated/
 devel_isolated/
-doc
+doc/
 
 # ROS Message folders
 msg/*Action.msg
@@ -94,8 +94,10 @@ CATKIN_IGNORE
 # Datasets folder
 datasets/
 
-# Images folder
+# Thesis subfolders to ignore
 images/
+Node\ Graphs/
+diagrams/
 
 # PDFs and images
 *.pdf
