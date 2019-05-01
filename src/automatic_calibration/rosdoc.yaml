@@ -1,0 +1,7 @@
+- builder: doxygen
+   name: Automatic Calibration
+   author: Pedro Martins
+   output_dir: automatic_calibration/doc
+   file_patterns: '*.c *.cpp *.h *hpp *.launch *.cc *.hh *.dox'
+   multiline_cpp_is_brief: True
+   use_mdfile_as_mainpage: README.md
