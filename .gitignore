@@ -94,6 +94,9 @@ CATKIN_IGNORE
 # Datasets folder
 datasets/
 
+# Images folder
+images/
+
 # PDFs and images
 *.pdf
 *.jpeg
