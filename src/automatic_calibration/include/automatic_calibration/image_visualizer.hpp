@@ -1,3 +1,6 @@
+static const std::string OPENCV_WINDOW = "Video Stream";
+static int i = 0;
+
 class ImageVisualizer
 {
   ros::NodeHandle nh_;

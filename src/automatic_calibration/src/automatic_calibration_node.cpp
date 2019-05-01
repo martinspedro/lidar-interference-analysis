@@ -19,9 +19,6 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& point_cloud_msg) {
 
 */
 
-static const std::string OPENCV_WINDOW = "Video Stream";
-static int i = 0;
-
 
 int main(int argc, char** argv)
 {
