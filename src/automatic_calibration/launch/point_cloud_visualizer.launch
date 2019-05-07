@@ -10,7 +10,11 @@ Description: Play bag file of velodyne data and laucng nodelet to convert velody
    <!-- Arguments -->
    <arg name="udacity_bags_folder_path" value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Udacity/" />
    <arg name="udacity_bag"              default="CHX_001/lidar.bag" />
-
+   <arg name="rviz_file"                default="$(find automatic_calibration)/rviz/point_cloud_visualizer.rviz" />
+   <arg name="use_standlone_nodelet"    default="true" />
+   <arg name="open_rviz"                default="true" />
+   <arg name="min_range"                default="0.3" />
+   <arg name="max_range"                default="150" />
 
    <!-- Packages -->
 
@@ -18,26 +22,13 @@ Description: Play bag file of velodyne data and laucng nodelet to convert velody
    <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR" required="true" args="$(arg udacity_bags_folder_path)$(arg udacity_bag) --clock -l"/>
 
    <!-- start nodelet manager and driver nodelets -->
-   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch" >
-     <arg name="model" value="32E"/>
-   </include>
+   <node pkg="nodelet" type="nodelet" name="velodyne_cloud_nodelet" args="standalone velodyne_pointcloud/CloudNodelet" if="$(arg use_standlone_nodelet)" >
+     <param name="model"       value="32E"/>
+     <param name="min_range"   value="$(arg min_range)"/>
+     <param name="max_range"   value="$(arg max_range)"/>
+     <param name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
+   </node>
 
-   <!-- start cloud nodelet -->
-   <include file="$(find velodyne_pointcloud)/launch/cloud_nodelet.launch">
-     <arg name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
-     <arg name="min_range"   value="0.3"/>
-     <arg name="max_range"   value="200"/>
-   </include>
-
-     <!-- velodyne_packets2pointcloud
-     <node pkg="velodyne_pointcloud" type="cloud_node" name="velodyne_pointcloud" >
-       <paam name="min_range"   value="0.3"/>
-       <param name="max_range"   value="200"/>
-       <param name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
-     </node>-->
-
-     <!-- rviz
-     <arg name="rviz"    default="true" />
-     <arg name="rviz_file" default="$(find udacity_launch)/rviz/disp.rviz" />
-     <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen" if="$(arg rviz)"/> -->
+     <!-- rviz -->
+     <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen" if="$(arg open_rviz)"/>
 </launch>
