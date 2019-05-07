@@ -35,6 +35,7 @@ using namespace pcl;
 /*******************************************************************************
  *                                 TYPEDEFS
  ******************************************************************************/
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-typedef pcl::PointXYZRGB PointC;
-typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
+typedef pcl::PointCloud<pcl::PointXYZ>  PointCloud;
+typedef pcl::PointCloud<pcl::PointXYZI> PointCloudI;
+typedef pcl::PointXYZRGB PointRGB;
+typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
