@@ -45,6 +45,6 @@ Description: Play bag file of velodyne data and laucng nodelet to convert velody
 
 
      <!-- rviz -->
-     <node pkg="automatic_calibration" type="point_cloud_visualizer" name="Simple_Point_Cloud_Visualizer" output="screen" unless="$(arg open_rviz)"/>
+     <node pkg="automatic_calibration" type="point_cloud_visualizer" name="Simple_Point_Cloud_Viewer" output="screen" unless="$(arg open_rviz)"/>
      <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen" if="$(arg open_rviz)"/>
 </launch>
