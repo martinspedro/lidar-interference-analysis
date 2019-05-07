@@ -1,7 +1,7 @@
 <launch>
   # Arguments
    <arg name="udacity_bags_folder_path" value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Udacity/" />
-    <arg name="udacity_bag"             default="CHX_001/cal_loop.bag" />
+   <arg name="udacity_camera_bag"       default="CHX_001/camera.bag" />
    <arg name="input_compressed_image"   default="/center_camera/image_color/" />
    <arg name="output_raw_image"         default="/camera/image_raw" />
 
@@ -10,7 +10,7 @@
    <param name="use_sim_time" value="true" />
 
    # Packages
-   <node pkg="rosbag" type="play" name="Udacity_CHX_001" required="true" args="$(arg udacity_bags_folder_path)$(arg udacity_bag)"/>
+   <node pkg="rosbag" type="play" name="Udacity_CHX_001" required="true" args="$(arg udacity_bags_folder_path)$(arg udacity_camera_bag)"/>
 
    # Nodes
    <node name="image_republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=$(arg input_compressed_image) raw out:=$(arg output_raw_image)" />
