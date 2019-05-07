@@ -30,7 +30,7 @@ Description: Play bag file of velodyne data and laucng nodelet to convert velody
    </node>
 
    <group unless="$(arg use_standlone_nodelet)">
-      <!-- start nodelet manager and driver nodelets -->
+      <!-- start manager and driver nodelets -->
       <include file="$(find velodyne_driver)/launch/nodelet_manager.launch" >
         <arg name="model" value="32E"/>
       </include>
