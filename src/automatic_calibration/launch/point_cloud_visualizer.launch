@@ -12,7 +12,7 @@ Description: Play bag file of velodyne data and laucng nodelet to convert velody
    <arg name="udacity_bag"              default="CHX_001/lidar.bag" />
    <arg name="rviz_file"                default="$(find automatic_calibration)/rviz/point_cloud_visualizer.rviz" />
    <arg name="use_standlone_nodelet"    default="true" />
-   <arg name="open_rviz"                default="true" />
+   <arg name="open_rviz"                default="false" />
    <arg name="min_range"                default="0.3" />
    <arg name="max_range"                default="150" />
 
@@ -45,5 +45,6 @@ Description: Play bag file of velodyne data and laucng nodelet to convert velody
 
 
      <!-- rviz -->
+     <node pkg="automatic_calibration" type="point_cloud_visualizer" name="Simple_Point_Cloud_Visualizer" output="screen" unless="$(arg open_rviz)"/>
      <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen" if="$(arg open_rviz)"/>
 </launch>
