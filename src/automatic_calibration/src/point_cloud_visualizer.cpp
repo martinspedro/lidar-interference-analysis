@@ -1,6 +1,8 @@
 #include "automatic_calibration/automatic_calibration.hpp"
 
 pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+
+
 void callback(const sensor_msgs::PointCloud2ConstPtr& point_cloud_msg) {
 
 //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
@@ -9,9 +11,9 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& point_cloud_msg) {
   // Convert ROS message to colored point cloud object
   //pcl::fromROSMsg(*point_cloud_msg, &cloud);
   //pcl::PointCloud<pcl::PointXYZRGB>::Ptr ptrCloud(&cloud);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::PointCloud<pcl::PointXYZI> cloud;
     pcl::fromROSMsg(*point_cloud_msg, cloud);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZI>);
     *cloudPtr = cloud;
 /*
       pcl::PCLPointCloud2 pcl_pc2;
