@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
-Author: Pedro Martins (martinspedro@av.it.pt)
-Description: Play bag file of velodyne data and laucng nodelet to convert velodyne_packets to velodyne_points
+    Author: Pedro Martins (martinspedro@av.it.pt)
+    Description: Play bag file of single camera data and launch image_republish node to convert from compressed format to raw
 -->
 <launch>
     <!-- PARAMETERS -->
