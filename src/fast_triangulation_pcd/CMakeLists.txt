@@ -14,10 +14,10 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-find_package(PCL 1.2 REQUIRED)
+find_package(PCL REQUIRED)
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures

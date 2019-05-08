@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <pcl_ros/point_cloud.h>
 
 // PCL specific includes
 #include <sensor_msgs/PointCloud2.h>
@@ -14,16 +15,22 @@
 #include <pcl/io/vtk_io.h>
 #include <pcl/search/kdtree.h>
 
+
+using namespace pcl;
+
 // Add these typedefs after your #includes
 typedef pcl::PointXYZRGB PointC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 
 ros::Publisher pub;
 
-void cloud_cb (const sensor_msgs::PointCloud2 input)
+void cloud_cb (sensor_msgs::PointCloud2ConstPtr& point_cloud_msg)
 {
 	// Create a container for the data
 	sensor_msgs::PointCloud2 output;
+	PointCloudC cloud;
+
+	pcl::fromROSMsg(*point_cloud_msg, cloud);
 
   // Load input file into a PointCloud<T> with an appropriate type
 	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -33,9 +40,10 @@ void cloud_cb (const sensor_msgs::PointCloud2 input)
 	//pcl::fromROSMsg(*input, cloud);
 
 
-	PointCloudC::Ptr cloud(new PointCloudC());
-	pcl::fromROSMsg(input, *cloud);
-	ROS_INFO("Got point cloud with %ld points", cloud->size());
+
+	PointCloudC::Ptr cloudPtr(new PointCloudC());
+	*cloudPtr = cloud;
+	//ROS_INFO("Got point cloud with %ld points", cloud->size());
 	/*
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromPCLPointCloud2 (*cloud, *cloud2)
@@ -103,7 +111,7 @@ void cloud_cb (const sensor_msgs::PointCloud2 input)
 	//output = *input;
 
 	// Publish the data
-	pub.publish(output);
+	//pub.publish(output);
 }
 
 int main (int argc, char** argv)
@@ -113,12 +121,14 @@ int main (int argc, char** argv)
 	ros::NodeHandle nh;
 
 	// Create a ROS subscriber for the input point cloud
-	ros::Subscriber sub = nh.subscribe("input", 1, cloud_cb);
+	 ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, cloud_cb);
 
 
 	// Create a ROS publisher for the output point cloud
-	pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+	//pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
 
 	// Spin
 	ros::spin();
+
+	return EXIT_SUCCESS;
 }
