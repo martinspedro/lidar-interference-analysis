@@ -1,5 +1,4 @@
-static const std::string OPENCV_WINDOW = "Video Stream";
-static int i = 0;
+static const std::string OPENCV_WINDOW = "Simple Video Stream Viewer";
 
 class ImageVisualizer
 {
@@ -12,10 +11,9 @@ public:
   ImageVisualizer()
     : it_(nh_)
   {
-    // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/camera/image_raw", 1,
-      &ImageVisualizer::imageCb, this);
-    image_pub_ = it_.advertise("/image_converter/output_video", 1);
+    // Subscribe to input video feed and publish output video feed
+    image_sub_ = it_.subscribe("/camera/image_color/raw", 1, &ImageVisualizer::imageCb, this);
+    image_pub_ = it_.advertise("/camera/image_info", 1);
 
     cv::namedWindow(OPENCV_WINDOW, 0);
   }
@@ -25,10 +23,13 @@ public:
     cv::destroyWindow(OPENCV_WINDOW);
   }
 
+  /** @brief Callback function for image visualization
+   *   
+   */
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
-    ROS_INFO("Frame #%d", i++);
     cv_bridge::CvImagePtr cv_ptr;
+
     try
     {
       cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
