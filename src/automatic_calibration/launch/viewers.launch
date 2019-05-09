@@ -84,21 +84,21 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
            args="compressed in:=$(arg left_camera_compressed_image) raw out:=$(arg left_camera_raw_image)" />
      <node name="video_stream_left" type="video_visualizer" pkg="automatic_calibration">
        <remap from="/camera/image_color/raw" to="$(arg left_camera_raw_image)" />
-       <remap from="/camera/image_info" to="/left_camera/image_info" />
+       <remap from="/camera/image_info" to="$(arg left_camera_image_info  )" />
     </node>
 
      <node name="frame_republish_center" type="republish" pkg="image_transport" output="screen"
            args="compressed in:=$(arg center_camera_compressed_image) raw out:=$(arg center_camera_raw_image)" />
      <node name="video_stream_center" type="video_visualizer" pkg="automatic_calibration" >
        <remap from="/camera/image_color/raw" to="$(arg center_camera_raw_image)" />
-       <remap from="/camera/image_info" to="/center_camera/image_info" />
+       <remap from="/camera/image_info" to="$(arg center_camera_image_info)" />
     </node>
 
      <node name="frame_republish_right" type="republish" pkg="image_transport" output="screen"
            args="compressed in:=$(arg right_camera_compressed_image) raw out:=$(arg right_camera_raw_image)" />
      <node name="video_stream_right" type="video_visualizer" pkg="automatic_calibration" >
        <remap from="/camera/image_color/raw" to="$(arg right_camera_raw_image)" />
-       <remap from="/camera/image_info" to="/right_camera/image_info" />
+       <remap from="/camera/image_info" to="$(arg right_camera_image_info)" />
      </node>
 
 </launch>
