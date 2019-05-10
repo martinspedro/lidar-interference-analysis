@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <!--
 Author: Pedro Martins (martinspedro@av.it.pt)
-Description: Play bag file of velodyne data and laucng nodelet to convert velodyne_packets to velodyne_points
+Description: Play bag file of velodyne data and then launch nodes to visualize LIDAR point cloud.
+             Point cloud visualization can use a simple viewer or RVIZ.
+             Also launch a nodelet to convert velodyne_packets to velodyne_points.
+             Nodelet manager and velodyne driver can be run optionally.
 -->
 <launch>
   <!-- Parameters -->
