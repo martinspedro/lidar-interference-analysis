@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+Description: Play bag file of velodyne and camera data and then launch nodes to
+             visualize the camera feed and LIDAR point cloud. Point cloud visualization
+             can use a simple viewer or RVIZ. Also launch nodes to convert compressed
+             video frames to raw and a nodelet to convert velodyne_packets to velodyne_points
+-->
+
+<launch>
+   <!-- PARAMETERS -->
+   <param name="use_sim_time" value="true" />
+
+   <!-- ARGUMENTS -->
+   <!-- Udacity datasets -->
+   <arg name="udacity_bags_folder_path"
+        value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Udacity/" />
+   <arg name="udacity_bag"              default="CHX_001/camera_and_lidar.bag" />
+
+   <!-- Point Cloud related -->
+   <arg name="use_standlone_nodelet"    default="true" />
+   <arg name="min_range"                default="0.3" />
+   <arg name="max_range"                default="150" />
+
+   <!-- Point Cloud visualization -->
+   <arg name="rviz_file"                default="$(find automatic_calibration)/rviz/point_cloud_visualizer.rviz" />
+   <arg name="open_rviz"                default="false" />
+
+
+   <!-- Camera related -->
+   <arg name="left_camera_compressed_image"   default="/left_camera/image_color/" />
+   <arg name="left_camera_raw_image"          default="/left_camera/image_color/raw" />
+   <arg name="left_camera_image_info"         default="/left_camera/image_info" />
+
+   <arg name="center_camera_compressed_image" default="/center_camera/image_color/" />
+   <arg name="center_camera_raw_image"        default="/center_camera/image_color/raw" />
+   <arg name="center_camera_image_info"       default="/center_camera/image_info" />
+
+   <arg name="right_camera_compressed_image"  default="/right_camera/image_color/" />
+   <arg name="right_camera_raw_image"         default="/right_camera/image_color/raw" />
+   <arg name="right_camera_image_info"        default="/right_camera/image_info" />
+
+
+
+   <!-- NODES -->
+   <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+   <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR_CAMERA" required="true"
+         args="$(arg udacity_bags_folder_path)$(arg udacity_bag) --clock -l"/>
+
+   <!-- start nodelet manager and driver nodelets -->
+   <node pkg="nodelet" type="nodelet" name="velodyne_cloud_nodelet" args="standalone velodyne_pointcloud/CloudNodelet"
+         if="$(arg use_standlone_nodelet)" >
+     <param name="model"       value="32E"/>
+     <param name="min_range"   value="$(arg min_range)"/>
+     <param name="max_range"   value="$(arg max_range)"/>
+     <param name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
+   </node>
+
+   <group unless="$(arg use_standlone_nodelet)">
+      <!-- start manager and driver nodelets -->
+      <include file="$(find velodyne_driver)/launch/nodelet_manager.launch" >
+        <arg name="model" value="32E"/>
+      </include>
+
+      <!-- start cloud nodelet -->
+      <include file="$(find velodyne_pointcloud)/launch/cloud_nodelet.launch">
+         <arg name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
+         <arg name="min_range"   value="$(arg min_range)"/>
+         <arg name="max_range"   value="$(arg max_range)"/>
+      </include>
+   </group>
+
+
+     <!-- Point Cloud Visualizer
+          Selec between opening simple point cloud visualizer or RVIZ
+       -->
+     <node pkg="sensor_fusion" type="point_cloud_coloring" name="Simple_Point_Cloud_Viewer"
+           output="screen" unless="$(arg open_rviz)"/>
+     <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen"
+           if="$(arg open_rviz)"/>
+
+     <!-- Video Feed Visualizer -->
+     <node name="frame_republish_left" type="republish" pkg="image_transport" output="screen"
+           args="compressed in:=$(arg left_camera_compressed_image) raw out:=$(arg left_camera_raw_image)" />
+     <node name="video_stream_left" type="video_visualizer" pkg="automatic_calibration">
+       <remap from="/camera/image_color/raw" to="$(arg left_camera_raw_image)" />
+       <remap from="/camera/image_info" to="$(arg left_camera_image_info  )" />
+    </node>
+
+     <node name="frame_republish_center" type="republish" pkg="image_transport" output="screen"
+           args="compressed in:=$(arg center_camera_compressed_image) raw out:=$(arg center_camera_raw_image)" />
+     <node name="video_stream_center" type="video_visualizer" pkg="automatic_calibration" >
+       <remap from="/camera/image_color/raw" to="$(arg center_camera_raw_image)" />
+       <remap from="/camera/image_info" to="$(arg center_camera_image_info)" />
+    </node>
+
+     <node name="frame_republish_right" type="republish" pkg="image_transport" output="screen"
+           args="compressed in:=$(arg right_camera_compressed_image) raw out:=$(arg right_camera_raw_image)" />
+     <node name="video_stream_right" type="video_visualizer" pkg="automatic_calibration" >
+       <remap from="/camera/image_color/raw" to="$(arg right_camera_raw_image)" />
+       <remap from="/camera/image_info" to="$(arg right_camera_image_info)" />
+     </node>
+
+</launch>
