@@ -101,6 +101,11 @@ images/
 Node\ Graphs/
 diagrams/
 
+# Thesis subfolders to ignore
+images/
+Node\ Graphs/
+diagrams/
+
 # PDFs and images
 *.pdf
 *.jpeg
