@@ -76,7 +76,7 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
      <!-- Point Cloud Visualizer
           Selec between opening simple point cloud visualizer or RVIZ
        -->
-     <node pkg="sensor_fusion" type="point_cloud_coloring" name="Simple_Point_Cloud_Viewer"
+     <node pkg="sensor_fusion" type="point_cloud_coloring" name="Point_Cloud_Coloring"
            output="screen" unless="$(arg open_rviz)" />
      <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen"
            if="$(arg open_rviz)"/>
