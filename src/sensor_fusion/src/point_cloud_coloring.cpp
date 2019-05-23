@@ -10,7 +10,8 @@
 #include "automatic_calibration/image_visualizer.hpp"
 
 #include <tf2_ros/transform_listener.h>
-#include <tf/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
+
 #include "tf2/transform_datatypes.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <tf2/convert.h>
@@ -19,7 +20,7 @@
 
 // Create viewer object
 pcl::visualization::CloudViewer viewer("Colored Cloud Viewer");
-const geometry_msgs::TransformStamped transform2;
+const geometry_msgs::TransformStamped& transform2;
 
 ros::Publisher pub;
 
@@ -57,7 +58,7 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& point_cloud_msg) {
     // Perform color manipulation on Point Cloud
     color_point_cloud(cloudPtr, r, g, b);
     //tf::TransformListener::transformPointCloud("camera_color_left", *transform2, cloudPtr);
-    //tf2::doTransform(&cloudPtr, *cloudCameraPtr, transform2);
+    tf2::doTransform(&cloudPtr, &cloudCameraPtr, &transform2);
 
     // Add new data to viewer
     viewer.showCloud(cloudPtr);
@@ -82,8 +83,9 @@ int main(int argc, char** argv)
   //cv::namedWindow(OPENCV_WINDOW, 0);
   ros::NodeHandle nh;
 
-  // Create TF listener
-  tf::TransformListener listener;
+  // Create TF Buffer
+  tf2_ros::Buffer tfBuffer;
+  tf2_ros::TransformListener tfListener(tfBuffer);
 
   ros::Rate rate(1.0);
   // Ros subscriber for ros msg for Point Cloud
@@ -93,13 +95,13 @@ int main(int argc, char** argv)
   //ImageVisualizer image_visualizer_object;
 
   while (nh.ok()) {
-      tf2::StampedTransform transform;
-
+      geometry_msgs::TransformStamped transformStamped;
     try{
-          listener.lookupTransform("camera_color_left", "velo_link", ros::Time(0), transform2);
-          tf2::convert(transform2, transform);
-    } catch (tf::TransformException &ex){
-      ROS_ERROR("%s", ex.what());
+      transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0));
+      tf2::convert(transformStamped, transform2);
+    }
+    catch (tf2::TransformException &ex) {
+      ROS_WARN("%s",ex.what());
       ros::Duration(1.0).sleep();
       continue;
     }
