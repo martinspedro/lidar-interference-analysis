@@ -15,6 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   automatic_calibration
+  tf2
+  tf2_ros
+  tf2_msgs
+  tf2_sensor_msgs
 )
 
 find_package(OpenCV)
