@@ -20,12 +20,21 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <tf2/convert.h>
 
+#include <stdint.h>
 
-pcl::visualization::CloudViewer viewer("Colored Cloud Viewer"); //! Create visualization object
+/** A structure to represent RGB Triplets
+ */
+typedef struct color {
+    uint8_t r; //!< Red  component
+    uint8_t g; //!< Green component
+    uint8_t b; //!< Blue  component
+} color_t;
 
-geometry_msgs::TransformStamped transformStamped; //! Create geometric transform object
+pcl::visualization::CloudViewer viewer("Colored Cloud Viewer"); //!< Create visualization object
 
-ros::Publisher pub; //! ROS Publisher
+geometry_msgs::TransformStamped transformStamped; //!< Create geometric transform object
+
+ros::Publisher pub; //!< ROS Publisher
 
 
 
@@ -34,15 +43,13 @@ ros::Publisher pub; //! ROS Publisher
  * Colors every point cloud voxel with the same color by iterating through each voxel RGB parameter
  *
  * @param cloud Pointer to the XYZRGB PointCloud
- * @param r Red color component
- * @param g Green color component
- * @param b Blue color component
+ * @param rgb   RGB triplet dataype
 */
-void color_point_cloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud, uint8_t r, uint8_t g, uint8_t b) {
+void color_point_cloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud, color_t rgb) {
     for (int i = 0; i < cloud->points.size(); i++) {
-        cloud->points[i].r = r;
-        cloud->points[i].g = g;
-        cloud->points[i].b = b;
+        cloud->points[i].r = rgb.r;
+        cloud->points[i].g = rgb.g;
+        cloud->points[i].b = rgb.b;
     }
 }
 
@@ -60,8 +67,12 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg) {
 
     sensor_msgs::PointCloud2 cloud_out, cloud_colored;
 
-    // pack r/g/b into rgb
-    uint8_t r = 255, g = 123, b = 10;    // Example: Red color
+    // Select RGB color
+    color_t point_cloud_RGB;
+    point_cloud_RGB.r = 255;
+    point_cloud_RGB.g = 123;
+    point_cloud_RGB.b = 10;
+
     //uint32_t rgb = (uint32_t)(r << 16 | g << 8 | b);
 
     // Create dynamic pointer to point cloud data
@@ -75,7 +86,7 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg) {
 
 
     // Perform color manipulation on Point Cloud
-    color_point_cloud(cloudPtr, r, g, b);
+    color_point_cloud(cloudPtr, point_cloud_RGB);
 
     pcl::toROSMsg(*cloudPtr,cloud_colored );
     tf2::doTransform(cloud_colored, cloud_out, transformStamped);
