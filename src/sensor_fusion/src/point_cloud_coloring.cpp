@@ -104,6 +104,18 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg) {
     pub.publish(cloud_out);
 }
 
+void imageCallback2(const sensor_msgs::ImageConstPtr& msg)
+{
+  try
+  {
+    cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
+    cv::waitKey(30);
+  }
+  catch (cv_bridge::Exception& e)
+  {
+    ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+  }
+}
 
 int main(int argc, char** argv)
 {
@@ -116,15 +128,16 @@ int main(int argc, char** argv)
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
 
+  transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(5.0));
 
   // Ros subscriber for ros msg for Point Cloud
   ros::Subscriber sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
   sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
   pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
 
-  //ImageVisualizer image_visualizer_object;
-  transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(5.0));
-
+  cv::namedWindow("view");
+  image_transport::ImageTransport it(nh);
+  image_transport::Subscriber sub = it.subscribe("/kitti/camera_color_left/image_raw", 1, imageCallback);
 
   ros::spin();
 
