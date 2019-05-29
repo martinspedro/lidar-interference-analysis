@@ -88,15 +88,14 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg) {
     color_point_cloud(cloudPtr, point_cloud_RGB);
 
     pcl::toROSMsg(*cloudPtr,cloud_colored );
-    tf2::doTransform(cloud_colored, cloud_out, transformStamped);
-/*
-    try{
+
+    try {
         tf2::doTransform(cloud_colored, cloud_out, transformStamped);
     }
     catch (tf2::TransformException &ex) {
-      ROS_WARN("%s",ex.what());
+        ROS_WARN("%s",ex.what());
     }
-*/
+
 
     // Add new data to viewer
     viewer.showCloud(cloudPtr);
@@ -123,34 +122,11 @@ int main(int argc, char** argv)
   sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
   pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
 
-  //ros::Subscriber sub_image = nh.subscribe<sensor_msgs::Image>("/camera/image_color/raw", 1, callback_image);
   //ImageVisualizer image_visualizer_object;
   transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(5.0));
-  try{
-       //point_cloud_msg->header.stamp);
-
-  }
-  catch (tf2::TransformException &ex) {
-    ROS_WARN("%s",ex.what());
-  }
-
-  /*
-  while (nh.ok()) {
 
 
-      try{
-           //point_cloud_msg->header.stamp);
-
-      }
-      catch (tf2::TransformException &ex) {
-        ROS_WARN("%s",ex.what());
-        ros::Duration(1.0).sleep();
-      }
-      //ros::Duration(0.1).sleep();
-
-
-
-  }*/
   ros::spin();
+
   return EXIT_SUCCESS;
 }
