@@ -21,10 +21,21 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <tf2/convert.h>
 
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/CameraInfo.h>
+
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+
 #include <stdint.h>
 
 #define VIEWER_NAME "Colored Cloud Viewer" //!< Viewer Name
 
+using namespace sensor_msgs;
+using namespace message_filters;
 
 pcl::visualization::CloudViewer viewer(VIEWER_NAME); //!< Create visualization object
 
@@ -114,6 +125,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
   }
 }
 
+void callback(const ImageConstPtr& image, const CameraInfoConstPtr& cam_info, const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
+{
+  ROS_INFO("I'm here!");
+
+}
 
 /** @brief Main code
  *
@@ -137,13 +153,27 @@ int main(int argc, char** argv)
   transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(5.0));
 
   // Ros subscriber for ros msg for Point Cloud
-  ros::Subscriber sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
-  sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
-  pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+  //ros::Subscriber sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
+  //sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
+  //pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
 
-  cv::namedWindow("view");
-  image_transport::ImageTransport it(nh);
-  image_transport::Subscriber sub = it.subscribe("/kitti/camera_color_left/image_raw", 1, imageCallback);
+  //cv::namedWindow("view");
+  //image_transport::ImageTransport it(nh);
+  //image_transport::Subscriber sub = it.subscribe("/kitti/camera_color_left/image_raw", 1, imageCallback);
+
+
+
+  message_filters::Subscriber<Image> image_sub(nh, "/kitti/camera_color_left/image_raw", 1);
+  message_filters::Subscriber<CameraInfo> info_sub(nh, "/kitti/camera_color_left/camera_info", 1);
+  message_filters::Subscriber<sensor_msgs::PointCloud2> point_cloud_sub(nh, "velodyne_points", 1);
+
+  typedef sync_policies::ApproximateTime<Image, CameraInfo, sensor_msgs::PointCloud2> MySyncPolicy;
+    // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_sub, info_sub,  point_cloud_sub);
+
+  //TimeSynchronizer<Image, sensor_msgs::PointCloud2> sync(image_sub, point_cloud_sub,  100);
+  sync.registerCallback(boost::bind(&callback, _1, _2, _3));
+
 
   ros::spin();
 
