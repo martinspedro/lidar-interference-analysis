@@ -9,6 +9,7 @@
 
 #include "automatic_calibration/automatic_calibration.hpp"
 #include "automatic_calibration/image_visualizer.hpp"
+#include "sensor_fusion/color.hpp"
 
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -24,20 +25,12 @@
 
 #define VIEWER_NAME "Colored Cloud Viewer" //!< Viewer Name
 
-/** A structure to represent RGB Triplets
- */
-typedef struct color {
-    uint8_t r; //!< Red  component
-    uint8_t g; //!< Green component
-    uint8_t b; //!< Blue  component
-} color_t;
 
 pcl::visualization::CloudViewer viewer(VIEWER_NAME); //!< Create visualization object
 
 geometry_msgs::TransformStamped transformStamped; //!< Create geometric transform object
 
 ros::Publisher pub; //!< ROS Publisher
-
 
 
 /** @brief Colors Point Cloud Voxels function
@@ -104,8 +97,12 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg) {
     pub.publish(cloud_out);
 }
 
-void imageCallback2(const sensor_msgs::ImageConstPtr& msg)
-{
+
+/** @brief Callback to process imagem stream
+ *
+ * @param[in] msg Pointer to Image data messages from ROS nodes
+*/
+void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
   try
   {
     cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
@@ -117,6 +114,15 @@ void imageCallback2(const sensor_msgs::ImageConstPtr& msg)
   }
 }
 
+
+/** @brief Main code
+ *
+ * Node initialization and announcement of publishers and subscribers
+ *
+ * @param[in] argc
+ * @param[in] argv
+ * @return Node exit status
+*/
 int main(int argc, char** argv)
 {
   //Initialize ROS
