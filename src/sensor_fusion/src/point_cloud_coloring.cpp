@@ -139,7 +139,7 @@ void callback(const ImageConstPtr& image,
               const CameraInfoConstPtr& cam_info,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg) {
 
-  ROS_INFO("Data Sync successfull!");
+  //ROS_INFO("Data Sync successfull!");
   // create Point Cloud with Intensity Field
   PointCloudRGB point_cloud_camera, point_cloud;
   PointCloudRGB::Ptr cloudCameraPtr(new PointCloudRGB);
@@ -167,6 +167,7 @@ void callback(const ImageConstPtr& image,
   point_cloud_RGB.r = 255;
   point_cloud_RGB.g = 123;
   point_cloud_RGB.b = 10;
+  cv::Mat image_opencv = cv_bridge::toCvShare(image, "bgr8")->image;
 
   //ROS_WARN("%d, %d", image->width, image->height);
   for (int i = 0; i < cloudCameraPtr->points.size(); i++) {
@@ -179,9 +180,11 @@ void callback(const ImageConstPtr& image,
       //ROS_INFO("Coordenadas dos pixeis: (%d, %d)", (int)uv.x, (int)uv.y);
 
       if(((int)uv.x >= 0) && ((int)uv.y >= 0) && ((int)uv.x <= image->width) && ((int)uv.y >= image->height)) {
-          cloudCameraPtr->points[i].r = point_cloud_RGB.r;
-          cloudCameraPtr->points[i].g = point_cloud_RGB.g;
-          cloudCameraPtr->points[i].b = point_cloud_RGB.b;
+          Point3_<uint8_t>* p =image_opencv.ptr< Point3_<uint8_t> > ((int)uv.y,(int)uv.x); //BGR
+
+          cloudCameraPtr->points[i].r = p->y; //point_cloud_RGB.r;
+          cloudCameraPtr->points[i].g = p->z;; //point_cloud_RGB.g;
+          cloudCameraPtr->points[i].b = p->x; //point_cloud_RGB.b;
       }
   }
 
@@ -195,7 +198,7 @@ void callback(const ImageConstPtr& image,
 
 
   // Add new data to viewer
-  viewer.showCloud(cloudPtr);
+  viewer.showCloud(cloudCameraPtr);
 
   // Publish the data.
   pub.publish(cloudCameraPtr);
