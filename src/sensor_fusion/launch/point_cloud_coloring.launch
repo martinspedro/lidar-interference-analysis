@@ -45,7 +45,7 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
    <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR_CAMERA" required="true"
-         args="$(arg udacity_bags_folder_path)$(arg udacity_bag) --clock -r 0.2">
+         args="$(arg udacity_bags_folder_path)$(arg udacity_bag) --clock -l">
           <remap from="/kitti/velo/pointcloud" to="/velodyne_points" />
       </node>
 
