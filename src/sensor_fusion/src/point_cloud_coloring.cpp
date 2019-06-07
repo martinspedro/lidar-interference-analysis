@@ -20,6 +20,7 @@
 #include "tf2/transform_datatypes.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <tf2/convert.h>
+//#include <tf2/Matrix3x3.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -33,14 +34,14 @@
 #include <stdint.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <typeinfo>
-
+//#include <Matrix3x3.h>
 
 #define VIEWER_NAME "Colored Cloud Viewer" //!< Viewer Name
 
 using namespace sensor_msgs;
 using namespace message_filters;
 
-//pcl::visualization::CloudViewer viewer(VIEWER_NAME); //!< Create visualization object
+pcl::visualization::CloudViewer viewer(VIEWER_NAME); //!< Create visualization object
 
 geometry_msgs::TransformStamped transformStamped; //!< Create geometric transform object
 
@@ -140,8 +141,9 @@ void callback(const ImageConstPtr& image,
 
   ROS_INFO("Data Sync successfull!");
   // create Point Cloud with Intensity Field
-  PointCloudRGB point_cloud_camera;
+  PointCloudRGB point_cloud_camera, point_cloud;
   PointCloudRGB::Ptr cloudCameraPtr(new PointCloudRGB);
+  PointCloudRGB::Ptr cloudPtr(new PointCloudRGB);
   PointCloudRGB::Ptr cloudColoredPtr(new PointCloudRGB);
 
   sensor_msgs::PointCloud2 point_cloud_camera_msg;
@@ -154,18 +156,33 @@ void callback(const ImageConstPtr& image,
   }
   // Convert ROS msg to Point Cloud
   fromROSMsg(point_cloud_camera_msg, point_cloud_camera);
+  fromROSMsg(*point_cloud_msg, point_cloud);
 
   // Initialize pointer to point cloud data
   *cloudCameraPtr = point_cloud_camera;
+  *cloudPtr = point_cloud;
   cam_model_.fromCameraInfo(cam_info);
+
+  color_t point_cloud_RGB;
+  point_cloud_RGB.r = 255;
+  point_cloud_RGB.g = 123;
+  point_cloud_RGB.b = 10;
+
+  //ROS_WARN("%d, %d", image->width, image->height);
   for (int i = 0; i < cloudCameraPtr->points.size(); i++) {
       //ROS_INFO("%s", typeid(cloudCameraPtr->points[i]).name());
       //cv::Point3d* aux2 = new cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z);
       cv::Point2d uv = cam_model_.project3dToPixel(cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z));
       //cv::Point2d aux = image_geometry::PinholeCameraModel::project3dToPixel(cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z)); //const cv::Point3d &  	xyz	)
-       ROS_INFO("(%f, %f, %f)", cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z);
-       ROS_INFO("(%f, %f, %f)", cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z);
-      //ROS_INFO("Coordenadas dos pontos: (%f, %f)", uv.x, uv.y);
+       //ROS_INFO("\n(%f, %f, %f) - (%f, %f, %f)", cloudPtr->points[i].x, cloudPtr->points[i].y, cloudPtr->points[i].z, cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z);
+       //cout << "\n\n\n\nHello\n\n\n\n" << endl;
+      //ROS_INFO("Coordenadas dos pixeis: (%d, %d)", (int)uv.x, (int)uv.y);
+
+      if(((int)uv.x >= 0) && ((int)uv.y >= 0) && ((int)uv.x <= image->width) && ((int)uv.y >= image->height)) {
+          cloudCameraPtr->points[i].r = point_cloud_RGB.r;
+          cloudCameraPtr->points[i].g = point_cloud_RGB.g;
+          cloudCameraPtr->points[i].b = point_cloud_RGB.b;
+      }
   }
 
 
@@ -178,10 +195,10 @@ void callback(const ImageConstPtr& image,
 
 
   // Add new data to viewer
-  //viewer.showCloud(cloudPtr);
+  viewer.showCloud(cloudPtr);
 
   // Publish the data.
-  //pub.publish(cloudColoredPtr);
+  pub.publish(cloudCameraPtr);
 }
 
 /** @brief Main code
@@ -204,11 +221,20 @@ int main(int argc, char** argv)
   tf2_ros::TransformListener tfListener(tfBuffer);
 
   transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
+  geometry_msgs::Vector3 translation = transformStamped.transform.translation;
+  geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
 
+  //ROS_WARN("\n(%f, %f, %f) - (%f, %f, %f, %f)\n", translation.x, translation.y, translation.z, rotation_q.x, rotation_q.y, rotation_q.z, rotation_q.w);
+  //tf2::Matrix3x3 m(&rotation_q);
+  //tf2Scalar roll, pitch, yaw;
+    //m.getRPY(roll, pitch, yaw);
+    //m.getRPY (roll, pitch, yaw);
+
+  //ROS_INFO("(%f, %f, %f)", transformStamped.translation);
   // Ros subscriber for ros msg for Point Cloud
   //ros::Subscriber sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
   //sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
-  //pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+  pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
 
   //cv::namedWindow("view");
   //image_transport::ImageTransport it(nh);
