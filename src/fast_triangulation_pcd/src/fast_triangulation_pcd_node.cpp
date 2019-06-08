@@ -24,13 +24,13 @@ typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 
 ros::Publisher pub;
 
-void cloud_cb (sensor_msgs::PointCloud2ConstPtr& point_cloud_msg)
+void cloud_cb (const sensor_msgs::PointCloud2 point_cloud_msg)
 {
 	// Create a container for the data
 	sensor_msgs::PointCloud2 output;
 	PointCloudC cloud;
 
-	pcl::fromROSMsg(*point_cloud_msg, cloud);
+	//pcl::fromROSMsg(*point_cloud_msg, cloud);
 
   // Load input file into a PointCloud<T> with an appropriate type
 	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -41,8 +41,8 @@ void cloud_cb (sensor_msgs::PointCloud2ConstPtr& point_cloud_msg)
 
 
 
-	PointCloudC::Ptr cloudPtr(new PointCloudC());
-	*cloudPtr = cloud;
+	//PointCloudC::Ptr cloudPtr(new PointCloudC());
+	//*cloudPtr = cloud;
 	//ROS_INFO("Got point cloud with %ld points", cloud->size());
 	/*
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
