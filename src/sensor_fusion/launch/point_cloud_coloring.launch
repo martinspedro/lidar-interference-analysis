@@ -12,10 +12,10 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
    <param name="use_sim_time" value="true" />
 
    <!-- ARGUMENTS -->
-   <!-- Udacity datasets -->
+   <!-- Kitti datasets -->
    <arg name="udacity_bags_folder_path"
         value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Kitti/" />
-   <arg name="udacity_bag"              default="kitti_2011_09_26_drive_0001_synced.bag" />
+   <arg name="udacity_bag"              default="kitti_2011_09_26_drive_0002_synced.bag" />
 
    <!-- Point Cloud related -->
    <arg name="use_standlone_nodelet"    default="true" />
