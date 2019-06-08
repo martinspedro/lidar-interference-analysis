@@ -48,6 +48,7 @@ geometry_msgs::TransformStamped transformStamped; //!< Create geometric transfor
 ros::Publisher pub; //!< ROS Publisher
 
 image_geometry::PinholeCameraModel cam_model_;
+
 /** @brief Colors Point Cloud Voxels function
  *
  * Colors every point cloud voxel with the same color by iterating through each voxel RGB parameter
@@ -167,7 +168,15 @@ void callback(const ImageConstPtr& image,
   point_cloud_RGB.r = 255;
   point_cloud_RGB.g = 123;
   point_cloud_RGB.b = 10;
-  cv::Mat image_opencv = cv_bridge::toCvShare(image, "bgr8")->image;
+
+  cv::Mat image_opencv;
+  try {
+      image_opencv = cv_bridge::toCvShare(image, "bgr8")->image;
+  }
+  catch (cv_bridge::Exception& e)
+  {
+    ROS_ERROR("Could not convert from '%s' to 'bgr8'.", image->encoding.c_str());
+  }
 
   //ROS_WARN("%d, %d", image->width, image->height);
   for (int i = 0; i < cloudCameraPtr->points.size(); i++) {
@@ -179,11 +188,10 @@ void callback(const ImageConstPtr& image,
        //cout << "\n\n\n\nHello\n\n\n\n" << endl;
       //ROS_INFO("Coordenadas dos pixeis: (%d, %d)", (int)uv.x, (int)uv.y);
 
-      if(((int)uv.x >= 0) && ((int)uv.y >= 0) && ((int)uv.x <= image->width) && ((int)uv.y >= image->height)) {
-          Point3_<uint8_t>* p =image_opencv.ptr< Point3_<uint8_t> > ((int)uv.y,(int)uv.x); //BGR
-
+      if(((int)(uv.x)>= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= image->width) && ((int)uv.y <= image->height) && (cloudCameraPtr->points[i].z >= 0)) {
+          Point3_<uint8_t>* p =image_opencv.ptr< Point3_<uint8_t> > ((int)(uv.y),(int)uv.x); // BGR (height, width)
           cloudCameraPtr->points[i].r = p->y; //point_cloud_RGB.r;
-          cloudCameraPtr->points[i].g = p->z;; //point_cloud_RGB.g;
+          cloudCameraPtr->points[i].g = p->z; //point_cloud_RGB.g;
           cloudCameraPtr->points[i].b = p->x; //point_cloud_RGB.b;
       }
   }
