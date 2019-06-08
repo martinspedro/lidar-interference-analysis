@@ -190,8 +190,8 @@ void callback(const ImageConstPtr& image,
 
       if(((int)(uv.x)>= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= image->width) && ((int)uv.y <= image->height) && (cloudCameraPtr->points[i].z >= 0)) {
           Point3_<uint8_t>* p =image_opencv.ptr< Point3_<uint8_t> > ((int)(uv.y),(int)uv.x); // BGR (height, width)
-          cloudCameraPtr->points[i].r = p->y; //point_cloud_RGB.r;
-          cloudCameraPtr->points[i].g = p->z; //point_cloud_RGB.g;
+          cloudCameraPtr->points[i].r = p->z; //point_cloud_RGB.r;
+          cloudCameraPtr->points[i].g = p->y; //point_cloud_RGB.g;
           cloudCameraPtr->points[i].b = p->x; //point_cloud_RGB.b;
       }
   }
