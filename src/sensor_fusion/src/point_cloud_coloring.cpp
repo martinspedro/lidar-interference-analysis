@@ -231,7 +231,9 @@ int main(int argc, char** argv)
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
 
+
   transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
+
   geometry_msgs::Vector3 translation = transformStamped.transform.translation;
   geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
 
@@ -245,7 +247,7 @@ int main(int argc, char** argv)
   // Ros subscriber for ros msg for Point Cloud
   //ros::Subscriber sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
   //sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
-  pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+  pub = nh.advertise<sensor_msgs::PointCloud2>("colored_point_cloud", 1);
 
   //cv::namedWindow("view");
   //image_transport::ImageTransport it(nh);
