@@ -15,7 +15,7 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
    <!-- Kitti datasets -->
    <arg name="kitti_bags_folder_path"
         value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Kitti/" />
-   <arg name="kitti_bag"              default="kitti_2011_09_26_drive_0001_synced.bag" />
+   <arg name="kitti_bag"              default="kitti_2011_09_26_drive_0005_synced.bag" />
 
    <!-- Point Cloud related -->
    <arg name="use_standlone_nodelet"    default="true" />
@@ -44,8 +44,8 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
 
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
-   <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR_CAMERA" required="true"
-         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock">
+   <node pkg="rosbag" type="play" name="KITTI_dataset" required="true"
+         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock -l">
           <remap from="/kitti/velo/pointcloud" to="/velodyne_points" />
       </node>
 
@@ -60,5 +60,6 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
      <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen"
            if="$(arg open_rviz)"/>
 
-
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="Visualizer" output="screen"/>
 </launch>
