@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_sensor_msgs
   camera_info_manager
   image_geometry
+  rosbag
 )
 
 find_package(OpenCV)
@@ -148,7 +149,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(point_cloud_coloring src/point_cloud_coloring.cpp)
-
+add_executable(stereo src/point_cloud_coloring_2.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -167,6 +168,12 @@ target_link_libraries(point_cloud_coloring
    ${automatic_calibration_LIBRARIES}
  )
 
+ target_link_libraries(stereo
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    ${PCL_LIBRARIES}
+    ${automatic_calibration_LIBRARIES}
+  )
 #############
 ## Install ##
 #############
