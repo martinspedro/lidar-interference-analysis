@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+Description: Play bag file of velodyne and camera data and then launch nodes to
+             visualize the camera feed and LIDAR point cloud. Point cloud visualization
+             can use a simple viewer or RVIZ. Also launch nodes to convert compressed
+             video frames to raw and a nodelet to convert velodyne_packets to velodyne_points
+-->
+
+<launch>
+   <!-- PARAMETERS -->
+   <param name="use_sim_time" value="true" />
+
+   <!-- ARGUMENTS -->
+   <!-- Kitti datasets -->
+   <arg name="kitti_bags_folder_path"
+        value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Kitti/" />
+   <arg name="kitti_bag"              default="kitti_2011_09_26_drive_0005_synced.bag" />
+
+   <!-- Point Cloud related -->
+   <arg name="use_standlone_nodelet"    default="true" />
+   <arg name="min_range"                default="0.3" />
+   <arg name="max_range"                default="150" />
+
+   <!-- Point Cloud visualization -->
+   <arg name="rviz_file"                default="$(find automatic_calibration)/rviz/point_cloud_visualizer.rviz" />
+   <arg name="open_rviz"                default="false" />
+
+
+   <!-- Camera related -->
+   <arg name="left_camera_compressed_image"   default="/left_camera/image_color/" />
+   <arg name="left_camera_raw_image"          default="/left_camera/image_color/raw" />
+   <arg name="left_camera_image_info"         default="/left_camera/image_info" />
+
+   <arg name="center_camera_compressed_image" default="/center_camera/image_color/" />
+   <arg name="center_camera_raw_image"        default="/center_camera/image_color/raw" />
+   <arg name="center_camera_image_info"       default="/center_camera/image_info" />
+
+   <arg name="right_camera_compressed_image"  default="/right_camera/image_color/" />
+   <arg name="right_camera_raw_image"         default="/right_camera/image_color/raw" />
+   <arg name="right_camera_image_info"        default="/right_camera/image_info" />
+
+
+
+   <!-- NODES -->
+   <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+   <node pkg="rosbag" type="play" name="KITTI_dataset"
+         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock">
+          <remap from="/kitti/velo/pointcloud" to="/velodyne_points" />
+      </node>
+
+
+     <!-- Point Cloud Visualizer
+          Selec between opening simple point cloud visualizer or RVIZ
+       -->
+     <node pkg="sensor_fusion" type="stereo" name="Stereo" output="screen" />
+
+
+</launch>

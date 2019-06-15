@@ -63,9 +63,13 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "point_cloud");
 
   bool flag = false;
+  geometry_msgs::TransformStamped transformStamped; //!< Create geometric transform object
+  sensor_msgs::PointCloud2 world_point_cloud_msg;
+
 
   PointCloudRGB::Ptr cloudCameraPtr(new PointCloudRGB);
-  PointCloudRGB point_cloud_camera;
+  PointCloudRGB::Ptr cloudSumPtr(new PointCloudRGB);
+  PointCloudRGB point_cloud_world, point_cloud_sum;
 
   pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer (VIEWER_NAME));
 
@@ -78,23 +82,48 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/kitti/velo/pointcloud"));
 
   rosbag::View view(bag, rosbag::TopicQuery(topics));
+
+  tf2_ros::Buffer tfBuffer;
+  tf2_ros::TransformListener tfListener(tfBuffer);
+
+
+  //std_msgs::Int32::ConstPtr i = m.instantiate<std_msgs::Int32>();
+  std::cout << "Finding Transform" << std::endl;
+  //transformStamped = tfBuffer.lookupTransform("velo_link", "world", ros::Time(0), ros::Duration(20.0));
+  std::cout << "Transform Found" << std::endl;
+
   foreach(rosbag::MessageInstance const m, view)
     {
         std::cout << "New Message Instance" << std::endl;
 
         sensor_msgs::PointCloud2::ConstPtr s = m.instantiate<sensor_msgs::PointCloud2>();
-        fromROSMsg(*s, point_cloud_camera);
+
 
         // Initialize pointer to point cloud data
-        *cloudCameraPtr = point_cloud_camera;
+
         if (s != NULL) {
+            /*
+            try {
+                tf2::doTransform(*s, world_point_cloud_msg, transformStamped);
+            }
+            catch (tf2::TransformException &ex) {
+                ROS_WARN("%s", ex.what());
+            }
+            */
+            //fromROSMsg(world_point_cloud_msg, point_cloud_world);
+            fromROSMsg(*s, point_cloud_world);
+
             if(!flag){
+                *cloudCameraPtr = point_cloud_world;
+                *cloudSumPtr = point_cloud_world;
                 viewer->addPointCloud<pcl::PointXYZRGB> (cloudCameraPtr, "sample cloud");
                 viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
                 viewer->addCoordinateSystem (1.0);
                 viewer->initCameraParameters ();
                 flag = true;
             } else {
+                *cloudSumPtr = *cloudSumPtr + point_cloud_world;
+                *cloudCameraPtr =  point_cloud_world;
                 viewer->updatePointCloud<pcl::PointXYZRGB> (cloudCameraPtr, "sample cloud");
             }
 
@@ -103,9 +132,18 @@ int main(int argc, char** argv)
         }
     }
 
-    std::cout << "Closing" << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+
     bag.close();
+    std::cout << "Infinite Cycle" << std::endl;
+    /*
+    while(1)
+    {
+        viewer->spinOnce(100);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    */
+
+
 
 
   return EXIT_SUCCESS;
