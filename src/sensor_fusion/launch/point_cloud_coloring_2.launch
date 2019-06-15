@@ -44,22 +44,16 @@ Description: Play bag file of velodyne and camera data and then launch nodes to
 
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
-   <node pkg="rosbag" type="play" name="KITTI_dataset" required="true"
-         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock -l">
+   <node pkg="rosbag" type="play" name="KITTI_dataset"
+         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock">
           <remap from="/kitti/velo/pointcloud" to="/velodyne_points" />
       </node>
-
-
 
 
      <!-- Point Cloud Visualizer
           Selec between opening simple point cloud visualizer or RVIZ
        -->
-     <node pkg="sensor_fusion" type="point_cloud_coloring" name="Point_Cloud_Coloring"
-           output="screen" unless="$(arg open_rviz)" />
-     <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen"
-           if="$(arg open_rviz)"/>
+     <node pkg="sensor_fusion" type="stereo" name="Stereo" output="screen" />
 
-    <!-- rviz -->
-    <node pkg="rviz" type="rviz" name="Visualizer" output="screen"/>
+
 </launch>

@@ -20,7 +20,7 @@
 #include "tf2/transform_datatypes.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <tf2/convert.h>
-//#include <tf2/Matrix3x3.h>
+
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -34,14 +34,13 @@
 #include <stdint.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <typeinfo>
-//#include <Matrix3x3.h>
 
 #define VIEWER_NAME "Colored Cloud Viewer" //!< Viewer Name
 
 using namespace sensor_msgs;
 using namespace message_filters;
 
-pcl::visualization::CloudViewer viewer(VIEWER_NAME); //!< Create visualization object
+pcl::visualization::PCLVisualizer::Ptr pcl_viewer (new pcl::visualization::PCLVisualizer (VIEWER_NAME)); //!< Create visualization object
 
 geometry_msgs::TransformStamped transformStamped; //!< Create geometric transform object
 
@@ -147,6 +146,8 @@ void callback(const ImageConstPtr& image,
   PointCloudRGB::Ptr cloudPtr(new PointCloudRGB);
   PointCloudRGB::Ptr cloudColoredPtr(new PointCloudRGB);
 
+  static bool first_callback = true;
+
   sensor_msgs::PointCloud2 point_cloud_camera_msg;
 
   try {
@@ -202,11 +203,20 @@ void callback(const ImageConstPtr& image,
 
   //pcl::toROSMsg(*cloudColoredPtr,point_cloud_camera );
 
+  // PCL Viewer
+  if (first_callback){
+      // Initialize PCL Viewer
+      //pcl_viewer->setBackgroundColor (48, 48, 48);  // Rviz Background Colors
+      pcl_viewer->addCoordinateSystem (1.0);
+      pcl_viewer->initCameraParameters ();
+      pcl_viewer->addPointCloud<pcl::PointXYZRGB> (cloudCameraPtr, "colored cloud");
+      pcl_viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "colored cloud");
+      first_callback = false;
+  } else {
+      pcl_viewer->updatePointCloud<pcl::PointXYZRGB> (cloudCameraPtr, "colored cloud");
+  }
 
-
-
-  // Add new data to viewer
-  viewer.showCloud(cloudCameraPtr);
+  pcl_viewer->spinOnce(10);
 
   // Publish the data.
   pub.publish(cloudCameraPtr);
@@ -231,7 +241,12 @@ int main(int argc, char** argv)
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
 
+
+
+
+
   transformStamped = tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
+
   geometry_msgs::Vector3 translation = transformStamped.transform.translation;
   geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
 
@@ -245,7 +260,7 @@ int main(int argc, char** argv)
   // Ros subscriber for ros msg for Point Cloud
   //ros::Subscriber sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
   //sub_pcl = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback_pcl);
-  pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+  pub = nh.advertise<sensor_msgs::PointCloud2>("colored_point_cloud", 1);
 
   //cv::namedWindow("view");
   //image_transport::ImageTransport it(nh);
