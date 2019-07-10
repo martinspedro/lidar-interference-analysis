@@ -27,4 +27,4 @@ class Image {
         int getImageInfoTopic(std::string info_topic);
 };
 
-#endif IMAGE_H
+#endif // IMAGE_H
