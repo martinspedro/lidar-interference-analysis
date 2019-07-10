@@ -92,19 +92,19 @@ tags
 # Catkin custom files
 CATKIN_IGNORE
 
-# Datasets & Tools folder
+# Rospackage folders
+src/bbox3d
+
+# Folders to ignore
 datasets/
 tools/
+documentation/
 
 # Thesis subfolders to ignore
 images/
 Node\ Graphs/
 diagrams/
 
-# Thesis subfolders to ignore
-images/
-Node\ Graphs/
-diagrams/
 
 # PDFs and images
 *.pdf
