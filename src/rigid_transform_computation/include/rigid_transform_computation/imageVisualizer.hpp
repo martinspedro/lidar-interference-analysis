@@ -12,6 +12,7 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -24,11 +25,13 @@
 
 class ImageVisualizer {
     private:
-        const std::string OPENCV_WINDOW = "Simple Video Stream Viewer";
+        const std::string OPENCV_WINDOW_NAME = "Video Viewer";
         const int DEFAULT_QUEUE_SIZE = 1;
 
         Image *image;
         std::string camera_topic;
+
+        cv_bridge::CvImagePtr cv_ptr;
 
 
         ros::NodeHandle nh_;
@@ -36,6 +39,8 @@ class ImageVisualizer {
         image_transport::Subscriber     image_sub_;
         image_transport::Publisher      image_pub_;
 
+    protected:
+        static void onMouse(int event, int x, int y, int flags, void* param);
 
     public:
         ImageVisualizer();
@@ -47,6 +52,7 @@ class ImageVisualizer {
         *
         */
         void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-};
+        void pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg);
 
-#endif IMAGE_VISUALIZER_H
+};
+#endif // IMAGE_VISUALIZER_H
