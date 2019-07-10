@@ -6,6 +6,8 @@ int main(int argc, char* argv[])
 {
     //Initialize ROS
     ros::init(argc, argv, "Image_Visualizer_Node");
+    std::cout << "Node init succesfully" << std::endl;
+
 
     ImageVisualizer image_visualizer_object;
 
