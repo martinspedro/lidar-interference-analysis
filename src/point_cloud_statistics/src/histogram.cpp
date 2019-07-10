@@ -62,12 +62,13 @@ int main(int argc, char** argv) {
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
     // Initialize pointer to point cloud data
 
+    /*
     std::vector<double> distance;
     foreach (pcl::PointXYZ const point, msg)
     {
         distance.push_back(pcl::geometry::distance(origin, point));
     }
-
+    */
     if (msg != NULL) {
         fromROSMsg(*msg, point_cloud);
 
