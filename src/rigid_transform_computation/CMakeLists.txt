@@ -125,6 +125,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OPENCV_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -143,6 +144,8 @@ include_directories(
 add_executable(rigid_transform_computation
     src/image.cpp
     src/imageVisualizer.cpp
+    #
+    src/pointCloudVisualizer.cpp
     src/rigid_transform_computation.cpp)
 
 ## Rename C++ executable without prefix
@@ -159,6 +162,7 @@ add_executable(rigid_transform_computation
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
+   ${PCL_LIBRARIES}
  )
 
 #############
