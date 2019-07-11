@@ -7,7 +7,7 @@
  */
 
 #include "rigid_transform_computation/pointCloudVisualizer.hpp"
-
+#include "rigid_transform_computation/exceptions.hpp"
 using namespace point_cloud;
 
 const std::string POINT_CLOUD_VIEWER_NAME = "Point Cloud Viewer";
@@ -58,4 +58,28 @@ void PointCloudVisualizer::viewerCallback(const sensor_msgs::PointCloud2::ConstP
     fromROSMsg(*point_cloud_msg, *(this->cloudPtr));
     this->pcl_viewer->updatePointCloud<pcl::PointXYZ> (this->cloudPtr, "point_cloud_name");
     this->pcl_viewer->spinOnce(10);
+}
+
+// http://docs.pointclouds.org/trunk/classpcl_1_1visualization_1_1_point_picking_event.html
+void PointCloudVisualizer::onPointPickingEvent (const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr) {
+    std::cout << "[INOF] Point picking event occurred." << std::endl;
+
+    float x, y, z;
+    if (pickingEvent.getPointIndex () != -1)
+    {
+        pickingEvent.getPoint(x, y, z);
+        std::cout << "[INOF] Point coordinate ( " << x << ", " << y << ", " << z << ")" << std::endl;
+    }
+
+
+}
+
+void PointCloudVisualizer::registerPointPickingCallback(const uint8_t MODE) {
+    if(MODE == PointCloudVisualizer::SINGLE_POINT_MODE) {
+        this->pcl_viewer->registerPointPickingCallback (PointCloudVisualizer::onPointPickingEvent, (void*)&(this->pcl_viewer));
+    }
+    else {
+        throw NotImplemented();
+    }
+
 }
