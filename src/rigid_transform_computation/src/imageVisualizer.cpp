@@ -17,32 +17,36 @@
 using namespace cv;
 
 
-ImageVisualizer::ImageVisualizer() : it_(nh_) {
+ImageVisualizer::ImageVisualizer() : it_(*nh_) {
     this->camera_topic = "/camera";
 
     this->image = new Image();
     // Subscribe to input video feed and publish output video feed
     this->image_sub_ = this->it_.subscribe(camera_topic + this->image->getImageColorTopic(),
                                DEFAULT_QUEUE_SIZE,
-                               &ImageVisualizer::pixelGrabberCallback, this);
+                               &ImageVisualizer::viewerCallback, this);
     this->image_pub_ = this->it_.advertise(camera_topic + this->image->getImageInfoTopic(),
                                DEFAULT_QUEUE_SIZE);
+
+    this->nh_ = ros::NodeHandlePtr(new ros::NodeHandle("image"));
 
     this->cv_ptr = nullptr;
 
     cv::namedWindow(OPENCV_WINDOW_NAME, WINDOW_NORMAL);
 }
 
-ImageVisualizer::ImageVisualizer(std::string camera_topic = "/camera") : it_(nh_) {
+ImageVisualizer::ImageVisualizer(std::string camera_topic = "/camera") : it_(*nh_) {
     this->camera_topic = camera_topic;
 
     this->image = new Image();
     // Subscribe to input video feed and publish output video feed
     this->image_sub_ = this->it_.subscribe(camera_topic + this->image->getImageColorTopic(),
                                DEFAULT_QUEUE_SIZE,
-                               &ImageVisualizer::imageCallback, this);
+                               &ImageVisualizer::viewerCallback, this);
     this->image_pub_ = this->it_.advertise(camera_topic + this->image->getImageInfoTopic(),
                                DEFAULT_QUEUE_SIZE);
+
+    this->nh_ = ros::NodeHandlePtr(new ros::NodeHandle("image"));
 
     cv::namedWindow(OPENCV_WINDOW_NAME, WINDOW_NORMAL);
 }
@@ -56,7 +60,7 @@ ImageVisualizer::~ImageVisualizer() {
 /** @brief Callback function for image visualization
 *
 */
-void ImageVisualizer::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
+void ImageVisualizer::viewerCallback(const sensor_msgs::ImageConstPtr& msg) {
     try {
         this->cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     }
@@ -85,11 +89,10 @@ void ImageVisualizer::pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg
     cv::waitKey(3);
 }
 
-void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) // now it's in param
-{
+void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
     if (event == cv::EVENT_LBUTTONDOWN)
     {
-        Mat &img_ptr = *((Mat*)param); //cast and deref the param
+        Mat &img_ptr = *((Mat*)param); //cast and deference the param
         Vec3b val = img_ptr.at<Vec3b>(y,x); // opencv is row-major !
         std::cout << img_ptr.type() << std::endl;
         std::cout << "x= " << x << " y= " << y << "val= "<<val<< std::endl;

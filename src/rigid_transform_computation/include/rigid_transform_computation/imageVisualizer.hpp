@@ -34,7 +34,7 @@ class ImageVisualizer {
         cv_bridge::CvImagePtr cv_ptr;
 
 
-        ros::NodeHandle nh_;
+        ros::NodeHandlePtr nh_;
         image_transport::ImageTransport it_;
         image_transport::Subscriber     image_sub_;
         image_transport::Publisher      image_pub_;
@@ -51,7 +51,7 @@ class ImageVisualizer {
         /** @brief Callback function for image visualization
         *
         */
-        void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+        void viewerCallback(const sensor_msgs::ImageConstPtr& msg);
         void pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg);
 
 };
