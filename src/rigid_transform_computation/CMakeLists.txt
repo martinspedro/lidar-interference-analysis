@@ -146,6 +146,9 @@ add_executable(rigid_transform_computation
     src/imageVisualizer.cpp
     #
     src/pointCloudVisualizer.cpp
+    #
+    src/rangeImageVisualizer.cpp
+    #
     src/rigid_transform_computation.cpp)
 
 ## Rename C++ executable without prefix
