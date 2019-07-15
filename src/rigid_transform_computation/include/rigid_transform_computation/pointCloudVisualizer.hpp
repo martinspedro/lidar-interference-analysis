@@ -34,6 +34,7 @@ namespace point_cloud {
     typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
 
 
+
     class PointCloudVisualizer{
         public:
             PointCloudVisualizer(std::string point_cloud_topic, std::string node_handler_name);
@@ -41,7 +42,7 @@ namespace point_cloud {
 
             void initPointCloudVisualizer();
             void addNewPointCloudToVisualizer(const sensor_msgs::PointCloud2::ConstPtr &point_cloud_msg, std::string point_cloud_name);
-            void viewerCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
+
             void registerPointPickingCallback(const uint8_t MODE);
             pcl::visualization::PCLVisualizer::Ptr pcl_viewer;
 
@@ -58,6 +59,7 @@ namespace point_cloud {
             PointCloud::Ptr cloudPtr;
 
             static void onPointPickingEvent (const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr);
+            void viewerCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
 
 
     };
