@@ -163,6 +163,12 @@ add_executable(point_cloud_visualizer_node
     #
     src/point_cloud_visualizer_node.cpp)
 
+add_executable(range_image_visualizer_node
+    src/rangeImageVisualizer.cpp
+    #
+    src/range_image_visualizer_node.cpp)
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -185,6 +191,12 @@ target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBRARIES}
     ${PCL_LIBRARIES}
   )
+
+  target_link_libraries(range_image_visualizer_node
+     ${catkin_LIBRARIES}
+     ${OpenCV_LIBRARIES}
+     ${PCL_LIBRARIES}
+   )
 #############
 ## Install ##
 #############
