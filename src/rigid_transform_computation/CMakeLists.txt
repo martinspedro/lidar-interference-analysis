@@ -16,6 +16,13 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   camera_info_manager
   image_geometry
+  geometry_msgs
+  tf_conversions
+  tf2
+  tf2_ros
+  tf2_msgs
+  tf2_sensor_msgs
+  eigen_conversions
 )
 
 ## System dependencies are found with CMake's conventions
@@ -151,6 +158,11 @@ add_executable(rigid_transform_computation
     #
     src/rigid_transform_computation.cpp)
 
+add_executable(point_cloud_visualizer_node
+    src/pointCloudVisualizer.cpp
+    #
+    src/point_cloud_visualizer_node.cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -168,6 +180,11 @@ target_link_libraries(${PROJECT_NAME}
    ${PCL_LIBRARIES}
  )
 
+ target_link_libraries(point_cloud_visualizer_node
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    ${PCL_LIBRARIES}
+  )
 #############
 ## Install ##
 #############
