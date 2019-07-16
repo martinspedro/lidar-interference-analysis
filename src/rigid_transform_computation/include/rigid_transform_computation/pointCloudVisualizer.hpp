@@ -38,30 +38,38 @@ namespace point_cloud {
     class PointCloudVisualizer{
         public:
             PointCloudVisualizer(std::string point_cloud_topic, std::string node_handler_name);
+            PointCloudVisualizer(std::string point_cloud_topic, std::string pose_topic, std::string node_handler_name);
             ~PointCloudVisualizer();
 
             void initPointCloudVisualizer();
             void addNewPointCloudToVisualizer(const sensor_msgs::PointCloud2::ConstPtr &point_cloud_msg, std::string point_cloud_name);
 
             void registerPointPickingCallback(const uint8_t MODE);
-            pcl::visualization::PCLVisualizer::Ptr pcl_viewer;
+
 
             static const uint8_t SINGLE_POINT_MODE = 0;
-        private:
+            Eigen::Affine3f getViewerPose();
 
+        private:
 
             std::string node_handler_name;
             std::string point_cloud_topic;
+            std::string pose_topic;
+
             ros::NodeHandlePtr nh_;
             ros::Subscriber point_cloud_sub;
+            ros::Publisher  pose_pub;
+
+            Eigen::Affine3f viewerPose;
 
             PointCloud point_cloud;
             PointCloud::Ptr cloudPtr;
 
+            pcl::visualization::PCLVisualizer::Ptr pcl_viewer;
+
             static void onPointPickingEvent (const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr);
             void viewerCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
-
-
+            void viewerWithPoseCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
     };
 }
 
