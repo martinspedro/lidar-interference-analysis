@@ -59,6 +59,7 @@ namespace point_cloud {
             ros::NodeHandlePtr nh_;
             ros::Subscriber point_cloud_sub;
             ros::Publisher  pose_pub;
+            ros::Publisher  point_pub;
 
             Eigen::Affine3f viewerPose;
 

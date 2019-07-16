@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 
 
     point_cloud::PointCloudVisualizer point_cloud_visualizer_object("/velodyne_points", "pcl_viewer_pose", "velo");
-    //point_cloud_visualizer_object.registerPointPickingCallback(point_cloud::PointCloudVisualizer::SINGLE_POINT_MODE);
+    point_cloud_visualizer_object.registerPointPickingCallback(point_cloud::PointCloudVisualizer::SINGLE_POINT_MODE);
 
 
     ros::spin();

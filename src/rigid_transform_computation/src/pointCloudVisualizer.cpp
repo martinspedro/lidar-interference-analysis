@@ -13,6 +13,9 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <geometry_msgs/Pose.h>
 
+#include <rigid_transform_computation/PointXYZI.h>
+
+
 using namespace point_cloud;
 
 const std::string POINT_CLOUD_VIEWER_NAME = "Point Cloud Viewer";
@@ -48,9 +51,13 @@ PointCloudVisualizer::PointCloudVisualizer(std::string point_cloud_topic,
                                         (point_cloud_topic,
                                          DEFAULT_QUEUE_SIZE,
                                          &PointCloudVisualizer::viewerWithPoseCallback, this);
-     this->pose_pub = this->nh_->advertise<geometry_msgs::Pose>
+    this->pose_pub = this->nh_->advertise<geometry_msgs::Pose>
                                          (pose_topic,
                                           DEFAULT_POSE_QUEUE_SIZE);
+
+    this->point_pub = this->nh_->advertise<rigid_transform_computation::PointXYZI>
+                                         ("picked_point",
+                                         DEFAULT_QUEUE_SIZE);
 
     this->pcl_viewer = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer(POINT_CLOUD_VIEWER_NAME)); // new pcl::visualization::PCLVisualizer(POINT_CLOUD_VIEWER_NAME); //!< Create visualization object
     this->cloudPtr = PointCloud::Ptr(new PointCloud);
@@ -115,7 +122,7 @@ void PointCloudVisualizer::viewerWithPoseCallback(const sensor_msgs::PointCloud2
 
     this->pose_pub.publish(tempPoseMsg);
 
-    std::cout << (this->viewerPose).matrix() << std::endl;
+    //std::cout << (this->viewerPose).matrix() << std::endl;
     this->pcl_viewer->spinOnce(10);
 
 }
@@ -123,21 +130,34 @@ void PointCloudVisualizer::viewerWithPoseCallback(const sensor_msgs::PointCloud2
 
 // http://docs.pointclouds.org/trunk/classpcl_1_1visualization_1_1_point_picking_event.html
 void PointCloudVisualizer::onPointPickingEvent (const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr) {
-    std::cout << "[INOF] Point picking event occurred." << std::endl;
+    std::cout << "Point picking event occurred." << std::endl;
+
+    //PointCloudVisualizer::PointCloudVisualizer* aux_pcl_handler = (PointCloudVisualizer::PointCloudVisualizer*) viewerVoidPtr;
 
     float x, y, z;
-    if (pickingEvent.getPointIndex () != -1)
-    {
+    int idx = pickingEvent.getPointIndex ();
+    std:cout << idx << std::endl;
+
+    if (idx != -1) {
         pickingEvent.getPoint(x, y, z);
-        std::cout << "[INOF] Point coordinate ( " << x << ", " << y << ", " << z << ")" << std::endl;
+
+        std::cout << "Point coordinate ( " << x << ", " << y << ", " << z << ")" << std::endl;
+
+        rigid_transform_computation::PointXYZI tempPoint;
+        tempPoint.x = x;
+        tempPoint.y = y;
+        tempPoint.z = z;
+        tempPoint.intensity = -1;//aux_pcl_handler->cloudPtr[idx].intensity;
+
+        ros::Publisher* aux_point_pub = (ros::Publisher*) viewerVoidPtr;
+        //aux_pcl_handler->
+        aux_point_pub->publish(tempPoint);
     }
-
-
 }
 
 void PointCloudVisualizer::registerPointPickingCallback(const uint8_t MODE) {
     if(MODE == PointCloudVisualizer::SINGLE_POINT_MODE) {
-        this->pcl_viewer->registerPointPickingCallback (PointCloudVisualizer::onPointPickingEvent, (void*)&(this->pcl_viewer));
+        this->pcl_viewer->registerPointPickingCallback (PointCloudVisualizer::onPointPickingEvent, (void*)&(this->point_pub));
     }
     else {
         throw NotImplemented();
