@@ -62,7 +62,8 @@ ImageVisualizer::~ImageVisualizer() {
 */
 void ImageVisualizer::viewerCallback(const sensor_msgs::ImageConstPtr& msg) {
     try {
-        this->cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        this->cv_ptr = cv_bridge::toCvShare(msg, "bgr8")->image);
+        //cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     }
     catch (cv_bridge::Exception& e) {
         ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -76,7 +77,8 @@ void ImageVisualizer::viewerCallback(const sensor_msgs::ImageConstPtr& msg) {
 
 void ImageVisualizer::pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg) {
     try {
-        this->cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);;
+        this->cv_ptr =  cv_bridge::toCvShare(msg, "bgr8")->image);
+        //cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);;
         setMouseCallback(OPENCV_WINDOW_NAME, ImageVisualizer::onMouse, &(this->cv_ptr->image)); // pass the address
     }
     catch (cv_bridge::Exception& e) {
