@@ -15,6 +15,10 @@ Author: Pedro Martins (martinspedro@av.it.pt)
     <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR" required="true" args="$(arg dataset_folder_path)$(arg default_bag) --clock -l"/>
 
     <node pkg="rigid_transform_computation" type="rigid_transform_computation" name="rigid_transform_computation" output="screen" />
+    <node pkg="rigid_transform_computation" type="point_cloud_visualizer_node" name="PCL_Viewer_with_Pose" output="screen" />
 
+    <node pkg="rigid_transform_computation" type="image_visualizer_node" name="Image_Visualizer" output="screen" >
+        <remap from="/img_pixel_picker/clicked_point" to="/camera/clicked_pixel" />
+    </node>
 
 </launch>

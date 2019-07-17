@@ -156,7 +156,7 @@ add_executable(rigid_transform_computation
     #
     src/pointCloudVisualizer.cpp
     #
-    src/rangeImageVisualizer.cpp
+    #src/rangeImageVisualizer.cpp
     #
     src/rigid_transform_computation.cpp)
 
