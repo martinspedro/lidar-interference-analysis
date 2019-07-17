@@ -61,5 +61,13 @@ class ImageVisualizer {
         //image_transport::Publisher      image_pub_;
         ros::Publisher                  pixel_pub;
 
+        struct MouseCallbackParams {
+            cv_bridge::CvImagePtr imgPtr;
+            //cv::Mat& imgPtr;
+            ros::Publisher* pixelPublisherPtr;
+        } ;
+
+        struct MouseCallbackParams tempMouseCallback;
+
 };
 #endif // IMAGE_VISUALIZER_H

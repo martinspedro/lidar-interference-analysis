@@ -20,6 +20,8 @@ using namespace cv;
 const uint8_t DEFAULT_PIXEL_QUEUE_SIZE = 10;
 const std::string DEFAULT_CAMERA_TOPIC = "/camera";
 
+
+
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                  std::string clicked_pixel_topic) : it_(nh_) {
     std::cout << "Init Success 1" << std::endl;
@@ -41,7 +43,7 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
 
     this->cv_ptr = nullptr;
 
-    this->pixel_pub = this->nh_.advertise<rigid_transform_computation::Pixel>(clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
+    //this->pixel_pub = new ros::Publisher(this->nh_.advertise<rigid_transform_computation::Pixel>(clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
 
     cv::namedWindow(OPENCV_WINDOW_NAME, cv::WINDOW_NORMAL);
 }
@@ -49,7 +51,7 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                  std::string clicked_pixel_topic,
                                  std::string node_handler_name) : it_(nh_) {
-    std::cout << "Init Success" << std::endl;
+    std::cout << "Init Started" << std::endl;
     this->camera_root_topic = camera_root_topic;
 
     this->image = new Image();
@@ -65,11 +67,12 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
     //this->nh_ = ros::NodeHandlePtr(new ros::NodeHandle(node_handler_name));
 
     this->cv_ptr = nullptr;
-
-    this->pixel_pub = this->nh_.advertise<rigid_transform_computation::Pixel>(clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
+    std::cout << "Pointer Allocated" << std::endl;
+    this->pixel_pub = this->nh_.advertise<rigid_transform_computation::Pixel>
+                                             (clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
 
     cv::namedWindow(OPENCV_WINDOW_NAME, WINDOW_NORMAL);
-
+    std::cout << "Init Success" << std::endl;
 }
 
 ImageVisualizer::~ImageVisualizer() {
@@ -87,6 +90,7 @@ void ImageVisualizer::viewerCallback(const sensor_msgs::ImageConstPtr& msg) {
         std::cout << "Reading Image MSg" << std::endl;
         this->cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
         std::cout << "ReadImage MSg Success" << std::endl;
+        this->tempMouseCallback.imgPtr = this->cv_ptr;
     }
     catch (cv_bridge::Exception& e) {
         ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -118,27 +122,56 @@ void ImageVisualizer::pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg
 }
 
 void ImageVisualizer::registerPixelPickingCallback(){
-    setMouseCallback(OPENCV_WINDOW_NAME, ImageVisualizer::onMouse, this);
+    //this->tempMouseCallback;
+    //tempMouseCallback = (struct MouseCallbackParams*) malloc(sizeof(struct MouseCallbackParams));
+
+    //this->tempMouseCallback.imgPtr = this->cv_ptr;
+    this->tempMouseCallback.pixelPublisherPtr = &(this->pixel_pub);
+
+    setMouseCallback(OPENCV_WINDOW_NAME, ImageVisualizer::onMouse, &(this->tempMouseCallback));
 }
 
 void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
+    std::cout << "Callback" << std::endl;
     if (event == cv::EVENT_LBUTTONDOWN)
     {
         //Mat &img_ptr = *((Mat*)param); //cast and deference the param
-        ImageVisualizer aux = *((ImageVisualizer*)param );
-        Mat &img_ptr = aux.cv_ptr->image;
-        Vec3b val = img_ptr.at<Vec3b>(y,x); // opencv is row-major !
-        std::cout << img_ptr.type() << std::endl;
-        std::cout << "x= " << x << " y= " << y << "val= "<<val<< std::endl;
+        //ImageVisualizer aux = *((ImageVisualizer*)param );
+        MouseCallbackParams &tempMouseCallback = *((MouseCallbackParams*) param);
 
-        rigid_transform_computation::Pixel tempPixel;
-        tempPixel.x = x;
-        tempPixel.y = y;
-        tempPixel.b = val[0];    //BGR color coding
-        tempPixel.g = val[1];
-        tempPixel.r = val[2];
+        if(tempMouseCallback.imgPtr) {
+            Mat &imgPtr = tempMouseCallback.imgPtr->image;
 
-        //aux.pixel_pub.publish(tempPixel);
+            Vec3b val = imgPtr.at<Vec3b>(y,x); // opencv is row-major !
+            std::cout << imgPtr.type() << std::endl;
+
+
+            rigid_transform_computation::Pixel tempPixel;
+            tempPixel.x = x;
+            tempPixel.y = y;
+            tempPixel.b = val[0];    //BGR color coding
+            tempPixel.g = val[1];
+            tempPixel.r = val[2];
+
+
+
+            std::cout << "Attempting to publish message" << std::endl;
+
+            tempMouseCallback.pixelPublisherPtr->publish(tempPixel);
+            std::cout << "x= " << x << " y= " << y << "val= "<< val << std::endl;
+
+            // Should clean last image
+            tempMouseCallback.imgPtr = nullptr;
+
+        }
+        else {
+            ROS_WARN("ERROR!");
+        }
+
+
+
+
+
     }
 
     return ;

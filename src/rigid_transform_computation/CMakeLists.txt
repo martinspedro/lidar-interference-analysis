@@ -170,6 +170,11 @@ add_executable(range_image_visualizer_node
     #
     src/range_image_visualizer_node.cpp)
 
+add_executable(image_visualizer_node
+    src/image.cpp
+    src/imageVisualizer.cpp
+    #
+    src/image_visualizer_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -194,11 +199,17 @@ target_link_libraries(${PROJECT_NAME}
     ${PCL_LIBRARIES}
   )
 
-  target_link_libraries(range_image_visualizer_node
-     ${catkin_LIBRARIES}
-     ${OpenCV_LIBRARIES}
-     ${PCL_LIBRARIES}
-   )
+target_link_libraries(range_image_visualizer_node
+ ${catkin_LIBRARIES}
+ ${OpenCV_LIBRARIES}
+ ${PCL_LIBRARIES}
+)
+
+target_link_libraries(image_visualizer_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ${PCL_LIBRARIES}
+)
 #############
 ## Install ##
 #############
