@@ -24,7 +24,6 @@ const std::string DEFAULT_CAMERA_TOPIC = "/camera";
 
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                  std::string clicked_pixel_topic) : it_(nh_) {
-    std::cout << "Init Success 1" << std::endl;
 
     this->camera_root_topic = camera_root_topic;
 
@@ -43,7 +42,8 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
 
     this->cv_ptr = nullptr;
 
-    //this->pixel_pub = new ros::Publisher(this->nh_.advertise<rigid_transform_computation::Pixel>(clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
+    this->pixel_pub = this->nh_.advertise<rigid_transform_computation::Pixel>
+                                             (clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
 
     cv::namedWindow(OPENCV_WINDOW_NAME, cv::WINDOW_NORMAL);
 }
@@ -51,7 +51,6 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                  std::string clicked_pixel_topic,
                                  std::string node_handler_name) : it_(nh_) {
-    std::cout << "Init Started" << std::endl;
     this->camera_root_topic = camera_root_topic;
 
     this->image = new Image();
@@ -67,17 +66,15 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
     //this->nh_ = ros::NodeHandlePtr(new ros::NodeHandle(node_handler_name));
 
     this->cv_ptr = nullptr;
-    std::cout << "Pointer Allocated" << std::endl;
     this->pixel_pub = this->nh_.advertise<rigid_transform_computation::Pixel>
                                              (clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
 
     cv::namedWindow(OPENCV_WINDOW_NAME, WINDOW_NORMAL);
-    std::cout << "Init Success" << std::endl;
 }
 
 ImageVisualizer::~ImageVisualizer() {
     cv::destroyWindow(OPENCV_WINDOW_NAME);
-    //delete this->image;
+    delete this->image;
     delete this;
 }
 
@@ -87,29 +84,9 @@ ImageVisualizer::~ImageVisualizer() {
 void ImageVisualizer::viewerCallback(const sensor_msgs::ImageConstPtr& msg) {
     try {
         //this->cv_ptr = cv_bridge::toCvShare(msg, "bgr8")->image);
-        std::cout << "Reading Image MSg" << std::endl;
         this->cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-        std::cout << "ReadImage MSg Success" << std::endl;
         this->tempMouseCallback.imgPtr = this->cv_ptr;
-    }
-    catch (cv_bridge::Exception& e) {
-        ROS_ERROR("cv_bridge exception: %s", e.what());
-        return;
-    }
-
-    // Update GUI Window
-    std::cout << "Im show" << std::endl;
-    cv::imshow(OPENCV_WINDOW_NAME, this->cv_ptr->image);
-    cv::waitKey(3);
-}
-
-
-void ImageVisualizer::pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg) {
-    try {
-        //this->cv_ptr =  cv_bridge::toCvShare(msg, "bgr8")->image);
-        this->cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);;
         //setMouseCallback(OPENCV_WINDOW_NAME, ImageVisualizer::onMouse, &(this->cv_ptr->image)); // pass the address
-
     }
     catch (cv_bridge::Exception& e) {
         ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -132,7 +109,7 @@ void ImageVisualizer::registerPixelPickingCallback(){
 }
 
 void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
-    std::cout << "Callback" << std::endl;
+    //std::cout << "Callback" << std::endl;
     if (event == cv::EVENT_LBUTTONDOWN)
     {
         //Mat &img_ptr = *((Mat*)param); //cast and deference the param
@@ -143,8 +120,7 @@ void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
             Mat &imgPtr = tempMouseCallback.imgPtr->image;
 
             Vec3b val = imgPtr.at<Vec3b>(y,x); // opencv is row-major !
-            std::cout << imgPtr.type() << std::endl;
-
+            //std::cout << imgPtr.type() << std::endl;
 
             rigid_transform_computation::Pixel tempPixel;
             tempPixel.x = x;
@@ -154,18 +130,14 @@ void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
             tempPixel.r = val[2];
 
 
-
-            std::cout << "Attempting to publish message" << std::endl;
-
             tempMouseCallback.pixelPublisherPtr->publish(tempPixel);
-            std::cout << "x= " << x << " y= " << y << "val= "<< val << std::endl;
+            //std::cout << "x= " << x << " y= " << y << "val= "<< val << std::endl;
 
             // Should clean last image
             tempMouseCallback.imgPtr = nullptr;
-
         }
         else {
-            ROS_WARN("ERROR!");
+            ROS_WARN("Invalid Pointer to cv_bridge (onMouse Callback)");
         }
 
 

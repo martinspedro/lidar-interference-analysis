@@ -9,7 +9,6 @@ int main(int argc, char* argv[])
 
 
     ImageVisualizer image_visualizer_object("/camera", "clicked_point", "img_pixel_picker");
-    std::cout << "Image Visualizer finished" << std::endl;
     image_visualizer_object.registerPixelPickingCallback();
 
 
