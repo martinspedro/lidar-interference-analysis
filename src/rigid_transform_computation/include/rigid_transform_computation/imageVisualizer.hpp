@@ -24,35 +24,42 @@
 
 
 class ImageVisualizer {
-    private:
-        const std::string OPENCV_WINDOW_NAME = "Video Viewer";
-        const int DEFAULT_QUEUE_SIZE = 1;
-
-        Image *image;
-        std::string camera_topic;
-
-        cv_bridge::CvImagePtr cv_ptr;
-
-
-        ros::NodeHandlePtr nh_;
-        image_transport::ImageTransport it_;
-        image_transport::Subscriber     image_sub_;
-        image_transport::Publisher      image_pub_;
-
-    protected:
-        static void onMouse(int event, int x, int y, int flags, void* param);
-
     public:
-        ImageVisualizer();
-        ImageVisualizer(std::string camera_topic);
+        ImageVisualizer(std::string camera_root_topic,
+                        std::string clicked_pixel_topic);
+        ImageVisualizer(std::string camera_root_topic,
+                        std::string clicked_pixel_topic,
+                        std::string node_handler_name);
 
         ~ImageVisualizer();
 
         /** @brief Callback function for image visualization
         *
         */
+
         void viewerCallback(const sensor_msgs::ImageConstPtr& msg);
         void pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg);
+        void registerPixelPickingCallback();
+
+    private:
+
+        static void onMouse(int event, int x, int y, int flags, void* param);
+
+        const std::string OPENCV_WINDOW_NAME = "Video Viewer";
+        const int DEFAULT_QUEUE_SIZE = 1;
+
+        Image *image;
+        std::string camera_root_topic;
+
+        cv_bridge::CvImagePtr cv_ptr;
+
+
+        ros::NodeHandle nh_;
+        image_transport::ImageTransport it_;
+
+        image_transport::Subscriber     image_sub_;
+        //image_transport::Publisher      image_pub_;
+        ros::Publisher                  pixel_pub;
 
 };
 #endif // IMAGE_VISUALIZER_H
