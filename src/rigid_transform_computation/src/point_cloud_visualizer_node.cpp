@@ -12,7 +12,20 @@ int main(int argc, char* argv[])
     point_cloud_visualizer_object.registerPointPickingCallback(point_cloud::PointCloudVisualizer::SINGLE_POINT_MODE);
 
 
-    ros::spin();
 
+    // Use Wall CLock as time source instead of /clock (even using use_simulated_time = True)
+    ros::WallRate wallTimer(100); // Wake-up at every 100 Hz.
+
+    //ros::spin();
+
+    while (ros::ok()) {
+        //std::cout << "Spinning..." << std::endl;
+        point_cloud_visualizer_object.spin();
+        //std::cout << "Going to sleep..." << std::endl;
+        wallTimer.sleep();
+        //std::cout << "Stopped Sleeping..." << std::endl;
+    }
+
+    std::cout << "Node shutdown..." << std::endl;
     return EXIT_SUCCESS;
 }

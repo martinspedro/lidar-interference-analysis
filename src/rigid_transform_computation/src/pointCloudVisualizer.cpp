@@ -108,8 +108,6 @@ void PointCloudVisualizer::viewerCallback(const sensor_msgs::PointCloud2::ConstP
     this->viewerPose = this->pcl_viewer->getViewerPose();
 
     this->pcl_viewer->spinOnce(10);
-
-
 }
 
 void PointCloudVisualizer::viewerWithPoseCallback(const sensor_msgs::PointCloud2::ConstPtr &point_cloud_msg) {
@@ -123,14 +121,14 @@ void PointCloudVisualizer::viewerWithPoseCallback(const sensor_msgs::PointCloud2
     this->pose_pub.publish(tempPoseMsg);
 
     //std::cout << (this->viewerPose).matrix() << std::endl;
-    this->pcl_viewer->spinOnce(10);
+
 
 }
 
 
 // http://docs.pointclouds.org/trunk/classpcl_1_1visualization_1_1_point_picking_event.html
 void PointCloudVisualizer::onPointPickingEvent (const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr) {
-    std::cout << "Point picking event occurred." << std::endl;
+    //std::cout << "Point picking event occurred." << std::endl;
 
     //PointCloudVisualizer::PointCloudVisualizer* aux_pcl_handler = (PointCloudVisualizer::PointCloudVisualizer*) viewerVoidPtr;
 
@@ -170,4 +168,9 @@ Eigen::Affine3f PointCloudVisualizer::getViewerPose() {
     //std::cout << (this->viewerPose).matrix() << std::endl;
     //this->viewerPose = this->pcl_viewer->getViewerPose();
     return this->viewerPose;
+}
+
+void PointCloudVisualizer::spin() {
+    this->pcl_viewer->spinOnce(10); // Visualizer loop runs for 10 ms
+    ros::spinOnce();
 }

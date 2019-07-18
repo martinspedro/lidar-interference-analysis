@@ -49,6 +49,7 @@ namespace point_cloud {
 
             static const uint8_t SINGLE_POINT_MODE = 0;
             Eigen::Affine3f getViewerPose();
+            void spin();
 
         private:
 
