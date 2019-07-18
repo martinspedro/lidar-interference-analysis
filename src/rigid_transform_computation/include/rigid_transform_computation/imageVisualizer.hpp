@@ -40,7 +40,7 @@ class ImageVisualizer {
         void viewerCallback(const sensor_msgs::ImageConstPtr& msg);
         void pixelGrabberCallback(const sensor_msgs::ImageConstPtr& msg);
         void registerPixelPickingCallback();
-
+        void spin();
     private:
 
         static void onMouse(int event, int x, int y, int flags, void* param);

@@ -25,6 +25,7 @@ const std::string DEFAULT_CAMERA_TOPIC = "/camera";
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                  std::string clicked_pixel_topic) : it_(nh_) {
 
+    std::cout << "Object Init" << std::endl;
     this->camera_root_topic = camera_root_topic;
 
     this->image = new Image();
@@ -46,11 +47,13 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                              (clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
 
     cv::namedWindow(OPENCV_WINDOW_NAME, cv::WINDOW_NORMAL);
+    std::cout << "Object Init Done" << std::endl;
 }
 
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
                                  std::string clicked_pixel_topic,
                                  std::string node_handler_name) : it_(nh_) {
+    std::cout << "Object Init" << std::endl;
     this->camera_root_topic = camera_root_topic;
 
     this->image = new Image();
@@ -69,7 +72,9 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic,
     this->pixel_pub = this->nh_.advertise<rigid_transform_computation::Pixel>
                                              (clicked_pixel_topic, DEFAULT_PIXEL_QUEUE_SIZE);
 
-    cv::namedWindow(OPENCV_WINDOW_NAME, WINDOW_NORMAL);
+    cv::namedWindow(OPENCV_WINDOW_NAME, cv::WINDOW_NORMAL);
+    cv::waitKey(3);
+    std::cout << "Object Init Done" << std::endl;
 }
 
 ImageVisualizer::~ImageVisualizer() {
@@ -133,18 +138,33 @@ void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
             tempMouseCallback.pixelPublisherPtr->publish(tempPixel);
             //std::cout << "x= " << x << " y= " << y << "val= "<< val << std::endl;
 
-            // Should clean last image
-            tempMouseCallback.imgPtr = nullptr;
+            // Should clean last image -> not really if you want to freeze the image and select multiple pixels
+            //tempMouseCallback.imgPtr = nullptr;
         }
         else {
             ROS_WARN("Invalid Pointer to cv_bridge (onMouse Callback)");
         }
 
-
-
-
-
     }
 
     return ;
+}
+
+
+void ImageVisualizer::spin() {
+    //std::cout << "Image Visualizer Spinning" << std::endl;
+    /*
+    if(this->cv_ptr) {
+        std::cout << "Valid Pointer" << std::endl;
+
+        //cv::imshow(OPENCV_WINDOW_NAME, this->cv_ptr->image);
+
+    }
+    else {
+        ROS_WARN("Invalid Pointer to cv_bridge (Imafe Visualizer::spin)");
+    }
+    */
+    cv::waitKey(3);
+    ros::spinOnce();
+    //std::cout << "Image Visualizer Spinning Done" << std::endl;
 }
