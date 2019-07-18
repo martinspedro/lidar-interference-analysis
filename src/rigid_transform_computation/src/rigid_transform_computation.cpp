@@ -24,35 +24,42 @@ class RigidTransformData {
     sensor_msgs::CameraInfo camera_info;
 };
 
-std::vector<PointI> pointCloudPoints;
-std::vector<Pixel_t> imagePixels;
+std::vector<cv::Point3f> pointCloudPoints;
+std::vector<cv::Point2f> imagePixels;
 std::vector<image_geometry::PinholeCameraModel> camera_info;
 
+cv::Mat rVec = cv::Mat_<float>(3, 1);
+cv::Mat tVec = cv::Mat_<float>(3, 1);
+
+void computeRigidTransform(){
+    //solvePnP(InputArray objectPoints, InputArray imagePoints, InputArray cameraMatrix, InputArray distCoeffs, OutputArray rvec, OutputArray tvec, bool useExtrinsicGuess=false, int flags=ITERATIVE )¶
+    cv::solvePnP(pointCloudPoints, imagePixels, camera_info[10].fullIntrinsicMatrix(), camera_info[10].distortionCoeffs(), rVec, tVec, false, cv::SOLVEPNP_ITERATIVE);
+    std::cout << rVec << std::endl;
+    std::cout << tVec << std::endl;
+
+}
 void pixelCallback(const rigid_transform_computation::Pixel::ConstPtr& msg) {
-    Pixel_t tempPixel;
+    cv::Point2f tempPixelPoint;
 
-    tempPixel.x = msg->x;
-    tempPixel.y = msg->y;
-    tempPixel.r = msg->r;
-    tempPixel.g = msg->g;
-    tempPixel.b = msg->b;
+    tempPixelPoint.x = msg->x;
+    tempPixelPoint.y = msg->y;
 
-    imagePixels.push_back(tempPixel);
 
-    std::cout << "Added Pixel: " << msg << std::endl;
+    imagePixels.push_back(tempPixelPoint);
+
+    std::cout << "Added Pixel: " << tempPixelPoint << std::endl;
 }
 
 void pointCloudCallback(const rigid_transform_computation::PointXYZI::ConstPtr& msg) {
-    PointI tempPoint;
+    cv::Point3f temp3DPoint;
 
-    tempPoint.x = msg->x;
-    tempPoint.y = msg->y;
-    tempPoint.z = msg->z;
-    tempPoint.intensity = msg->intensity;
+    temp3DPoint.x = msg->x;
+    temp3DPoint.y = msg->y;
+    temp3DPoint.z = msg->z;
 
-    pointCloudPoints.push_back(tempPoint);
+    pointCloudPoints.push_back(temp3DPoint);
 
-    std::cout << "Added Point3D: " << msg << std::endl;
+    std::cout << "Added Point3D: " << temp3DPoint << std::endl;
 }
 
 void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& cam_info) {
@@ -61,7 +68,15 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& cam_info) {
     tempCameraModel.fromCameraInfo(cam_info);
     camera_info.push_back(tempCameraModel);
 
-    std::cout << "Added Camera Info: " << cam_info << std::endl;
+    //std::cout << tempCameraModel.fullIntrinsicMatrix() << std::endl;
+    //std::cout << "Added Camera Info " << std::endl;
+    //std::cout << tempCameraModel.distortionCoeffs() << std::endl;
+
+    if ( (pointCloudPoints.size() >= 5) && (imagePixels.size() >= 5) )
+    {
+        std::cout << "Solving PnP" << std::endl;
+        computeRigidTransform();
+    }
 }
 
 
