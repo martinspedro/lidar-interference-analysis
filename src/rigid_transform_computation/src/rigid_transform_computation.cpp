@@ -31,13 +31,25 @@ std::vector<image_geometry::PinholeCameraModel> camera_info;
 cv::Mat rVec = cv::Mat_<float>(3, 1);
 cv::Mat tVec = cv::Mat_<float>(3, 1);
 
+
+cv::Point3f transformLiDARToCameraReferential(cv::Point3f lidar_point) {
+    cv::Point3f temp3DPoint;
+
+    temp3DPoint.x = lidar_point.y;
+    temp3DPoint.y = - lidar_point.z;
+    temp3DPoint.z = lidar_point.x;
+}
+
 void computeRigidTransform(){
     //solvePnP(InputArray objectPoints, InputArray imagePoints, InputArray cameraMatrix, InputArray distCoeffs, OutputArray rvec, OutputArray tvec, bool useExtrinsicGuess=false, int flags=ITERATIVE )¶
     cv::solvePnP(pointCloudPoints, imagePixels, camera_info[10].fullIntrinsicMatrix(), camera_info[10].distortionCoeffs(), rVec, tVec, false, cv::SOLVEPNP_ITERATIVE);
     std::cout << rVec << std::endl;
     std::cout << tVec << std::endl;
 
+    ros::shutdown(); // send shutdown command to node because its functionality its over
+
 }
+
 void pixelCallback(const rigid_transform_computation::Pixel::ConstPtr& msg) {
     cv::Point2f tempPixelPoint;
 
@@ -57,7 +69,7 @@ void pointCloudCallback(const rigid_transform_computation::PointXYZI::ConstPtr& 
     temp3DPoint.y = msg->y;
     temp3DPoint.z = msg->z;
 
-    pointCloudPoints.push_back(temp3DPoint);
+    pointCloudPoints.push_back(transformLiDARToCameraReferential(temp3DPoint));
 
     std::cout << "Added Point3D: " << temp3DPoint << std::endl;
 }

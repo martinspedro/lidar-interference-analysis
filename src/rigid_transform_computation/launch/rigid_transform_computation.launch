@@ -12,7 +12,9 @@ Author: Pedro Martins (martinspedro@av.it.pt)
 
 
     <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
-    <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR" required="true" args="$(arg dataset_folder_path)$(arg default_bag) --clock -l"/>
+
+
+
 
     <node pkg="rigid_transform_computation" type="rigid_transform_computation" name="rigid_transform_computation" output="screen" />
     <node pkg="rigid_transform_computation" type="point_cloud_visualizer_node" name="PCL_Viewer_with_Pose" output="screen" />
