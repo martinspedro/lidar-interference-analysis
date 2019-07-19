@@ -134,12 +134,11 @@ void PointCloudVisualizer::onPointPickingEvent (const pcl::visualization::PointP
 
     float x, y, z;
     int idx = pickingEvent.getPointIndex ();
-    std:cout << idx << std::endl;
 
     if (idx != -1) {
         pickingEvent.getPoint(x, y, z);
 
-        std::cout << "Point coordinate ( " << x << ", " << y << ", " << z << ")" << std::endl;
+        //std::cout << "Point coordinate ( " << x << ", " << y << ", " << z << ")" << std::endl;
 
         rigid_transform_computation::PointXYZI tempPoint;
         tempPoint.x = x;
