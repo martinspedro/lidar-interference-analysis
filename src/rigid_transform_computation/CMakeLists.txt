@@ -31,6 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(OpenCV)
 find_package(PCL)
+find_package(yaml-cpp)
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -191,6 +192,7 @@ target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
    ${PCL_LIBRARIES}
+    yaml-cpp
  )
 
  target_link_libraries(point_cloud_visualizer_node
