@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+Description:
+-->
+
+<launch>
+   <!-- PARAMETERS -->
+   <param name="use_sim_time" value="true" />
+
+   <!-- ARGUMENTS -->
+   <!-- Datasets -->
+   <arg name="dataset_folder_path" value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/mine/" />
+   <arg name="default_bag"              default="2019-07-08-11-26-33.bag" />
+
+   <node pkg="tf" type="static_transform_publisher" name="LiDAR_to_world" args="0 0 1.2 0 0 0 1 world velo_link 100" />
+   <!--
+   <node pkg="tf" type="static_transform_publisher" name="LiDAR_to_camera" args="1.561041339307391   1.026755305206084  -1.22545941899812
+                                                                                 -0.1299325239396167 1.026800109363647  -5.218334321603256
+                                                                                 1 velo_link camera_color_left 100" />
+    1.561041339307391 1.026755305206084  -1.22545941899812                                                                         -->
+ <node pkg="tf" type="static_transform_publisher" name="LiDAR_to_camera" args="0   0   0
+                                                                               -1.561041339307391 1.026755305206084 -1.22545941899812 
+                                                                               velo_link camera_color_left 100" />
+   <!-- NODES -->
+   <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+   <node pkg="rosbag" type="play" name="Dataset" required="true"
+         args="$(arg dataset_folder_path)$(arg default_bag) --clock -l">
+      </node>
+
+
+
+
+     <!-- Point Cloud Visualizer
+          Selec between opening simple point cloud visualizer or RVIZ
+       -->
+     <node pkg="sensor_fusion" type="point_cloud_coloring" name="Point_Cloud_Coloring" output="screen" >
+         <remap from="/kitti/camera_color_left/image_raw" to="/camera/image_color" />
+         <remap from="/kitti/camera_color_left/camera_info" to= "/camera/camera_info"  />
+    </node>
+
+
+
+
+</launch>
