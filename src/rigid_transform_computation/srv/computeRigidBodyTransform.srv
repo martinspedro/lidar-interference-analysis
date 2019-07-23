@@ -1,0 +1,3 @@
+string solvePnpType
+---
+geometry_msgs/Pose rigidBodyTransform
