@@ -13,7 +13,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <geometry_msgs/Pose.h>
 
-#include <rigid_transform_computation/PointXYZI.h>
+#include "rigid_transform_computation/PointXYZI.h"
 
 
 using namespace point_cloud;
