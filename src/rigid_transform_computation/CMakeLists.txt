@@ -162,6 +162,17 @@ add_executable(rigid_transform_computation
     #
     src/rigid_transform_computation.cpp)
 
+add_executable(compute_rigid_body_transform
+    src/image.cpp
+    src/imageVisualizer.cpp
+    #
+    src/pointCloudVisualizer.cpp
+    #
+    src/CSV_manager.cpp
+    #
+    src/compute_rigid_body_transform.cpp)
+
+
 add_executable(point_cloud_visualizer_node
     src/pointCloudVisualizer.cpp
     #
@@ -198,6 +209,12 @@ add_dependencies(rigid_transform_computation
     #${catkin_EXPORTED_TARGETS}
     )
 
+add_dependencies(compute_rigid_body_transform
+    rigid_transform_computation_generate_messages_cpp
+    #${${PROJECT_NAME}_EXPORTED_TARGETS}
+    #${catkin_EXPORTED_TARGETS}
+    )
+
 add_dependencies(point_cloud_visualizer_node
     rigid_transform_computation_generate_messages_cpp
     #${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -229,6 +246,12 @@ target_link_libraries(${PROJECT_NAME}
    ${PCL_LIBRARIES}
     yaml-cpp
  )
+
+target_link_libraries(compute_rigid_body_transform
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
 
  target_link_libraries(point_cloud_visualizer_node
     ${catkin_LIBRARIES}
