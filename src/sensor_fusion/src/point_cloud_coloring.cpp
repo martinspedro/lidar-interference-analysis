@@ -40,7 +40,7 @@
 using namespace sensor_msgs;
 using namespace message_filters;
 
-pcl::visualization::PCLVisualizer::Ptr pcl_viewer (new pcl::visualization::PCLVisualizer (VIEWER_NAME)); //!< Create visualization object
+//pcl::visualization::PCLVisualizer::Ptr pcl_viewer (new pcl::visualization::PCLVisualizer (VIEWER_NAME)); //!< Create visualization object
 
 geometry_msgs::TransformStamped transformStamped; //!< Create geometric transform object
 
@@ -202,7 +202,7 @@ void callback(const ImageConstPtr& image,
   //color_point_cloud(cloudPtr, point_cloud_RGB);
 
   //pcl::toROSMsg(*cloudColoredPtr,point_cloud_camera );
-
+/*
   // PCL Viewer
   if (first_callback){
       // Initialize PCL Viewer
@@ -217,7 +217,7 @@ void callback(const ImageConstPtr& image,
   }
 
   pcl_viewer->spinOnce(10);
-
+*/
   // Publish the data.
   pub.publish(cloudCameraPtr);
 }
