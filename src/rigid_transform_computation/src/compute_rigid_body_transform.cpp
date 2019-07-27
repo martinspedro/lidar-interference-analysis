@@ -9,7 +9,7 @@
 
 #include "rigid_transform_computation/Pixel.h"
 #include "rigid_transform_computation/PointXYZI.h"
-#include <yaml-cpp/yaml.h>  // yaml-cpp is installed as a shared library in usr/local/
+#include <yaml-cpp/yaml.h>  //!< yaml-cpp is installed as a shared library in usr/local/
 
 #include <string>
 
@@ -18,13 +18,30 @@
 #include "rigid_transform_computation/CSV_manager.hpp"
 
 
+#include "tf2/LinearMath/Matrix3x3.h"
+#include "tf2/LinearMath/Quaternion.h"
+
+#include <tf2_ros/static_transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
+
+
+/*
+#include <Matrix3x3.h>
+
+
+#include <Transform.h>
+
+#include "tf_conversions/tf_eigen.h"
+#include "tf/transform_datatypes.h"
+#include "Eigen/Core"
 #include <Eigen/Geometry>
+*/
 
 using namespace point_cloud;
 
 const std::string THESIS_FILE_PATH = "/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/";
 
-bool flag = false;
+int flag = 0;   // Temporary solution. Yaml-cpp should be used to read calibration file
 
 std::vector<cv::Point3f> pointCloudPoints;
 std::vector<cv::Point2f> imagePixels;
@@ -76,11 +93,10 @@ case 4:
 
   std::cout << "Rotation Vector: " << rVec << std::endl;
   std::cout << "Translation Vector: " << tVec << std::endl;
-  //rVec.at<float>(2, 1) = -  rVec.at<float>(2, 1);
 
   cv::Mat rMat = cv::Mat(3, 3, CV_32FC1);
   cv::Vec3f eulerVec;
-  cv::Rodrigues(rVec,rMat);
+  cv::Rodrigues(rVec,rMat); // Rodrigues overloads matrix type from float to double!
   std::cout << "Rotation Matrix: " << rMat << std::endl;
 
  /*
@@ -129,26 +145,67 @@ case 4:
                                  eulerAngles);
   std::cout << "Euler Angles: " << eulerAngles << std::endl;
 */
-  //geometry_msgs::Pose rigidBodyPose;
-  //geometry_msgs::Transform rigidBodyTransform;
 
+  //geometry_msgs::Pose rigidBodyPose;
+  //tf::Transform rigidBodyTransform;
+
+  // row major storing. Opencv uses row-major access so it is create using a commonly matrix convention
+  std::cout << "xx (0,0): " << rMat.at<double>(0,0) << std::endl;
+  std::cout << "xy (0,1): " << rMat.at<double>(0,1) << std::endl;
+  std::cout << "xz (0,2): " << rMat.at<double>(0,2) << std::endl;
+  std::cout << "yx (1,0): " << rMat.at<double>(1,0) << std::endl;
+  std::cout << "yy (1,1): " << rMat.at<double>(1,1) << std::endl;
+  std::cout << "yz (1,2): " << rMat.at<double>(1,2) << std::endl;
+  std::cout << "zx (2,0): " << rMat.at<double>(2,0) << std::endl;
+  std::cout << "zy (2,1): " << rMat.at<double>(2,1) << std::endl;
+  std::cout << "zz (2,2): " << rMat.at<double>(2,2) << std::endl;
+
+
+  tf2::Matrix3x3 aux(rMat.at<double>(0,0), rMat.at<double>(0,1), rMat.at<double>(0,2),
+                    rMat.at<double>(1,0), rMat.at<double>(1,1), rMat.at<double>(1,2),
+                    rMat.at<double>(2,0), rMat.at<double>(2,1), rMat.at<double>(2,2));
+
+  //std::cout << aux << std::endl;
+
+  tf2::Quaternion rotQ;
+  aux.getRotation(rotQ);
+  rotQ.normalize();
+  //std::cout << rotQ << std::endl;
+  ///std::cout << "q.w() = " << rotQ.w() << std::endl; //Print out the scalar
+  //std::cout << "q.vec() = " << rotQ.getAxis() << std::endl; //Print out the orientation vector
   //Eigen::Quaterniond q(rMat);
+
   //tf::Quaternion()
-  //std::cout << "q.w() = " << q.w() << std::endl; //Print out the scalar
-//std::cout << "q.vec() = " << q.vec() << std::endl; //Print out the orientation vector
+
+  static tf2_ros::StaticTransformBroadcaster static_broadcaster;
+  geometry_msgs::TransformStamped static_transformStamped;
+
+  static_transformStamped.header.stamp = ros::Time::now();
+  static_transformStamped.header.frame_id = "velo_link";
+  static_transformStamped.child_frame_id = "camera_color_left";
+
+  static_transformStamped.transform.translation.x = tVec.at<double>(0, 0);
+  static_transformStamped.transform.translation.y = tVec.at<double>(1, 0);
+  static_transformStamped.transform.translation.z = tVec.at<double>(2, 0);
+
+  static_transformStamped.transform.rotation.x = rotQ.x();
+  static_transformStamped.transform.rotation.y = rotQ.y();
+  static_transformStamped.transform.rotation.z = rotQ.z();
+  static_transformStamped.transform.rotation.w = - rotQ.w(); //invert the transform
+  static_broadcaster.sendTransform(static_transformStamped);
 
   //rigidBodyTransform.position = tVec;
   //rigidBodyTransform.orientation = q;
-
+  flag = 2;
   return true;
 }
 
 void getEulerAngles(cv::Mat &rotCamerMatrix,cv::Vec3f &eulerAngles){
     cv::Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
     float* _r = rotCamerMatrix.ptr<float>();
-    float projMatrix[12] = {_r[0],_r[1],_r[2],0,
-                          _r[3],_r[4],_r[5],0,
-                          _r[6],_r[7],_r[8],0};
+    float projMatrix[12] = {_r[0],_r[1],_r[2], 0,
+                            _r[3],_r[4],_r[5], 0,
+                            _r[6],_r[7],_r[8], 0};
 
     cv::decomposeProjectionMatrix( cv::Mat(3,4,CV_32FC1,projMatrix),
                                cameraMatrix,
@@ -167,7 +224,10 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& cam_info) {
     camera_info.push_back(tempCameraModel);
     std::cout << "Callback" << std::endl;
 
-    flag = true;
+    if (flag == 0) {
+        flag = 1;
+    }
+
 }
 
 int main(int argc, char* argv[])
@@ -200,7 +260,7 @@ int main(int argc, char* argv[])
 
     ros::Rate r(1);
     while(ros::ok()){
-        if(flag) {
+        if(flag == 1) {
             //std::cout << "Camera Info" << camera_info[0].fullIntrinsicMatrix() << std::endl;
             computeRigidTransform(atoll(argv[2]));
         }
