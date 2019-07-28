@@ -251,6 +251,7 @@ target_link_libraries(compute_rigid_body_transform
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${PCL_LIBRARIES}
+    yaml-cpp
 )
 
  target_link_libraries(point_cloud_visualizer_node

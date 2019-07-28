@@ -25,27 +25,13 @@
 #include <geometry_msgs/TransformStamped.h>
 
 
-/*
-#include <Matrix3x3.h>
-
-
-#include <Transform.h>
-
-#include "tf_conversions/tf_eigen.h"
-#include "tf/transform_datatypes.h"
-#include "Eigen/Core"
-#include <Eigen/Geometry>
-*/
-
 using namespace point_cloud;
 
 const std::string THESIS_FILE_PATH = "/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/";
 
-int flag = 0;   // Temporary solution. Yaml-cpp should be used to read calibration file
-
 std::vector<cv::Point3f> pointCloudPoints;
 std::vector<cv::Point2f> imagePixels;
-std::vector<image_geometry::PinholeCameraModel> camera_info;
+image_geometry::PinholeCameraModel camera_info;
 
 cv::Mat rVec = cv::Mat(3, 1, CV_32FC1);
 cv::Mat tVec = cv::Mat(3, 1, CV_32FC1);
@@ -79,31 +65,31 @@ bool computeRigidTransform(int pnp_mode) {
     {
     case 0:
         cv::solvePnP(pointCloudPoints, imagePixels,
-                     camera_info[0].fullIntrinsicMatrix(), camera_info[0].distortionCoeffs(),
+                     camera_info.fullIntrinsicMatrix(), camera_info.distortionCoeffs(),
                      rVec, tVec, false, cv::SOLVEPNP_ITERATIVE);
         std::cout << "Solving using SOLVEPNP_ITERATIVE" << std::endl;
         break;
     case 1:
         cv::solvePnP(pointCloudPoints, imagePixels,
-                     camera_info[0].fullIntrinsicMatrix(), camera_info[0].distortionCoeffs(),
+                     camera_info.fullIntrinsicMatrix(), camera_info.distortionCoeffs(),
                      rVec, tVec, false, cv::SOLVEPNP_P3P);
         std::cout << "Solving using SOLVEPNP_P3P" << std::endl;
         break;
      case 2:
          cv::solvePnP(pointCloudPoints, imagePixels,
-                      camera_info[0].fullIntrinsicMatrix(), camera_info[0].distortionCoeffs(),
+                      camera_info.fullIntrinsicMatrix(), camera_info.distortionCoeffs(),
                       rVec, tVec, false, cv::SOLVEPNP_EPNP);
         std::cout << "Solving using SOLVEPNP_EPNP" << std::endl;
         break;
   case 3:
       cv::solvePnP(pointCloudPoints, imagePixels,
-                   camera_info[0].fullIntrinsicMatrix(), camera_info[0].distortionCoeffs(),
+                   camera_info.fullIntrinsicMatrix(), camera_info.distortionCoeffs(),
                    rVec, tVec, false, cv::SOLVEPNP_DLS);
     std::cout << "Solving using SOLVEPNP_DLS" << std::endl;
     break;
 case 4:
         cv::solvePnP(pointCloudPoints, imagePixels,
-                     camera_info[0].fullIntrinsicMatrix(), camera_info[0].distortionCoeffs(),
+                     camera_info.fullIntrinsicMatrix(), camera_info.distortionCoeffs(),
                      rVec, tVec, false, cv::SOLVEPNP_UPNP);
       std::cout << "Solving using SOLVEPNP_UPNP" << std::endl;
     default:
@@ -205,77 +191,67 @@ case 4:
 
   //rigidBodyTransform.position = tVec;
   //rigidBodyTransform.orientation = q;
-  flag = 2;
   return true;
 }
 
-void getEulerAngles(cv::Mat &rotCamerMatrix,cv::Vec3f &eulerAngles){
-    cv::Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
-    float* _r = rotCamerMatrix.ptr<float>();
-    float projMatrix[12] = {_r[0],_r[1],_r[2], 0,
-                            _r[3],_r[4],_r[5], 0,
-                            _r[6],_r[7],_r[8], 0};
 
-    cv::decomposeProjectionMatrix( cv::Mat(3,4,CV_32FC1,projMatrix),
-                               cameraMatrix,
-                               rotMatrix,
-                               transVect,
-                               rotMatrixX,
-                               rotMatrixY,
-                               rotMatrixZ,
-                               eulerAngles);
-}
+// http://library.isr.ist.utl.pt/docs/roswiki/yaml_cpp.html
+// https://ossyaritoori.hatenablog.com/entry/2017/08/16/Read_yaml_file_with_yaml-cpp_in_ROS_C%2B%2B_/_
+// https://github.com/jbeder/yaml-cpp/wiki/Tutorial
+// https://stackoverflow.com/questions/50150387/parsing-yaml-file-using-yaml-cpp-error
+void readCameraInfoYAML(std::string filename) {
 
-void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& cam_info) {
-    image_geometry::PinholeCameraModel tempCameraModel;
+    YAML::Node camera_info_yaml = YAML::LoadFile(filename);
 
-    tempCameraModel.fromCameraInfo(cam_info);
-    camera_info.push_back(tempCameraModel);
-    std::cout << "Callback" << std::endl;
+    sensor_msgs::CameraInfo camera_info_msg;
+    std::array<double, 9ul> K, R;
+    std::array<double, 12ul> P;
 
-    if (flag == 0) {
-        flag = 1;
-    }
+    camera_info_msg.width = camera_info_yaml["image_width"].as<uint32_t>();
+    camera_info_msg.height = camera_info_yaml["image_height"].as<uint32_t>();
 
+    camera_info_msg.distortion_model = camera_info_yaml["distortion_model"].as<std::string>();
+
+    // Instead of creating YAML nodes to deal with Map events, acess directly the data field, since the others are not needed
+    camera_info_msg.D = camera_info_yaml["distortion_coefficients"]["data"].as<std::vector<double>>();
+
+    K = camera_info_yaml["camera_matrix"]["data"].as< std::array<double, 9ul> >();
+    R = camera_info_yaml["rectification_matrix"]["data"].as< std::array<double, 9ul> >();
+    P = camera_info_yaml["projection_matrix"]["data"].as< std::array<double, 12ul> >();
+
+    std::memcpy(&camera_info_msg.K[0], &K[0], sizeof(double)*9);
+    std::memcpy(&camera_info_msg.R[0], &R[0], sizeof(double)*9);
+    std::memcpy(&camera_info_msg.P[0], &P[0], sizeof(double)*12);
+
+    camera_info.fromCameraInfo(camera_info_msg);
 }
 
 int main(int argc, char* argv[])
 {
     //Initialize ROS
     ros::init(argc, argv, "rigid_transform_computation");
-    std::cout << "Node init succesfully" << std::endl;
+    std::cout << "ROS Node init succesfully" << std::endl;
 
-    if (argc != 3) {
-      ROS_INFO("Usage: rosrun rigid_transform_computation compute_rigid_body_transform csv_filename solvePnP_mode");
+    if (argc != 4) {
+      ROS_INFO("Usage: rosrun rigid_transform_computation compute_rigid_body_transform csv_filename camera_info_yaml_filename solvePnP_mode");
       return EXIT_FAILURE;
     }
 
 
-    for (int i = 0; i < argc; ++i) {
-        std::cout << argv[i] << std::endl;
-    }
-
-    ros::NodeHandle nh;
-    ros::Subscriber camera_info_sub = nh.subscribe<sensor_msgs::CameraInfo>("/camera/camera_info", 1, cameraInfoCallback);
-
+    std::cout << "Loading 2D <-> 3D correspondences for calibration... ";
     load(THESIS_FILE_PATH + argv[1], &imagePixels, &pointCloudPoints);
+    std::cout << "Done!" << std::endl << "Loading Camera Info YAML file... ";
+    readCameraInfoYAML(argv[2]);
+    std::cout << "Done!" << std::endl << "Computing Rigid Body Transform... ";
+    computeRigidTransform(atoll(argv[3]));
+    std::cout << "Done! " << std::endl << "Static Transform is going to be published under /tf_static. " << std::endl;
 
-    std::cout << "Data Load succesfull" << std::endl;
-    //std::cout << imagePixels << std::endl;
-    //std::cout << pointCloudPoints << std::endl;
-
-    //ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/camera/camera_info",ros::Duration(10));
 
     ros::Rate r(1);
     while(ros::ok()){
-        if(flag == 1) {
-            //std::cout << "Camera Info" << camera_info[0].fullIntrinsicMatrix() << std::endl;
-            computeRigidTransform(atoll(argv[2]));
-        }
-        ros::spinOnce();
+        ros::spinOnce();    // Spin even if no callbacks or services exist
         r.sleep();
     }
 
-    ros::spin();
     return EXIT_SUCCESS;
 }
