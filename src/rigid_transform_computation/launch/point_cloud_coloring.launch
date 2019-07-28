@@ -14,13 +14,12 @@ Description:
    <arg name="default_bag"              default="2019-07-08-11-26-33.bag" />
 
    <node pkg="tf" type="static_transform_publisher" name="LiDAR_to_world" args="0 0 0.8 0 0 0 1 world velo_link 100" />
-                                                            -->
+                                                            
  <!-- node pkg="tf" type="static_transform_publisher" name="LiDAR_to_camera" args="0.01268853045936955   -0.1297726036281011   -0.06284104963923154
                                                                                 0.5094598 -0.4932622 0.5511629 -0.4397301
                                                                                velo_link camera_color_left 100" /
 
-    Implemented using ros node                                                 -->
-    
+    Implemented using ros node                                                                      -->
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
    <node pkg="rosbag" type="play" name="Dataset" required="true"

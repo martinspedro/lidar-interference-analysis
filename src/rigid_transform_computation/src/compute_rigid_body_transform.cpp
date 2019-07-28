@@ -52,6 +52,27 @@ cv::Mat tVec = cv::Mat(3, 1, CV_32FC1);
 
 
 
+void createStaticTransformMsg(cv::Mat translation_vector, tf2::Quaternion rotation_quaternion) {
+    static tf2_ros::StaticTransformBroadcaster static_broadcaster;
+    geometry_msgs::TransformStamped static_transformStamped;
+
+    static_transformStamped.header.stamp = ros::Time::now();
+    static_transformStamped.header.frame_id = "velo_link";
+    static_transformStamped.child_frame_id = "camera_color_left";
+
+    static_transformStamped.transform.translation.x = translation_vector.at<double>(0, 0);
+    static_transformStamped.transform.translation.y = translation_vector.at<double>(1, 0);
+    static_transformStamped.transform.translation.z = translation_vector.at<double>(2, 0);
+
+    static_transformStamped.transform.rotation.x = rotation_quaternion.x();
+    static_transformStamped.transform.rotation.y = rotation_quaternion.y();
+    static_transformStamped.transform.rotation.z = rotation_quaternion.z();
+
+    static_transformStamped.transform.rotation.w = - rotation_quaternion.w(); //invert the transform
+
+    static_broadcaster.sendTransform(static_transformStamped);
+}
+
 bool computeRigidTransform(int pnp_mode) {
 
     switch (pnp_mode)
@@ -150,6 +171,7 @@ case 4:
   //tf::Transform rigidBodyTransform;
 
   // row major storing. Opencv uses row-major access so it is create using a commonly matrix convention
+  /*
   std::cout << "xx (0,0): " << rMat.at<double>(0,0) << std::endl;
   std::cout << "xy (0,1): " << rMat.at<double>(0,1) << std::endl;
   std::cout << "xz (0,2): " << rMat.at<double>(0,2) << std::endl;
@@ -159,7 +181,7 @@ case 4:
   std::cout << "zx (2,0): " << rMat.at<double>(2,0) << std::endl;
   std::cout << "zy (2,1): " << rMat.at<double>(2,1) << std::endl;
   std::cout << "zz (2,2): " << rMat.at<double>(2,2) << std::endl;
-
+  */
 
   tf2::Matrix3x3 aux(rMat.at<double>(0,0), rMat.at<double>(0,1), rMat.at<double>(0,2),
                     rMat.at<double>(1,0), rMat.at<double>(1,1), rMat.at<double>(1,2),
@@ -169,7 +191,8 @@ case 4:
 
   tf2::Quaternion rotQ;
   aux.getRotation(rotQ);
-  rotQ.normalize();
+  rotQ.normalize();     // always normalize the quaternion to avoid numerical errors
+
   //std::cout << rotQ << std::endl;
   ///std::cout << "q.w() = " << rotQ.w() << std::endl; //Print out the scalar
   //std::cout << "q.vec() = " << rotQ.getAxis() << std::endl; //Print out the orientation vector
@@ -177,22 +200,8 @@ case 4:
 
   //tf::Quaternion()
 
-  static tf2_ros::StaticTransformBroadcaster static_broadcaster;
-  geometry_msgs::TransformStamped static_transformStamped;
+  createStaticTransformMsg(tVec, rotQ);
 
-  static_transformStamped.header.stamp = ros::Time::now();
-  static_transformStamped.header.frame_id = "velo_link";
-  static_transformStamped.child_frame_id = "camera_color_left";
-
-  static_transformStamped.transform.translation.x = tVec.at<double>(0, 0);
-  static_transformStamped.transform.translation.y = tVec.at<double>(1, 0);
-  static_transformStamped.transform.translation.z = tVec.at<double>(2, 0);
-
-  static_transformStamped.transform.rotation.x = rotQ.x();
-  static_transformStamped.transform.rotation.y = rotQ.y();
-  static_transformStamped.transform.rotation.z = rotQ.z();
-  static_transformStamped.transform.rotation.w = - rotQ.w(); //invert the transform
-  static_broadcaster.sendTransform(static_transformStamped);
 
   //rigidBodyTransform.position = tVec;
   //rigidBodyTransform.orientation = q;
@@ -256,7 +265,6 @@ int main(int argc, char* argv[])
     //std::cout << pointCloudPoints << std::endl;
 
     //ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/camera/camera_info",ros::Duration(10));
-    int count = 0;
 
     ros::Rate r(1);
     while(ros::ok()){
