@@ -60,7 +60,6 @@ void createStaticTransformMsg(cv::Mat translation_vector, tf2::Quaternion rotati
 }
 
 bool computeRigidTransform(int pnp_mode) {
-
     switch (pnp_mode)
     {
     case 0:
@@ -98,99 +97,39 @@ case 4:
     }
 
 
-  std::cout << "Rotation Vector: " << rVec << std::endl;
-  std::cout << "Translation Vector: " << tVec << std::endl;
+  std::cout << "Rotation Vector: \n" << rVec << std::endl;
+  std::cout << "Translation Vector: \n" << tVec << std::endl;
 
   cv::Mat rMat = cv::Mat(3, 3, CV_32FC1);
   cv::Vec3f eulerVec;
   cv::Rodrigues(rVec,rMat); // Rodrigues overloads matrix type from float to double!
-  std::cout << "Rotation Matrix: " << rMat << std::endl;
-
- /*
-  cv::Mat tVec4 = cv::Mat(4, 1, CV_32FC1);
-  cv::Mat univector = cv::Mat(1, 1, CV_64FC1);
-  std::cout << "New Translation Vector: " << tVec4 << std::endl;
-  std::cout << "x " << tVec.dims << std::endl;
-  std::cout << "x " << tVec.cols << std::endl;
-  std::cout << "x " << tVec.type()     << std::endl;
-
-  std::cout << "x " << univector.dims << std::endl;
-  std::cout << "x " << univector.cols << std::endl;
-  std::cout << "x " << univector.type()     << std::endl;
-
-  //cv:vconcat(tVec, univector, tVec4); // rVec is a column vector already
-  //tVec.push_back( cv::Mat(1, 1, CV_64FC1));
-  std::cout << "New Translation Vector: " << tVec4 << std::endl;
-
-  cv::Mat projectionMatrix = cv::Mat(3, 4, CV_32FC1);
-   std::cout << "Projection Matrix: " << projectionMatrix << std::endl;
-  cv::hconcat(rMat, rVec, projectionMatrix); // rVec is a column vector already
-  std::cout << "Projection Matrix: " << projectionMatrix << std::endl;
-
-  cv::Mat rotMat = cv::Mat(3, 3, CV_32FC1);
-  cv::Mat camera_matrix = cv::Mat(3, 3, CV_32FC1);
-  cv::Mat rotMatrixX = cv::Mat(3, 3, CV_32FC1);
-  cv::Mat rotMatrixY = cv::Mat(3, 3, CV_32FC1);
-  cv::Mat rotMatrixZ = cv::Mat(3, 3, CV_32FC1);
-
-  cv::Vec3f eulerAngles;
-
-  std::cout << "Decomposing Matrix" << std::endl;
-  std::cout << projectionMatrix.type()     << std::endl;
-   std::cout << camera_matrix.type()     << std::endl;
-   //std::cout << camera_info[0].fullIntrinsicMatrix().type()     << std::endl;
-    std::cout << rMat.type()     << std::endl;
-     std::cout << tVec4.type()     << std::endl;
-
-  cv::decomposeProjectionMatrix( projectionMatrix,
-                                 camera_matrix,
-                                 rotMat,
-                                 tVec4,
-                                 rotMatrixX,
-                                 rotMatrixY,
-                                 rotMatrixZ,
-                                 eulerAngles);
-  std::cout << "Euler Angles: " << eulerAngles << std::endl;
-*/
-
-  //geometry_msgs::Pose rigidBodyPose;
-  //tf::Transform rigidBodyTransform;
-
-  // row major storing. Opencv uses row-major access so it is create using a commonly matrix convention
-  /*
-  std::cout << "xx (0,0): " << rMat.at<double>(0,0) << std::endl;
-  std::cout << "xy (0,1): " << rMat.at<double>(0,1) << std::endl;
-  std::cout << "xz (0,2): " << rMat.at<double>(0,2) << std::endl;
-  std::cout << "yx (1,0): " << rMat.at<double>(1,0) << std::endl;
-  std::cout << "yy (1,1): " << rMat.at<double>(1,1) << std::endl;
-  std::cout << "yz (1,2): " << rMat.at<double>(1,2) << std::endl;
-  std::cout << "zx (2,0): " << rMat.at<double>(2,0) << std::endl;
-  std::cout << "zy (2,1): " << rMat.at<double>(2,1) << std::endl;
-  std::cout << "zz (2,2): " << rMat.at<double>(2,2) << std::endl;
-  */
+  std::cout << "Rotation Matrix: \n" << rMat << std::endl;
 
   tf2::Matrix3x3 aux(rMat.at<double>(0,0), rMat.at<double>(0,1), rMat.at<double>(0,2),
                     rMat.at<double>(1,0), rMat.at<double>(1,1), rMat.at<double>(1,2),
                     rMat.at<double>(2,0), rMat.at<double>(2,1), rMat.at<double>(2,2));
 
-  //std::cout << aux << std::endl;
+
 
   tf2::Quaternion rotQ;
   aux.getRotation(rotQ);
   rotQ.normalize();     // always normalize the quaternion to avoid numerical errors
 
-  //std::cout << rotQ << std::endl;
-  ///std::cout << "q.w() = " << rotQ.w() << std::endl; //Print out the scalar
-  //std::cout << "q.vec() = " << rotQ.getAxis() << std::endl; //Print out the orientation vector
-  //Eigen::Quaterniond q(rMat);
-
-  //tf::Quaternion()
+  std::cout << "Normalized Camera to LiDAR Quaternion (x, y, z, w): (" <<
+             rotQ.x() << ", " <<
+             rotQ.y() << ", " <<
+             rotQ.z() << ", " <<
+             rotQ.w() << ")"  <<
+             std::endl;
+  std::cout << "Normalized LiDAR to Camera Quaternion (x, y, z, w): (" <<
+            rotQ.x() << ", " <<
+            rotQ.y() << ", " <<
+            rotQ.z() << ", " <<
+            -rotQ.w() << ")"  <<
+            std::endl;
 
   createStaticTransformMsg(tVec, rotQ);
 
-
-  //rigidBodyTransform.position = tVec;
-  //rigidBodyTransform.orientation = q;
   return true;
 }
 
