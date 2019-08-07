@@ -160,6 +160,8 @@ add_executable(rigid_transform_computation
     #
     src/CSV_manager.cpp
     #
+    src/rigid_body_transform.cpp
+    #
     src/rigid_transform_computation.cpp)
 
 add_executable(compute_rigid_body_transform
@@ -169,6 +171,8 @@ add_executable(compute_rigid_body_transform
     src/pointCloudVisualizer.cpp
     #
     src/CSV_manager.cpp
+    #
+    src/rigid_body_transform.cpp
     #
     src/compute_rigid_body_transform.cpp)
 
