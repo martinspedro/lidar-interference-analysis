@@ -16,12 +16,34 @@
 #include <tf2_ros/static_transform_broadcaster.h>
 #include "tf2/LinearMath/Quaternion.h"
 
+#include "rigid_transform_computation/computeRigidBodyTransform.h" //!< Srv message for rigid body transform computation
+#include "rigid_transform_computation/save_correspondences.h"   //!< Service to save correspondences
+
+#include "rigid_transform_computation/pointCloudVisualizer.hpp"
+
+#include "rigid_transform_computation/Pixel.h"
+#include "rigid_transform_computation/PointXYZI.h"
 
 
 namespace rigid_body_transform {
     static const std::string THESIS_FILE_PATH = "/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/";
 
     cv::Point3f transformLiDARToCameraReferential(cv::Point3f lidar_point);
+
+    typedef struct Pixel_struct {
+        uint32_t x;
+        uint32_t y;
+        uint8_t r; //!< Red  component
+        uint8_t g; //!< Green component
+        uint8_t b; //!< Blue  component
+    } Pixel_t;
+
+    class RigidTransformData {
+        point_cloud::PointI pointCloudPoint;
+        Pixel_t     imagePixel;
+        sensor_msgs::CameraInfo camera_info;
+    };
+
 
     class LiDARCameraCalibrationData {
         public:
@@ -34,11 +56,22 @@ namespace rigid_body_transform {
             ~LiDARCameraCalibrationData();
 
 
-            bool computeRigidBodyTransform(int pnp_mode);
+            void publishStaticTransformMsg();
+            void computeRigidBodyTransform(int pnp_mode);
             void readCameraInfoFromYAML(std::string filename);
 
+            bool saveCorrespondencesSrvCallback(rigid_transform_computation::save_correspondences::Request  &req,
+                                                rigid_transform_computation::save_correspondences::Response &res);
+
+            bool computeRigidTransformSrvCallback(rigid_transform_computation::computeRigidBodyTransform::Request  &req,
+                                                  rigid_transform_computation::computeRigidBodyTransform::Response &res);
+
+            void pixelCallback(const rigid_transform_computation::Pixel::ConstPtr& msg);
+            void pointCloudCallback(const rigid_transform_computation::PointXYZI::ConstPtr& msg);
+            void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& cam_info);
         private:
-            void createStaticTransformMsg();
+            geometry_msgs::TransformStamped createStaticTransformMsg();
+            void solvePnP(int solvePnP_mode);
 
             std::string frame_id_;
             std::string child_frame_id_;
