@@ -136,7 +136,7 @@ void ImageVisualizer::onMouse(int event, int x, int y, int flags, void* param) {
 
 
             tempMouseCallback.pixelPublisherPtr->publish(tempPixel);
-            //std::cout << "x= " << x << " y= " << y << "val= "<< val << std::endl;
+            std::cout << "Pixel Clicked at (x, y): (" << x << ", " << y << ") with RGB= "<< val << std::endl;
 
             // Should clean last image -> not really if you want to freeze the image and select multiple pixels
             //tempMouseCallback.imgPtr = nullptr;
