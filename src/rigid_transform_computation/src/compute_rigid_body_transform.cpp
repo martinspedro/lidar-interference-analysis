@@ -1,14 +1,10 @@
 #include <iostream>
 #include <sstream>
 
-
-
-
-
-
 #include "rigid_transform_computation/rigid_body_transform.hpp"
-
 #include "rigid_transform_computation/CSV_manager.hpp"
+
+
 
 using namespace rigid_body_transform;
 
@@ -37,11 +33,13 @@ int main(int argc, char* argv[])
     calibration_data_object.readCameraInfoFromYAML(argv[2]);
     std::cout << "Done!" << std::endl << "Computing Rigid Body Transform... ";
     calibration_data_object.computeRigidBodyTransform(atoll(argv[3]));
+    std::cout << "Done! " << std::endl << "Create Static Transform Message to be published... ";
+    calibration_data_object.publishStaticTransformMsg();
     std::cout << "Done! " << std::endl << "Static Transform is going to be published under /tf_static. " << std::endl;
 
-
     ros::Rate r(1);
-    while(ros::ok()){
+    while(ros::ok())
+    {
         ros::spinOnce();    // Spin even if no callbacks or services exist
         r.sleep();          // loop at 1 Hz
     }
