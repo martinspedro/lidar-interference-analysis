@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   ros::ServiceClient client = n.serviceClient<rigid_transform_computation::computeRigidBodyTransform>("computeRigidBodyTransform");
   rigid_transform_computation::computeRigidBodyTransform srv;
 
-  srv.request.solvePnpType = argv[1];
+  srv.request.solvePnpType = atoll(argv[1]);
 
   if (client.call(srv)) {
     std::cout << srv.response.rigidBodyTransform << std::endl;

@@ -1,3 +1,3 @@
-string solvePnpType
+int32 solvePnpType
 ---
-geometry_msgs/Pose rigidBodyTransform
+geometry_msgs/TransformStamped rigidBodyTransform
