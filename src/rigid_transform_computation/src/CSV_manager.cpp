@@ -2,16 +2,12 @@
 #include <fstream>
 #include <string>
 
-#include <opencv2/opencv.hpp>
-
-#include "ros/ros.h"
+#include "rigid_transform_computation/CSV_manager.hpp"
 
 bool create(std::string filename, std::vector<cv::Point2f> imagePixels, std::vector<cv::Point3f> pointCloudPoints) {
 
 
     std::fstream fout; // file pointer
-
-    std::cout << filename << std::endl;
     fout.open(filename, std::ios::out); // opens an existing csv file
 
 
