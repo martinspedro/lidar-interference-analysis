@@ -32,8 +32,8 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   // clang-format off
-  ros::ServiceClient client = nh.serviceClient<rigid_transform_computation::
-      compute_rigid_body_transform>("compute_rigid_body_transform");
+  ros::ServiceClient client
+        = nh.serviceClient<rigid_transform_computation::compute_rigid_body_transform>("compute_rigid_body_transform");
   // clang-format on
 
   rigid_transform_computation::compute_rigid_body_transform srv;
