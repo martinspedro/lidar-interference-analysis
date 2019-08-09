@@ -1,74 +1,89 @@
+/*!
+ *  \file CSV_manager.cpp
+ *  \brief Basic implementation of a CSV file manager tailored for the rigid_transform_computation package
+ *  \author Pedro Martins (martinspedro@av.it.pt)
+ *
+ *  C++ implementation file of a basic file manager for CSV (Comma Separated Values) file-types, with read and write
+ * functionatilies.
+ *
+ *  Provides read and write functionalities for CSV files that store the LiDAR and Camera points correspondence
+ */
+
 #include <iostream>
 #include <fstream>
 #include <string>
 
 #include "rigid_transform_computation/CSV_manager.hpp"
 
-bool create(std::string filename, std::vector<cv::Point2f> imagePixels, std::vector<cv::Point3f> pointCloudPoints) {
+namespace csv_file_manager
+{
+void write(std::string filename, std::vector<cv::Point2f> image_pixels, std::vector<cv::Point3f> point_cloud_points)
+{
+  std::fstream fout;                   // file pointer
+  fout.open(filename, std::ios::out);  // creates a new csv file with writing permission
 
+  /* Formats the output in CSV style and streams it to file pointer
+   * image X, image Y, point cloud X, point cloud y, point cloud z
+   */
+  for (int i = 0; i < image_pixels.size(); i++)
+  {
+    fout << image_pixels.at(i).x << ", " << image_pixels.at(i).y << ", " << point_cloud_points.at(i).x << ", "
+         << point_cloud_points.at(i).y << ", " << point_cloud_points.at(i).z << "\n";
+  }
 
-    std::fstream fout; // file pointer
-    fout.open(filename, std::ios::out); // opens an existing csv file
-
-
-    // Read the input
-    for (int i = 0; i < imagePixels.size(); i++) {
-        fout << imagePixels.at(i).x << ", "
-             << imagePixels.at(i).y << ", "
-             << pointCloudPoints.at(i).x << ", "
-             << pointCloudPoints.at(i).y << ", "
-             << pointCloudPoints.at(i).z
-             << "\n";
-    }
-
-    fout.close();
-    return true;
+  fout.close();
 }
 
+void read(std::string filename, std::vector<cv::Point2f>* image_pixels, std::vector<cv::Point3f>* point_cloud_points)
+{
+  std::fstream fin;                  // File pointer
+  fin.open(filename, std::ios::in);  // Open an existing file
 
-void load(std::string filename, std::vector<cv::Point2f>* imagePixels, std::vector<cv::Point3f>* pointCloudPoints) {
-    std::fstream fin; // File pointer
+  // temporary variables
+  std::string line;
+  std::vector<cv::Point2f> temp_image_pixels;
+  std::vector<cv::Point3f> temp_point_cloud_points;
 
-    // Open an existing file
-    fin.open(filename, std::ios::in);
+  // while still has lines to be read
+  while (getline(fin, line))
+  {
+    std::stringstream ss(line);
 
-    std::string line, word;
-    std::vector<cv::Point2f> tempImagePixels;
-    std::vector<cv::Point3f> tempPointCloudPoints;
+    std::vector<std::string> words;
+    cv::Point2f temp_pixel;
+    cv::Point3f temp_point;
 
-
-    while (getline(fin, line)) {
-        std::stringstream ss(line);
-
-        std::vector<std::string> results;
-        cv::Point2f tempPixel;
-        cv::Point3f tempPoint;
-
-
-        while( ss.good() ) {
-            std::string substr;
-            getline( ss, substr, ',' );
-            results.push_back( substr );
-        }
-        try {
-            tempPixel.x = std::stoi(results.at(0));
-            tempPixel.y = std::stoi(results.at(1));
-            tempImagePixels.push_back(tempPixel);
-
-
-            tempPoint.x = std::atof(results.at(2).c_str());
-            tempPoint.y = std::atof(results.at(3).c_str());
-            tempPoint.z = std::atof(results.at(4).c_str());
-            tempPointCloudPoints.push_back(tempPoint);
-        }
-        catch (const char *exception) {
-            std::cout << exception << std::endl;
-        }
-
-
+    // split a correspondence in substrings contain the 5 data fields
+    while (ss.good())
+    {
+      std::string substr;
+      getline(ss, substr, ',');
+      words.push_back(substr);
     }
 
-    fin.close();
-    *imagePixels = tempImagePixels;
-    *pointCloudPoints = tempPointCloudPoints;
+    try
+    {
+      // convert pixel coordinates to integer and save the 2D point in the vector of selected pixels
+      temp_pixel.x = std::stoi(words.at(0));
+      temp_pixel.y = std::stoi(words.at(1));
+      temp_image_pixels.push_back(temp_pixel);
+
+      // convert point cloud coordinates to float and save the 3D point in the vector of selected points
+      temp_point.x = std::atof(words.at(2).c_str());
+      temp_point.y = std::atof(words.at(3).c_str());
+      temp_point.z = std::atof(words.at(4).c_str());
+      temp_point_cloud_points.push_back(temp_point);
+    }
+    catch (const char* exception)
+    {
+      std::cout << exception << std::endl;
+    }
+  }
+
+  fin.close();
+
+  // Fill the pointers with the read data
+  *image_pixels = temp_image_pixels;
+  *point_cloud_points = temp_point_cloud_points;
 }
+} /* namespace csv_file_manager */
