@@ -1,37 +1,38 @@
 /**
- * @file   camera.cpp
- * @brief  Image Stream and Visualizer Header File
+ * \file   image.cpp
+ * \brief  Implementation of a class to store image topics
  *
- * @author Pedro Martins
- * @date   9 july 2019
  */
+
 #include "rigid_transform_computation/image.hpp"
 
-
-Image::Image(){
-    this->image_color_topic = "/image_color";
-    this->image_info_topic = "/image_info";
+Image::Image()
+{
+  this->image_color_topic_ = "/image_color";
+  this->image_info_topic_ = "/image_info";
 }
 
-Image::Image(std::string color_topic, std::string info_topic) {
-    this->image_color_topic = color_topic;
-    this->image_info_topic = info_topic;
+Image::Image(std::string image_color_topic, std::string image_info_topic)
+  : image_color_topic_(image_color_topic), image_info_topic_(image_info_topic)
+{
 }
 
-std::string Image::getImageColorTopic() const {
-    return this->image_color_topic;
+std::string Image::getImageColorTopic() const
+{
+  return this->image_color_topic_;
 }
 
-std::string Image::getImageInfoTopic() const {
-    return this->image_info_topic;
+std::string Image::getImageInfoTopic() const
+{
+  return this->image_info_topic_;
 }
 
-int Image::getImageColorTopic(std::string color_topic) {
-    this->image_color_topic = color_topic;
-    return EXIT_SUCCESS;
+void Image::setImageColorTopic(std::string image_color_topic)
+{
+  this->image_color_topic_ = image_color_topic;
 }
 
-int Image::getImageInfoTopic(std::string info_topic) {
-    this->image_info_topic = info_topic;
-    return EXIT_SUCCESS;
+void Image::setImageInfoTopic(std::string image_info_topic)
+{
+  this->image_info_topic_ = image_info_topic;
 }
