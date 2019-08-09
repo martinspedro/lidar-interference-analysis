@@ -198,7 +198,7 @@ namespace rigid_body_transform {
 
         if (!( (this->image_pixels_.size() == 0) | (this->point_cloud_points_.size() == 0) )) {
             if (this->image_pixels_.size() == this->point_cloud_points_.size()) {
-                create(THESIS_FILE_PATH + req.filename, this->image_pixels_, this->point_cloud_points_);
+                csv_file_manager::write(THESIS_FILE_PATH + req.filename, this->image_pixels_, this->point_cloud_points_);
 
                 oss << "File saved in " << req.filename;
                 res.message = oss.str();
