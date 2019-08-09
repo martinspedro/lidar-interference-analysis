@@ -72,7 +72,7 @@ add_message_files(
 # Generate services in the 'srv' folder
 add_service_files(
   FILES
-  computeRigidBodyTransform.srv
+  compute_rigid_body_transform.srv
   save_correspondences.srv
 )
 
@@ -193,8 +193,8 @@ add_executable(image_visualizer_node
     #
     src/image_visualizer_node.cpp)
 
-add_executable(rigidBodyTransform_client
-    src/rigidBodyTransform_client.cpp)
+add_executable(compute_rigid_body_transform_client
+    src/compute_rigid_body_transform_client.cpp)
 
 add_executable(save_correspondences_client
     src/save_correspondences_client.cpp)
@@ -237,7 +237,7 @@ add_dependencies(image_visualizer_node
     #${catkin_EXPORTED_TARGETS}
     )
 
-add_dependencies(rigidBodyTransform_client
+add_dependencies(compute_rigid_body_transform_client
     rigid_transform_computation_generate_messages_cpp)
 
 add_dependencies(save_correspondences_client
@@ -276,7 +276,7 @@ target_link_libraries(image_visualizer_node
   ${PCL_LIBRARIES}
 )
 
-target_link_libraries(rigidBodyTransform_client
+target_link_libraries(compute_rigid_body_transform_client
   ${catkin_LIBRARIES}
 )
 
