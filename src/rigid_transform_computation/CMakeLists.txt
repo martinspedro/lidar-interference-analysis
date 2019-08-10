@@ -152,7 +152,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(rigid_transform_computation
+add_executable(correspondences_data_listener_node
     src/image.cpp
     src/imageVisualizer.cpp
     #
@@ -162,9 +162,9 @@ add_executable(rigid_transform_computation
     #
     src/rigid_body_transform.cpp
     #
-    src/rigid_transform_computation.cpp)
+    src/correspondences_data_listener_node.cpp)
 
-add_executable(compute_rigid_body_transform
+add_executable(compute_rigid_body_transform_node
     src/image.cpp
     src/imageVisualizer.cpp
     #
@@ -174,7 +174,7 @@ add_executable(compute_rigid_body_transform
     #
     src/rigid_body_transform.cpp
     #
-    src/compute_rigid_body_transform.cpp)
+    src/compute_rigid_body_transform_node.cpp)
 
 
 add_executable(point_cloud_visualizer_node
@@ -207,13 +207,13 @@ add_executable(save_correspondences_client
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(rigid_transform_computation
+add_dependencies(correspondences_data_listener_node
     rigid_transform_computation_generate_messages_cpp
     #${${PROJECT_NAME}_EXPORTED_TARGETS}
     #${catkin_EXPORTED_TARGETS}
     )
 
-add_dependencies(compute_rigid_body_transform
+add_dependencies(compute_rigid_body_transform_node
     rigid_transform_computation_generate_messages_cpp
     #${${PROJECT_NAME}_EXPORTED_TARGETS}
     #${catkin_EXPORTED_TARGETS}
@@ -244,14 +244,14 @@ add_dependencies(save_correspondences_client
     rigid_transform_computation_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(correspondences_data_listener_node
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
    ${PCL_LIBRARIES}
     yaml-cpp
  )
 
-target_link_libraries(compute_rigid_body_transform
+target_link_libraries(compute_rigid_body_transform_node
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${PCL_LIBRARIES}
