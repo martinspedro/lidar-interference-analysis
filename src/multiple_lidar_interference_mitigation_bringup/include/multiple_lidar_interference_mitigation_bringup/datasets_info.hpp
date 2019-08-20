@@ -53,14 +53,30 @@ extern const std::string UDACITY_CHX_LIDAR_BAG;
 // My datasets
 extern const std::string EXPERIMENTAL_DATASETS_FULL_PATH;
 extern const std::string ANECOIC_CHAMBER_DATASETS_FULL_PATH;
+
 extern const std::string IT2_DARK_ROOM_DATASETS_FULL_PATH;
-extern const std::string IT2_DARK_ROOM_SCENARIO_A_DATASETS_FULL_PATH;
-extern const std::string IT2_DARK_ROOM_SCENARIO_B_DATASETS_FULL_PATH;
+extern const std::string IT2_DARK_ROOM_SCENARIO_A1_DATASETS_FULL_PATH;
+extern const std::string IT2_DARK_ROOM_SCENARIO_A2_DATASETS_FULL_PATH;
+
+extern const std::string IT2_DARK_ROOM_SCENARIO_B1_DATASETS_FULL_PATH;
+extern const std::string IT2_DARK_ROOM_SCENARIO_B1_CAMERA_CALIBRATION_FOLDER_FULL_PATH;
+extern const std::string IT2_DARK_ROOM_SCENARIO_B1_GROUND_TRUTH_FOLDER_FULL_PATH;
+extern const std::string IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH;
 
 extern const std::string CAMERA_CALIBRATION_BAG_NAME;
 extern const std::string GROUND_TRUTH_BAG_NAME;
 extern const std::string INTERFERENCE_BAG_NAME;
 extern const std::string RAW_BAG_NAME;
 
+extern const std::string CLOSER_DISTANCE_AFFIX;
+extern const std::string HALFWAY_DISTANCE_AFFIX;
+extern const std::string FURTHER_DISTANCE_AFFIX;
+
+extern const std::string BELOW_HEIGHT_AFFIX;
+extern const std::string ALIGNED_HEIGHT_AFFIX;
+extern const std::string ABOVE_HEIGHT_AFFIX;
+
+extern const std::string AFFIX_SEPARATOR;
+}  // namespace datasets_path
+
 #endif /* DATASETS_INFO_H */
-}

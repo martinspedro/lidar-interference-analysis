@@ -1,5 +1,5 @@
 /**
- * \file   datasets_info.hpp
+ * \file   datasets_info.cpp
  * \brief  Set of constants usefull to manage the datasets
  *
  */
@@ -45,15 +45,36 @@ const std::string UDACITY_CHX_CAMERA_AND_LIDAR_BAG = "camera_and_lidar.bag";
 const std::string UDACITY_CHX_CAMERA_BAG = "camera.bag";
 const std::string UDACITY_CHX_LIDAR_BAG = "lidar.bag";
 
-extern const std::string EXPERIMENTAL_DATASETS_FULL_PATH = DATASETS_FULL_PATH + "mine/";
-extern const std::string ANECOIC_CHAMBER_DATASETS_FULL_PATH = EXPERIMENTAL_DATASETS_FULL_PATH + "IT2 Anechoic Chamber/";
-extern const std::string IT2_DARK_ROOM_DATASETS_FULL_PATH = EXPERIMENTAL_DATASETS_FULL_PATH + "IT2 Dark Room/";
-extern const std::string IT2_DARK_ROOM_SCENARIO_A_DATASETS_FULL_PATH = IT2_DARK_ROOM_DATASETS_FULL_PATH + "Scenario A/";
-extern const std::string IT2_DARK_ROOM_SCENARIO_B_DATASETS_FULL_PATH = IT2_DARK_ROOM_DATASETS_FULL_PATH + "Scenario B/";
+const std::string EXPERIMENTAL_DATASETS_FULL_PATH = DATASETS_FULL_PATH + "mine/";
+const std::string ANECOIC_CHAMBER_DATASETS_FULL_PATH = EXPERIMENTAL_DATASETS_FULL_PATH + "IT2 Anechoic Chamber/";
+const std::string IT2_DARK_ROOM_DATASETS_FULL_PATH = EXPERIMENTAL_DATASETS_FULL_PATH + "IT2 Dark Room/";
+const std::string IT2_DARK_ROOM_SCENARIO_A1_DATASETS_FULL_PATH = IT2_DARK_ROOM_DATASETS_FULL_PATH + "2019-07-06 "
+                                                                                                    "(Scenario A)/";
+const std::string IT2_DARK_ROOM_SCENARIO_A2_DATASETS_FULL_PATH = IT2_DARK_ROOM_DATASETS_FULL_PATH + "2019-07-08 "
+                                                                                                    "(Scenario A)/";
 
-extern const std::string CAMERA_CALIBRATION_BAG_NAME = "camera_calibration.bag";
-extern const std::string GROUND_TRUTH_BAG_NAME = "ground_truth.bag";
-extern const std::string INTERFERENCE_BAG_NAME = "interference.bag";
-extern const std::string RAW_BAG_NAME = "original_raw.bag";
+const std::string IT2_DARK_ROOM_SCENARIO_B1_DATASETS_FULL_PATH = IT2_DARK_ROOM_DATASETS_FULL_PATH + "2019-07-31 "
+                                                                                                    "(Scenario B)/";
+const std::string IT2_DARK_ROOM_SCENARIO_B1_CAMERA_CALIBRATION_FOLDER_FULL_PATH =
+    IT2_DARK_ROOM_SCENARIO_B1_DATASETS_FULL_PATH + "Camera Calibration/";
+const std::string IT2_DARK_ROOM_SCENARIO_B1_GROUND_TRUTH_FOLDER_FULL_PATH =
+    IT2_DARK_ROOM_SCENARIO_B1_DATASETS_FULL_PATH + "Ground Truth/";
+const std::string IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH =
+    IT2_DARK_ROOM_SCENARIO_B1_DATASETS_FULL_PATH + "Multiple LiDAR Interference/";
+
+const std::string CAMERA_CALIBRATION_BAG_NAME = "camera_intrinsic_calibration.bag";
+const std::string GROUND_TRUTH_BAG_NAME = "ground_truth.bag";
+const std::string INTERFERENCE_BAG_NAME = "interference.bag";
+const std::string RAW_BAG_NAME = "original_raw.bag";
+
+const std::string CLOSER_DISTANCE_AFFIX = "closer";
+const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
+const std::string FURTHER_DISTANCE_AFFIX = "further";
+
+const std::string BELOW_HEIGHT_AFFIX = "below";
+const std::string ALIGNED_HEIGHT_AFFIX = "aligned";
+const std::string ABOVE_HEIGHT_AFFIX = "above";
+
+const std::string AFFIX_SEPARATOR = "_";
 
 }  // namespace datasets_path
