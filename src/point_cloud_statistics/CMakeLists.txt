@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   pcl_ros
   rosbag
+  multiple_lidar_interference_mitigation_bringup
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,8 +107,9 @@ find_package(PCL)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-#  LIBRARIES point_cloud_statistics
-   CATKIN_DEPENDS roscpp rospy std_msgs
+   LIBRARIES datasets_info
+   #  LIBRARIES point_cloud_statistics
+   CATKIN_DEPENDS roscpp rospy std_msgs multiple_lidar_interference_mitigation_bringup
 #  DEPENDS system_lib
 )
 
@@ -120,6 +122,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -138,6 +141,7 @@ include_directories(
 add_executable(histogram                              src/histogram.cpp)
 add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp)
 add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp)
+add_executable(point_cloud_change_detection_node      src/point_cloud_change_detection_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -163,6 +167,12 @@ target_link_libraries(point_cloud_box_filtering_node
 target_link_libraries(point_cloud_box_filtering_runtime_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
+)
+
+target_link_libraries(point_cloud_change_detection_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   datasets_info
 )
 #############
 ## Install ##
