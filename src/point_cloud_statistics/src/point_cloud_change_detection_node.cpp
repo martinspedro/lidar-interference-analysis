@@ -1,6 +1,5 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include <thread>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -8,7 +7,6 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/pcl_plotter.h>
 #include <string>
 
@@ -19,25 +17,21 @@
 #include <iostream>
 #include <utility>
 
-#define VIEWER_NAME "Simple Cloud Visualizer"
-
 #include <pcl/octree/octree_pointcloud_changedetector.h>
-
-#include <iostream>
-#include <vector>
-#include <ctime>
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-typedef pcl::PointCloud<pcl::PointXYZI> PointCloudI;
-typedef pcl::PointXYZRGB PointRGB;
-typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
+
+inline const std::string constructFullBagPath(const std::string bag_type, std::string dataset_name)
+{
+  return datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + dataset_name + "/" + bag_type;
+}
 
 int main(int argc, char** argv)
 {
   // Initialize ROS
-  ros::init(argc, argv, "point_cloud_histogram");
+  ros::init(argc, argv, "point_cloud_change_detection_node");
 
   PointCloud::Ptr interference_cloud_ptr(new PointCloud);
   PointCloud::Ptr ground_truth_ptr(new PointCloud);
@@ -50,12 +44,8 @@ int main(int argc, char** argv)
   pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(resolution);
 
   rosbag::Bag bag;
-  std::cout << "Opening rosbag"
-            << datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
-                   datasets_path::GROUND_TRUTH_BAG_NAME
-            << std::endl;
-  bag.open(datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
-           datasets_path::GROUND_TRUTH_BAG_NAME);
+  std::cout << "Opening rosbag" << constructFullBagPath(datasets_path::GROUND_TRUTH_BAG_NAME, argv[1]) << std::endl;
+  bag.open(constructFullBagPath(datasets_path::GROUND_TRUTH_BAG_NAME, argv[1]));
 
   std::vector<std::string> topics;
   topics.push_back(std::string("/velodyne_points"));
@@ -75,12 +65,8 @@ int main(int argc, char** argv)
 
   bag.close();
 
-  std::cout << "Opening rosbag"
-            << datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
-                   datasets_path::INTERFERENCE_BAG_NAME
-            << std::endl;
-  bag.open(datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
-           datasets_path::INTERFERENCE_BAG_NAME);
+  std::cout << "Opening rosbag" << constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]) << std::endl;
+  bag.open(constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]));
 
   rosbag::View view2(bag, rosbag::TopicQuery(topics));
   long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
@@ -123,6 +109,7 @@ int main(int argc, char** argv)
       octree.deleteTree();
     }
   }
+
   bag.close();
 
   float relative_percentage_out_points = (float)(out_points_count) / point_count * 100;
