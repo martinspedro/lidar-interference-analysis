@@ -7,64 +7,24 @@
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
-#include <thread>
 #include <sensor_msgs/PointCloud2.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/common/geometry.h>
 
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/visualization/pcl_plotter.h>
 #include <string>
 
 #include <boost/foreach.hpp>
 #define foreach BOOST_FOREACH
 
 #include <visualization_msgs/Marker.h>
-
-#include <vector>
-#include <iostream>
-#include <utility>
-
-#define VIEWER_NAME "Simple Cloud Visualizer"
+#include "point_cloud_statistics/box_filter.hpp"
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-typedef pcl::PointCloud<pcl::PointXYZI> PointCloudI;
-typedef pcl::PointXYZRGB PointRGB;
-typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
 
 long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
-
-struct RoomDimensions
-{
-  float x_min_;
-  float x_max_;
-  float y_min_;
-  float y_max_;
-  float z_min_;
-  float z_max_;
-
-  RoomDimensions(float x_min, float x_max, float y_min, float y_max, float z_min, float z_max)
-    : x_min_(x_min), x_max_(x_max), y_min_(y_min), y_max_(y_max), z_min_(z_min), z_max_(z_max)
-  {
-  }
-};
-
-bool pointInsideRoom(pcl::PointXYZ point, RoomDimensions room_dimensions)
-{
-  return ((point.x > room_dimensions.x_min_) && (point.x < room_dimensions.x_max_)) &&
-         ((point.y > room_dimensions.y_min_) && (point.y < room_dimensions.y_max_)) &&
-         ((point.z > room_dimensions.z_min_) && (point.z < room_dimensions.z_max_));
-}
 
 void callback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   std::cout << "Callback" << std::endl;
-  static RoomDimensions dark_room(-2.0, 7.0, -3.0, 4.5, -1.9, 3.5);  // added 1 meter in every direction
+  static BoxFilter dark_room(-2.0, 7.0, -3.0, 4.5, -1.9, 3.5);  // added 1 meter in every direction
 
   PointCloud point_cloud;
   fromROSMsg(*msg, point_cloud);
@@ -74,7 +34,7 @@ void callback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   for (int j = 0; j < point_cloud.points.size(); j++)
   {
     point_count++;
-    if (pointInsideRoom(point_cloud.points[j], dark_room))
+    if (dark_room.pointInsideBox(point_cloud.points[j]))
     {
       ++in_points_count;
     }
@@ -85,22 +45,11 @@ void callback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   }
 }
 
-int main(int argc, char** argv)
+void initBoxMarker(visualization_msgs::Marker marker)
 {
-  // Initialize ROS
-  ros::init(argc, argv, "point_cloud_histogram");
-  ros::NodeHandle nh;
-
-  // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback);
-
-  ros::Rate r(10);
-  ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visual_marker_pub", 1);
-
   // Set our initial shape type to be a cube
   uint32_t shape = visualization_msgs::Marker::CUBE;
 
-  visualization_msgs::Marker marker;
   // Set the frame ID and timestamp.  See the TF tutorials for information on these.
   marker.header.frame_id = "velodyne";
   marker.header.stamp = ros::Time::now();
@@ -137,12 +86,25 @@ int main(int argc, char** argv)
   marker.color.a = 0.5;
 
   marker.lifetime = ros::Duration();
+}
 
-  // Publish the marker
+int main(int argc, char** argv)
+{
+  // Initialize ROS
+  ros::init(argc, argv, "point_cloud_histogram");
+  ros::NodeHandle nh;
+
+  // Create a ROS subscriber for the input point cloud
+  ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2>("velodyne_points", 1, callback);
+
+  ros::Rate r(10);
+  ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visual_marker_pub", 1);
+  visualization_msgs::Marker marker;
+  initBoxMarker(marker);
 
   while (ros::ok())
   {
-    marker_pub.publish(marker);
+    marker_pub.publish(marker);  // Publish the marker
     ros::spinOnce();
     r.sleep();
   }

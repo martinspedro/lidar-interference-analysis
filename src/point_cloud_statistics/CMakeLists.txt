@@ -120,7 +120,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
 )
@@ -139,8 +139,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(histogram                              src/histogram.cpp)
-add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp)
-add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp)
+add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp src/box_filter)
+add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp src/box_filter)
 add_executable(point_cloud_change_detection_node      src/point_cloud_change_detection_node.cpp)
 
 ## Rename C++ executable without prefix
@@ -162,6 +162,7 @@ target_link_libraries(histogram
 target_link_libraries(point_cloud_box_filtering_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
+   datasets_info
 )
 
 target_link_libraries(point_cloud_box_filtering_runtime_node
