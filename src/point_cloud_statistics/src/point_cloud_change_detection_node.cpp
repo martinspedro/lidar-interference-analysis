@@ -46,22 +46,22 @@ int main(int argc, char** argv)
   float resolution = atof(argv[2]);
   std::cout << "Octree voxel edge resolution (m): " << resolution << std::endl;
 
-  std::cout << "Opening rosbag" << datasets_path::IT2_DARK_ROOM_SCENARIO_B_DATASETS_FULL_PATH + argv[1] << std::endl;
-  rosbag::Bag bag, ground_truth;
-
-  bag.open(datasets_path::IT2_DARK_ROOM_SCENARIO_B_DATASETS_FULL_PATH + argv[1]);
-  ground_truth.open(datasets_path::IT2_DARK_ROOM_SCENARIO_B_DATASETS_FULL_PATH + "Ground "
-                                                                                 "Truth/2019-07-31-15-48-52.bag");
-
   // Instantiate octree-based point cloud change detection class
   pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(resolution);
 
+  rosbag::Bag bag;
+  std::cout << "Opening rosbag"
+            << datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
+                   datasets_path::GROUND_TRUTH_BAG_NAME
+            << std::endl;
+  bag.open(datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
+           datasets_path::GROUND_TRUTH_BAG_NAME);
+
   std::vector<std::string> topics;
   topics.push_back(std::string("/velodyne_points"));
-  rosbag::View view_interference(bag, rosbag::TopicQuery(topics));
-  rosbag::View view_groud_truth(ground_truth, rosbag::TopicQuery(topics));
+  rosbag::View view(bag, rosbag::TopicQuery(topics));
 
-  foreach (rosbag::MessageInstance const m, view_groud_truth)
+  foreach (rosbag::MessageInstance const m, view)
   {
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
     if (msg != NULL)
@@ -73,11 +73,22 @@ int main(int argc, char** argv)
     }
   }
 
+  bag.close();
+
+  std::cout << "Opening rosbag"
+            << datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
+                   datasets_path::INTERFERENCE_BAG_NAME
+            << std::endl;
+  bag.open(datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + argv[1] + "/" +
+           datasets_path::INTERFERENCE_BAG_NAME);
+
+  rosbag::View view2(bag, rosbag::TopicQuery(topics));
   long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
 
-  foreach (rosbag::MessageInstance const m, view_interference)
+  foreach (rosbag::MessageInstance const m, view2)
   {
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
+
     if (msg != NULL)
     {
       PointCloud point_cloud;
@@ -88,13 +99,11 @@ int main(int argc, char** argv)
 
       octree.setInputCloud(ground_truth_ptr);
       octree.addPointsFromInputCloud();
-
       octree.switchBuffers();
 
       // Add points from cloudB to octree
       octree.setInputCloud(interference_cloud_ptr);
       octree.addPointsFromInputCloud();
-
       std::vector<int> newPointIdxVector;
 
       // Get vector of point indices from octree voxels which did not exist in previous buffer
@@ -114,9 +123,7 @@ int main(int argc, char** argv)
       octree.deleteTree();
     }
   }
-
   bag.close();
-  ground_truth.close();
 
   float relative_percentage_out_points = (float)(out_points_count) / point_count * 100;
 
