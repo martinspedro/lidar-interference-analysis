@@ -21,6 +21,9 @@
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 
+#include <vtkColorSeries.h>
+#include <vtkChart.h>
+
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 inline const std::string constructFullBagPath(const std::string bag_type, std::string dataset_name)
@@ -33,19 +36,62 @@ int main(int argc, char** argv)
   // Initialize ROS
   ros::init(argc, argv, "point_cloud_change_detection_node");
 
+  if (!((argc == 3) || (argc == 4) || (argc == 5)))
+  {
+    ROS_ERROR(
+        "Invalid number of arguments providede\n"
+        "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
+        "<voxel edge resolution>\n"  // 3 arguments
+        "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
+        "<voxel edge intervarl minimum resolution> <voxel edge intervarl maximum resolution>\n"  // 4 arguments
+        "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
+        "<voxel edge intervarl minimum resolution> <voxel edge intervarl maximum resolution> <step value>\n"  // 5 args
+    );
+
+    return EXIT_FAILURE;
+  }
+
+  float min_resolution = atof(argv[2]), step_value, max_resolution;
+
+  switch (argc)
+  {
+    case 3:
+      ROS_ASSERT_MSG(min_resolution > 0, "Resolution value must be positive!");
+      max_resolution = min_resolution;
+      step_value = 1;  // workaround to exit the for cycle for the interval
+      break;
+    case 4:
+      ROS_ASSERT_MSG(min_resolution > 0, "Interval inferior bound must be positive!");
+      max_resolution = atof(argv[3]);
+      step_value =
+          (max_resolution - min_resolution) / 10;  // make step value a order of magnitude below the interval range
+      break;
+    case 5:
+      max_resolution = atof(argv[3]);
+      step_value = atof(argv[4]);
+      ROS_ASSERT_MSG(step_value > 0, "Step value cannot be negative!");
+      break;
+  }
+
+  ROS_ASSERT_MSG(min_resolution <= max_resolution,
+                 "Interval [%f, %f] is invalid! Inferior bound must be lower than upper bound", min_resolution,
+                 max_resolution);
+
+  std::string ground_truth_full_bag_path = constructFullBagPath(datasets_path::GROUND_TRUTH_BAG_NAME, argv[1]);
+  std::string interference_full_bag_path = constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]);
+
+  std::cout << "TEST CONDITIONS:" << std::endl
+            << "Voxel edge resolution interval: [" << min_resolution << ", " << max_resolution << "]" << std::endl
+            << "With a step of: " << step_value << std::endl
+            << "Test folder name is: " << argv[1] << std::endl
+            << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl
+            << "Interference Full path: " << interference_full_bag_path << std::endl;
+
   PointCloud::Ptr interference_cloud_ptr(new PointCloud);
   PointCloud::Ptr ground_truth_ptr(new PointCloud);
 
-  // define the edge
-  float resolution = atof(argv[2]);
-  std::cout << "Octree voxel edge resolution (m): " << resolution << std::endl;
-
-  // Instantiate octree-based point cloud change detection class
-  pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(resolution);
-
   rosbag::Bag bag;
-  std::cout << "Opening rosbag" << constructFullBagPath(datasets_path::GROUND_TRUTH_BAG_NAME, argv[1]) << std::endl;
-  bag.open(constructFullBagPath(datasets_path::GROUND_TRUTH_BAG_NAME, argv[1]));
+  bag.open(ground_truth_full_bag_path);  // open ground truth bag file
 
   std::vector<std::string> topics;
   topics.push_back(std::string("/velodyne_points"));
@@ -63,61 +109,88 @@ int main(int argc, char** argv)
     }
   }
 
-  bag.close();
+  bag.close();  // close ground truth bag file
 
-  std::cout << "Opening rosbag" << constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]) << std::endl;
-  bag.open(constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]));
+  std::vector<double> freqdata, resolution_values;
 
-  rosbag::View view2(bag, rosbag::TopicQuery(topics));
-  long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
-
-  foreach (rosbag::MessageInstance const m, view2)
+  // \TODO Implement Multithreading here. Could speed up computation speeds but requires multiple copies of the octree
+  // stucture
+  for (float i = min_resolution; i <= max_resolution; i += step_value)
   {
-    sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
+    resolution_values.push_back(i);
+    long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
 
-    if (msg != NULL)
+    // Instantiate octree-based point cloud change detection class
+    pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(i);
+
+    bag.open(interference_full_bag_path);  // Open interference bag
+
+    rosbag::View view2(bag, rosbag::TopicQuery(topics));
+
+    foreach (rosbag::MessageInstance const m, view2)
     {
-      PointCloud point_cloud;
-      fromROSMsg(*msg, point_cloud);
-      *interference_cloud_ptr = point_cloud;
+      sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
+      if (msg != NULL)
+      {
+        PointCloud point_cloud;
+        fromROSMsg(*msg, point_cloud);
+        *interference_cloud_ptr = point_cloud;
 
-      ++msg_count;
+        ++msg_count;
 
-      octree.setInputCloud(ground_truth_ptr);
-      octree.addPointsFromInputCloud();
-      octree.switchBuffers();
+        octree.setInputCloud(ground_truth_ptr);
+        octree.addPointsFromInputCloud();
+        octree.switchBuffers();
 
-      // Add points from cloudB to octree
-      octree.setInputCloud(interference_cloud_ptr);
-      octree.addPointsFromInputCloud();
-      std::vector<int> newPointIdxVector;
+        // Add points from cloudB to octree
+        octree.setInputCloud(interference_cloud_ptr);
+        octree.addPointsFromInputCloud();
+        std::vector<int> newPointIdxVector;
 
-      // Get vector of point indices from octree voxels which did not exist in previous buffer
-      octree.getPointIndicesFromNewVoxels(newPointIdxVector);
+        // Get vector of point indices from octree voxels which did not exist in previous buffer
+        octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
-      // Output points
-      /*
-      std::cout << "Output from getPointIndicesFromNewVoxels:" << std::endl;
-      for (size_t i = 0; i < newPointIdxVector.size(); ++i)
-        std::cout << i << "# Index:" << newPointIdxVector[i] << "  Point:" << point_cloud.points[newPointIdxVector[i]].x
-                  << " " << point_cloud.points[newPointIdxVector[i]].y << " "
-                  << point_cloud.points[newPointIdxVector[i]].z << std::endl;
-      */
-      point_count += point_cloud.size();
+        point_count += point_cloud.size();
+        out_points_count += newPointIdxVector.size();
 
-      out_points_count += newPointIdxVector.size();
-      octree.deleteTree();
+        octree.deleteTree();
+      }
     }
+
+    bag.close();  // close interference bag
+
+    float relative_percentage_out_points = (float)(out_points_count) / point_count * 100;
+
+    std::cout << "\nVoxel edge resolution: " << i << std::endl
+              << "Number of received Point Cloud Messages: " << msg_count << std::endl
+              << "Number of received Point Cloud 3D Points: " << point_count << std::endl
+              << "From which " << out_points_count << "(" << relative_percentage_out_points << "%) are interfered"
+              << std::endl;
+
+    freqdata.push_back((double)(out_points_count) / point_count);
   }
 
-  bag.close();
+  std::cout << std::endl;
+  for (int i = 0; i < freqdata.size(); ++i)
+  {
+    std::cout << resolution_values[i] << ", " << freqdata[i] << std::endl;
+  }
 
-  float relative_percentage_out_points = (float)(out_points_count) / point_count * 100;
+  pcl::visualization::PCLPlotter* plotter = new pcl::visualization::PCLPlotter("My Plotter");
 
-  std::cout << "Number of received Point Cloud Messages: " << msg_count << std::endl
-            << "Number of received Point Cloud 3D Points: " << point_count << std::endl
-            << "From which " << out_points_count << "(" << relative_percentage_out_points << "%) are interfered"
-            << std::endl;
+  plotter->setWindowSize(900, 600);
+  plotter->setYTitle("Y axis");
+  plotter->setXTitle("X axis");
+  plotter->setTitle("My plot");
+  plotter->setShowLegend(true);  // show legends
+  plotter->setColorScheme(vtkColorSeries::WARM);
+
+  // plotter->addHistogramData(freqdata, (int)((max_resolution - min_resolution) / step_value) + 1,
+  //                            "Interference points relative to the number of registered points");
+  plotter->addPlotData(resolution_values, freqdata, "Interference points relative to the number of registered points",
+                       vtkChart::BAR);
+  plotter->plot();
+  plotter->spinOnce(2000);
 
   return EXIT_SUCCESS;
 }
