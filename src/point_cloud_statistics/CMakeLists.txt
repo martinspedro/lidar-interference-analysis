@@ -143,7 +143,12 @@ include_directories(
 add_executable(histogram                              src/histogram.cpp)
 add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp src/box_filter)
 add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp src/box_filter)
-add_executable(point_cloud_change_detection_node      src/point_cloud_change_detection_node.cpp src/bar_chart_plotter.cpp)
+
+add_executable(point_cloud_change_detection_node
+      src/point_cloud_change_detection_node.cpp
+      src/bar_chart_plotter.cpp
+      src/cloud_statistical_data.cpp
+      src/point_cloud_statistics.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

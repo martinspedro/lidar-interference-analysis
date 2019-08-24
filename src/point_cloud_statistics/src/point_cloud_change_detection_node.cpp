@@ -19,20 +19,14 @@
 
 #include <vtkColorSeries.h>
 #include "point_cloud_statistics/bar_chart_plotter.hpp"
-
-#include <pcl/octree/octree_pointcloud_changedetector.h>
+#include "point_cloud_statistics/cloud_statistical_data.hpp"
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
-/*
-#include <vtkColorSeries.h>
-#include <vtkChart.h>
+#include "point_cloud_statistics/point_cloud_statistics.hpp"
 
-#include <vtkSmartPointer.h>
-#include <vtkRenderWindow.h>
+///
+#include <pcl/octree/octree_pointcloud_changedetector.h>
 
-#include <vtkWindowToImageFilter.h>
-#include <vtkPNGWriter.h>
-*/
 #include <velodyne_pointcloud/point_types.h>
 
 #include <pcl/point_representation.h>
@@ -227,39 +221,6 @@ void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt,
   final_transform = targetToSource;
 }
 
-inline const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name)
-{
-  return datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + dataset_name + "/" + file_name;
-}
-
-struct StatisticalData
-{
-  long int point_cloud_msg_count;
-  long int point_count;
-  long int outliers_points_count;
-  long int inliers_points_count;
-
-  double relative_percentage_out_points;
-
-  StatisticalData()
-  {
-    point_cloud_msg_count = 0;
-    point_count = 0;
-    outliers_points_count = 0;
-    inliers_points_count = 0;
-
-    relative_percentage_out_points = 0.0;
-  }
-
-  void printStatistics()
-  {
-    std::cout << "Number of received Point Cloud Messages: " << point_cloud_msg_count << std::endl
-              << "Number of received Point Cloud 3D Points: " << point_count << std::endl
-              << "From which " << outliers_points_count << " (" << relative_percentage_out_points << "%) are interfered"
-              << std::endl;
-  }
-};
-
 int main(int argc, char** argv)
 {
   // Initialize ROS
@@ -306,8 +267,10 @@ int main(int argc, char** argv)
                  "Interval [%f, %f] is invalid! Inferior bound must be lower than upper bound", min_resolution,
                  max_resolution);
 
-  std::string ground_truth_full_bag_path = constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
-  std::string interference_full_bag_path = constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
+  std::string ground_truth_full_bag_path =
+      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
+  std::string interference_full_bag_path =
+      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
 
   std::cout << "TEST CONDITIONS:" << std::endl
             << "Voxel edge resolution interval: [" << min_resolution << ", " << max_resolution << "]" << std::endl
@@ -428,7 +391,7 @@ int main(int argc, char** argv)
   }
   // save aligned pair, transformed into the first cloud's frame
   std::stringstream ss;
-  ss << constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
+  ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
   pcl::io::savePCDFile(ss.str(), *result, true);
 
   //}
@@ -450,7 +413,7 @@ int main(int argc, char** argv)
   sor_out.filter(*ground_truth_ptr);
 
   std::stringstream ss1;
-  ss1 << constructFullPathToDataset(argv[1], "filtered_ground_truth_model.pcd");
+  ss1 << point_cloud_statistics::constructFullPathToDataset(argv[1], "filtered_ground_truth_model.pcd");
   pcl::io::savePCDFile(ss1.str(), *ground_truth_ptr, true);
 
   // Create the filtering object
@@ -460,7 +423,7 @@ int main(int argc, char** argv)
   sor_voxel.filter(*ground_truth_ptr);
 
   std::stringstream ss2;
-  ss2 << constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
+  ss2 << point_cloud_statistics::constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
   pcl::io::savePCDFile(ss2.str(), *ground_truth_ptr, true);
 
   // ground_truth_ptr = result;
@@ -477,8 +440,10 @@ int main(int argc, char** argv)
   {
     resolution_values.push_back(i);
 
-    StatisticalData ground_truth_bag_stats = StatisticalData();
-    StatisticalData interference_bag_stats = StatisticalData();
+    point_cloud_statistics::CloudStatisticalData ground_truth_bag_stats =
+        point_cloud_statistics::CloudStatisticalData();
+    point_cloud_statistics::CloudStatisticalData interference_bag_stats =
+        point_cloud_statistics::CloudStatisticalData();
 
     // Instantiate octree-based point cloud change detection class
     pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(i);
@@ -546,10 +511,8 @@ int main(int argc, char** argv)
     }
 
     // Compute Relative percentage of outliers
-    ground_truth_bag_stats.relative_percentage_out_points =
-        (double)(ground_truth_bag_stats.outliers_points_count) / ground_truth_bag_stats.point_count * 100;
-    interference_bag_stats.relative_percentage_out_points =
-        (double)(interference_bag_stats.outliers_points_count) / interference_bag_stats.point_count * 100;
+    ground_truth_bag_stats.computeOutliersRelativeValue();
+    interference_bag_stats.computeOutliersRelativeValue();
 
     // Print statistical results
     std::cout << "\nVoxel edge resolution: " << i << std::endl << "Ground Truth: " << std::endl;
@@ -558,10 +521,8 @@ int main(int argc, char** argv)
     interference_bag_stats.printStatistics();
 
     // Generate Data for bar chart
-    ground_truth_errors.push_back((double)(ground_truth_bag_stats.outliers_points_count) /
-                                  ground_truth_bag_stats.point_count);
-    interference_errors.push_back((double)(interference_bag_stats.outliers_points_count) /
-                                  interference_bag_stats.point_count);
+    ground_truth_errors.push_back(ground_truth_bag_stats.getOutliersPercentage());
+    interference_errors.push_back(interference_bag_stats.getOutliersPercentage());
   }
 
   ground_truth_bag.close();  // close ground truth bag file
@@ -587,7 +548,8 @@ int main(int argc, char** argv)
   plotter->plot();  // holds here until window is given the closing instruction
 
   // Saves the bar chart as a PNG file on the dataset directory
-  const char* bar_chart_filename = constructFullPathToDataset(argv[1], std::string(argv[1]) + ".png").c_str();
+  const char* bar_chart_filename =
+      point_cloud_statistics::constructFullPathToDataset(argv[1], std::string(argv[1]) + ".png").c_str();
   plotter->saveBarChartPNG(bar_chart_filename);
   std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
