@@ -7,7 +7,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/visualization/pcl_plotter.h>
+
 #include <string>
 
 #include <boost/foreach.hpp>
@@ -17,10 +17,13 @@
 #include <iostream>
 #include <utility>
 
+#include <vtkColorSeries.h>
+#include "point_cloud_statistics/bar_chart_plotter.hpp"
+
 #include <pcl/octree/octree_pointcloud_changedetector.h>
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
-
+/*
 #include <vtkColorSeries.h>
 #include <vtkChart.h>
 
@@ -29,10 +32,9 @@
 
 #include <vtkWindowToImageFilter.h>
 #include <vtkPNGWriter.h>
-
+*/
 #include <velodyne_pointcloud/point_types.h>
 
-#include <boost/make_shared.hpp>
 #include <pcl/point_representation.h>
 
 #include <pcl/io/pcd_io.h>
@@ -46,9 +48,13 @@
 
 #include <pcl/visualization/pcl_visualizer.h>
 
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+
 //#include "lz4.h"
 //#include "lz4hc.h"
 #include <pcl/features/normal_3d.h>
+
 typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
 using pcl::visualization::PointCloudColorHandlerCustom;
@@ -109,7 +115,7 @@ void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt,
   pcl::VoxelGrid<PointT> grid;
   if (downsample)
   {
-    grid.setLeafSize(0.05, 0.05, 0.05);
+    grid.setLeafSize(0.01, 0.01, 0.01);
     grid.setInputCloud(cloud_src);
     grid.filter(*src);
 
@@ -338,11 +344,20 @@ int main(int argc, char** argv)
       // VelodynePointCloud ground_truth_point_cloud;
       PointCloud ground_truth_point_cloud;
       fromROSMsg(*msg, ground_truth_point_cloud);
-      //*ground_truth_ptr = ground_truth_point_cloud;
+      //*result = ground_truth_point_cloud;
 
       std::cout << "(" << msg->width << ", " << msg->height << ")" << std::endl;
       sum += msg->width;
       sum_squared += msg->width * msg->width;
+
+      PointCloud::Ptr filtered_point_cloud(new PointCloud);
+      *filtered_point_cloud = ground_truth_point_cloud;
+      pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor_out;
+      sor_out.setInputCloud(filtered_point_cloud);
+      sor_out.setMeanK(50);
+      sor_out.setStddevMulThresh(1);
+      sor_out.filter(*filtered_point_cloud);
+      // break;
       /*
       for (int i = 0; i < msg->fields.size(); ++i)
       {
@@ -354,7 +369,7 @@ int main(int argc, char** argv)
 
       std::cout << pcl::getFieldsList(ground_truth_point_cloud) << std::endl << std::endl;
       */
-      *target = ground_truth_point_cloud;
+      *target = *filtered_point_cloud;
       // Tutorial starts here
       if (count > 0)
       {
@@ -369,7 +384,7 @@ int main(int argc, char** argv)
         PointCloud::Ptr temp(new PointCloud);
         // PCL_INFO("Aligning %s (%d) with %s (%d).\n", data[i - 1].f_name.c_str(), source->points.size(),
         //         data[i].f_name.c_str(), target->points.size());
-        pairAlign(source, target, temp, pairTransform, false);
+        pairAlign(source, target, temp, pairTransform, true);
 
         // transform current pair into the global transform
         pcl::transformPointCloud(*temp, *result, GlobalTransform);
@@ -381,7 +396,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        *source = ground_truth_point_cloud;
+        *source = *filtered_point_cloud;
       }
       /*
       std::vector<int> field_sizes;
@@ -405,7 +420,7 @@ int main(int argc, char** argv)
       */
       ++count;
       std::cout << "Message number: " << count << std::endl;
-      if (count > 10)
+      if (count > 3)
       {
         break;
       }
@@ -425,7 +440,30 @@ int main(int argc, char** argv)
   std::cout << "Number of clouds: " << count << std::endl;
   std::cout << result->size() << std::endl;
   // return 0;
-  ground_truth_ptr = result;
+
+  // VOXEL GRID FILTER
+  // Create the filtering object
+  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor_out;
+  sor_out.setInputCloud(result);
+  sor_out.setMeanK(50);
+  sor_out.setStddevMulThresh(1);
+  sor_out.filter(*ground_truth_ptr);
+
+  std::stringstream ss1;
+  ss1 << constructFullPathToDataset(argv[1], "filtered_ground_truth_model.pcd");
+  pcl::io::savePCDFile(ss1.str(), *ground_truth_ptr, true);
+
+  // Create the filtering object
+  pcl::VoxelGrid<pcl::PointXYZ> sor_voxel;
+  sor_voxel.setInputCloud(ground_truth_ptr);
+  sor_voxel.setLeafSize(0.01f, 0.01f, 0.01f);
+  sor_voxel.filter(*ground_truth_ptr);
+
+  std::stringstream ss2;
+  ss2 << constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
+  pcl::io::savePCDFile(ss2.str(), *ground_truth_ptr, true);
+
+  // ground_truth_ptr = result;
 
   std::vector<double> ground_truth_errors, interference_errors, resolution_values;
 
@@ -535,40 +573,25 @@ int main(int argc, char** argv)
     std::cout << resolution_values[i] << ", " << ground_truth_errors[i] << ", " << interference_errors[i] << std::endl;
   }
 
-  pcl::visualization::PCLPlotter* plotter = new pcl::visualization::PCLPlotter();
+  // Create Bar Plot object with Full HD resolution and the description for the data
+  BarChartPlotter* plotter =
+      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                          "Voxel edge Resolution", "Outliers/Inliers");
 
-  plotter->setWindowSize(1920, 1080);
-  plotter->setTitle("Interference Analysis based on Change Detection using an octree structure");
-  plotter->setXTitle("Voxel edge Resolution");
-  plotter->setYTitle("Outliers/Inliers");
-
-  plotter->setShowLegend(true);  // show legends
-
+  // Add the outliers of the interfered and ground truth datasets
   plotter->setColorScheme(vtkColorSeries::WARM);
-  plotter->addPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model", vtkChart::BAR);
-
-  plotter->setColorScheme(vtkColorSeries::COOL);
-  plotter->addPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model", vtkChart::BAR);
+  plotter->addBarPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model");
+  plotter->setColorScheme(vtkColorSeries::BLUES);
+  plotter->addBarPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model");
 
   plotter->plot();  // holds here until window is given the closing instruction
 
-  vtkSmartPointer<vtkRenderWindow> plotter_render_window_ptr = plotter->getRenderWindow();
+  // Saves the bar chart as a PNG file on the dataset directory
+  const char* bar_chart_filename = constructFullPathToDataset(argv[1], std::string(argv[1]) + ".png").c_str();
+  plotter->saveBarChartPNG(bar_chart_filename);
+  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
-  vtkSmartPointer<vtkWindowToImageFilter> window_to_image_filter = vtkSmartPointer<vtkWindowToImageFilter>::New();
-  window_to_image_filter->SetInput(plotter_render_window_ptr);
-  window_to_image_filter->SetInputBufferTypeToRGBA();  // also record the alpha (transparency) channel
-  window_to_image_filter->ReadFrontBufferOff();        // read from the back buffer
-  window_to_image_filter->Update();
-
-  vtkSmartPointer<vtkPNGWriter> writer = vtkSmartPointer<vtkPNGWriter>::New();
-  writer->SetFileName(constructFullPathToDataset(argv[1], std::string(argv[1]) + ".png").c_str());
-  writer->SetInputConnection(window_to_image_filter->GetOutputPort());
-  writer->Write();
-
-  std::cout << "Saved bar chart on: " << constructFullPathToDataset(argv[1], std::string(argv[1]) + ".png")
-            << std::endl;
-
-  plotter->close();
+  plotter->close();  // Destroys bar chart object
 
   return EXIT_SUCCESS;
 }
