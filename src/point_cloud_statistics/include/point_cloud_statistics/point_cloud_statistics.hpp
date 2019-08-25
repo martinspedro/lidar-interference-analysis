@@ -20,6 +20,9 @@ const std::string constructFullPathToDataset(const std::string dataset_name, con
 
 void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt, PointCloud::Ptr output,
                Eigen::Matrix4f& final_transform, bool downsample);
+
+pcl::PointCloud<pcl::PointXYZ> icp(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+                                   pcl::PointCloud<pcl::PointXYZ>::Ptr target);
 }  // namespace point_cloud_statistics
 
 #endif  // POINT_CLOUD_STATISTICS_H

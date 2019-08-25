@@ -92,7 +92,7 @@ void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt,
   pcl::VoxelGrid<PointT> grid;
   if (downsample)
   {
-    grid.setLeafSize(0.01, 0.01, 0.01);
+    grid.setLeafSize(0.005, 0.005, 0.005);
     grid.setInputCloud(cloud_src);
     grid.filter(*src);
 
@@ -135,7 +135,7 @@ void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt,
   reg.setTransformationEpsilon(1e-8);
   // Set the maximum distance between two correspondences (src<->tgt) to 10cm
   // Note: adjust this based on the size of your datasets
-  reg.setMaxCorrespondenceDistance(0.01);
+  reg.setMaxCorrespondenceDistance(0.02);
   // Set the point representation
   reg.setPointRepresentation(boost::make_shared<const MyPointRepresentation>(point_representation));
 
@@ -204,4 +204,41 @@ void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt,
   final_transform = targetToSource;
 }
 
+pcl::PointCloud<pcl::PointXYZ> icp(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+                                   pcl::PointCloud<pcl::PointXYZ>::Ptr target)
+{
+  bool downsample = true;
+  pcl::VoxelGrid<PointT> grid;
+  if (downsample)
+  {
+    grid.setLeafSize(0.05, 0.005, 0.005);
+    grid.setInputCloud(source);
+    grid.filter(*source);
+
+    grid.setInputCloud(target);
+    grid.filter(*target);
+  }
+
+  pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+  icp.setInputSource(source);
+  icp.setInputTarget(target);
+
+  // Set the max correspondence distance to 5cm (e.g., correspondences with higher distances will be ignored)
+  icp.setMaxCorrespondenceDistance(0.02);
+  // Set the maximum number of iterations (criterion 1)
+  icp.setMaximumIterations(50);
+  // Set the transformation epsilon (criterion 2)
+  icp.setTransformationEpsilon(1e-8);
+  // Set the euclidean distance difference epsilon (criterion 3)
+  icp.setEuclideanFitnessEpsilon(1);
+
+  pcl::PointCloud<pcl::PointXYZ> Final;
+  icp.align(Final);
+  std::cout << "has converged:" << icp.hasConverged() << " score: " << icp.getFitnessScore() << std::endl;
+  std::cout << icp.getFinalTransformation() << std::endl;
+
+  // pcl::transformPointCloud(*cloud_tgt, *output, targetToSource);
+
+  return *source + Final;
+}
 }  // namespace point_cloud_statistics
