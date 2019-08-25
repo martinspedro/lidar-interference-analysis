@@ -33,7 +33,7 @@ BarChartPlotter::BarChartPlotter(unsigned int width, unsigned int height, const 
   this->setYTitle(y_axis_title);
 }
 
-void BarChartPlotter::saveBarChartPNG(const char* filename_full_path)
+void BarChartPlotter::saveBarChartPNG(std::string filename_full_path)
 {
   vtkSmartPointer<vtkRenderWindow> plotter_render_window_ptr = this->getRenderWindow();
 
@@ -44,7 +44,7 @@ void BarChartPlotter::saveBarChartPNG(const char* filename_full_path)
   window_to_image_filter->Update();
 
   vtkSmartPointer<vtkPNGWriter> writer = vtkSmartPointer<vtkPNGWriter>::New();
-  writer->SetFileName(filename_full_path);
+  writer->SetFileName(filename_full_path.c_str());
   writer->SetInputConnection(window_to_image_filter->GetOutputPort());
   writer->Write();
 }
