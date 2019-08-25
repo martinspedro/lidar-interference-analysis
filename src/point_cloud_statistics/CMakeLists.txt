@@ -150,6 +150,10 @@ add_executable(point_cloud_change_detection_node
       src/cloud_statistical_data.cpp
       src/point_cloud_statistics.cpp)
 
+add_executable(ground_truth_model_estimation_node
+      src/ground_truth_model_estimation_node.cpp
+      src/point_cloud_statistics.cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -178,6 +182,12 @@ target_link_libraries(point_cloud_box_filtering_runtime_node
 )
 
 target_link_libraries(point_cloud_change_detection_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   datasets_info
+)
+
+target_link_libraries(ground_truth_model_estimation_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    datasets_info
