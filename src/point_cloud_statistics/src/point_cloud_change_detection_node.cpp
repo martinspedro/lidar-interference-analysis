@@ -1,5 +1,14 @@
+/**
+ * \file   point_cloud_change_detection_node.cpp
+ * \brief
+ *
+ */
+
+// ROS Bag related includes
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
+#include <boost/foreach.hpp>
+#define foreach BOOST_FOREACH
 
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
@@ -14,28 +23,12 @@
 
 #include <pcl/io/pcd_io.h>
 
-#include <pcl/registration/icp.h>
-#include <pcl/registration/icp_nl.h>
-#include <pcl/registration/transforms.h>
-
-#include <pcl/visualization/pcl_visualizer.h>
-
-#include <pcl/filters/filter.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/statistical_outlier_removal.h>
-
-#include <pcl/features/normal_3d.h>
-
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 
 #include <string>
 #include <vector>
 #include <iostream>
-#include <utility>
-
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
 
 // Bar Graph related includes
 #include <vtkColorSeries.h>
@@ -45,6 +38,9 @@
 // Datasets related includes
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 #include "point_cloud_statistics/point_cloud_statistics.hpp"
+
+// writing to CSV file
+#include <fstream>
 
 typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
@@ -60,9 +56,9 @@ int main(int argc, char** argv)
         "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
         "<voxel edge resolution>\n"  // 3 arguments
         "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
-        "<voxel edge intervarl minimum resolution> <voxel edge intervarl maximum resolution>\n"  // 4 arguments
+        "<voxel edge intervarl minimum resolution> <voxel edge interval maximum resolution>\n"  // 4 arguments
         "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
-        "<voxel edge intervarl minimum resolution> <voxel edge intervarl maximum resolution> <step value>\n"  // 5 args
+        "<voxel edge intervarl minimum resolution> <voxel edge interval maximum resolution> <step value>\n"  // 5 args
     );
 
     return EXIT_FAILURE;
@@ -117,105 +113,8 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
-  std::cout << "Ground Truth" << std::endl;
-  int count = 0;
-
-  // generate ground truth model for test scenario
-
-  // Tutorial
-  PointCloud::Ptr result(new PointCloud), source(new PointCloud), target(new PointCloud);
-  Eigen::Matrix4f GlobalTransform = Eigen::Matrix4f::Identity(), pairTransform;
-
-  foreach (rosbag::MessageInstance const m, ground_truth_view)
-  {
-    sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
-    if (msg != NULL)
-    {
-      // VelodynePointCloud ground_truth_point_cloud;
-      PointCloud ground_truth_point_cloud;
-      fromROSMsg(*msg, ground_truth_point_cloud);
-      //*result = ground_truth_point_cloud;
-
-      // std::cout << "(" << msg->width << ", " << msg->height << ")" << std::endl;
-
-      PointCloud::Ptr filtered_point_cloud(new PointCloud);
-      *filtered_point_cloud = ground_truth_point_cloud;
-      /*
-      pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor_out;
-      sor_out.setInputCloud(filtered_point_cloud);
-      sor_out.setMeanK(50);
-      sor_out.setStddevMulThresh(1);
-      sor_out.filter(*filtered_point_cloud);
-      */
-
-      *target = ground_truth_point_cloud;
-      if (count > 0)
-      {
-        // Add visualization data
-        // showCloudsLeft(source, target);
-
-        PointCloud::Ptr temp(new PointCloud);
-        point_cloud_statistics::pairAlign(source, target, temp, pairTransform, true);
-
-        // transform current pair into the global transform
-        pcl::transformPointCloud(*temp, *result, pairTransform);
-
-        // update the global transform
-        GlobalTransform *= pairTransform;
-
-        *source = *result;
-      }
-      else
-      {
-        *source = *filtered_point_cloud;
-      }
-
-      std::cout << "Message number: " << count << std::endl;
-      if (++count > 10)
-      {
-        break;
-      }
-    }
-  }
-  // save aligned pair, transformed into the first cloud's frame
-  std::stringstream ss;
-  ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
-  pcl::io::savePCDFile(ss.str(), *result, true);
-
-  /*
-    float average = (double)sum / count;
-    float variance = ((double)sum_squared - sum * sum) / count;
-    std::cout << "Sum: " << sum << std::endl;
-    std::cout << "Average: " << average << std::endl;
-    std::cout << "Variance: " << variance << std::endl;
-    std::cout << "Number of clouds: " << count << std::endl;
-    std::cout << result->size() << std::endl;
-  */
-
-  // VOXEL GRID FILTER
-  // Create the filtering object
-  /*
-  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor_out;
-  sor_out.setInputCloud(result);
-  sor_out.setMeanK(50);
-  sor_out.setStddevMulThresh(1);
-  sor_out.filter(*ground_truth_ptr);
-
-  std::stringstream ss1;
-  ss1 << point_cloud_statistics::constructFullPathToDataset(argv[1], "filtered_ground_truth_model.pcd");
-  pcl::io::savePCDFile(ss1.str(), *ground_truth_ptr, true);
-  */
-  // Create the filtering object
-  pcl::VoxelGrid<pcl::PointXYZ> sor_voxel;
-  sor_voxel.setInputCloud(result);
-  sor_voxel.setLeafSize(0.04f, 0.04f, 0.04f);
-  sor_voxel.filter(*ground_truth_ptr);
-
-  std::stringstream ss2;
-  ss2 << point_cloud_statistics::constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
-  pcl::io::savePCDFile(ss2.str(), *ground_truth_ptr, true);
-
-  // ground_truth_ptr = result;
+  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
+  pcl::io::loadPCDFile<pcl::PointXYZ>(ground_truth_pcd, *ground_truth_ptr);
 
   std::vector<double> ground_truth_errors, interference_errors, resolution_values;
 
@@ -318,10 +217,17 @@ int main(int argc, char** argv)
   interference_bag.close();  // close interference bag
 
   std::cout << std::endl;
-  for (int i = 0; i < ground_truth_errors.size(); ++i)
+
+  std::fstream fout;  // file pointer
+  std::string interference_csv_stats = point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_"
+                                                                                                   "results.csv");
+  fout.open(interference_csv_stats, std::ios::out);  // creates a new csv file with writing permission
+  for (int i = 0; i < resolution_values.size(); i++)
   {
+    fout << resolution_values[i] << ", " << ground_truth_errors[i] << ", " << interference_errors[i] << "\n";
     std::cout << resolution_values[i] << ", " << ground_truth_errors[i] << ", " << interference_errors[i] << std::endl;
   }
+  fout.close();
 
   // Create Bar Plot object with Full HD resolution and the description for the data
   BarChartPlotter* plotter =
@@ -338,7 +244,7 @@ int main(int argc, char** argv)
 
   // Saves the bar chart as a PNG file on the dataset directory
   std::string bar_chart_filename =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], std::string(argv[1]) + ".png").c_str();
+      point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
   plotter->saveBarChartPNG(bar_chart_filename);
   std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
