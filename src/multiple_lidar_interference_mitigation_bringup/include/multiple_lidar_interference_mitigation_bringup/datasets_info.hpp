@@ -11,6 +11,8 @@
 
 namespace datasets_path
 {
+const std::string getTestScenarioDatasetFullPath(const std::string test_name);
+
 extern const std::string DATASETS_FULL_PATH;
 
 // Bosch related datasets
@@ -63,8 +65,30 @@ extern const std::string IT2_DARK_ROOM_SCENARIO_B1_CAMERA_CALIBRATION_FOLDER_FUL
 extern const std::string IT2_DARK_ROOM_SCENARIO_B1_GROUND_TRUTH_FOLDER_FULL_PATH;
 extern const std::string IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH;
 
+extern const std::string CAMBADA_DATASETS_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_DATASETS_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_B_DATASETS_FULL_PATH;
+
+extern const std::string CAMBADA_SCENARIO_A_CAMERA_CALIBRATION_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_GROUND_TRUTH_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_INTERFERENCE_FOLDER_FULL_PATH;
+
+extern const std::string CAMBADA_SCENARIO_A_DISTANCE_INTERFERENCE_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_HEIGHT_INTERFERENCE_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_HUMAN_INTERFERENCE_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_LIDARS_LOS_OBSTACLE_INTERFERENCE_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_A_ROTATION_FREQUENCY_INTERFERENCE_FOLDER_FULL_PATH;
+
+extern const std::string CAMBADA_SCENARIO_B_CAMERA_CALIBRATION_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_B_GROUND_TRUTH_FOLDER_FULL_PATH;
+extern const std::string CAMBADA_SCENARIO_B_INTERFERENCE_FOLDER_FULL_PATH;
+
+extern const std::string CAMBADA_SCENARIO_B_DIRECTION_INTERFERENCE_FOLDER_FULL_PATH;
+
 extern const std::string CAMERA_CALIBRATION_BAG_NAME;
 extern const std::string GROUND_TRUTH_BAG_NAME;
+extern const std::string GROUND_TRUTH_BEGINNING_BAG_NAME;
+extern const std::string GROUND_TRUTH_FINAL_BAG_NAME;
 extern const std::string INTERFERENCE_BAG_NAME;
 extern const std::string RAW_BAG_NAME;
 
