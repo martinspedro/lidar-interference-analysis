@@ -1,0 +1,7 @@
+<launch>
+
+<include  file="$(find velodyne_pointcloud)/launch/VLP16_points.launch" />
+<include file="$(find rigid_transform_computation)/launch/camera_intrinsic_calibration.launch" />
+
+
+</launch>
