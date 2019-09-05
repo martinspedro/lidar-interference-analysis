@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directory List of all the available subfolders
-directories=(
+test_scenarios=(
 CCW_20_deg_further_above
 closer_above
 closer_aligned
@@ -12,18 +12,51 @@ further_below
 halfway_above
 halfway_aligned
 halfway_below
+distance_1m
+distance_2m
+distance_3m
+distance_4m
+distance_5m
+distance_6m
+distance_7m
+distance_8m
+distance_9m
+distance_10m
+distance_11m
+distance_12m
+height_0.6m
+height_0.7m
+height_0.8m
+height_0.9m
+height_1.0m
+height_1.1m
+height_1.2m
+human_3m
+human_4m
+human_5m
+human_6m
+human_direct
+LOS_2m
+LOS_4m
+LOS_6m
+LOS_8m
+LOS_10m
+LOS_12m
+direction_0
+direction_30
+direction_60
+direction_90
+direction_120
+irection_150
+direction_180
+direction_210
+direction_240
+direction_270
+direction_300
+direction_330
 )
 
 
-# Datasets base path
-base_path="/media/martinspedro/Elements/mine/IT2 Dark Room/2019-07-31 (Scenario B)/Multiple LiDAR Interference"
-
-for i in ${directories[@]}; do
-  # A valid dataset must contain an interference.bag and a ground_truth.bag
-  if [ -f "$base_path/$i/interference.bag" ] && [ -f "$base_path/$i/ground_truth.bag" ]
-  then
+for i in ${test_scenarios[@]}; do
     rosrun point_cloud_statistics ground_truth_model_estimation_node $i
-  else
-    echo "$i/ does not have the two required bag files - ground truth and interference"
-  fi
 done
