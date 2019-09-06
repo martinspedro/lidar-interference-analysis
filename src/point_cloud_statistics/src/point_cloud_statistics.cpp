@@ -93,7 +93,7 @@ void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt,
   pcl::VoxelGrid<PointT> grid;
   if (downsample)
   {
-    grid.setLeafSize(0.005, 0.005, 0.005);
+    grid.setLeafSize(0.05f, 0.05f, 0.05f);
     grid.setInputCloud(cloud_src);
     grid.filter(*src);
 
@@ -212,7 +212,7 @@ pcl::PointCloud<pcl::PointXYZ> icp(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
   pcl::VoxelGrid<PointT> grid;
   if (downsample)
   {
-    grid.setLeafSize(0.05, 0.005, 0.005);
+    grid.setLeafSize(0.05f, 0.05f, 0.05f);
     grid.setInputCloud(source);
     grid.filter(*source);
 
