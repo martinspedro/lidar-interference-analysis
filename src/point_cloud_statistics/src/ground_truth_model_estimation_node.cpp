@@ -149,7 +149,7 @@ int main(int argc, char** argv)
 
   pcl::VoxelGrid<pcl::PointXYZ> sor_voxel;
   sor_voxel.setInputCloud(result);
-  sor_voxel.setLeafSize(0.01f, 0.01f, 0.01f);
+  sor_voxel.setLeafSize(0.05f, 0.05f, 0.05f);
   sor_voxel.filter(*ground_truth_ptr);
 
   ss.str(std::string());  // clear stringstream buffer
