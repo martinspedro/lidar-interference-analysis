@@ -224,8 +224,10 @@ int main(int argc, char** argv)
   fout.open(interference_csv_stats, std::ios::out);  // creates a new csv file with writing permission
   for (int i = 0; i < resolution_values.size(); i++)
   {
-    fout << resolution_values[i] << ", " << ground_truth_errors[i] << ", " << interference_errors[i] << "\n";
-    std::cout << resolution_values[i] << ", " << ground_truth_errors[i] << ", " << interference_errors[i] << std::endl;
+    fout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", " << interference_errors[i] / 100.0
+         << "\n";
+    std::cout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", "
+              << interference_errors[i] / 100.0 << std::endl;
   }
   fout.close();
 
