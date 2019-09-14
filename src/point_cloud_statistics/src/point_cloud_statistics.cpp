@@ -209,7 +209,7 @@ pcl::PointCloud<pcl::PointXYZ> icp(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
                                    pcl::PointCloud<pcl::PointXYZ>::Ptr target)
 {
   bool downsample = true;
-  pcl::VoxelGrid<PointT> grid;
+  pcl::VoxelGrid<pcl::PointXYZ> grid;
   if (downsample)
   {
     grid.setLeafSize(0.05f, 0.05f, 0.05f);
