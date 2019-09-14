@@ -58,5 +58,5 @@ void BarChartPlotter::addBarPlotData(std::vector<double> const& array_x, std::ve
 void BarChartPlotter::addBarPlotData(double const* array_x, double const* array_y, unsigned int size,
                                      char const* name = "Y Axis")
 {
-  this->addPlotData(array_x, array_y, size, name, vtkChart::LINE);
+  this->addPlotData(array_x, array_y, size, name, vtkChart::BAR);
 }
