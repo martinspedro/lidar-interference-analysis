@@ -20,6 +20,7 @@ public:
 
   void saveBarChartPNG(std::string filename_full_path);
   void addBarPlotData(std::vector<double> const& array_x, std::vector<double> const& array_y, char const* name);
+  void addBarPlotData(double const* array_x, double const* array_y, unsigned int size, char const* name);
 };
 
 #endif  // BAR_CHART_PLOTTER_H
