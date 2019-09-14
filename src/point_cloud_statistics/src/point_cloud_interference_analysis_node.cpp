@@ -81,58 +81,22 @@ double computeEuclideanDistance(double x_1, double y_1, double z_1, double x_2, 
 int main(int argc, char** argv)
 {
   // Initialize ROS
-  ros::init(argc, argv, "point_cloud_change_detection_node");
-  /*
-    if (!((argc == 3) || (argc == 4) || (argc == 5)))
-    {
-      ROS_ERROR(
-          "Invalid number of arguments providede\n"
-          "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
-          "<voxel edge resolution>\n"  // 3 arguments
-          "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
-          "<voxel edge intervarl minimum resolution> <voxel edge interval maximum resolution>\n"  // 4 arguments
-          "USAGE: rosrun point_cloud_statistics point_cloud_change_detection_node <IT2 folder for test scenario> "
-          "<voxel edge intervarl minimum resolution> <voxel edge interval maximum resolution> <step value>\n"  // 5 args
-      );
+  ros::init(argc, argv, "point_cloud_interference_analysis_node");
 
-      return EXIT_FAILURE;
-    }
+  if (argc != 2)
+  {
+    ROS_ERROR("Invalid number of arguments provided\n"
+              "USAGE: rosrun point_cloud_statistics point_cloud_interference_analysis_node <test scenario codename>");
 
-    float min_resolution = atof(argv[2]), step_value, max_resolution;
+    return EXIT_FAILURE;
+  }
 
-    switch (argc)
-    {
-      case 3:
-        ROS_ASSERT_MSG(min_resolution > 0, "Resolution value must be positive!");
-        max_resolution = min_resolution;
-        step_value = 1;  // workaround to exit the for cycle for the interval
-        break;
-      case 4:
-        ROS_ASSERT_MSG(min_resolution > 0, "Interval inferior bound must be positive!");
-        max_resolution = atof(argv[3]);
-        step_value =
-            (max_resolution - min_resolution) / 10;  // make step value a order of magnitude below the interval range
-        break;
-      case 5:
-        max_resolution = atof(argv[3]);
-        step_value = atof(argv[4]);
-        ROS_ASSERT_MSG(step_value > 0, "Step value cannot be negative!");
-        break;
-    }
-
-    ROS_ASSERT_MSG(min_resolution <= max_resolution,
-                   "Interval [%f, %f] is invalid! Inferior bound must be lower than upper bound", min_resolution,
-                   max_resolution);
-  */
   std::string ground_truth_full_bag_path =
       point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
   std::string interference_full_bag_path =
       point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
 
-  std::cout << "TEST CONDITIONS:"
-            << std::endl
-            //<< "Voxel edge resolution interval: [" << min_resolution << ", " << max_resolution << "]" << std::endl
-            //<< "With a step of: " << step_value << std::endl
+  std::cout << "TEST CONDITIONS:" << std::endl
             << "Test folder name is: " << argv[1] << std::endl
             << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl
             << "Interference Full path: " << interference_full_bag_path << std::endl;
@@ -140,6 +104,17 @@ int main(int argc, char** argv)
   double organized_cloud_ground_truth[16][1800];
   double organized_cloud_interference[16][1800];
   double ground_truth_cloud[16][1800];
+
+  for (int i = 0; i < 15; ++i)
+  {
+    for (int j = 0; j < 1800; ++j)
+    {
+      organized_cloud_ground_truth[i][j] = std::numeric_limits<double>::quiet_NaN();
+      organized_cloud_interference[i][j] = std::numeric_limits<double>::quiet_NaN();
+      ground_truth_cloud[i][j] = std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+
   std::vector<double> distance_ground, distance_interference;
 
   VelodynePointCloud::Ptr current_msg_cloud_ptr(new VelodynePointCloud);
@@ -162,20 +137,14 @@ int main(int argc, char** argv)
 
   rosbag::View interference_view(interference_bag, rosbag::TopicQuery(topics));
 
-  // \TODO Implement Multithreading here. Could speed up computation speeds but requires multiple copies of the octree
-  // stucture
-  /// for (float i = min_resolution; i <= max_resolution; i += step_value)
-  //{
-  // resolution_values.push_back(i);
-
-  point_cloud_statistics::CloudStatisticalData ground_truth_bag_stats = point_cloud_statistics::CloudStatisticalData();
-  point_cloud_statistics::CloudStatisticalData interference_bag_stats = point_cloud_statistics::CloudStatisticalData();
+  // point_cloud_statistics::CloudStatisticalData ground_truth_bag_stats =
+  // point_cloud_statistics::CloudStatisticalData(); point_cloud_statistics::CloudStatisticalData interference_bag_stats
+  // = point_cloud_statistics::CloudStatisticalData();
 
   long long unsigned int mean = 0;
   long long unsigned int msg_num = 0;
 
   // Instantiate octree-based point cloud change detection class
-  // pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(i);
 
   for (int i = 0; i < ground_truth_ptr->size(); ++i)
   {
@@ -183,11 +152,6 @@ int main(int argc, char** argv)
                       [getAzimuthIndex(ground_truth_ptr->points[i].y, ground_truth_ptr->points[i].x)] =
                           computeEuclideanDistance(ground_truth_ptr->points[i].x, ground_truth_ptr->points[i].y,
                                                    ground_truth_ptr->points[i].z);
-    /*
-    std::cout << "Laser ID: " << current_msg_cloud_ptr->points[i].ring << " - "
-              << atan(current_msg_cloud_ptr->points[i].y / current_msg_cloud_ptr->points[i].x) * 180.0d / M_PI
-              << std::endl;
-              */
   }
 
   // Ground Truth Bag
@@ -200,10 +164,6 @@ int main(int argc, char** argv)
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
-      // std::cout << "Ground Truth" << std::endl;
-      // for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
-
-      // std::cout << current_msg_cloud_ptr->size() << std::endl;
       mean += current_msg_cloud_ptr->size();
       ++msg_num;
 
@@ -213,24 +173,7 @@ int main(int argc, char** argv)
             current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
             computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
                                      current_msg_cloud_ptr->points[i].z);
-        /*
-        std::cout << "Laser ID: " << current_msg_cloud_ptr->points[i].ring << " - "
-                  << atan(current_msg_cloud_ptr->points[i].y / current_msg_cloud_ptr->points[i].x) * 180.0d / M_PI
-                  << std::endl;
-                  */
       }
-      /*
-      for (int i = 0; i < 30; ++i)
-      {
-
-
-                  std::cout << "Laser ID: " << current_msg_cloud_ptr->points[i].ring << " - "
-                            << atan(current_msg_cloud_ptr->points[i].y / current_msg_cloud_ptr->points[i].x) * 180 /
-           M_PI
-                            << std::endl;
-
-      }
-      */
     }
   }
 
@@ -245,9 +188,6 @@ int main(int argc, char** argv)
       *current_msg_cloud_ptr = point_cloud;
 
       ++interference_bag_stats.point_cloud_msg_count;
-      // std::cout << current_msg_cloud_ptr->size() << std::endl;
-      // std::cout << "Interference" << std::endl;
-      // for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
       mean += current_msg_cloud_ptr->size();
       ++msg_num;
 
@@ -257,30 +197,10 @@ int main(int argc, char** argv)
             current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
             computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
                                      current_msg_cloud_ptr->points[i].z);
-        /*
-        std::cout << "Laser ID: " << current_msg_cloud_ptr->points[i].ring << " - "
-                  << atan(current_msg_cloud_ptr->points[i].y / current_msg_cloud_ptr->points[i].x) * 180.0d / M_PI
-                  << std::endl;
-                  */
       }
     }
   }
 
-  // break;
-  // }
-  /*
-    for (int i = 0; i < 16; ++i)
-    {
-      std::cout << "---------------------- Ring " << i << "-----------------------" << std::endl;
-      // sort(organized_cloud[i].begin(), organized_cloud[i].end());
-      for (int j = 0; j < 1800; ++j)
-      {
-        std::cout << "#" << j << ": " << organized_cloud[i][j] << std::endl;
-        // std::cout << "(x, y, z, i): (" << organized_cloud[i][j] << ", " << organized_cloud[i][j].y << ", "
-        //            << organized_cloud[i][j].z << ", " << organized_cloud[i][j].intensity << ") " << std::endl;
-      }
-    }
-*/
   std::cout << "Nº messages received: " << msg_num << std::endl
             << "Nº points measures" << mean << std::endl
             << "Average Points per message: " << (1.0d * mean) / msg_num << std::endl;
@@ -294,17 +214,19 @@ int main(int argc, char** argv)
       distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
     }
   }
+
   std::cout << "done" << std::endl;
   ground_truth_bag.close();  // close ground truth bag file
   interference_bag.close();  // close interference bag
 
   pcl::visualization::PCLPlotter* plotter = new pcl::visualization::PCLPlotter("Ground");
-  plotter->setTitle("Groubnd");  // global title
+  plotter->setTitle("Ground");  // global title
   plotter->setXTitle("Absolute Distance");
   plotter->setYTitle("Logarithmic");
   plotter->setShowLegend(true);  // show legends
 
   plotter->addHistogramData(distance_ground, 200, "Ground_Truth_Comparison");  // number of bins are 10
+  // plotter->setXRange(0, 20);
   plotter->plot();
 
   pcl::visualization::PCLPlotter* plotter2 = new pcl::visualization::PCLPlotter("Interference");
@@ -314,6 +236,8 @@ int main(int argc, char** argv)
   plotter2->setShowLegend(true);  // show legends
 
   plotter2->addHistogramData(distance_interference, 200, "Interference_Comparison");  // number of bins are 10
+  // plotter2->setXRange(0, 20);
+
   plotter2->plot();
 
   return EXIT_SUCCESS;
