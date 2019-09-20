@@ -105,6 +105,7 @@ int main(int argc, char** argv)
   double organized_cloud_interference[16][1800];
   double ground_truth_cloud[16][1800];
 
+  // Init Data Structures to quiet_NaN
   for (int i = 0; i < 15; ++i)
   {
     for (int j = 0; j < 1800; ++j)
@@ -142,7 +143,7 @@ int main(int argc, char** argv)
   // = point_cloud_statistics::CloudStatisticalData();
 
   long long unsigned int mean = 0;
-  long long unsigned int msg_num = 0;
+  long long unsigned int msg_num_interference = 0;
 
   // Instantiate octree-based point cloud change detection class
 
@@ -165,7 +166,7 @@ int main(int argc, char** argv)
       *current_msg_cloud_ptr = point_cloud;
 
       mean += current_msg_cloud_ptr->size();
-      ++msg_num;
+      //++msg_num;
 
       for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
       {
@@ -173,6 +174,23 @@ int main(int argc, char** argv)
             current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
             computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
                                      current_msg_cloud_ptr->points[i].z);
+      }
+
+      for (int i = 0; i < 15; ++i)
+      {
+        for (int j = 0; j < 1800; ++j)
+        {
+          // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
+          distance_ground.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
+        }
+      }
+
+      for (int i = 0; i < 15; ++i)
+      {
+        for (int j = 0; j < 1800; ++j)
+        {
+          organized_cloud_ground_truth[i][j] = std::numeric_limits<double>::quiet_NaN();
+        }
       }
     }
   }
@@ -187,9 +205,8 @@ int main(int argc, char** argv)
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
-      ++interference_bag_stats.point_cloud_msg_count;
       mean += current_msg_cloud_ptr->size();
-      ++msg_num;
+      ++msg_num_interference;
 
       for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
       {
@@ -198,12 +215,29 @@ int main(int argc, char** argv)
             computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
                                      current_msg_cloud_ptr->points[i].z);
       }
+
+      for (int i = 0; i < 15; ++i)
+      {
+        for (int j = 0; j < 1800; ++j)
+        {
+          // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
+          distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
+        }
+      }
+
+      for (int i = 0; i < 15; ++i)
+      {
+        for (int j = 0; j < 1800; ++j)
+        {
+          organized_cloud_interference[i][j] = std::numeric_limits<double>::quiet_NaN();
+        }
+      }
     }
   }
 
-  std::cout << "Nº messages received: " << msg_num << std::endl
+  std::cout << "Nº messages received: " << msg_num_interference << std::endl
             << "Nº points measures" << mean << std::endl
-            << "Average Points per message: " << (1.0d * mean) / msg_num << std::endl;
+            << "Average Points per message: " << (1.0d * mean) / msg_num_interference << std::endl;
 
   for (int i = 0; i < 15; ++i)
   {
@@ -211,14 +245,57 @@ int main(int argc, char** argv)
     {
       // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
       distance_ground.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
+      std::cout << ground_truth_cloud[i][j] << " - " << organized_cloud_interference[i][j] << " = "
+                << abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]) << std::endl;
       distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
     }
   }
 
+  double relative_freq_ground[1000], relative_freq_interference[1000];
+  double x_axis[1000];
+
+  for (int i = 0; i < 1000; ++i)
+  {
+    relative_freq_ground[i] = 0;
+    relative_freq_interference[i] = 0;
+    x_axis[i] = (double)(i)*0.1;
+  }
+
+  unsigned int total_valid_points_ground;
+  unsigned int total_valid_points_interference;
+
+  double relative_valid_points_ground[1000];
+  double relative_valid_points_interference[1000];
+  for (int i = 0; i < distance_ground.size(); ++i)
+  {
+    /*
+  std::cout << distance_interference[i] << std::endl;
+  std::cout << distance_interference[i] * 10.0d << std::endl;
+  std::cout << floor(distance_interference[i] * 10.0d) << std::endl;
+  std::cout << (unsigned int)(floor(distance_interference[i] * 10.0d)) << std::endl;
+  */
+    if (distance_ground[i] != std::numeric_limits<double>::quiet_NaN())
+    {
+      ++relative_freq_ground[(unsigned int)(floor(distance_ground[i] * 100.0d))];
+      ++total_valid_points_ground;
+    }
+    if (distance_interference[i] != std::numeric_limits<double>::quiet_NaN())
+    {
+      ++relative_freq_interference[(unsigned int)(floor(distance_interference[i] * 100.0d))];
+      ++total_valid_points_interference;
+    }
+  }
+  /*
+  for (int i = 0; i < 1000; ++i)
+  {
+    relative_freq_ground[i] = relative_freq_ground[i] == 0 ? 0 : abs(log10(relative_freq_ground[i]));
+    relative_freq_interference[i] = relative_freq_interference[i] == 0 ? 0 : abs(log10(relative_freq_interference[i]));
+  }
+  */
   std::cout << "done" << std::endl;
   ground_truth_bag.close();  // close ground truth bag file
   interference_bag.close();  // close interference bag
-
+  /*
   pcl::visualization::PCLPlotter* plotter = new pcl::visualization::PCLPlotter("Ground");
   plotter->setTitle("Ground");  // global title
   plotter->setXTitle("Absolute Distance");
@@ -239,6 +316,45 @@ int main(int argc, char** argv)
   // plotter2->setXRange(0, 20);
 
   plotter2->plot();
+*/
+  for (int i = 0; i < 1000; ++i)
+  {
+    relative_valid_points_ground[i] = relative_freq_ground[i] / total_valid_points_ground;
+    relative_valid_points_interference[i] = relative_freq_interference[i] / total_valid_points_interference;
 
+    if (i < 50)
+    {
+      std::cout << i * 0.1 << ": " << relative_valid_points_ground[i] << " | " << relative_valid_points_interference[i]
+                << std::endl;
+    }
+  }
+
+  double interference = 0;
+  for (int i = 1; i < 1000; ++i)
+  {
+    interference += relative_freq_interference[i];
+  }
+
+  std::cout << "Interference: " << interference / total_valid_points_interference << std::endl;
+
+  // Create Bar Plot object with Full HD resolution and the description for the data
+  BarChartPlotter* plotter =
+      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                          "Voxel edge Resolution", "Outliers/Inliers");
+
+  // Add the outliers of the interfered and ground truth datasets
+  plotter->setColorScheme(vtkColorSeries::WARM);
+  plotter->addBarPlotData(x_axis, relative_freq_interference, 1000, "Interference Bag vs Ground Truth Model");
+  plotter->setColorScheme(vtkColorSeries::BLUES);
+  plotter->addBarPlotData(x_axis, relative_freq_ground, 1000, "Ground Truth Bag vs Ground Truth Model");
+
+  plotter->plot();  // holds here until window is given the closing instruction
+
+  // Saves the bar chart as a PNG file on the dataset directory
+  std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
+  plotter->saveBarChartPNG(bar_chart_filename);
+  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+
+  plotter->close();  // Destroys bar chart object
   return EXIT_SUCCESS;
 }
