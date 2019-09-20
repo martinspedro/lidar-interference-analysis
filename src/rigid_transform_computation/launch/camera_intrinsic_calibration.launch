@@ -1,0 +1,77 @@
+<launch>
+
+<!--
+	<group ns="camera">
+		<node name="image_proc" pkg="image_proc" type="image_proc"/>
+	</group>
+-->
+	<node name="camera" pkg="avt_vimba_camera" type="mono_camera_node" output="screen">
+		<param name="guid" value="50-0503439737"/>
+		<param name="ip" value="192.168.10.1"/>
+		<param name="camera_info_url" value="file://$(find rigid_transform_computation)/ost.yaml"/> 
+		<param name="frame_id" value="camera_link"/>
+		<param name="trig_timestamp_topic" value=""/>
+		<param name="show_debug_prints" value="true"/>
+
+		<!-- Trigger mode:
+			1. Freerun
+			2. SyncIn1
+			3. SyncIn2
+			4. SyncIn3
+			5. SyncIn4
+			6. FixedRate
+			7. Software
+		-->
+		<param name="trigger_source" value="FixedRate"/>
+<!--    <param name="trigger_activation" value="AnyEdge"/> -->
+
+		<!-- Acquisition mode:
+			1. Continuous
+			2. SingleFrame
+			3. MultiFrame
+			4. Recorder
+		-->
+		<param name="acquisition_mode" value="Continuous"/>
+
+		<!-- Acquisition rate in fps -->
+		<param name="acquisition_rate" value="8"/>
+
+		<!-- Pixel format:
+			1. Mono8
+			2. Mono12
+			3. Mono12Packed
+			4. BayerRG8
+			5. BayerRG12Packed
+			6. BayerGR12
+			7. RGB8Packed
+			8. BGR8Packed
+		-->
+		<param name="pixel_format" value="BayerRG8"/>
+		<!-- Exposure in us -->
+		<param name="exposure" value="100000"/>
+		<!-- Gain in dB -->
+		<param name="gain" value="6"/>
+
+		<!-- Auto control
+			1. Off
+			2. Once
+			3. Continuous
+		-->
+		<param name="exposure_auto" value="Off"/>
+		<param name="gain_auto" value="Off"/>
+		<param name="whitebalance_auto" value="Off"/>
+
+		<param name="binning_x" value="1"/>
+		<param name="binning_y" value="1"/>
+		<param name="decimation_x" value="1"/>
+		<param name="decimation_y" value="1"/>
+		<param name="x_offset" value="0"/>
+		<param name="y_offset" value="0"/>
+		<param name="width" value="2452"/>
+		<param name="height" value="2056"/>
+
+		<param name="stream_bytes_per_second" value="999000000 "/>
+
+	</node>
+
+</launch>

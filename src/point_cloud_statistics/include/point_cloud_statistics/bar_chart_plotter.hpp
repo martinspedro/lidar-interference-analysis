@@ -1,0 +1,26 @@
+/**
+ * \file   bar_chart_plotter.hpp
+ * \brief
+ *
+ */
+
+#ifndef BAR_CHART_PLOTTER_H
+#define BAR_CHART_PLOTTER_H
+
+#include <pcl/visualization/pcl_plotter.h>
+#include <string>
+
+class BarChartPlotter : public pcl::visualization::PCLPlotter
+{
+public:
+  BarChartPlotter(unsigned int width, unsigned int height);
+  BarChartPlotter(unsigned int width, unsigned int height, const char* title);
+  BarChartPlotter(unsigned int width, unsigned int height, const char* title, const char* x_axis_title,
+                  const char* y_axis_title);
+
+  void saveBarChartPNG(std::string filename_full_path);
+  void addBarPlotData(std::vector<double> const& array_x, std::vector<double> const& array_y, char const* name);
+  void addBarPlotData(double const* array_x, double const* array_y, unsigned int size, char const* name);
+};
+
+#endif  // BAR_CHART_PLOTTER_H

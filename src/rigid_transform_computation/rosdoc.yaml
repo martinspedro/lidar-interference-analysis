@@ -1,0 +1,6 @@
+- builder: doxygen
+  name: Rigid Body Transform
+  author: Pedro Martins
+  file_patterns: '*.c *.cpp *.h *hpp *.cc *.hh *.dox *.srv *.msg *.md'
+  multiline_cpp_is_brief: True
+  use_mdfile_as_mainpage: README.md

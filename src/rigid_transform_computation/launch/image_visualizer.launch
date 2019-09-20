@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+-->
+
+<launch>
+    <!-- Parameters -->
+    <param name="use_sim_time" value="true" />
+
+    <arg name="dataset_folder_path" value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/mine/" />
+    <arg name="default_bag"              default="2019-07-08-11-26-33.bag" />
+
+
+    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+    <node pkg="rosbag" type="play" name="Udacity_CHX_001_LIDAR" required="true" args="$(arg dataset_folder_path)$(arg default_bag) --clock -l"/>
+
+    <node pkg="rigid_transform_computation" type="image_visualizer_node" name="Image_Visualizer" output="screen" />
+
+
+</launch>

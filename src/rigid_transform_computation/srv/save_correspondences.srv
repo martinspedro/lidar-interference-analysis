@@ -1,0 +1,6 @@
+# Service message definition to trigger the saving of 2D <-> 3D correspondences on a CSV file
+
+string filename   # CSV filename
+---
+bool   success    # Indicates if file saving was succesfull
+string message    # verbose output from the service implementation

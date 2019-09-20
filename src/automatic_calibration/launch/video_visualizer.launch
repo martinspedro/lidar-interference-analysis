@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+    Author: Pedro Martins (martinspedro@av.it.pt)
+    Description: Play bag file of single camera data and launch image_republish node to convert from compressed format to raw
+-->
+<launch>
+    <!-- PARAMETERS -->
+    <param name="use_sim_time" value="true" />
+
+    <!-- ARGUMENTS -->
+    <arg name="udacity_bags_folder_path" value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Udacity/" />
+    <arg name="udacity_camera_bag"       default="CHX_001/camera.bag" />
+    <arg name="input_compressed_image"   default="/center_camera/image_color/" />
+    <arg name="output_raw_image"         default="/camera/image_raw" />
+
+
+    <!-- DATA -->
+    <node pkg="rosbag" type="play" name="Udacity_CHX_001_CAMERA" required="true"
+          args="$(arg udacity_bags_folder_path)$(arg udacity_camera_bag)"/>
+
+    <!-- NODES -->
+    <node name="image_republish" type="republish" pkg="image_transport" output="screen"
+          args="compressed in:=$(arg input_compressed_image) raw out:=$(arg output_raw_image)" />
+    <node name="video_stream" type="automatic_calibration_node" pkg="automatic_calibration" />
+</launch>

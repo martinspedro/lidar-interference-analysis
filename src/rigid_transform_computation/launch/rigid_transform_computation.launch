@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+-->
+
+<launch>
+    <!-- Parameters -->
+    <param name="use_sim_time"            value="true" />
+
+    <arg name="thesis_repo_directory"     value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/"/>
+    <arg name="calibration_folder_path"   value="$(arg thesis_repo_directory)calibration/Manta/" />
+    <arg name="default_calibration_yaml"  default="ost.yaml" />
+
+    <arg name="datasets_directory"        value="/media/martinspedro/Elements/"/>
+    <arg name="dataset_folder_path"       value="$(arg datasets_directory)mine/IT2\ Dark\ Room/Scenario\ A/2019-07-08/" />
+    <arg name="default_bag"               default="2019-07-08-11-26-33.bag" />
+
+
+    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+    <!--
+         <node pkg="rosbag" type="play" name="Bag_Player" required="true" args="$(arg dataset_folder_path)$(arg default_bag) -l"/>
+      -->
+
+
+    <node pkg="rigid_transform_computation" type="rigid_transform_computation" name="rigid_transform_computation" output="screen" />
+            <!-- args="$(arg calibration_folder_path)$(arg default_calibration_yaml)" -->
+    <node pkg="rigid_transform_computation" type="point_cloud_visualizer_node" name="PCL_Viewer_with_Pose" output="screen" />
+
+    <node pkg="rigid_transform_computation" type="image_visualizer_node" name="Image_Visualizer" output="screen" >
+        <remap from="/img_pixel_picker/clicked_point" to="/camera/clicked_pixel" />
+    </node>
+
+</launch>

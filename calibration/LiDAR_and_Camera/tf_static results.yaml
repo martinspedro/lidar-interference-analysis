@@ -1,0 +1,18 @@
+header:
+  seq: 0
+  stamp:
+    secs: 1562581595
+    nsecs: 962602910
+  frame_id: "velo_link"
+child_frame_id: "camera_color_left"
+transform:
+  translation:
+    x: 0.0126885304594
+    y: -0.129772603628
+    z: -0.0628410496392
+  rotation:
+    x: 0.509459781341
+    y: -0.493262230182
+    z: 0.551162930886
+    w: -0.439730061617
+

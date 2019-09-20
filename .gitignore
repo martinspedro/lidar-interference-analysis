@@ -9,7 +9,7 @@ msg_gen/
 srv_gen/
 build_isolated/
 devel_isolated/
-doc
+doc/
 
 # ROS Message folders
 msg/*Action.msg
@@ -85,14 +85,27 @@ Session.vim
 
 ## Auto-generated tag files
 tags
+
 ## Persistent undo
 [._]*.un~
 
 # Catkin custom files
 CATKIN_IGNORE
 
-# Datasets folder
+# Rospackage folders
+src/bbox3d
+
+# Folders to ignore
 datasets/
+tools/
+documentation/
+
+# Thesis subfolders to ignore
+images/
+Node\ Graphs/
+diagrams/
+videos/
+
 
 # PDFs and images
 *.pdf

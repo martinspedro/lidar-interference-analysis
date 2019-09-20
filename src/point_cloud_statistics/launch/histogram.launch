@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+-->
+
+<launch>
+
+   <node pkg="point_cloud_statistics" type="histogram" name="Point_Cloud_Histogram" output="screen" />
+
+</launch>

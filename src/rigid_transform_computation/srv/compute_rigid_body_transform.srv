@@ -1,0 +1,15 @@
+# Service message definition for a rigid body transform computation method between a 2D and a 3D sensor
+#
+
+# 8 bit integer describing the OpenCV solvePnP algorithm to be used to compute the transformations between
+# the 2D and 3D correspondences
+# Available methods:
+# - 0: SOLVEPNP_ITERATIVE
+# - 1: SOLVEPNP_P3P
+# - 2: SOLVEPNP_EPNP
+# - 3: SOLVEPNP_DLS
+# - 4: SOLVEPNP_UPNP
+int8 solve_PnP_algorithm
+---
+# 6 DoF transform between the two sensors
+geometry_msgs/TransformStamped rigid_body_transform

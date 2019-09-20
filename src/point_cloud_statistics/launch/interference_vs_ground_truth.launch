@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+-->
+
+<launch>
+
+   <param name="use_sim_time"            value="true" />
+   <arg name="datasets_directory"        value="/media/martinspedro/Elements/"/>
+   <arg name="dataset_folder_path"       value="$(arg datasets_directory)mine/IT2\ Dark\ Room/2019-07-31\ \(Scenario\ B\)" />
+   <arg name="default_bag"               default="2019-07-08-11-26-33.bag" />
+
+
+   <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+   <node pkg="rosbag" type="play" name="ground_truth" required="true"
+     args="$(arg dataset_folder_path)/Multiple\ LiDAR\ Interference/closer_above/ground_truth.bag --clock -l">
+             <remap from="/velodyne_points" to="/ground_truth" />
+         </node>
+
+   <node pkg="rosbag" type="play" name="Interference" required="true"
+     args="$(arg dataset_folder_path)/Multiple\ LiDAR\ Interference/closer_above/interference.bag --clock -l" />
+
+
+
+</launch>
