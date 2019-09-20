@@ -42,6 +42,7 @@ Thesis Layout
 - Summary of the topic
 - What is the problem
 - Why it matters
+- key sensors para ADAS (cam, LIDAR, etc.)
 - Key concepts:
     - Road accidents
     - ADAS
@@ -49,11 +50,11 @@ Thesis Layout
     - LiDAR
     - LiDAR Interference (?)
 
-## 1.1 Motivation
+## 1.1 Scope and Motivation
 - Why is the topic important
 - Why and how it matters
 
-## 1.2 Main objectives
+## 1.2 Objectives
 - Study LiDAR Interference
 - Create a dataset with multiple scenarios and test conditions to study LiDAR interference
 - Calibration between LiDAR and Camera
@@ -61,56 +62,50 @@ Thesis Layout
 - Object Detection in Images
 - Images and Point Cloud correspondence between objects, with and without LIDAR interference
 
-## 1.3 Tools used and development philosophies (Title of subchapter ?)
-- Software & Hardware Requirements:
-    - Real Time
-    - Large Dataset manipulations
-    - Data management
-- Which software/tools were used and why:
-    - ROS
-    - OpenCV
-    - PCL
-    - VTK
-- Which languages were used and why:
-    - C++
-- How was data managed:
-    - bag
-    - CSV
-    - YAML
-    - XML
-- Design principles followed, i.e., during implementation of several functionalities, some things may be counter
-intuitive, but they follow some design principles and I would like to have a paragraph here explaining it.
-
-## 1.4 Document Organization
+## 1.3 Document Organization
 - How is the thesis structured
     - Headings of this document
 
-## 1.5 Original Contributions/ Presentations
+## 1.4 Contributions
 - Indicate where the work has been presented before the thesis defence
 - Students@DETI (poster on sensor fusion)
 - RECPAD (if accepted, paper on LiDAR Interference and poster or oral presentation)
 - Others (if applicable)
 
-# 2. Overview and Terminology (?)
-## 2.1 LiDAR
-- How it works
-- Show examples of point clouds
-
-## 2.2 ?
-- (Sinto que faltam aqui mais tópicos, mas tenho receio que entre em repetição no State of the Art)
-
 # 3. State of the Art
 ## 3.1 Datasets
-## 3.2 Camera and LiDAR Extrinsic Calibration
-## 3.3 Sensor Fusion
-## 3.4 Object Detection
+## 3.2 Camera
+## 3.3 LiDAR
+## 3.4 Camera and LiDAR Extrinsic Calibration
+## 3.5 Sensor Fusion
+## 3.6 Object Detection
 - On Image: YOLO, Fast-CNN, Faster-CNN, etc.
 - Correspondence between images and point cloud
 
-## 3.5 LiDAR Interference
+## 3.7 LiDAR Interference
 
 
-# 4. Sensor Fusion
+# 4. Intrinsic and Extrinsic Calibration
+## 4.1 Intrinsic Camera calibration
+- Calibration Patterns
+- Experimental Setup
+- How it was done
+- Results
+
+## 4.2 Intrinsic LiDAR Calibration
+- How it was done
+- Results
+
+## 4.3 Extrinsic Camera and LiDAR Calibration
+- Mathematical Principle (referential, 6DOF, Rigid Body Transforms)
+- Experimental Setup
+- Calibration method implemented
+- Results
+- Test with sensor fusion (apply sensor fusion to calibrated experimental data)
+
+## 4.4 Final Remarks
+
+# 5. Sensor Fusion
 - What is sensor fusion and what are its advantages?
 - Requirements for sensor Fusion:
     - Data must be on the same referential
@@ -120,25 +115,6 @@ intuitive, but they follow some design principles and I would like to have a par
 - Results
 - Final Remarks
 
-# 5. Intrinsic and Extrinsic Calibration
-## 5.1 Intrinsic Camera calibration
-- Calibration Patterns
-- Experimental Setup
-- How it was done
-- Results
-
-## 5.2 Intrinsic LiDAR Calibration
-- How it was done
-- Results
-
-## 5.3 Extrinsic Camera and LiDAR Calibration
-- Mathematical Principle (referential, 6DOF, Rigid Body Transforms)
-- Experimental Setup
-- Calibration method implemented
-- Results
-- Test with sensor fusion (apply sensor fusion to calibrated experimental data)
-
-## 5.4 Final Remarks
 
 # 6. Object Detection
 ## 6.1 On Image
