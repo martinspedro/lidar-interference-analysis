@@ -116,7 +116,7 @@ int main(int argc, char** argv)
   std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
   pcl::io::loadPCDFile<pcl::PointXYZ>(ground_truth_pcd, *ground_truth_ptr);
 
-  std::vector<double> ground_truth_errors, interference_errors, resolution_values;
+  std::vector<double> ground_truth_errors, interference_errors, real_errors, resolution_values;
 
   interference_bag.open(interference_full_bag_path);  // Open interference bag
 
@@ -211,6 +211,8 @@ int main(int argc, char** argv)
     // Generate Data for bar chart
     ground_truth_errors.push_back(ground_truth_bag_stats.getOutliersPercentage());
     interference_errors.push_back(interference_bag_stats.getOutliersPercentage());
+    real_errors.push_back(interference_bag_stats.getOutliersPercentage() -
+                          ground_truth_bag_stats.getOutliersPercentage());
   }
 
   ground_truth_bag.close();  // close ground truth bag file
@@ -225,11 +227,12 @@ int main(int argc, char** argv)
   for (int i = 0; i < resolution_values.size(); i++)
   {
     fout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", " << interference_errors[i] / 100.0
-         << "\n";
+         << ", " << real_errors[i] / 100.0 << "\n";
     std::cout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", "
-              << interference_errors[i] / 100.0 << std::endl;
+              << interference_errors[i] / 100.0 << ", " << real_errors[i] / 100.0 << std::endl;
   }
   fout.close();
+  std::cout << "Interference Results saved on csv file on: " << interference_csv_stats << std::endl;
 
   // Create Bar Plot object with Full HD resolution and the description for the data
   BarChartPlotter* plotter =
@@ -241,6 +244,8 @@ int main(int argc, char** argv)
   plotter->addBarPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model");
   plotter->setColorScheme(vtkColorSeries::BLUES);
   plotter->addBarPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model");
+  plotter->setColorScheme(vtkColorSeries::COOL);
+  plotter->addBarPlotData(resolution_values, real_errors, "Ground Truth Bag vs Ground Truth Model");
 
   plotter->plot();  // holds here until window is given the closing instruction
 
