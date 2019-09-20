@@ -53,7 +53,9 @@ int main(int argc, char** argv)
             << "Test folder name is: " << argv[1] << std::endl
             << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl;
 
-  VelodynePointCloud::Ptr ground_truth_ptr(new VelodynePointCloud);
+  // VelodynePointCloud::Ptr ground_truth_ptr(new VelodynePointCloud);
+  PointCloud::Ptr ground_truth_ptr(new PointCloud);
+
   // velodyne_pointcloud::PointcloudXYZIR::Ptr ground_truth_ptr(new velodyne_pointcloud::PointcloudXYZIR);
 
   rosbag::Bag ground_truth_bag;
@@ -66,8 +68,9 @@ int main(int argc, char** argv)
   int count = 0;
 
   // Tutorial
-  VelodynePointCloud::Ptr result(new VelodynePointCloud), source(new VelodynePointCloud),
-      target(new VelodynePointCloud);
+  // VelodynePointCloud::Ptr result(new VelodynePointCloud), source(new VelodynePointCloud),
+  //      target(new VelodynePointCloud);
+  PointCloud::Ptr result(new PointCloud), source(new PointCloud), target(new PointCloud);
   Eigen::Matrix4f GlobalTransform = Eigen::Matrix4f::Identity(), pairTransform;
 
   foreach (rosbag::MessageInstance const m, ground_truth_view)
@@ -76,7 +79,7 @@ int main(int argc, char** argv)
     if (msg != NULL)
     {
       // VelodynePointCloud ground_truth_point_cloud;
-      VelodynePointCloud ground_truth_point_cloud;
+      PointCloud ground_truth_point_cloud;
       fromROSMsg(*msg, ground_truth_point_cloud);
       *ground_truth_ptr = ground_truth_point_cloud;
 
@@ -94,16 +97,15 @@ int main(int argc, char** argv)
       sor_out.filter(*filtered_point_cloud);
       */
 
-      /*
       *target = ground_truth_point_cloud;
       if (count > 0)
       {
         // Add visualization data
         // showCloudsLeft(source, target);
 
-        VelodynePointCloud::Ptr temp(new VelodynePointCloud);
+        // VelodynePointCloud::Ptr temp(new VelodynePointCloud);
         // point_cloud_statistics::pairAlign(source, target, temp, pairTransform, true);
-        //*result = point_cloud_statistics::icp(source, target);
+        *result = point_cloud_statistics::icp(source, target);
         // transform current pair into the global transform
         // pcl::transformPointCloud(*temp, *result, pairTransform);
 
@@ -114,7 +116,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        *source = *filtered_point_cloud;
+        *source = ground_truth_point_cloud;
       }
 
       std::cout << "Message number: " << count << std::endl;
@@ -122,7 +124,6 @@ int main(int argc, char** argv)
       {
         break;
       }
-      */
     }
   }
 
@@ -156,16 +157,15 @@ int main(int argc, char** argv)
   */
   // Create the filtering object
 
-  /*
-    pcl::VoxelGrid<velodyne_pointcloud::PointXYZIR> sor_voxel;
-    sor_voxel.setInputCloud(result);
-    sor_voxel.setLeafSize(0.05f, 0.05f, 0.05f);
-    sor_voxel.filter(*ground_truth_ptr);
+  pcl::VoxelGrid<pcl::PointXYZ> sor_voxel;
+  sor_voxel.setInputCloud(result);
+  sor_voxel.setLeafSize(0.05f, 0.05f, 0.05f);
+  sor_voxel.filter(*ground_truth_ptr);
 
-    ss.str(std::string());  // clear stringstream buffer
-    ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
-    pcl::io::savePCDFile(ss.str(), *ground_truth_ptr, true);
-  */
+  ss.str(std::string());  // clear stringstream buffer
+  ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
+  pcl::io::savePCDFile(ss.str(), *ground_truth_ptr, true);
+
   ss.str(std::string());  // clear stringstream buffer
   ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
   pcl::io::savePCDFile(ss.str(), *ground_truth_ptr, true);
