@@ -129,6 +129,7 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
+  // Load Ground Truth Model
   std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
   pcl::io::loadPCDFile<velodyne_pointcloud::PointXYZIR>(ground_truth_pcd, *ground_truth_ptr);
 
@@ -239,18 +240,19 @@ int main(int argc, char** argv)
             << "Nº points measures" << mean << std::endl
             << "Average Points per message: " << (1.0d * mean) / msg_num_interference << std::endl;
 
-  for (int i = 0; i < 15; ++i)
-  {
-    for (int j = 0; j < 1800; ++j)
+  /*
+    for (int i = 0; i < 15; ++i)
     {
-      // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
-      distance_ground.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
-      std::cout << ground_truth_cloud[i][j] << " - " << organized_cloud_interference[i][j] << " = "
-                << abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]) << std::endl;
-      distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
+      for (int j = 0; j < 1800; ++j)
+      {
+        // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
+        distance_ground.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
+        std::cout << ground_truth_cloud[i][j] << " - " << organized_cloud_interference[i][j] << " = "
+                  << abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]) << std::endl;
+        distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
+      }
     }
-  }
-
+  */
   double relative_freq_ground[1000], relative_freq_interference[1000];
   double x_axis[1000];
 
