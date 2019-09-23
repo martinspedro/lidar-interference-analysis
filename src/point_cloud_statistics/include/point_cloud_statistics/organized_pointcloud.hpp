@@ -7,19 +7,8 @@
 #ifndef ORGANIZED_POINTCLOUD_H
 #define ORGANIZED_POINTCLOUD_H
 
-#include <pcl/point_types.h>
+//#include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
-#include <Eigen/StdVector>
-#include <Eigen/Geometry>
-#include <pcl/PCLHeader.h>
-#include <pcl/exceptions.h>
-#include <pcl/pcl_macros.h>
-#include <pcl/point_traits.h>
-
-#include <algorithm>
-#include <utility>
-#include <vector>
-#include <pcl/impl/point_types.hpp>
 
 namespace organized_pointcloud
 {
@@ -27,17 +16,19 @@ template <class T>
 class OrganizedPointCloud : public pcl::PointCloud<T>
 {
 public:
-  OrganizedPointCloud<T>(unsigned int width, unsigned int height, const T& value);
-
+  OrganizedPointCloud(unsigned int width, unsigned int height, const T& init_value);
   ~OrganizedPointCloud<T>() = default;
 
-  // void _init_data_structure();
+  void clearPointsFromPointcloud();
+  void organizeVelodynePointCloud(pcl::PointCloud<T> unorganized_cloud);
+  OrganizedPointCloud<T> computeDistanceBetweenPointClouds(OrganizedPointCloud<T> point_cloud_1,
+                                                           OrganizedPointCloud<T> point_cloud_2);
 
 private:
-  pcl::PointCloud<pcl::PointXYZ>* cloud;
-
-  unsigned int _height;
-  unsigned int _width;
+  float getAzimuth(T point);
+  unsigned int getAzimuthIndex(T point);
+  float computeEuclideanDistanceToOrigin(T point);
+  float computeEuclideanDistance(T point1, T point2);
 };
 
 }  // namespace organized_pointcloud
