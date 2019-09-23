@@ -109,9 +109,9 @@ find_package(VTK)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES datasets_info
+   LIBRARIES datasets_info organized_pointcloud
    #  LIBRARIES point_cloud_statistics
-   CATKIN_DEPENDS roscpp rospy std_msgs multiple_lidar_interference_mitigation_bringup
+   CATKIN_DEPENDS roscpp rospy std_msgs multiple_lidar_interference_mitigation_bringup velodyne_pointcloud
 #  DEPENDS system_lib
 )
 
@@ -127,10 +127,11 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/point_cloud_statistics.cpp
-# )
+# Declare a C++ library
+add_library(organized_pointcloud
+   src/organized_pointcloud.cpp
+   include/point_cloud_statistics/organized_pointcloud.hpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -159,7 +160,8 @@ add_executable(point_cloud_interference_analysis_node
       src/point_cloud_interference_analysis_node.cpp
       src/bar_chart_plotter.cpp
       src/cloud_statistical_data.cpp
-      src/point_cloud_statistics.cpp)
+      src/point_cloud_statistics.cpp
+      src/organized_pointcloud.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -204,6 +206,7 @@ target_link_libraries(point_cloud_interference_analysis_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    datasets_info
+   organized_pointcloud
 )
 #############
 ## Install ##

@@ -53,14 +53,17 @@
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>multiple_lidar_interference_mitigation_bringup</build_depend>
+    <build_depend>velodyne_pointcloud</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>multiple_lidar_interference_mitigation_bringup</build_export_depend>
+  <build_export_depend>velodyne_pointcloud</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>multiple_lidar_interference_mitigation_bringup</exec_depend>
+  <exec_depend>velodyne_pointcloud</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
