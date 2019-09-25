@@ -42,47 +42,24 @@
 // writing to CSV file
 #include <fstream>
 
-#define _USE_MATH_DEFINES  // Define to use PI
-#include <math.h>
-
 #include <pcl/visualization/pcl_plotter.h>
+
+#include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
 
 typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
-double getAzimuth(double y, double x)
-{
-  return atan2(y, x) * 180.0d / (double)(M_PI);
-}
-
-unsigned int getAzimuthIndex(double y, double x)
-{
-  double shifted_azimuth = getAzimuth(y, x) + 180.0d;
-  double fixed_point_shifted_azimuth = floor(shifted_azimuth * 10.0d) / 10.0d;
-  double index = fixed_point_shifted_azimuth * 1800 / 360;
-  return (unsigned int)(index);
-
-  // std::cout << azimuth * 1800 / 360.0 << std::endl;
-}
-
-double computeEuclideanDistance(double x, double y, double z)
-{
-  return std::sqrt(x * x + y * y + z * z);
-}
-
-double computeEuclideanDistance(double x_1, double y_1, double z_1, double x_2, double y_2, double z_2)
-{
-  double x_diff = x_2 - x_1;
-  double y_diff = y_2 - y_1;
-  double z_diff = z_2 - z_1;
-
-  return std::sqrt(x_diff * x_diff + y_diff * y_diff + z_diff * z_diff);
-}
+//  template class organized_pointcloud::OrganizedPointCloud<velodyne_pointcloud::PointXYZIR>;  // forward declaration
+//  of
 
 int main(int argc, char** argv)
 {
   // Initialize ROS
   ros::init(argc, argv, "point_cloud_interference_analysis_node");
-
+  if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Warn))
+  {
+    ros::console::notifyLoggerLevelsChanged();
+  }
   if (argc != 2)
   {
     ROS_ERROR("Invalid number of arguments provided\n"
@@ -91,6 +68,13 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
+  // define Velodyne related constants
+  const unsigned int VLP16_LASER_COUNT = 16u;
+  const float AZIMUTHAL_ANGULAR_RESOLUTION = 0.2F;
+  const unsigned int AZIMUTHAL_UNIQUE_ANGLES_COUNT =
+      (unsigned int)ceil(point_cloud::organized::FULL_REVOLUTION_DEGREE_F / AZIMUTHAL_ANGULAR_RESOLUTION);
+
+  // Get full path to bags, giving the codename and the type of bag
   std::string ground_truth_full_bag_path =
       point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
   std::string interference_full_bag_path =
@@ -101,27 +85,34 @@ int main(int argc, char** argv)
             << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl
             << "Interference Full path: " << interference_full_bag_path << std::endl;
 
-  double organized_cloud_ground_truth[16][1800];
-  double organized_cloud_interference[16][1800];
-  double ground_truth_cloud[16][1800];
+  std::vector<double> ground_truth_errors, interference_errors, resolution_values;
+  std::vector<double>* ground_truth_errors_ptr;
+  std::vector<double>* interference_errors_ptr;
+  std::cout << "Vectors created:" << std::endl;
 
-  // Init Data Structures to quiet_NaN
-  for (int i = 0; i < 15; ++i)
-  {
-    for (int j = 0; j < 1800; ++j)
-    {
-      organized_cloud_ground_truth[i][j] = std::numeric_limits<double>::quiet_NaN();
-      organized_cloud_interference[i][j] = std::numeric_limits<double>::quiet_NaN();
-      ground_truth_cloud[i][j] = std::numeric_limits<double>::quiet_NaN();
-    }
-  }
+  //*ground_truth_errors_ptr = ground_truth_errors;
+  //*interference_errors_ptr = interference_errors;
+  std::cout << "Vectors assigned:" << std::endl;
 
-  std::vector<double> distance_ground, distance_interference;
+  // organized_pointcloud::
+  OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> ground_truth_model(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                          VLP16_LASER_COUNT);
+  // organized_pointcloud::
+  OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> ground_truth_cloud(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                          VLP16_LASER_COUNT);
+  // organized_pointcloud::
+  OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> interference_cloud(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                          VLP16_LASER_COUNT);
 
   VelodynePointCloud::Ptr current_msg_cloud_ptr(new VelodynePointCloud);
   VelodynePointCloud::Ptr ground_truth_ptr(new VelodynePointCloud);
-  // velodyne_pointcloud::PointcloudXYZIR::Ptr ground_truth_ptr(new velodyne_pointcloud::PointcloudXYZIR);
 
+  // Load Ground Truth Model
+  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
+  pcl::io::loadPCDFile<velodyne_pointcloud::PointXYZIR>(ground_truth_pcd, *ground_truth_ptr);
+
+  ground_truth_model.organizeVelodynePointCloud(*ground_truth_ptr);
+  std::cout << "Finishung" << std::endl;
   rosbag::Bag interference_bag, ground_truth_bag;
   ground_truth_bag.open(ground_truth_full_bag_path);  // open ground truth bag file
 
@@ -129,34 +120,10 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
-  // Load Ground Truth Model
-  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
-  pcl::io::loadPCDFile<velodyne_pointcloud::PointXYZIR>(ground_truth_pcd, *ground_truth_ptr);
-
-  std::vector<double> ground_truth_errors, interference_errors, resolution_values;
-
   interference_bag.open(interference_full_bag_path);  // Open interference bag
 
   rosbag::View interference_view(interference_bag, rosbag::TopicQuery(topics));
-
-  // point_cloud_statistics::CloudStatisticalData ground_truth_bag_stats =
-  // point_cloud_statistics::CloudStatisticalData(); point_cloud_statistics::CloudStatisticalData interference_bag_stats
-  // = point_cloud_statistics::CloudStatisticalData();
-
-  long long unsigned int mean = 0;
-  long long unsigned int msg_num_interference = 0;
-
-  // Instantiate octree-based point cloud change detection class
-
-  for (int i = 0; i < ground_truth_ptr->size(); ++i)
-  {
-    ground_truth_cloud[ground_truth_ptr->points[i].ring]
-                      [getAzimuthIndex(ground_truth_ptr->points[i].y, ground_truth_ptr->points[i].x)] =
-                          computeEuclideanDistance(ground_truth_ptr->points[i].x, ground_truth_ptr->points[i].y,
-                                                   ground_truth_ptr->points[i].z);
-  }
-
-  // Ground Truth Bag
+  std::cout << "GROUND TRUTH" << std::endl;
   foreach (rosbag::MessageInstance const m, ground_truth_view)
   {
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
@@ -165,38 +132,23 @@ int main(int argc, char** argv)
       VelodynePointCloud point_cloud;
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
-
-      mean += current_msg_cloud_ptr->size();
-      //++msg_num;
-
-      for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
-      {
-        organized_cloud_ground_truth[current_msg_cloud_ptr->points[i].ring][getAzimuthIndex(
-            current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
-            computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
-                                     current_msg_cloud_ptr->points[i].z);
-      }
-
-      for (int i = 0; i < 15; ++i)
-      {
-        for (int j = 0; j < 1800; ++j)
-        {
-          // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
-          distance_ground.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
-        }
-      }
-
-      for (int i = 0; i < 15; ++i)
-      {
-        for (int j = 0; j < 1800; ++j)
-        {
-          organized_cloud_ground_truth[i][j] = std::numeric_limits<double>::quiet_NaN();
-        }
-      }
+      // std::cout << "Read" << std::endl;
+      ground_truth_cloud.organizeVelodynePointCloud(*current_msg_cloud_ptr);
+      // std::cout << "Organized" << std::endl;
+      ground_truth_cloud.computeDistanceBetweenPointClouds(ground_truth_model, ground_truth_errors);
+      // std::cout << "Computed" << std::endl;
+      ground_truth_cloud.clearPointsFromPointcloud();
+      // std::cout << "Cleared" << std::endl;
     }
   }
-
-  // Interference Bag
+  std::cout << "Print Ground Truth " << std::endl;
+  /*
+    for (int i = 0; i < ground_truth_errors.size(); ++i)
+    {
+      std::cout << ground_truth_errors[i] << std::endl;
+    }
+  */
+  std::cout << "Ground truth done " << std::endl;
   foreach (rosbag::MessageInstance const m, interference_view)
   {
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
@@ -206,50 +158,128 @@ int main(int argc, char** argv)
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
-      mean += current_msg_cloud_ptr->size();
-      ++msg_num_interference;
+      // std::cout << "Read I" << std::endl;
+      interference_cloud.organizeVelodynePointCloud(*current_msg_cloud_ptr);
+      // std::cout << "Organized I" << std::endl;
+      interference_cloud.computeDistanceBetweenPointClouds(ground_truth_model, interference_errors);
+      // std::cout << "Computed I " << std::endl;
+      interference_cloud.clearPointsFromPointcloud();
+      // std::cout << "ClearedI " << std::endl;
+    }
+  }
+  std::cout << "Bags Read" << std::endl;
 
-      for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
-      {
-        organized_cloud_interference[current_msg_cloud_ptr->points[i].ring][getAzimuthIndex(
-            current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
-            computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
-                                     current_msg_cloud_ptr->points[i].z);
-      }
+  // std::vector<double> ground_truth_errors = ground_truth_errors, interference_errors = interference_errors;
+  // std::cout << "Finishung" << std::endl;
 
-      for (int i = 0; i < 15; ++i)
+  // long long unsigned int mean = 0;
+  // long long unsigned int msg_num_interference = 0;
+
+  // Instantiate octree-based point cloud change detection class
+  /*
+    for (int i = 0; i < ground_truth_ptr->size(); ++i)
+    {
+      ground_truth_cloud[ground_truth_ptr->points[i].ring]
+                        [getAzimuthIndex(ground_truth_ptr->points[i].y, ground_truth_ptr->points[i].x)] =
+                            computeEuclideanDistance(ground_truth_ptr->points[i].x, ground_truth_ptr->points[i].y,
+                                                     ground_truth_ptr->points[i].z);
+    }
+
+    // Ground Truth Bag
+    foreach (rosbag::MessageInstance const m, ground_truth_view)
+    {
+      sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
+      if (msg != NULL)
       {
-        for (int j = 0; j < 1800; ++j)
+        VelodynePointCloud point_cloud;
+        fromROSMsg(*msg, point_cloud);
+        *current_msg_cloud_ptr = point_cloud;
+
+        mean += current_msg_cloud_ptr->size();
+        //++msg_num;
+
+        for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
         {
-          // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
-          distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
+          organized_cloud_ground_truth[current_msg_cloud_ptr->points[i].ring][getAzimuthIndex(
+              current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
+              computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
+                                       current_msg_cloud_ptr->points[i].z);
         }
-      }
 
-      for (int i = 0; i < 15; ++i)
-      {
-        for (int j = 0; j < 1800; ++j)
+        for (int i = 0; i < 15; ++i)
         {
-          organized_cloud_interference[i][j] = std::numeric_limits<double>::quiet_NaN();
+          for (int j = 0; j < 1800; ++j)
+          {
+            // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
+            ground_truth_errors.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
+          }
+        }
+
+        for (int i = 0; i < 15; ++i)
+        {
+          for (int j = 0; j < 1800; ++j)
+          {
+            organized_cloud_ground_truth[i][j] = std::numeric_limits<double>::quiet_NaN();
+          }
         }
       }
     }
-  }
 
-  std::cout << "Nº messages received: " << msg_num_interference << std::endl
-            << "Nº points measures" << mean << std::endl
-            << "Average Points per message: " << (1.0d * mean) / msg_num_interference << std::endl;
+    // Interference Bag
+    foreach (rosbag::MessageInstance const m, interference_view)
+    {
+      sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
+      if (msg != NULL)
+      {
+        VelodynePointCloud point_cloud;
+        fromROSMsg(*msg, point_cloud);
+        *current_msg_cloud_ptr = point_cloud;
 
+        mean += current_msg_cloud_ptr->size();
+        ++msg_num_interference;
+
+        for (int i = 0; i < current_msg_cloud_ptr->size(); ++i)
+        {
+          organized_cloud_interference[current_msg_cloud_ptr->points[i].ring][getAzimuthIndex(
+              current_msg_cloud_ptr->points[i].y, current_msg_cloud_ptr->points[i].x)] =
+              computeEuclideanDistance(current_msg_cloud_ptr->points[i].x, current_msg_cloud_ptr->points[i].y,
+                                       current_msg_cloud_ptr->points[i].z);
+        }
+
+        for (int i = 0; i < 15; ++i)
+        {
+          for (int j = 0; j < 1800; ++j)
+          {
+            // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
+            interference_errors.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
+          }
+        }
+
+        for (int i = 0; i < 15; ++i)
+        {
+          for (int j = 0; j < 1800; ++j)
+          {
+            organized_cloud_interference[i][j] = std::numeric_limits<double>::quiet_NaN();
+          }
+        }
+      }
+    }
+
+
+    std::cout << "Nº messages received: " << msg_num_interference << std::endl
+              << "Nº points measures" << mean << std::endl
+              << "Average Points per message: " << (1.0d * mean) / msg_num_interference << std::endl;
+  */
   /*
     for (int i = 0; i < 15; ++i)
     {
       for (int j = 0; j < 1800; ++j)
       {
         // std::cout << abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]) << std::endl;
-        distance_ground.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
+        ground_truth_errors.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_ground_truth[i][j]));
         std::cout << ground_truth_cloud[i][j] << " - " << organized_cloud_interference[i][j] << " = "
                   << abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]) << std::endl;
-        distance_interference.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
+        interference_errors.push_back(abs(ground_truth_cloud[i][j] - organized_cloud_interference[i][j]));
       }
     }
   */
@@ -263,62 +293,84 @@ int main(int argc, char** argv)
     x_axis[i] = (double)(i)*0.1;
   }
 
+  std::cout << "Relative vectors" << std::endl;
   unsigned int total_valid_points_ground;
   unsigned int total_valid_points_interference;
 
   double relative_valid_points_ground[1000];
   double relative_valid_points_interference[1000];
-  for (int i = 0; i < distance_ground.size(); ++i)
+
+  std::cout << "Ground Truth Errors" << std::endl;
+  for (int i = 0; i < ground_truth_errors.size(); ++i)
   {
     /*
-  std::cout << distance_interference[i] << std::endl;
-  std::cout << distance_interference[i] * 10.0d << std::endl;
-  std::cout << floor(distance_interference[i] * 10.0d) << std::endl;
-  std::cout << (unsigned int)(floor(distance_interference[i] * 10.0d)) << std::endl;
+  std::cout << interference_errors[i] << std::endl;
+  std::cout << interference_errors[i] * 10.0d << std::endl;
+  std::cout << floor(interference_errors[i] * 10.0d) << std::endl;
+  std::cout << (unsigned int)(floor(interference_errors[i] * 10.0d)) << std::endl;
   */
-    if (distance_ground[i] != std::numeric_limits<double>::quiet_NaN())
+    if (ground_truth_errors[i] != std::numeric_limits<double>::quiet_NaN())
     {
-      ++relative_freq_ground[(unsigned int)(floor(distance_ground[i] * 100.0d))];
+      ++relative_freq_ground[(unsigned int)(floor(ground_truth_errors[i] * 10.0d))];
       ++total_valid_points_ground;
     }
-    if (distance_interference[i] != std::numeric_limits<double>::quiet_NaN())
+  }
+
+  std::cout << "Interfernce Errors SIze:" << interference_errors.size() << std::endl;
+  for (int i = 0; i < interference_errors.size(); ++i)
+  {
+    if (interference_errors[i] != std::numeric_limits<double>::quiet_NaN())
     {
-      ++relative_freq_interference[(unsigned int)(floor(distance_interference[i] * 100.0d))];
-      ++total_valid_points_interference;
+      unsigned int index = (unsigned int)(floor(interference_errors[i] * 10.0d));
+      // std::cout << index << std::endl;
+      if (index < (sizeof(relative_freq_interference) / sizeof(*relative_freq_interference)))
+      {
+        ++relative_freq_interference[index];
+        ++total_valid_points_interference;
+      }
+      else
+      {
+        ROS_WARN("Index out of bounds: %d", index);
+      }
     }
   }
+  std::cout << "Relative Interference Computed" << std::endl;
   /*
   for (int i = 0; i < 1000; ++i)
   {
     relative_freq_ground[i] = relative_freq_ground[i] == 0 ? 0 : abs(log10(relative_freq_ground[i]));
-    relative_freq_interference[i] = relative_freq_interference[i] == 0 ? 0 : abs(log10(relative_freq_interference[i]));
+    relative_freq_interference[i] = relative_freq_interference[i] == 0 ? 0 :
+  abs(log10(relative_freq_interference[i]));
   }
   */
+
   std::cout << "done" << std::endl;
   ground_truth_bag.close();  // close ground truth bag file
   interference_bag.close();  // close interference bag
+
+  std::cout << "Close" << std::endl;
   /*
-  pcl::visualization::PCLPlotter* plotter = new pcl::visualization::PCLPlotter("Ground");
-  plotter->setTitle("Ground");  // global title
-  plotter->setXTitle("Absolute Distance");
-  plotter->setYTitle("Logarithmic");
-  plotter->setShowLegend(true);  // show legends
+    pcl::visualization::PCLPlotter* plotter = new pcl::visualization::PCLPlotter("Ground");
+    plotter->setTitle("Ground");  // global title
+    plotter->setXTitle("Absolute Distance");
+    plotter->setYTitle("Logarithmic");
+    plotter->setShowLegend(true);  // show legends
 
-  plotter->addHistogramData(distance_ground, 200, "Ground_Truth_Comparison");  // number of bins are 10
-  // plotter->setXRange(0, 20);
-  plotter->plot();
+    plotter->addHistogramData(ground_truth_errors, 200, "Ground_Truth_Comparison");  // number of bins are 10
+    // plotter->setXRange(0, 20);
+    plotter->plot();
 
-  pcl::visualization::PCLPlotter* plotter2 = new pcl::visualization::PCLPlotter("Interference");
-  plotter2->setTitle("Interference");  // global title
-  plotter2->setXTitle("Absolute Distance");
-  plotter2->setYTitle("Logarithmic");
-  plotter2->setShowLegend(true);  // show legends
+    pcl::visualization::PCLPlotter* plotter2 = new pcl::visualization::PCLPlotter("Interference");
+    plotter2->setTitle("Interference");  // global title
+    plotter2->setXTitle("Absolute Distance");
+    plotter2->setYTitle("Logarithmic");
+    plotter2->setShowLegend(true);  // show legends
 
-  plotter2->addHistogramData(distance_interference, 200, "Interference_Comparison");  // number of bins are 10
-  // plotter2->setXRange(0, 20);
+    plotter2->addHistogramData(interference_errors, 200, "Interference_Comparison");  // number of bins are 10
+    // plotter2->setXRange(0, 20);
 
-  plotter2->plot();
-*/
+    plotter2->plot();
+  */
   for (int i = 0; i < 1000; ++i)
   {
     relative_valid_points_ground[i] = relative_freq_ground[i] / total_valid_points_ground;
@@ -334,29 +386,30 @@ int main(int argc, char** argv)
   double interference = 0;
   for (int i = 1; i < 1000; ++i)
   {
-    interference += relative_freq_interference[i];
+    interference += (double)relative_freq_interference[i];
   }
 
   std::cout << "Interference: " << interference / total_valid_points_interference << std::endl;
 
   // Create Bar Plot object with Full HD resolution and the description for the data
-  BarChartPlotter* plotter =
+  BarChartPlotter* plotter3 =
       new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
                           "Voxel edge Resolution", "Outliers/Inliers");
 
   // Add the outliers of the interfered and ground truth datasets
-  plotter->setColorScheme(vtkColorSeries::WARM);
-  plotter->addBarPlotData(x_axis, relative_freq_interference, 1000, "Interference Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::BLUES);
-  plotter->addBarPlotData(x_axis, relative_freq_ground, 1000, "Ground Truth Bag vs Ground Truth Model");
+  plotter3->setColorScheme(vtkColorSeries::WARM);
+  plotter3->addBarPlotData(x_axis, relative_freq_interference, 1000, "Interference Bag vs Ground Truth Model");
+  plotter3->setColorScheme(vtkColorSeries::BLUES);
+  plotter3->addBarPlotData(x_axis, relative_freq_ground, 1000, "Ground Truth Bag vs Ground Truth Model");
 
-  plotter->plot();  // holds here until window is given the closing instruction
+  plotter3->plot();  // holds here until window is given the closing instruction
 
   // Saves the bar chart as a PNG file on the dataset directory
   std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
-  plotter->saveBarChartPNG(bar_chart_filename);
+  plotter3->saveBarChartPNG(bar_chart_filename);
   std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
-  plotter->close();  // Destroys bar chart object
+  plotter3->close();  // Destroys bar chart object
+
   return EXIT_SUCCESS;
 }
