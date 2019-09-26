@@ -93,6 +93,8 @@ extern const std::string GROUND_TRUTH_FINAL_BAG_NAME;
 extern const std::string INTERFERENCE_BAG_NAME;
 extern const std::string RAW_BAG_NAME;
 
+extern const std::string GROUND_TRUTH_MODEL_FILENAME;
+
 extern const std::string CLOSER_DISTANCE_AFFIX;
 extern const std::string HALFWAY_DISTANCE_AFFIX;
 extern const std::string FURTHER_DISTANCE_AFFIX;

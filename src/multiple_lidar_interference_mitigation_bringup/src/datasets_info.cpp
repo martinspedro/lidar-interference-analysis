@@ -107,6 +107,8 @@ const std::string GROUND_TRUTH_FINAL_BAG_NAME;
 const std::string INTERFERENCE_BAG_NAME = "interference.bag";
 const std::string RAW_BAG_NAME = "original_raw.bag";
 
+const std::string GROUND_TRUTH_MODEL_FILENAME = "ground_truth_model.pcd";
+
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
 const std::string FURTHER_DISTANCE_AFFIX = "further";
