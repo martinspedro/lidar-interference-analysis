@@ -23,6 +23,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(PCL REQUIRED COMPONENTS common visualization)
 find_package(VTK)
 
+find_package(PythonLibs 2.7)
+
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -126,8 +128,8 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
 )
-
 # Declare a C++ library
 #add_library(organized_pointcloud
 #   include/point_cloud_statistics/organized_pointcloud.hpp
@@ -205,8 +207,10 @@ target_link_libraries(ground_truth_model_estimation_node
 target_link_libraries(point_cloud_interference_analysis_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
+   ${PYTHON_LIBRARIES}
    datasets_info
 )
+
 #############
 ## Install ##
 #############
