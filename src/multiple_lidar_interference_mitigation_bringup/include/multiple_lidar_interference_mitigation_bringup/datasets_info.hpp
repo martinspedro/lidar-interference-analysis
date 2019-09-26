@@ -12,6 +12,7 @@
 namespace datasets_path
 {
 const std::string getTestScenarioDatasetFullPath(const std::string test_name);
+void printAvailableCodenames(void);
 
 extern const std::string DATASETS_FULL_PATH;
 

@@ -6,6 +6,7 @@
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 #include <map>
+#include <iostream>
 
 namespace datasets_path
 {
@@ -199,6 +200,15 @@ const std::string getTestScenarioDatasetFullPath(const std::string test_name)
   else
   {
     throw std::out_of_range("Dataset key is invalid");
+  }
+}
+
+void printAvailableCodenames(void)
+{
+  std::cout << "Codename -> full path to test scenario folder" << std::endl;
+  for (auto& element : datasets_map)
+  {
+    std::cout << element.first << " -> " << element.second << std::endl;
   }
 }
 }  // namespace datasets_path
