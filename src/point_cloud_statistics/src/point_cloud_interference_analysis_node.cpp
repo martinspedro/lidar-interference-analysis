@@ -25,7 +25,9 @@
 
 #include <string>
 #include <vector>
+#include <array>
 #include <iostream>
+#include <algorithm>
 
 // Bar Graph related includes
 #include <vtkColorSeries.h>
@@ -46,7 +48,7 @@
 
 typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
-#include "./matplotlibcpp.h"
+#include "matplotlib-cpp/matplotlibcpp.h"
 
 int main(int argc, char** argv)
 {
@@ -96,8 +98,6 @@ int main(int argc, char** argv)
 
   ground_truth_model.organizeVelodynePointCloud(*ground_truth_model_ptr);
 
-  std::cout << "Ground Truth Model Loaded" << std::endl;
-
   // Load Bags
   rosbag::Bag interference_bag, ground_truth_bag;
   ground_truth_bag.open(ground_truth_full_bag_path);  // open ground truth bag file
@@ -129,7 +129,6 @@ int main(int argc, char** argv)
     }
   }
 
-  std::cout << "Ground truth done " << std::endl;
   foreach (rosbag::MessageInstance const m, interference_view)
   {
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
@@ -152,47 +151,79 @@ int main(int argc, char** argv)
   interference_bag.close();  // close interference bag
 
   std::cout << "Nº messages received: " << msg_num_interference << std::endl
-            << "Nº points measures" << mean << std::endl
+            << "Nº points measures: " << mean << std::endl
             << "Average Points per message: " << (1.0d * mean) / msg_num_interference << std::endl;
 
   // Statistical part of Code
-  double relative_freq_ground[1000], relative_freq_interference[1000];
-  double x_axis[1000];
+  const double DISTANCE_RESOLUTION = 0.1d;    // in meters
+  const unsigned int MAXIMUM_DISTANCE = 130;  // in meters
+  const unsigned int UNIQUE_DISTANCES_COUNT = (unsigned int)(ceil(MAXIMUM_DISTANCE / DISTANCE_RESOLUTION));
 
-  for (int i = 0; i < 1000; ++i)
+  std::fstream fout;  // file pointer
+  std::string interference_distance_errors = point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_"
+                                                                                                         "distance_"
+                                                                                                         "errors.csv");
+  fout.open(interference_distance_errors, std::ios::out);  // creates a new csv file with writing permission
+  for (int i = 0; i < interference_errors.size(); i += VLP16_LASER_COUNT)
   {
-    relative_freq_ground[i] = 0;
-    relative_freq_interference[i] = 0;
+    for (int j = i; j < i + VLP16_LASER_COUNT; ++j)
+    {
+      fout << interference_errors[j] << ", ";
+    }
+    fout << "\n";
+  }
+  fout.close();
+
+  std::cout << "Interference Results saved on csv file on: " << interference_distance_errors << std::endl;
+
+  std::string ground_truth_distance_errors = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_"
+                                                                                                         "distance_"
+                                                                                                         "errors.csv");
+  fout.open(ground_truth_distance_errors, std::ios::out);  // creates a new csv file with writing permission
+  for (int i = 0; i < ground_truth_errors.size(); i += VLP16_LASER_COUNT)
+  {
+    for (int j = i; j < i + VLP16_LASER_COUNT; ++j)
+    {
+      fout << ground_truth_errors[j] << ", ";
+    }
+    fout << "\n";
+  }
+  fout.close();
+
+  std::cout << "Interference Results saved on csv file on: " << ground_truth_distance_errors << std::endl;
+
+  // create arrays to count the frequency of interference and use default value initialization
+  std::array<int, UNIQUE_DISTANCES_COUNT> ground_truth_freq_count{}, interference_freq_count{};
+  std::array<double, UNIQUE_DISTANCES_COUNT> ground_truth_relative_freq_count{}, interference_relative_freq_count{};
+
+  // Create array to hold x_axis values and initialize it
+  std::array<double, UNIQUE_DISTANCES_COUNT> x_axis{};
+  for (int i = 0; i < UNIQUE_DISTANCES_COUNT; ++i)
+  {
     x_axis[i] = (double)(i)*0.1;
   }
 
-  std::cout << "Relative vectors" << std::endl;
-  unsigned int total_valid_points_ground;
-  unsigned int total_valid_points_interference;
+  unsigned int total_valid_points_ground = 0;
+  unsigned int total_valid_points_interference = 0;
 
-  double relative_valid_points_ground[1000];
-  double relative_valid_points_interference[1000];
-
-  std::cout << "Ground Truth Errors" << std::endl;
   for (int i = 0; i < ground_truth_errors.size(); ++i)
   {
     if (ground_truth_errors[i] != std::numeric_limits<double>::quiet_NaN())
     {
-      ++relative_freq_ground[(unsigned int)(floor(ground_truth_errors[i] * 10.0d))];
+      ++ground_truth_freq_count[(unsigned int)(floor(ground_truth_errors[i] / DISTANCE_RESOLUTION))];
       ++total_valid_points_ground;
     }
   }
 
-  std::cout << "Interfernce Errors SIze:" << interference_errors.size() << std::endl;
   for (int i = 0; i < interference_errors.size(); ++i)
   {
     if (interference_errors[i] != std::numeric_limits<double>::quiet_NaN())
     {
-      unsigned int index = (unsigned int)(floor(interference_errors[i] * 10.0d));
+      unsigned int index = (unsigned int)(floor(interference_errors[i] / DISTANCE_RESOLUTION));
       // std::cout << index << std::endl;
-      if (index < (sizeof(relative_freq_interference) / sizeof(*relative_freq_interference)))
+      if (index < interference_freq_count.size())
       {
-        ++relative_freq_interference[index];
+        ++interference_freq_count[index];
         ++total_valid_points_interference;
       }
       else
@@ -202,61 +233,51 @@ int main(int argc, char** argv)
     }
   }
   std::cout << "Relative Interference Computed" << std::endl;
-
-  std::cout << "done" << std::endl;
-
   /*
-    for (int i = 0; i < 1000; ++i)
-    {
-      relative_valid_points_ground[i] = relative_freq_ground[i] / total_valid_points_ground;
-      relative_valid_points_interference[i] = relative_freq_interference[i] / total_valid_points_interference;
+    // Create Bar Plot object with Full HD resolution and the description for the data
+    BarChartPlotter* plotter =
+        new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                            "Voxel edge Resolution", "Outliers/Inliers");
 
-      if (i < 50)
-      {
-        std::cout << i * 0.1 << ": " << relative_valid_points_ground[i] << " | " <<
-    relative_valid_points_interference[i]
-                  << std::endl;
-      }
-    }
+    // Add the outliers of the interfered and ground truth datasets
+    plotter->setColorScheme(vtkColorSeries::WARM);
+    plotter->addBarPlotData(x_axis, interference_freq_count, 1000, "Interference Bag vs Ground Truth Model");
+    plotter->setColorScheme(vtkColorSeries::BLUES);
+    plotter->addBarPlotData(x_axis, ground_truth_freq_count, 1000, "Ground Truth Bag vs Ground Truth Model");
+
+    plotter->plot();  // holds here until window is given the closing instruction
+
+    // Saves the bar chart as a PNG file on the dataset directory
+    std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
+    plotter->saveBarChartPNG(bar_chart_filename);
+    std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+
+    plotter->close();  // Destroys bar chart object
   */
-  double interference = 0;
-  for (int i = 1; i < 1000; ++i)
+  std::vector<double> aux, x_axis_v;
+  for (int i = 0; i < UNIQUE_DISTANCES_COUNT; ++i)
   {
-    interference += (double)relative_freq_interference[i];
-  }
-
-  std::cout << "Interference: " << interference / total_valid_points_interference << std::endl;
-
-  // Create Bar Plot object with Full HD resolution and the description for the data
-  BarChartPlotter* plotter =
-      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
-                          "Voxel edge Resolution", "Outliers/Inliers");
-
-  // Add the outliers of the interfered and ground truth datasets
-  plotter->setColorScheme(vtkColorSeries::WARM);
-  plotter->addBarPlotData(x_axis, relative_freq_interference, 1000, "Interference Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::BLUES);
-  plotter->addBarPlotData(x_axis, relative_freq_ground, 1000, "Ground Truth Bag vs Ground Truth Model");
-
-  plotter->plot();  // holds here until window is given the closing instruction
-
-  // Saves the bar chart as a PNG file on the dataset directory
-  std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
-  plotter->saveBarChartPNG(bar_chart_filename);
-  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
-
-  plotter->close();  // Destroys bar chart object
-
-  std::vector<float> aux, x_axis_v;
-  for (int i = 0; i < 1000; ++i)
-  {
-    aux.push_back(relative_freq_ground[i]);
+    aux.push_back(ground_truth_freq_count[i]);
     x_axis_v.push_back(x_axis[i]);
   }
 
   if (!matplotlibcpp::semilogy(x_axis_v, aux))
   {
     ROS_WARN("No graph produced");
+  }
+
+  interference_errors.erase(
+      std::remove(interference_errors.begin(), interference_errors.end(), std::numeric_limits<double>::quiet_NaN()),
+      interference_errors.end());
+
+  if (!matplotlibcpp::bar(x_axis_v, interference_errors))
+  {
+    ROS_WARN("No bar2 produced");
+  }
+
+  if (!matplotlibcpp::hist(interference_errors))
+  {
+    ROS_WARN("No hist produced");
   }
 
   matplotlibcpp::show();
