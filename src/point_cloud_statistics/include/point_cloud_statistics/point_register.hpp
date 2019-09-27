@@ -15,10 +15,10 @@ struct PointRegister
   float distance_mean;
   float distance_var;
   // float distance_sigma;
+
   float intensity_mean;
   float intensity_var;
   // float distance_sigma;
-  int ring;
 
   union
   {
@@ -30,6 +30,7 @@ struct PointRegister
       float z;
     };
   };
+  int ring;
 
   std::vector<T> data;
   std::vector<float> distance;
