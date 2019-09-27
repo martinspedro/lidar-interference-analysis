@@ -34,6 +34,18 @@
 #include <velodyne_pointcloud/point_types.h>
 typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
+#include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
+#include "point_cloud_statistics/point_register.hpp"
+
+#include "matplotlib-cpp/matplotlibcpp.h"
+
+struct intensity
+{
+  float mean;
+  float variance;
+};
+
 int main(int argc, char** argv)
 {
   // Initialize ROS
@@ -45,13 +57,24 @@ int main(int argc, char** argv)
 
     return EXIT_FAILURE;
   }
+  // define Velodyne related constants
+  const unsigned int VLP16_LASER_COUNT = 16u;
+  const float AZIMUTHAL_ANGULAR_RESOLUTION = 0.2F;
+  const unsigned int AZIMUTHAL_UNIQUE_ANGLES_COUNT =
+      (unsigned int)ceil(point_cloud::organized::FULL_REVOLUTION_DEGREE_F / AZIMUTHAL_ANGULAR_RESOLUTION);
 
   std::string ground_truth_full_bag_path =
       point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
 
-  std::cout << "GROUND TRUTH GENERATION" << std::endl
-            << "Test folder name is: " << argv[1] << std::endl
-            << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl;
+  ROS_INFO_STREAM("\nGROUND TRUTH GENERATION: " << std::endl
+                                                << "- Test folder name is: " << argv[1] << std::endl
+                                                << "- Ground Truth Full path: " << ground_truth_full_bag_path
+                                                << std::endl);
+
+  point_cloud::organized::OrganizedPointCloud<PointRegister<velodyne_pointcloud::PointXYZIR> > ground_truth_dataset(
+      AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> ground_truth_model(
+      AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
 
   VelodynePointCloud::Ptr ground_truth_ptr(new VelodynePointCloud);
   // PointCloud::Ptr ground_truth_ptr(new PointCloud);
@@ -71,7 +94,7 @@ int main(int argc, char** argv)
   VelodynePointCloud::Ptr result(new VelodynePointCloud), source(new VelodynePointCloud),
       target(new VelodynePointCloud);
   // PointCloud::Ptr result(new PointCloud), source(new PointCloud), target(new PointCloud);
-  Eigen::Matrix4f GlobalTransform = Eigen::Matrix4f::Identity(), pairTransform;
+  // Eigen::Matrix4f GlobalTransform = Eigen::Matrix4f::Identity(), pairTransform;
 
   foreach (rosbag::MessageInstance const m, ground_truth_view)
   {
@@ -82,6 +105,12 @@ int main(int argc, char** argv)
       // PointCloud ground_truth_point_cloud;
       fromROSMsg(*msg, ground_truth_point_cloud);
       *ground_truth_ptr = ground_truth_point_cloud;
+
+      ground_truth_dataset.registerVelodynePointCloud(*ground_truth_ptr);
+
+      // ground_truth_model.computeDistanceBetweenPointClouds(ground_truth_model, ground_truth_errors);
+      // ground_truth_model.clearPointsFromPointcloud();
+
       //*result = ground_truth_point_cloud;
       // std::cout << "(" << msg->width << ", " << msg->height << ")" << std::endl;
       /*
@@ -125,8 +154,25 @@ int main(int argc, char** argv)
         break;
       }
       */
-      break;
     }
+  }
+
+  ground_truth_bag.close();  // close ground truth bag file
+
+  std::vector<intensity> azimuth(AZIMUTHAL_UNIQUE_ANGLES_COUNT);
+  std::vector<intensity> laser(VLP16_LASER_COUNT);
+  ground_truth_dataset.computeStats<velodyne_pointcloud::PointXYZIR, intensity>(azimuth, laser);
+
+  ground_truth_model.generateModel<PointRegister<velodyne_pointcloud::PointXYZIR> >(ground_truth_dataset);
+
+  for (int i = 0; i < azimuth.size(); ++i)
+  {
+    std::cout << i << ": " << azimuth[i].mean << std::endl;
+  }
+
+  for (int i = 0; i < laser.size(); ++i)
+  {
+    std::cout << i << ": " << laser[i].mean << std::endl;
   }
 
   // save aligned pair, transformed into the first cloud's frame
@@ -170,10 +216,30 @@ int main(int argc, char** argv)
   pcl::io::savePCDFile(ss.str(), *ground_truth_ptr, true);
 
   ss.str(std::string());  // clear stringstream buffer
-  ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
-  pcl::io::savePCDFile(ss.str(), *ground_truth_ptr, true);
+  ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
+  pcl::io::savePCDFile(ss.str(), ground_truth_model, true);
 
-  ground_truth_bag.close();  // close ground truth bag file
+  std::cout << "Ground Truth Model saved on "
+            << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd") << std::endl;
+
+  std::vector<std::vector<float> > x, y, z;
+
+  for (int i = 0; i < AZIMUTHAL_UNIQUE_ANGLES_COUNT; ++i)
+  {
+    std::vector<float> x_row, y_row, z_row;
+    for (int j = 0; j < VLP16_LASER_COUNT; ++j)
+    {
+      x_row.push_back(i);
+      y_row.push_back(j);
+      z_row.push_back(ground_truth_dataset.at(i, j).distance_var);
+    }
+    x.push_back(x_row);
+    y.push_back(y_row);
+    z.push_back(z_row);
+  }
+
+  matplotlibcpp::plot_surface(x, y, z);
+  matplotlibcpp::show();
 
   return EXIT_SUCCESS;
 }
