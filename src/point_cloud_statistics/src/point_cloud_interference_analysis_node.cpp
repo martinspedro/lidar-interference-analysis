@@ -92,8 +92,8 @@ int main(int argc, char** argv)
       AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
 
   // Load Ground Truth Model for desired Test Scenario
-  std::string ground_truth_pcd =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_MODEL_FILENAME);
+  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new."
+                                                                                             "pcd");
   pcl::io::loadPCDFile<velodyne_pointcloud::PointXYZIR>(ground_truth_pcd, *ground_truth_model_ptr);
 
   ground_truth_model.organizeVelodynePointCloud(*ground_truth_model_ptr);
@@ -203,8 +203,8 @@ int main(int argc, char** argv)
     x_axis[i] = (double)(i)*0.1;
   }
 
-  unsigned int total_valid_points_ground = 0;
-  unsigned int total_valid_points_interference = 0;
+  double total_valid_points_ground = 0;
+  double total_valid_points_interference = 0;
 
   for (int i = 0; i < ground_truth_errors.size(); ++i)
   {
@@ -233,48 +233,54 @@ int main(int argc, char** argv)
     }
   }
   std::cout << "Relative Interference Computed" << std::endl;
-  /*
-    // Create Bar Plot object with Full HD resolution and the description for the data
-    BarChartPlotter* plotter =
-        new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
-                            "Voxel edge Resolution", "Outliers/Inliers");
 
-    // Add the outliers of the interfered and ground truth datasets
-    plotter->setColorScheme(vtkColorSeries::WARM);
-    plotter->addBarPlotData(x_axis, interference_freq_count, 1000, "Interference Bag vs Ground Truth Model");
-    plotter->setColorScheme(vtkColorSeries::BLUES);
-    plotter->addBarPlotData(x_axis, ground_truth_freq_count, 1000, "Ground Truth Bag vs Ground Truth Model");
+  std::vector<double> x_axis_v(x_axis.begin(), x_axis.end()),
+      interference_freq_count_v(interference_freq_count.begin(), interference_freq_count.end()),
+      ground_truth_freq_count_v(ground_truth_freq_count.begin(), ground_truth_freq_count.end());
 
-    plotter->plot();  // holds here until window is given the closing instruction
-
-    // Saves the bar chart as a PNG file on the dataset directory
-    std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
-    plotter->saveBarChartPNG(bar_chart_filename);
-    std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
-
-    plotter->close();  // Destroys bar chart object
-  */
-  std::vector<double> aux, x_axis_v;
-  for (int i = 0; i < UNIQUE_DISTANCES_COUNT; ++i)
+  for (int i = 0; i < interference_freq_count_v.size(); ++i)
   {
-    aux.push_back(ground_truth_freq_count[i]);
-    x_axis_v.push_back(x_axis[i]);
+    interference_freq_count_v[i] /= total_valid_points_interference;
   }
 
-  if (!matplotlibcpp::semilogy(x_axis_v, aux))
+  for (int i = 0; i < ground_truth_freq_count_v.size(); ++i)
+  {
+    ground_truth_freq_count_v[i] /= total_valid_points_ground;
+  }
+  // Create Bar Plot object with Full HD resolution and the description for the data
+  BarChartPlotter* plotter =
+      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                          "Voxel edge Resolution", "Outliers/Inliers");
+
+  // Add the outliers of the interfered and ground truth datasets
+  plotter->setColorScheme(vtkColorSeries::WARM);
+  plotter->addBarPlotData(x_axis_v, interference_freq_count_v, "Interference Bag vs Ground Truth Model");
+  plotter->setColorScheme(vtkColorSeries::BLUES);
+  plotter->addBarPlotData(x_axis_v, ground_truth_freq_count_v, "Ground Truth Bag vs Ground Truth Model");
+
+  plotter->plot();  // holds here until window is given the closing instruction
+
+  // Saves the bar chart as a PNG file on the dataset directory
+  std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
+  plotter->saveBarChartPNG(bar_chart_filename);
+  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+
+  plotter->close();  // Destroys bar chart object
+
+  if (!matplotlibcpp::semilogy(x_axis_v, ground_truth_freq_count_v))
   {
     ROS_WARN("No graph produced");
   }
-
+  matplotlibcpp::show();
   interference_errors.erase(
       std::remove(interference_errors.begin(), interference_errors.end(), std::numeric_limits<double>::quiet_NaN()),
       interference_errors.end());
 
-  if (!matplotlibcpp::bar(x_axis_v, interference_errors))
+  if (!matplotlibcpp::bar(x_axis_v, interference_freq_count_v))
   {
     ROS_WARN("No bar2 produced");
   }
-
+  matplotlibcpp::show();
   if (!matplotlibcpp::hist(interference_errors))
   {
     ROS_WARN("No hist produced");
