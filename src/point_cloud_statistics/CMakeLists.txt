@@ -155,7 +155,8 @@ add_executable(point_cloud_change_detection_node
 
 add_executable(ground_truth_model_estimation_node
       src/ground_truth_model_estimation_node.cpp
-      src/point_cloud_statistics.cpp)
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp)
 
 add_executable(point_cloud_interference_analysis_node
       src/point_cloud_interference_analysis_node.cpp
