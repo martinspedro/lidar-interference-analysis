@@ -116,6 +116,121 @@ public:
       }
     }
   }
+  template <class DataT>
+  float getAzimuth2(const DataT point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[getAzimuth]");
+    return atan2(point.y, point.x) * point_cloud::organized::RADIAN_TO_DEGREE_F;
+  }
+
+  template <class DataT>
+  unsigned int getAzimuthIndex2(const DataT point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[getAzimuthIndex]");
+    float shifted_azimuth = OrganizedPointCloud<PointT>::getAzimuth2<DataT>(point) +
+                            point_cloud::organized::DEGREE_OFFSET_TO_POSITIVE_ANGLE_F;
+    float fixed_point_shifted_azimuth = floor(shifted_azimuth * 10.0f) / 10.0f;
+    float index =
+        fixed_point_shifted_azimuth * (float)(this->width - 1) / point_cloud::organized::FULL_REVOLUTION_DEGREE_F;
+
+    return (unsigned int)(index);
+  }
+
+  template <class DataT>
+  float computeEuclideanDistanceToOrigin2(DataT point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[computeEuclideanDistanceToOrigin]");
+    return std::sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
+  }
+
+  template <class DataT>
+  void registerVelodynePointCloud(pcl::PointCloud<DataT> unorganized_cloud)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[registerVelodynePointCloud]");
+    // this->header = unorganized_cloud.header;  // use sequence number, stamp and frame_id from the unorganized cloud
+    this->is_dense = false;  // Organized Point Cloud is not dense
+
+    DataT aux;
+    aux.x = std::numeric_limits<float>::quiet_NaN();
+    aux.y = std::numeric_limits<float>::quiet_NaN();
+    aux.z = std::numeric_limits<float>::quiet_NaN();
+    aux.intensity = std::numeric_limits<float>::quiet_NaN();
+    aux.ring = -1;
+
+    for (int i = 0; i < unorganized_cloud.size(); ++i)
+    {
+      unsigned int azimuth_index = getAzimuthIndex2<DataT>(unorganized_cloud.points[i]);
+
+      ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
+
+      // push_back point to data vector
+      this->at(azimuth_index, unorganized_cloud.points[i].ring).data.push_back(unorganized_cloud.points[i]);
+    }
+  }
+
+  template <class DataT, typename IntensityT>
+  void computeStats(std::vector<IntensityT>& azimuth, std::vector<IntensityT>& laser)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[registerVelodynePointCloud]");
+
+    for (int i = 0; i < this->height; ++i)
+    {
+      for (int j = 0; j < this->width; ++j)
+      {
+        for (int k = 0; k < this->at(j, i).data.size(); ++k)
+        {
+          this->at(j, i).x += this->at(j, i).data[k].x;
+          this->at(j, i).y += this->at(j, i).data[k].y;
+          this->at(j, i).z += this->at(j, i).data[k].z;
+
+          this->at(j, i).distance.push_back(computeEuclideanDistanceToOrigin2(this->at(j, i).data[k]));
+          this->at(j, i).distance_mean += this->at(j, i).distance[k];
+          this->at(j, i).distance_var += this->at(j, i).distance[k] * this->at(j, i).distance[k];
+          this->at(j, i).intensity_var += this->at(j, i).data[k].intensity * this->at(j, i).data[k].intensity;
+          this->at(j, i).intensity_mean += this->at(j, i).data[k].intensity;
+        }
+        if (this->at(j, i).data.size() > 0)
+        {
+          this->at(j, i).x /= (float)(this->at(j, i).data.size());
+          this->at(j, i).y /= (float)(this->at(j, i).data.size());
+          this->at(j, i).z /= (float)(this->at(j, i).data.size());
+
+          this->at(j, i).ring = this->at(j, i).data[0].ring;
+
+          this->at(j, i).distance_var +=
+              -(this->at(j, i).distance_mean * this->at(j, i).distance_mean) / (float)(this->at(j, i).data.size());
+          this->at(j, i).intensity_var +=
+              -(this->at(j, i).intensity_mean * this->at(j, i).intensity_mean) / (float)(this->at(j, i).data.size());
+
+          this->at(j, i).distance_mean /= (float)(this->at(j, i).data.size());
+          this->at(j, i).intensity_mean /= (float)(this->at(j, i).data.size());
+        }
+
+        laser[i].mean += this->at(j, i).intensity_mean;
+
+        azimuth[j].mean += (this->at(j, i).intensity_mean / (float)(this->height));
+      }
+      laser[i].mean /= (float)(this->width);
+    }
+  }
+
+  template <class DataT>
+  void generateModel(OrganizedPointCloud<DataT> point_cloud)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[generateModel]");
+
+    for (int i = 0; i < this->height; ++i)
+    {
+      for (int j = 0; j < this->width; ++j)
+      {
+        this->at(j, i).x = point_cloud.at(j, i).x;
+        this->at(j, i).y = point_cloud.at(j, i).y;
+        this->at(j, i).z = point_cloud.at(j, i).z;
+        this->at(j, i).ring = point_cloud.at(j, i).ring;
+        this->at(j, i).intensity = point_cloud.at(j, i).intensity_mean;
+      }
+    }
+  }
 
   OrganizedPointCloud<PointT> computeDistanceBetweenPointClouds(OrganizedPointCloud<PointT> point_cloud_1,
                                                                 OrganizedPointCloud<PointT> point_cloud_2)
