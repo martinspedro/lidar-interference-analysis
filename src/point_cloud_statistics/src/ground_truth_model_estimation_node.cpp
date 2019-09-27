@@ -210,11 +210,11 @@ int main(int argc, char** argv)
   sor_voxel.setInputCloud(result);
   sor_voxel.setLeafSize(0.05f, 0.05f, 0.05f);
   sor_voxel.filter(*ground_truth_ptr);
-*/
+
   ss.str(std::string());  // clear stringstream buffer
   ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "voxelized_ground_truth_model.pcd");
   pcl::io::savePCDFile(ss.str(), *ground_truth_ptr, true);
-
+*/
   ss.str(std::string());  // clear stringstream buffer
   ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
   pcl::io::savePCDFile(ss.str(), ground_truth_model, true);
