@@ -17,11 +17,11 @@ namespace point_cloud
 {
 namespace organized
 {
-template <class T>
-class OrganizedPointCloud : public pcl::PointCloud<T>
+template <class PointT>
+class OrganizedPointCloud : public pcl::PointCloud<PointT>
 {
 public:
-  OrganizedPointCloud(unsigned int width, unsigned int height) : pcl::PointCloud<T>(width, height)
+  OrganizedPointCloud(unsigned int width, unsigned int height) : pcl::PointCloud<PointT>(width, height)
   {
     ROS_DEBUG_NAMED("call_stack", "[OrganizedPointCloud] with (%d, %d)", width, height);
   }
@@ -30,7 +30,7 @@ public:
   {
     ROS_DEBUG_NAMED("call_stack", "[clearPointsFromPointcloud]");
 
-    T aux;
+    PointT aux;
     aux.x = std::numeric_limits<float>::quiet_NaN();
     aux.y = std::numeric_limits<float>::quiet_NaN();
     aux.z = std::numeric_limits<float>::quiet_NaN();
@@ -46,17 +46,17 @@ public:
     }
   }
 
-  float getAzimuth(const T point)
+  float getAzimuth(const PointT point)
   {
     ROS_DEBUG_NAMED("call_stack", "[getAzimuth]");
     return atan2(point.y, point.x) * point_cloud::organized::RADIAN_TO_DEGREE_F;
   }
 
-  unsigned int getAzimuthIndex(const T point)
+  unsigned int getAzimuthIndex(const PointT point)
   {
     ROS_DEBUG_NAMED("call_stack", "[getAzimuthIndex]");
     float shifted_azimuth =
-        OrganizedPointCloud<T>::getAzimuth(point) + point_cloud::organized::DEGREE_OFFSET_TO_POSITIVE_ANGLE_F;
+        OrganizedPointCloud<PointT>::getAzimuth(point) + point_cloud::organized::DEGREE_OFFSET_TO_POSITIVE_ANGLE_F;
     float fixed_point_shifted_azimuth = floor(shifted_azimuth * 10.0f) / 10.0f;
     float index =
         fixed_point_shifted_azimuth * (float)(this->width - 1) / point_cloud::organized::FULL_REVOLUTION_DEGREE_F;
@@ -64,13 +64,13 @@ public:
     return (unsigned int)(index);
   }
 
-  float computeEuclideanDistanceToOrigin(T point)
+  float computeEuclideanDistanceToOrigin(PointT point)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeEuclideanDistanceToOrigin]");
     return std::sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
   }
 
-  float computeEuclideanDistance(T point1, T point2)
+  float computeEuclideanDistance(PointT point1, PointT point2)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeEuclideanDistance]");
     ROS_DEBUG("P1->(%f, %f, %f), P2->(%f, %f, %f)", point1.x, point1.y, point1.z, point2.x, point2.y, point2.z);
@@ -81,13 +81,13 @@ public:
     return std::sqrt(x_diff * x_diff + y_diff * y_diff + z_diff * z_diff);
   }
 
-  void organizeVelodynePointCloud(pcl::PointCloud<T> unorganized_cloud)
+  void organizeVelodynePointCloud(pcl::PointCloud<PointT> unorganized_cloud)
   {
     ROS_DEBUG_NAMED("call_stack", "[organizeVelodynePointCloud]");
     this->header = unorganized_cloud.header;  // use sequence number, stamp and frame_id from the unorganized cloud
     this->is_dense = false;                   // Organized Point Cloud is not dense
 
-    T aux;
+    PointT aux;
     aux.x = std::numeric_limits<float>::quiet_NaN();
     aux.y = std::numeric_limits<float>::quiet_NaN();
     aux.z = std::numeric_limits<float>::quiet_NaN();
@@ -107,17 +107,18 @@ public:
       }
       else
       {
-        ROS_WARN("Point would erase previous point! (%f, %f, %f) vs (%f, %f, %f) and azimuth_index: %d. Point not "
+        ROS_WARN("Point would erase previous point! (%f, %f, %d) vs (%f, %f, %d) and azimuth_index: %d. Point not "
                  "added!",
                  this->at(azimuth_index, unorganized_cloud.points[i].ring).x,
-                 this->at(azimuth_index, unorganized_cloud.points[i].ring).y, unorganized_cloud.points[i].ring,
-                 unorganized_cloud.points[i].x, unorganized_cloud.points[i].y, azimuth_index);
+                 this->at(azimuth_index, unorganized_cloud.points[i].ring).y,
+                 this->at(azimuth_index, unorganized_cloud.points[i].ring).ring, unorganized_cloud.points[i].x,
+                 unorganized_cloud.points[i].y, unorganized_cloud.points[i].ring, azimuth_index);
       }
     }
   }
 
-  OrganizedPointCloud<T> computeDistanceBetweenPointClouds(OrganizedPointCloud<T> point_cloud_1,
-                                                           OrganizedPointCloud<T> point_cloud_2)
+  OrganizedPointCloud<PointT> computeDistanceBetweenPointClouds(OrganizedPointCloud<PointT> point_cloud_1,
+                                                                OrganizedPointCloud<PointT> point_cloud_2)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeDistanceBetweenPointClouds]");
 
@@ -125,7 +126,7 @@ public:
                    "Point cloud dimensions disagree: (%i, %i) vs (%i, %i)", point_cloud_1.width, point_cloud_1.height,
                    point_cloud_2.width, point_cloud_2.height);
 
-    OrganizedPointCloud<T> distance_map(point_cloud_1.width, point_cloud_1.height);
+    OrganizedPointCloud<PointT> distance_map(point_cloud_1.width, point_cloud_1.height);
 
     for (int i = 0; i < point_cloud_1.width; ++i)
     {
@@ -138,7 +139,7 @@ public:
     return distance_map;
   }
 
-  void computeDistanceBetweenPointClouds(OrganizedPointCloud<T> point_cloud, std::vector<double>& distance_vector)
+  void computeDistanceBetweenPointClouds(OrganizedPointCloud<PointT> point_cloud, std::vector<double>& distance_vector)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeDistanceBetweenPointClouds] (%i, %i) vs (%i, %i)", this->width, this->height,
                     point_cloud.width, point_cloud.height);
