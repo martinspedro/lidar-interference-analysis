@@ -1,6 +1,6 @@
 /**
  * \file   box_filter.cpp
- * \brief
+ * \brief Rectangular filter for XYZ Point Clouds
  *
  */
 
