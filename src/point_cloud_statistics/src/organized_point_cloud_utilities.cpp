@@ -1,6 +1,6 @@
 /**
- * \file   organized_pointcloud.cpp
- * \brief
+ * \file   organized_point_cloud_utilities.cpp
+ * \brief Implementation file of utilities and constants to organize velodyne point clouds
  *
  */
 

@@ -1,6 +1,6 @@
 /**
- * \file   organized_pointcloud.hpp
- * \brief
+ * \file   organized_point_cloud_utilities.hpp
+ * \brief Header file of utilities and constants to organize velodyne point clouds
  *
  */
 
@@ -33,7 +33,9 @@ float computeEuclideanDistance(float x_1, float y_1, float z_1, float x_2, float
 double computeEuclideanDistance(double x_1, double y_1, double z_1, double x_2, double y_2, double z_2);
 long double computeEuclideanDistance(long double x_1, long double y_1, long double z_1, long double x_2,
                                      long double y_2, long double z_2);
+
 }  // namespace organized
+
 }  // namespace point_cloud
 
 #endif  // ORGANIZED_POINT_CLOUD_UTILITIES_H
