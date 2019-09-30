@@ -143,7 +143,6 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(histogram                              src/histogram.cpp)
 add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp src/box_filter)
 add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp src/box_filter)
 
@@ -177,11 +176,6 @@ add_executable(point_cloud_interference_analysis_node
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(histogram
-   ${catkin_LIBRARIES}
-   ${PCL_LIBRARIES}
-)
-
 target_link_libraries(point_cloud_box_filtering_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
