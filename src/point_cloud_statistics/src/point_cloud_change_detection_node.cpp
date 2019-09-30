@@ -128,10 +128,10 @@ int main(int argc, char** argv)
   {
     resolution_values.push_back(i);
 
-    point_cloud_statistics::CloudStatisticalData ground_truth_bag_stats =
-        point_cloud_statistics::CloudStatisticalData();
-    point_cloud_statistics::CloudStatisticalData interference_bag_stats =
-        point_cloud_statistics::CloudStatisticalData();
+    point_cloud::statistics::CloudStatisticalData ground_truth_bag_stats =
+        point_cloud::statistics::CloudStatisticalData();
+    point_cloud::statistics::CloudStatisticalData interference_bag_stats =
+        point_cloud::statistics::CloudStatisticalData();
 
     // Instantiate octree-based point cloud change detection class
     pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(i);

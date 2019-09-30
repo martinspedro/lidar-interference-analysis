@@ -1,13 +1,15 @@
 /**
- * \file   cloud_statistical_data.hpp
- * \brief
+ * \file  cloud_statistical_data.hpp
+ * \brief Header file for Statistical Cloud data class
  *
  */
 
 #ifndef CLOUD_STATISTICAL_DATA_H
 #define CLOUD_STATISTICAL_DATA_H
 
-namespace point_cloud_statistics
+namespace point_cloud
+{
+namespace statistics
 {
 struct CloudStatisticalData
 {
@@ -28,5 +30,8 @@ struct CloudStatisticalData
   inline double getOutliersPercentage();
 };
 
-}  // namespace point_cloud_statistics
+}  // namespace statistics
+
+}  // namespace point_cloud
+
 #endif  // CLOUD_STATISTICAL_DATA_H

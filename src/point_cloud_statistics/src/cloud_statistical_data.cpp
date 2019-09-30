@@ -1,13 +1,15 @@
 /**
- * \file   cloud_statistical_data.cpp
- * \brief
+ * \file  cloud_statistical_data.cpp
+ * \brief Implementation of Statistical Cloud data class
  *
  */
 
 #include "point_cloud_statistics/cloud_statistical_data.hpp"
 #include <iostream>
 
-namespace point_cloud_statistics
+namespace point_cloud
+{
+namespace statistics
 {
 CloudStatisticalData::CloudStatisticalData()
 {
@@ -16,10 +18,10 @@ CloudStatisticalData::CloudStatisticalData()
   this->outliers_points_count = 0;
   this->inliers_points_count = 0;
 
-  this->points_average_per_msg = 0.0;
-  this->points_variance_per_msg = 0.0;
+  this->points_average_per_msg = 0.0d;
+  this->points_variance_per_msg = 0.0d;
 
-  this->relative_out_points = 0.0;
+  this->relative_out_points = 0.0d;
 }
 
 void CloudStatisticalData::printStatistics()
@@ -37,7 +39,9 @@ void CloudStatisticalData::computeOutliersRelativeValue()
 
 inline double CloudStatisticalData::getOutliersPercentage()
 {
-  return this->relative_out_points * 100;
+  return this->relative_out_points * 100.0d;
 }
 
-}  // namespace point_cloud_statistics
+}  // namespace statistics
+
+}  // namespace point_cloud
