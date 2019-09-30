@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(point_cloud_statistics)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+## Compile as C++14, supported in ROS Melodic and newer
+add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -155,7 +157,8 @@ add_executable(point_cloud_change_detection_node
 add_executable(ground_truth_model_estimation_node
       src/ground_truth_model_estimation_node.cpp
       src/point_cloud_statistics.cpp
-      src/organized_point_cloud_utilities.cpp)
+      src/organized_point_cloud_utilities.cpp
+    src/vlp_16_utilities.cpp)
 
 add_executable(point_cloud_interference_analysis_node
       src/point_cloud_interference_analysis_node.cpp
