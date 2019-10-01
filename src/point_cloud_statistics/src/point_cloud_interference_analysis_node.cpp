@@ -71,9 +71,9 @@ int main(int argc, char** argv)
 
   // Get full path to bags, giving the codename and the type of bag
   std::string ground_truth_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
   std::string interference_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
 
   ROS_INFO_STREAM("\nTEST CONDITIONS: " << std::endl
                                         << "- Test folder name is: " << argv[1] << std::endl
@@ -92,8 +92,7 @@ int main(int argc, char** argv)
       AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
 
   // Load Ground Truth Model for desired Test Scenario
-  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new."
-                                                                                             "pcd");
+  std::string ground_truth_pcd = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
   pcl::io::loadPCDFile<velodyne_pointcloud::PointXYZIR>(ground_truth_pcd, *ground_truth_model_ptr);
 
   ground_truth_model.organizeVelodynePointCloud(*ground_truth_model_ptr);
@@ -160,7 +159,7 @@ int main(int argc, char** argv)
   const unsigned int UNIQUE_DISTANCES_COUNT = (unsigned int)(ceil(MAXIMUM_DISTANCE / DISTANCE_RESOLUTION));
 
   std::fstream fout;  // file pointer
-  std::string interference_distance_errors = point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_"
+  std::string interference_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "interference_"
                                                                                                          "distance_"
                                                                                                          "errors.csv");
   fout.open(interference_distance_errors, std::ios::out);  // creates a new csv file with writing permission
@@ -176,7 +175,7 @@ int main(int argc, char** argv)
 
   std::cout << "Interference Results saved on csv file on: " << interference_distance_errors << std::endl;
 
-  std::string ground_truth_distance_errors = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_"
+  std::string ground_truth_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_"
                                                                                                          "distance_"
                                                                                                          "errors.csv");
   fout.open(ground_truth_distance_errors, std::ios::out);  // creates a new csv file with writing permission
@@ -234,6 +233,9 @@ int main(int argc, char** argv)
   }
   std::cout << "Relative Interference Computed" << std::endl;
 
+  std::cout << "Total Valid Ground Points: " << total_valid_points_ground << std::endl;
+  std::cout << "Total Valid Intereference Points: " << total_valid_points_interference << std::endl;
+
   std::vector<double> x_axis_v(x_axis.begin(), x_axis.end()),
       interference_freq_count_v(interference_freq_count.begin(), interference_freq_count.end()),
       ground_truth_freq_count_v(ground_truth_freq_count.begin(), ground_truth_freq_count.end());
@@ -261,7 +263,7 @@ int main(int argc, char** argv)
   plotter->plot();  // holds here until window is given the closing instruction
 
   // Saves the bar chart as a PNG file on the dataset directory
-  std::string bar_chart_filename = point_cloud_statistics::constructFullPathToDataset(argv[1], "chart.png").c_str();
+  std::string bar_chart_filename = datasets_path::constructFullPathToDataset(argv[1], "chart.png").c_str();
   plotter->saveBarChartPNG(bar_chart_filename);
   std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 

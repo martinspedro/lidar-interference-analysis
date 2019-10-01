@@ -52,7 +52,7 @@ int main(int argc, char** argv)
   }
 
   std::string ground_truth_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
 
   ROS_INFO_STREAM("\nGROUND TRUTH GENERATION: " << std::endl
                                                 << "- Test folder name is: " << argv[1] << std::endl
@@ -105,11 +105,11 @@ int main(int argc, char** argv)
   }
 
   std::stringstream ss;
-  ss << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
+  ss << datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
   pcl::io::savePCDFile(ss.str(), ground_truth_model, true);
 
   std::cout << "Ground Truth Model saved on "
-            << point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd") << std::endl;
+            << datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd") << std::endl;
 
   return EXIT_SUCCESS;
 }
