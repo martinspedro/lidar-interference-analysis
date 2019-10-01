@@ -25,8 +25,10 @@ struct PointXYZIR
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  //!< ensure proper alignment
 } EIGEN_ALIGN16;
 
+};  // namespace velodyne
+
 // clang-format off
-POINT_CLOUD_REGISTER_POINT_STRUCT(pcl::PointXYZIR,
+POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne::PointXYZIR,
                                     (float, x, x)
                                     (float, y, y)
                                     (float, z, z)
@@ -34,7 +36,5 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(pcl::PointXYZIR,
                                     (unsigned int, ring, ring)
                                  )
 // clang-format on
-
-};  // namespace velodyne
 
 #endif  // VELODYNE_POINT_TYPE_H
