@@ -11,18 +11,16 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-typedef pcl::PointXYZ PointT;
-typedef pcl::PointCloud<PointT> PointCloud;
-
-namespace point_cloud_statistics
+namespace point_cloud
 {
-const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name);
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloudXYZ;
 
-void pairAlign(const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt, PointCloud::Ptr output,
-               Eigen::Matrix4f& final_transform, bool downsample);
+namespace statistics
+{
+PointCloudXYZ icp(PointCloudXYZ::Ptr source, PointCloudXYZ::Ptr target, bool downsample);
 
-pcl::PointCloud<pcl::PointXYZ> icp(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
-                                   pcl::PointCloud<pcl::PointXYZ>::Ptr target);
-}  // namespace point_cloud_statistics
+}  // namespace statistics
+
+}  // namespace point_cloud
 
 #endif  // POINT_CLOUD_STATISTICS_H
