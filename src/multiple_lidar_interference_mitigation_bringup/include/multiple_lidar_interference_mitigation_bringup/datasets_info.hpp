@@ -11,6 +11,7 @@
 
 namespace datasets_path
 {
+const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name);
 const std::string getTestScenarioDatasetFullPath(const std::string test_name);
 void printAvailableCodenames(void);
 

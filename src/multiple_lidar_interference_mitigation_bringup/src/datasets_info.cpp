@@ -205,6 +205,12 @@ const std::string getTestScenarioDatasetFullPath(const std::string test_name)
   }
 }
 
+const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioDatasetFullPath(dataset_name) + file_name;
+}
+
 void printAvailableCodenames(void)
 {
   std::cout << "Codename -> full path to test scenario folder" << std::endl;
@@ -213,4 +219,5 @@ void printAvailableCodenames(void)
     std::cout << element.first << " -> " << element.second << std::endl;
   }
 }
+
 }  // namespace datasets_path
