@@ -22,13 +22,14 @@ struct PointStatisticsContainer
   };
 
   unsigned int ring;  //!< laser ring number
-
+  float intensity;
   union
   {
     float data_i[4];
     struct
     {
-      float intensity_mean;
+      float intensity_mean;  //!< Mean Intensity (does not have mean because PCL recognizes the field and can use it in
+                             //!< its custom algorithm)
       float intensity_var;
       float intensity_min;
       float intensity_max;
