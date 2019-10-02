@@ -8,12 +8,9 @@
 #define VLP_16_UTILITIES_H
 
 #include <point_cloud_statistics/velodyne_point_type.h>
-#include <pcl/point_cloud.h>
 
 namespace velodyne
 {
-typedef pcl::PointCloud<velodyne::PointXYZIR> VelodynePointCloud;
-
 namespace vlp16
 {
 extern const unsigned int VLP16_LASER_COUNT;

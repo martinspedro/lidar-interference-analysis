@@ -10,6 +10,9 @@
 #define PCL_NO_PRECOMPILE
 
 #include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+
+#include <boost/shared_ptr.hpp>
 
 namespace velodyne
 {
@@ -23,6 +26,11 @@ struct PointXYZIR
   unsigned int ring;               //!< laser ring number
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  //!< ensure proper alignment
 } EIGEN_ALIGN16;
+
+// Usefull Point Declarations
+typedef pcl::PointCloud<velodyne::PointXYZIR> VelodynePointCloud;
+typedef boost::shared_ptr<VelodynePointCloud> VelodynePointCloudPtr;
+typedef boost::shared_ptr<VelodynePointCloud const> VelodynePointCloudConstPtr;
 
 };  // namespace velodyne
 
