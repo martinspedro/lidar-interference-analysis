@@ -14,8 +14,6 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-#include <velodyne_pointcloud/point_types.h>
-
 #include <pcl/point_representation.h>
 
 #include <pcl/io/pcd_io.h>
@@ -44,9 +42,9 @@
 #include <pcl/visualization/pcl_plotter.h>
 
 #include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_velodyne_point_cloud.hpp"
+#include "point_cloud_statistics/velodyne_point_type.h"
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
-
-typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
 #include "matplotlib-cpp/matplotlibcpp.h"
 
@@ -81,21 +79,21 @@ int main(int argc, char** argv)
                                         << "- Interference Full path: " << interference_full_bag_path << std::endl);
 
   std::vector<double> ground_truth_errors, interference_errors;
-  VelodynePointCloud::Ptr current_msg_cloud_ptr(new VelodynePointCloud);
-  VelodynePointCloud::Ptr ground_truth_model_ptr(new VelodynePointCloud);
+  velodyne::VelodynePointCloud::Ptr current_msg_cloud_ptr(new velodyne::VelodynePointCloud);
+  velodyne::VelodynePointCloud::Ptr ground_truth_model_ptr(new velodyne::VelodynePointCloud);
 
-  point_cloud::organized::OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> ground_truth_model(
-      AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
-  point_cloud::organized::OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> ground_truth_cloud(
-      AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
-  point_cloud::organized::OrganizedPointCloud<velodyne_pointcloud::PointXYZIR> interference_cloud(
-      AZIMUTHAL_UNIQUE_ANGLES_COUNT, VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_model(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_cloud(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud interference_cloud(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         VLP16_LASER_COUNT);
 
   // Load Ground Truth Model for desired Test Scenario
   std::string ground_truth_pcd = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
-  pcl::io::loadPCDFile<velodyne_pointcloud::PointXYZIR>(ground_truth_pcd, *ground_truth_model_ptr);
+  pcl::io::loadPCDFile<velodyne::PointXYZIR>(ground_truth_pcd, *ground_truth_model_ptr);
 
-  ground_truth_model.organizeVelodynePointCloud(*ground_truth_model_ptr);
+  ground_truth_model.organizePointCloud(*ground_truth_model_ptr);
 
   // Load Bags
   rosbag::Bag interference_bag, ground_truth_bag;
@@ -116,13 +114,13 @@ int main(int argc, char** argv)
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
     if (msg != NULL)
     {
-      VelodynePointCloud point_cloud;
+      velodyne::VelodynePointCloud point_cloud;
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
       mean += current_msg_cloud_ptr->size();
 
-      ground_truth_cloud.organizeVelodynePointCloud(*current_msg_cloud_ptr);
+      ground_truth_cloud.organizePointCloud(*current_msg_cloud_ptr);
       ground_truth_cloud.computeDistanceBetweenPointClouds(ground_truth_model, ground_truth_errors);
       ground_truth_cloud.clearPointsFromPointcloud();
     }
@@ -133,14 +131,14 @@ int main(int argc, char** argv)
     sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
     if (msg != NULL)
     {
-      VelodynePointCloud point_cloud;
+      velodyne::VelodynePointCloud point_cloud;
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
       mean += current_msg_cloud_ptr->size();
       ++msg_num_interference;
 
-      interference_cloud.organizeVelodynePointCloud(*current_msg_cloud_ptr);
+      interference_cloud.organizePointCloud(*current_msg_cloud_ptr);
       interference_cloud.computeDistanceBetweenPointClouds(ground_truth_model, interference_errors);
       interference_cloud.clearPointsFromPointcloud();
     }
@@ -160,8 +158,8 @@ int main(int argc, char** argv)
 
   std::fstream fout;  // file pointer
   std::string interference_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "interference_"
-                                                                                                         "distance_"
-                                                                                                         "errors.csv");
+                                                                                                "distance_"
+                                                                                                "errors.csv");
   fout.open(interference_distance_errors, std::ios::out);  // creates a new csv file with writing permission
   for (int i = 0; i < interference_errors.size(); i += VLP16_LASER_COUNT)
   {
@@ -176,8 +174,8 @@ int main(int argc, char** argv)
   std::cout << "Interference Results saved on csv file on: " << interference_distance_errors << std::endl;
 
   std::string ground_truth_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_"
-                                                                                                         "distance_"
-                                                                                                         "errors.csv");
+                                                                                                "distance_"
+                                                                                                "errors.csv");
   fout.open(ground_truth_distance_errors, std::ios::out);  // creates a new csv file with writing permission
   for (int i = 0; i < ground_truth_errors.size(); i += VLP16_LASER_COUNT)
   {

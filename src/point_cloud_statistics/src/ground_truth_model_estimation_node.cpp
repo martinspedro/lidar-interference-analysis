@@ -25,6 +25,10 @@
 #include "point_cloud_statistics/vlp_16_utilities.hpp"
 
 #include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_velodyne_point_cloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud_with_container.hpp"
+
+#include "point_cloud_statistics/organized_pointcloud.hpp"
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
 #include "point_cloud_statistics/point_statistics_container.hpp"
 
@@ -59,10 +63,11 @@ int main(int argc, char** argv)
                                                 << "- Ground Truth Full path: " << ground_truth_full_bag_path
                                                 << std::endl);
 
-  point_cloud::organized::OrganizedPointCloud<PointStatisticsContainer<velodyne::PointXYZIR> > ground_truth_dataset(
-      velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT, velodyne::vlp16::VLP16_LASER_COUNT);
-  point_cloud::organized::OrganizedPointCloud<velodyne::PointXYZIR> ground_truth_model(
-      velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT, velodyne::vlp16::VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedPointCloudWithContainer<PointStatisticsContainer<velodyne::PointXYZIR>,
+                                                           velodyne::PointXYZIR>
+      ground_truth_dataset(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT, velodyne::vlp16::VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_model(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         velodyne::vlp16::VLP16_LASER_COUNT);
 
   velodyne::VelodynePointCloud::Ptr ground_truth_ptr(new velodyne::VelodynePointCloud);
 
@@ -91,8 +96,8 @@ int main(int argc, char** argv)
   std::vector<intensity> azimuth(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT);
   std::vector<intensity> laser(velodyne::vlp16::VLP16_LASER_COUNT);
 
-  ground_truth_dataset.computeStats<velodyne::PointXYZIR, intensity>(azimuth, laser);
-  ground_truth_model.generateModel<PointStatisticsContainer<velodyne::PointXYZIR> >(ground_truth_dataset);
+  ground_truth_dataset.computeStats<intensity>(azimuth, laser);
+  ground_truth_dataset.generateModel(ground_truth_model);
 
   for (int i = 0; i < azimuth.size(); ++i)
   {
