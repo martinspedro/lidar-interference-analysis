@@ -108,8 +108,7 @@ int main(int argc, char** argv)
   ss << datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
   pcl::io::savePCDFile(ss.str(), ground_truth_model, true);
 
-  std::cout << "Ground Truth Model saved on "
-            << datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd") << std::endl;
+  std::cout << "Ground Truth Model saved on " << ss.str() << std::endl;
 
   return EXIT_SUCCESS;
 }
