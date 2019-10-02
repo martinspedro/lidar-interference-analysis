@@ -25,6 +25,16 @@ struct PointXYZIR
   float intensity;                 //!< laser intensity reading
   unsigned int ring;               //!< laser ring number
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  //!< ensure proper alignment
+
+  PointXYZIR()
+    : x(std::numeric_limits<float>::quiet_NaN())
+    , y(std::numeric_limits<float>::quiet_NaN())
+    , z(std::numeric_limits<float>::quiet_NaN())
+    , intensity(std::numeric_limits<float>::quiet_NaN())
+    , ring(-1)
+  {
+  }
+
 } EIGEN_ALIGN16;
 
 // Usefull Point Declarations
