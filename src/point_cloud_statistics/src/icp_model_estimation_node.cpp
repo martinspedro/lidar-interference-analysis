@@ -27,10 +27,6 @@
 #include <point_cloud_statistics/velodyne_point_type.h>
 #include "point_cloud_statistics/vlp_16_utilities.hpp"
 
-#include "point_cloud_statistics/organized_pointcloud.hpp"
-#include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
-#include "point_cloud_statistics/point_register.hpp"
-
 #include "matplotlib-cpp/matplotlibcpp.h"
 
 int main(int argc, char** argv)
