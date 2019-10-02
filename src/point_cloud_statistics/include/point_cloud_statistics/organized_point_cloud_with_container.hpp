@@ -9,12 +9,13 @@
 
 #include <pcl/point_cloud.h>
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
-#include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud.hpp"
 #include "point_cloud_statistics/organized_velodyne_point_cloud.hpp"
 
 #include "point_cloud_statistics/velodyne_point_type.h"
 #include <ros/ros.h>
 #include <ros/console.h>
+#include <boost/shared_ptr.hpp>
 
 namespace point_cloud
 {
@@ -24,20 +25,22 @@ template <class ContainerT, class DataT>
 class OrganizedPointCloudWithContainer : public OrganizedPointCloud<ContainerT>
 {
 public:
+  using Ptr = boost::shared_ptr<OrganizedPointCloudWithContainer<ContainerT, DataT> >;
+  using ConstPtr = boost::shared_ptr<const OrganizedPointCloudWithContainer<ContainerT, DataT> >;
+
   OrganizedPointCloudWithContainer(unsigned int width, unsigned int height)
     : point_cloud::organized::OrganizedPointCloud<ContainerT>(width, height)
   {
     ROS_DEBUG_NAMED("call_stack", "[OrganizedPointCloudWithContainer] with (%d, %d)", width, height);
   }
 
-  void registerVelodynePointCloud(pcl::PointCloud<DataT> unorganized_cloud)
+  void registerPointCloud(pcl::PointCloud<DataT> unorganized_cloud)
   {
     ROS_DEBUG_NAMED("call_stack", "[registerVelodynePointCloud]");
 
     for (int i = 0; i < unorganized_cloud.size(); ++i)
     {
       unsigned int azimuth_index = getAzimuthIndex(unorganized_cloud.points[i]);
-
       ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
 
       // push_back point to data_points vector
@@ -54,6 +57,7 @@ public:
     {
       for (int j = 0; j < this->width; ++j)
       {
+        std::cout << this->at(j, i).data_points.size() << std::endl;
         for (int k = 0; k < this->at(j, i).data_points.size(); ++k)
         {
           this->at(j, i).x += this->at(j, i).data_points[k].x;
@@ -92,7 +96,7 @@ public:
     }
   }
 
-  void generateModel(OrganizedPointCloud<DataT> point_cloud)
+  void generateModel(OrganizedPointCloud<DataT>* point_cloud)
   {
     ROS_DEBUG_NAMED("call_stack", "[generateModel]");
 
@@ -100,11 +104,11 @@ public:
     {
       for (int j = 0; j < this->width; ++j)
       {
-        point_cloud.at(j, i).x = this->at(j, i).x;
-        point_cloud.at(j, i).y = this->at(j, i).y;
-        point_cloud.at(j, i).z = this->at(j, i).z;
-        point_cloud.at(j, i).ring = this->at(j, i).ring;
-        point_cloud.at(j, i).intensity = this->at(j, i).intensity_mean;
+        point_cloud->at(j, i).x = this->at(j, i).x;
+        point_cloud->at(j, i).y = this->at(j, i).y;
+        point_cloud->at(j, i).z = this->at(j, i).z;
+        point_cloud->at(j, i).ring = this->at(j, i).ring;
+        point_cloud->at(j, i).intensity = this->at(j, i).intensity_mean;
       }
     }
   }

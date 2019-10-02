@@ -12,6 +12,8 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace point_cloud
 {
 namespace organized
@@ -20,6 +22,9 @@ template <class PointT>
 class OrganizedPointCloud : public pcl::PointCloud<PointT>
 {
 public:
+  using Ptr = boost::shared_ptr<OrganizedPointCloud>;
+  using ConstPtr = boost::shared_ptr<const OrganizedPointCloud>;
+
   OrganizedPointCloud(unsigned int width, unsigned int height) : pcl::PointCloud<PointT>(width, height)
   {
     ROS_DEBUG_NAMED("call_stack", "[OrganizedPointCloud] with (%d, %d)", width, height);
