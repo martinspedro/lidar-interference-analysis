@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-find_package(PCL REQUIRED COMPONENTS common visualization)
+find_package(PCL REQUIRED COMPONENTS common visualization filters octree registration)
 find_package(VTK)
 
 find_package(PythonLibs 2.7)
@@ -158,7 +158,13 @@ add_executable(ground_truth_model_estimation_node
       src/ground_truth_model_estimation_node.cpp
       src/point_cloud_statistics.cpp
       src/organized_point_cloud_utilities.cpp
-    src/vlp_16_utilities.cpp)
+      src/vlp_16_utilities.cpp)
+
+add_executable(icp_model_estimation_node
+      src/icp_model_estimation_node.cpp
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp)
 
 add_executable(point_cloud_interference_analysis_node
       src/point_cloud_interference_analysis_node.cpp
@@ -197,6 +203,12 @@ target_link_libraries(point_cloud_change_detection_node
 )
 
 target_link_libraries(ground_truth_model_estimation_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   datasets_info
+)
+
+target_link_libraries(icp_model_estimation_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    datasets_info
