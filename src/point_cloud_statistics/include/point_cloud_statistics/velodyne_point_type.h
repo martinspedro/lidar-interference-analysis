@@ -23,7 +23,7 @@ struct PointXYZIR
 {
   PCL_ADD_POINT4D;                 //!< quad-word (X, Y, Z, 0) Euclidean Coordinates
   float intensity;                 //!< laser intensity reading
-  unsigned int ring;               //!< laser ring number
+  uint16_t ring;                   //!< laser ring number. uint datatype is forced by the but_velodyne_driver
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  //!< ensure proper alignment
 
   PointXYZIR()
@@ -52,7 +52,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne::PointXYZIR,
                                     (float, y, y)
                                     (float, z, z)
                                     (float, intensity, intensity)
-                                    (unsigned int, ring, ring)
+                                    (uint16_t, ring, ring)
                                  )
 // clang-format on
 
