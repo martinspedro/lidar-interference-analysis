@@ -9,17 +9,16 @@
 
 #define PCL_NO_PRECOMPILE
 
-#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/impl/instantiate.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace velodyne
 {
-/** Velodyne Point: Euclidean Coordinates, including intensity and laser ring number. */
+/**
+ * \brief Velodyne Point: Euclidean Coordinates, including intensity and laser ring number.
+ */
 struct PointXYZIR
 {
-  PCL_ADD_POINT4D;                 //!< quad-word XYZ
+  PCL_ADD_POINT4D;                 //!< quad-word (X, Y, Z, 0) Euclidean Coordinates
   float intensity;                 //!< laser intensity reading
   unsigned int ring;               //!< laser ring number
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  //!< ensure proper alignment
