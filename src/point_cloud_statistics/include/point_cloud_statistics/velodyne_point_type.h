@@ -31,6 +31,8 @@ struct PointXYZIR
 typedef pcl::PointCloud<velodyne::PointXYZIR> VelodynePointCloud;
 typedef boost::shared_ptr<VelodynePointCloud> VelodynePointCloudPtr;
 typedef boost::shared_ptr<VelodynePointCloud const> VelodynePointCloudConstPtr;
+using Ptr = boost::shared_ptr<PointXYZIR>;
+using ConstPtr = boost::shared_ptr<const PointXYZIR>;
 
 };  // namespace velodyne
 
