@@ -24,7 +24,7 @@
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 #include "point_cloud_statistics/point_cloud_statistics.hpp"
 
-#include <point_cloud_statistics/velodyne_point_type.h>
+#include "point_cloud_statistics/velodyne_point_type.h"
 #include "point_cloud_statistics/vlp_16_utilities.hpp"
 
 #include "matplotlib-cpp/matplotlibcpp.h"
@@ -32,7 +32,7 @@
 int main(int argc, char** argv)
 {
   // Initialize ROS
-  ros::init(argc, argv, "ground_truth_model_estimation_node");
+  ros::init(argc, argv, "icp_model_estimation_node");
 
   if (argc != 2)
   {
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         *source = ground_truth_point_cloud;
       }
 
-      std::cout << "Message number: " << count << std::endl;
+      std::cout << "Message number: " << count++ << std::endl;
     }
   }
 

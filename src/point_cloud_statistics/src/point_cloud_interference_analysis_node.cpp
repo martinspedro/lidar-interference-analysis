@@ -41,7 +41,7 @@
 
 #include <pcl/visualization/pcl_plotter.h>
 
-#include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud.hpp"
 #include "point_cloud_statistics/organized_velodyne_point_cloud.hpp"
 #include "point_cloud_statistics/velodyne_point_type.h"
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"

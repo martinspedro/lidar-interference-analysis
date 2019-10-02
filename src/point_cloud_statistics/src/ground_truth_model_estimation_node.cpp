@@ -24,11 +24,10 @@
 #include <point_cloud_statistics/velodyne_point_type.h>
 #include "point_cloud_statistics/vlp_16_utilities.hpp"
 
-#include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud.hpp"
 #include "point_cloud_statistics/organized_velodyne_point_cloud.hpp"
 #include "point_cloud_statistics/organized_point_cloud_with_container.hpp"
 
-#include "point_cloud_statistics/organized_pointcloud.hpp"
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
 #include "point_cloud_statistics/point_statistics_container.hpp"
 
@@ -66,8 +65,10 @@ int main(int argc, char** argv)
   point_cloud::organized::OrganizedPointCloudWithContainer<PointStatisticsContainer<velodyne::PointXYZIR>,
                                                            velodyne::PointXYZIR>
       ground_truth_dataset(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT, velodyne::vlp16::VLP16_LASER_COUNT);
-  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_model(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
-                                                                         velodyne::vlp16::VLP16_LASER_COUNT);
+
+  point_cloud::organized::OrganizedVelodynePointCloud* ground_truth_model_ptr(
+      new point_cloud::organized::OrganizedVelodynePointCloud(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                              velodyne::vlp16::VLP16_LASER_COUNT));
 
   velodyne::VelodynePointCloud::Ptr ground_truth_ptr(new velodyne::VelodynePointCloud);
 
@@ -75,7 +76,7 @@ int main(int argc, char** argv)
   ground_truth_bag.open(ground_truth_full_bag_path);  // open ground truth bag file
 
   std::vector<std::string> topics;
-  topics.push_back(std::string("/velodyne"));
+  topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
   foreach (rosbag::MessageInstance const m, ground_truth_view)
@@ -87,7 +88,7 @@ int main(int argc, char** argv)
       fromROSMsg(*msg, ground_truth_point_cloud);
       *ground_truth_ptr = ground_truth_point_cloud;
 
-      ground_truth_dataset.registerVelodynePointCloud(*ground_truth_ptr);
+      ground_truth_dataset.registerPointCloud(ground_truth_point_cloud);
     }
   }
 
@@ -97,7 +98,7 @@ int main(int argc, char** argv)
   std::vector<intensity> laser(velodyne::vlp16::VLP16_LASER_COUNT);
 
   ground_truth_dataset.computeStats<intensity>(azimuth, laser);
-  ground_truth_dataset.generateModel(ground_truth_model);
+  ground_truth_dataset.generateModel(ground_truth_model_ptr);
 
   for (int i = 0; i < azimuth.size(); ++i)
   {
@@ -111,7 +112,7 @@ int main(int argc, char** argv)
 
   std::stringstream ss;
   ss << datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
-  pcl::io::savePCDFile(ss.str(), ground_truth_model, true);
+  pcl::io::savePCDFile(ss.str(), *ground_truth_model_ptr, true);
 
   std::cout << "Ground Truth Model saved on " << ss.str() << std::endl;
 
