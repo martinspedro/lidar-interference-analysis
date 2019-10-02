@@ -3,46 +3,40 @@
  * \brief
  *
  */
+#define PCL_NO_PRECOMPILE
 
 // ROS Bag related includes
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
+
 #include <boost/foreach.hpp>
 #define foreach BOOST_FOREACH
 
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/common/geometry.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <pcl/octree/octree_pointcloud_changedetector.h>
 
-#include <velodyne_pointcloud/point_types.h>
-
-#include <pcl/point_representation.h>
-
-#include <pcl/io/pcd_io.h>
-
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
-
 #include <string>
 #include <vector>
+
+// IO
+#include <pcl/io/pcd_io.h>
 #include <iostream>
+#include <fstream>
 
 // Bar Graph related includes
 #include <vtkColorSeries.h>
 #include "point_cloud_statistics/bar_chart_plotter.hpp"
 #include "point_cloud_statistics/cloud_statistical_data.hpp"
 
+#include "point_cloud_statistics/velodyne_point_type.h"
+#include "point_cloud_statistics/vlp_16_utilities.hpp"
+
 // Datasets related includes
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
-#include "point_cloud_statistics/point_cloud_statistics.hpp"
-
-// writing to CSV file
-#include <fstream>
-
-typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
 int main(int argc, char** argv)
 {
@@ -86,14 +80,14 @@ int main(int argc, char** argv)
       break;
   }
 
-  ROS_ASSERT_MSG(min_resolution <= max_resolution,
+  ROS_ERROR_COND(min_resolution <= max_resolution,
                  "Interval [%f, %f] is invalid! Inferior bound must be lower than upper bound", min_resolution,
                  max_resolution);
 
   std::string ground_truth_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
   std::string interference_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
 
   std::cout << "TEST CONDITIONS:" << std::endl
             << "Voxel edge resolution interval: [" << min_resolution << ", " << max_resolution << "]" << std::endl
@@ -102,9 +96,8 @@ int main(int argc, char** argv)
             << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl
             << "Interference Full path: " << interference_full_bag_path << std::endl;
 
-  PointCloud::Ptr current_msg_cloud_ptr(new PointCloud);
-  PointCloud::Ptr ground_truth_ptr(new PointCloud);
-  // velodyne_pointcloud::PointcloudXYZIR::Ptr ground_truth_ptr(new velodyne_pointcloud::PointcloudXYZIR);
+  velodyne::VelodynePointCloud::Ptr current_msg_cloud_ptr(new velodyne::VelodynePointCloud),
+      ground_truth_ptr(new velodyne::VelodynePointCloud);
 
   rosbag::Bag interference_bag, ground_truth_bag;
   ground_truth_bag.open(ground_truth_full_bag_path);  // open ground truth bag file
@@ -113,8 +106,8 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
-  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
-  pcl::io::loadPCDFile<pcl::PointXYZ>(ground_truth_pcd, *ground_truth_ptr);
+  std::string ground_truth_pcd = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
+  pcl::io::loadPCDFile<velodyne::PointXYZIR>(ground_truth_pcd, *ground_truth_ptr);
 
   std::vector<double> ground_truth_errors, interference_errors, real_errors, resolution_values;
 
@@ -134,7 +127,7 @@ int main(int argc, char** argv)
         point_cloud::statistics::CloudStatisticalData();
 
     // Instantiate octree-based point cloud change detection class
-    pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(i);
+    pcl::octree::OctreePointCloudChangeDetector<velodyne::PointXYZIR> octree(i);
 
     // Ground Truth Bag
     foreach (rosbag::MessageInstance const m, ground_truth_view)
@@ -142,7 +135,7 @@ int main(int argc, char** argv)
       sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
       if (msg != NULL)
       {
-        PointCloud point_cloud;
+        velodyne::VelodynePointCloud point_cloud;
         fromROSMsg(*msg, point_cloud);
         *current_msg_cloud_ptr = point_cloud;
 
@@ -173,7 +166,7 @@ int main(int argc, char** argv)
       sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
       if (msg != NULL)
       {
-        PointCloud point_cloud;
+        velodyne::VelodynePointCloud point_cloud;
         fromROSMsg(*msg, point_cloud);
         *current_msg_cloud_ptr = point_cloud;
 
@@ -221,8 +214,8 @@ int main(int argc, char** argv)
   std::cout << std::endl;
 
   std::fstream fout;  // file pointer
-  std::string interference_csv_stats = point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_"
-                                                                                                   "results.csv");
+  std::string interference_csv_stats = datasets_path::constructFullPathToDataset(argv[1], "interference_"
+                                                                                          "results.csv");
   fout.open(interference_csv_stats, std::ios::out);  // creates a new csv file with writing permission
   for (int i = 0; i < resolution_values.size(); i++)
   {
@@ -251,7 +244,7 @@ int main(int argc, char** argv)
 
   // Saves the bar chart as a PNG file on the dataset directory
   std::string bar_chart_filename =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
+      datasets_path::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
   plotter->saveBarChartPNG(bar_chart_filename);
   std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
