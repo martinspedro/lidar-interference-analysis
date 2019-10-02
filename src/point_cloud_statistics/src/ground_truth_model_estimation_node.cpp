@@ -26,7 +26,7 @@
 
 #include "point_cloud_statistics/organized_pointcloud.hpp"
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
-#include "point_cloud_statistics/point_register.hpp"
+#include "point_cloud_statistics/point_statistics_container.hpp"
 
 #include "matplotlib-cpp/matplotlibcpp.h"
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
                                                 << "- Ground Truth Full path: " << ground_truth_full_bag_path
                                                 << std::endl);
 
-  point_cloud::organized::OrganizedPointCloud<PointRegister<velodyne::PointXYZIR> > ground_truth_dataset(
+  point_cloud::organized::OrganizedPointCloud<PointStatisticsContainer<velodyne::PointXYZIR> > ground_truth_dataset(
       velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT, velodyne::vlp16::VLP16_LASER_COUNT);
   point_cloud::organized::OrganizedPointCloud<velodyne::PointXYZIR> ground_truth_model(
       velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT, velodyne::vlp16::VLP16_LASER_COUNT);
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
   std::vector<intensity> laser(velodyne::vlp16::VLP16_LASER_COUNT);
 
   ground_truth_dataset.computeStats<velodyne::PointXYZIR, intensity>(azimuth, laser);
-  ground_truth_model.generateModel<PointRegister<velodyne::PointXYZIR> >(ground_truth_dataset);
+  ground_truth_model.generateModel<PointStatisticsContainer<velodyne::PointXYZIR> >(ground_truth_dataset);
 
   for (int i = 0; i < azimuth.size(); ++i)
   {
