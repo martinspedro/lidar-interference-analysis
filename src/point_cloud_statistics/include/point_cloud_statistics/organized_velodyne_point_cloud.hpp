@@ -9,7 +9,7 @@
 
 #include <pcl/point_cloud.h>
 #include "point_cloud_statistics/organized_point_cloud_utilities.hpp"
-#include "point_cloud_statistics/organized_pointcloud.hpp"
+#include "point_cloud_statistics/organized_point_cloud.hpp"
 #include "point_cloud_statistics/velodyne_point_type.h"
 
 #include <ros/ros.h>
