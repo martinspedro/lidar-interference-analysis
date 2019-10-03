@@ -57,7 +57,6 @@ public:
     {
       for (int j = 0; j < this->width; ++j)
       {
-        std::cout << this->at(j, i).data_points.size() << std::endl;
         for (int k = 0; k < this->at(j, i).data_points.size(); ++k)
         {
           this->at(j, i).x += this->at(j, i).data_points[k].x;
