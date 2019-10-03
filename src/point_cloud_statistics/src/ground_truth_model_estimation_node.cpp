@@ -33,6 +33,8 @@
 
 #include "matplotlib-cpp/matplotlibcpp.h"
 
+#include <fstream>
+
 /**
  * \struct intensity characteristics
  */
@@ -100,21 +102,96 @@ int main(int argc, char** argv)
   ground_truth_dataset.computeStats<intensity>(azimuth, laser);
   ground_truth_dataset.generateModel(ground_truth_model_ptr);
 
-  for (int i = 0; i < azimuth.size(); ++i)
-  {
-    std::cout << i << ": " << azimuth[i].mean << std::endl;
-  }
-
-  for (int i = 0; i < laser.size(); ++i)
-  {
-    std::cout << i << ": " << laser[i].mean << std::endl;
-  }
-
   std::stringstream ss;
-  ss << datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model_new.pcd");
+  ss << datasets_path::constructFullPathToResults(argv[1], datasets_path::ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME);
   pcl::io::savePCDFile(ss.str(), *ground_truth_model_ptr, true);
-
   std::cout << "Ground Truth Model saved on " << ss.str() << std::endl;
+
+  /**
+   *  Data Saving
+   */
+  /*
+    for (int i = 0; i < azimuth.size(); ++i)
+    {
+      std::cout << i << ": " << azimuth[i].mean << std::endl;
+    }
+
+    for (int i = 0; i < laser.size(); ++i)
+    {
+      std::cout << i << ": " << laser[i].mean << std::endl;
+    }
+  */
+  int num_elem_written = 0;
+  std::ofstream fout;  // file pointer
+
+  std::string average_intensity_filename =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME);
+
+  fout.open(average_intensity_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < ground_truth_model_ptr->width; ++i)
+  {
+    for (int j = 0; j < ground_truth_model_ptr->height; ++j)
+    {
+      if (fout.is_open())
+      {
+        fout.write(reinterpret_cast<const char*>(&ground_truth_model_ptr->at(i, j).intensity), sizeof(float));
+        ++num_elem_written;
+      }
+      else
+      {
+        ROS_ERROR("File is not Open! Aborting!");
+      }
+    }
+  }
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_model_ptr->size(),
+                 "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 ground_truth_model_ptr->size());
+  std::cout << "Ground Truth Model Average Intensity saved on " << average_intensity_filename << std::endl;
+
+  /*
+    std::ifstream fin;  // file pointer
+    fin.open(mean_intensity_filename, std::ios::in | std::ios::binary);
+
+    fin.seekg(0, fin.end);
+    int length = fin.tellg() / sizeof(float);
+    fin.seekg(0, fin.beg);
+    unsigned int count = 0;
+
+
+  point_cloud::organized::OrganizedVelodynePointCloud test(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                           velodyne::vlp16::VLP16_LASER_COUNT);
+  int num_elements_read = 0;
+  float temp_azimuth[velodyne::vlp16::VLP16_LASER_COUNT];
+  while (fin.read(reinterpret_cast<char*>(&temp_azimuth[0]), velodyne::vlp16::VLP16_LASER_COUNT * sizeof(float)))
+  {
+    for (int i = 0; i < velodyne::vlp16::VLP16_LASER_COUNT; ++i)
+    {
+      test.at(count, i).intensity = temp_azimuth[i];
+      ++num_elements_read;
+    }
+    ++count;
+  }
+  fin.close();
+  std::cout << "Count: " << count << std::endl;
+
+  std::cout << "Interference Results saved on binary file on: " << mean_intensity_filename << std::endl;
+
+  for (int i = 0; i < ground_truth_model_ptr->width; ++i)
+  {
+    for (int j = 0; j < ground_truth_model_ptr->height; ++j)
+    {
+      if (ground_truth_model_ptr->at(i, j).intensity != test.at(i, j).intensity)
+      {
+        ROS_ERROR("Data mismatch");
+      }
+      std::cout << ground_truth_model_ptr->at(i, j).intensity << " vs " << test.at(i, j).intensity << std::endl;
+    }
+  }
+  std::cout << num_elements_write << " vs " << num_elements_read << std::endl;
+  */
 
   return EXIT_SUCCESS;
 }
