@@ -107,7 +107,24 @@ const std::string GROUND_TRUTH_FINAL_BAG_NAME;
 const std::string INTERFERENCE_BAG_NAME = "interference.bag";
 const std::string RAW_BAG_NAME = "original_raw.bag";
 
-const std::string GROUND_TRUTH_MODEL_FILENAME = "ground_truth_model.pcd";
+const std::string GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH = "Ground Truth Model/";
+const std::string INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH = "Interference Analysis/";
+
+const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME = "organized_ground_truth_model.pcd";
+const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model.pcd";
+const std::string GROUND_TRUTH_AZIMUTH_AVERAGE_INTENSITY_BIN_NAME = "ground_truth_azimuth_average_intensity.bin";
+const std::string GROUND_TRUTH_LASER_AVERAGE_INTENSITY_BIN_NAME = "ground_truth_laser_average_intensity.bin";
+const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME = "ground_truth_average_point_distance.bin";
+const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME = "ground_truth_point_distance_variance.bin";
+const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME = "ground_truth_average_point_intensity.bin";
+const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME = "ground_truth_point_intesity_variance.bin";
+
+const std::string GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "ground_truth_bag_distance.bin";
+const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "ground_truth_bag_intensity.bin";
+
+const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "interference_bag_distance.bin";
+const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interference_bag_intensity.bin";
+const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.bin";
 
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
@@ -192,10 +209,39 @@ const std::map<const std::string, const std::string> datasets_map = {
   { "CAMBADA_B_Camera_Calibration", CAMBADA_SCENARIO_B_CAMERA_CALIBRATION_FOLDER_FULL_PATH },
 };
 
+const std::map<const std::string, const std::string> results_map = {
+  { ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { ICP_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AZIMUTH_AVERAGE_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_LASER_AVERAGE_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+};
+
 const std::string getTestScenarioDatasetFullPath(const std::string test_name)
 {
   std::map<std::string, const std::string>::const_iterator it = datasets_map.find(test_name);
   if (it != datasets_map.end())
+  {
+    return it->second;  // return the value of the key
+  }
+  else
+  {
+    throw std::out_of_range("Dataset key is invalid");
+  }
+}
+
+const std::string getResultsFolderRelativePath(const std::string test_name)
+{
+  std::map<std::string, const std::string>::const_iterator it = results_map.find(test_name);
+  if (it != results_map.end())
   {
     return it->second;  // return the value of the key
   }
@@ -211,7 +257,13 @@ const std::string constructFullPathToDataset(const std::string dataset_name, con
   return getTestScenarioDatasetFullPath(dataset_name) + file_name;
 }
 
-void printAvailableCodenames(void)
+const std::string constructFullPathToResults(const std::string dataset_name, const std::string results_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioDatasetFullPath(dataset_name) + getResultsFolderRelativePath(results_name) + results_name;
+}
+
+void printAvailableDatasetsCodenames(void)
 {
   std::cout << "Codename -> full path to test scenario folder" << std::endl;
   for (auto& element : datasets_map)

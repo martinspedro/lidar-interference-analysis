@@ -13,7 +13,10 @@ namespace datasets_path
 {
 const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name);
 const std::string getTestScenarioDatasetFullPath(const std::string test_name);
-void printAvailableCodenames(void);
+const std::string getResultsFolderRelativePath(const std::string test_name);
+const std::string constructFullPathToResults(const std::string dataset_name, const std::string results_name);
+
+void printAvailableDatasetsCodenames(void);
 
 extern const std::string DATASETS_FULL_PATH;
 
@@ -94,7 +97,24 @@ extern const std::string GROUND_TRUTH_FINAL_BAG_NAME;
 extern const std::string INTERFERENCE_BAG_NAME;
 extern const std::string RAW_BAG_NAME;
 
-extern const std::string GROUND_TRUTH_MODEL_FILENAME;
+extern const std::string GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH;
+extern const std::string INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH;
+
+extern const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME;
+extern const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME;
+extern const std::string GROUND_TRUTH_AZIMUTH_AVERAGE_INTENSITY_BIN_NAME;
+extern const std::string GROUND_TRUTH_LASER_AVERAGE_INTENSITY_BIN_NAME;
+extern const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME;
+extern const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME;
+extern const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME;
+extern const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME;
+
+extern const std::string GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
+extern const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
+
+extern const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
+extern const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
+extern const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME;
 
 extern const std::string CLOSER_DISTANCE_AFFIX;
 extern const std::string HALFWAY_DISTANCE_AFFIX;
