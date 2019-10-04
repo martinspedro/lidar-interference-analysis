@@ -35,6 +35,9 @@
 
 #include <fstream>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 /**
  * \struct intensity characteristics
  */
@@ -102,41 +105,121 @@ int main(int argc, char** argv)
   ground_truth_dataset.computeStats<intensity>(azimuth, laser);
   ground_truth_dataset.generateModel(ground_truth_model_ptr);
 
+  std::cout << "Data computation ended. Ground Truth Model and related statistics caluldated." << std::endl;
+
+  /*********************************************************************************************************************
+   *                                                   Data Saving
+   ********************************************************************************************************************/
+  std::string ground_truth_results_folder =
+      datasets_path::getTestScenarioDatasetFullPath(argv[1]) + datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH;
+
+  // https:// pubs.opengroup.org/onlinepubs/009695399/functions/mkdir.html
+  // give write, read and execute permission to user and group. Read and Transpose for others
+  if (mkdir(ground_truth_results_folder.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == EXIT_FAILURE)
+  {
+    ROS_FATAL("Cannot create directory on %s", ground_truth_results_folder.c_str());
+    return EXIT_FAILURE;
+  }
+  std::cout << datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH << " folder created on "
+            << ground_truth_results_folder << std::endl;
+
+  /*
+   * Organized PointCloud PCD Model
+   */
   std::stringstream ss;
   ss << datasets_path::constructFullPathToResults(argv[1], datasets_path::ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME);
   pcl::io::savePCDFile(ss.str(), *ground_truth_model_ptr, true);
   std::cout << "Ground Truth Model saved on " << ss.str() << std::endl;
 
-  /**
-   *  Data Saving
-   */
-  /*
-    for (int i = 0; i < azimuth.size(); ++i)
-    {
-      std::cout << i << ": " << azimuth[i].mean << std::endl;
-    }
-
-    for (int i = 0; i < laser.size(); ++i)
-    {
-      std::cout << i << ": " << laser[i].mean << std::endl;
-    }
-  */
+  // statistcs variables
   int num_elem_written = 0;
   std::ofstream fout;  // file pointer
 
+  /*
+   * Save Azimuth Average Intensity and respective Variance
+   */
+  std::string azimuth_intensity_filename =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME);
+
+  fout.open(azimuth_intensity_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < azimuth.size() && fout.is_open(); ++i)
+  {
+    if (fout.good())
+    {
+      fout.write(reinterpret_cast<const char*>(&azimuth[i].mean), sizeof(float));
+      ++num_elem_written;
+      fout.write(reinterpret_cast<const char*>(&azimuth[i].variance), sizeof(float));
+      ++num_elem_written;
+    }
+    else
+    {
+      ROS_ERROR("Good bit no set!");
+    }
+  }
+
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == (azimuth.size() * 2),
+                 "Azimuth Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 (azimuth.size() * 2));
+  std::cout << "Ground Truth Azimuth Intensity saved on " << azimuth_intensity_filename << std::endl;
+
+  /*
+   * Save Laser Average Intensity and respective Variance
+   */
+  num_elem_written = 0;
+  std::string laser_intensity_filename =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_LASER_INTENSITY_BIN_NAME);
+
+  fout.open(laser_intensity_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < laser.size() && fout.is_open(); ++i)
+  {
+    if (fout.good())
+    {
+      fout.write(reinterpret_cast<const char*>(&laser[i].mean), sizeof(float));
+      ++num_elem_written;
+      fout.write(reinterpret_cast<const char*>(&laser[i].variance), sizeof(float));
+      ++num_elem_written;
+    }
+    else
+    {
+      ROS_ERROR("Good bit no set!");
+    }
+  }
+
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == (laser.size() * 2),
+                 "Laser Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 (laser.size() * 2));
+  std::cout << "Ground Truth laser Intensity saved on " << laser_intensity_filename << std::endl;
+
+  /*
+   * Save Organized Point Cloud Average Intensity
+   */
+  num_elem_written = 0;
   std::string average_intensity_filename =
       datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME);
 
   fout.open(average_intensity_filename, std::ios::out | std::ios::trunc | std::ios::binary);
 
-  for (int i = 0; i < ground_truth_model_ptr->width; ++i)
+  for (int i = 0; i < ground_truth_dataset.width; ++i)
   {
-    for (int j = 0; j < ground_truth_model_ptr->height; ++j)
+    for (int j = 0; j < ground_truth_dataset.height; ++j)
     {
       if (fout.is_open())
       {
-        fout.write(reinterpret_cast<const char*>(&ground_truth_model_ptr->at(i, j).intensity), sizeof(float));
-        ++num_elem_written;
+        if (fout.good())
+        {
+          fout.write(reinterpret_cast<const char*>(&ground_truth_dataset.at(i, j).intensity), sizeof(float));
+          ++num_elem_written;
+        }
+        else
+        {
+          ROS_ERROR("Good bit no set!");
+        }
       }
       else
       {
@@ -146,10 +229,124 @@ int main(int argc, char** argv)
   }
   fout.close();
 
-  ROS_ASSERT_MSG(num_elem_written == ground_truth_model_ptr->size(),
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
                  "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
-                 ground_truth_model_ptr->size());
+                 ground_truth_dataset.size());
   std::cout << "Ground Truth Model Average Intensity saved on " << average_intensity_filename << std::endl;
+
+  /*
+   * Save Organized Point Cloud Intensity Variance
+   */
+  num_elem_written = 0;
+  std::string variance_intensity_filename =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME);
+
+  fout.open(variance_intensity_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < ground_truth_dataset.width; ++i)
+  {
+    for (int j = 0; j < ground_truth_dataset.height; ++j)
+    {
+      if (fout.is_open())
+      {
+        if (fout.good())
+        {
+          fout.write(reinterpret_cast<const char*>(&ground_truth_dataset.at(i, j).intensity_var), sizeof(float));
+          ++num_elem_written;
+        }
+        else
+        {
+          ROS_ERROR("Good bit no set!");
+        }
+      }
+      else
+      {
+        ROS_ERROR("File is not Open! Aborting!");
+      }
+    }
+  }
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
+                 "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 ground_truth_dataset.size());
+  std::cout << "Ground Truth Model Intensity Variance saved on " << variance_intensity_filename << std::endl;
+
+  /*
+   * Save Organized Point Cloud Average Distance
+   */
+  num_elem_written = 0;
+  std::string average_distance_filename =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME);
+
+  fout.open(average_distance_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < ground_truth_dataset.width; ++i)
+  {
+    for (int j = 0; j < ground_truth_dataset.height; ++j)
+    {
+      if (fout.is_open())
+      {
+        if (fout.good())
+        {
+          fout.write(reinterpret_cast<const char*>(&ground_truth_dataset.at(i, j).distance_mean), sizeof(float));
+          ++num_elem_written;
+        }
+        else
+        {
+          ROS_ERROR("Good bit no set!");
+        }
+      }
+      else
+      {
+        ROS_ERROR("File is not Open! Aborting!");
+      }
+    }
+  }
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
+                 "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 ground_truth_dataset.size());
+  std::cout << "Ground Truth Model Intensity Variance saved on " << average_distance_filename << std::endl;
+
+  /*
+   * Save Organized Point Cloud Distance Variance
+   */
+  num_elem_written = 0;
+  std::string variance_distance_filename =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME);
+
+  fout.open(variance_distance_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < ground_truth_dataset.width; ++i)
+  {
+    for (int j = 0; j < ground_truth_dataset.height; ++j)
+    {
+      if (fout.is_open())
+      {
+        if (fout.good())
+        {
+          fout.write(reinterpret_cast<const char*>(&ground_truth_dataset.at(i, j).distance_var), sizeof(float));
+          ++num_elem_written;
+        }
+        else
+        {
+          ROS_ERROR("Good bit no set!");
+        }
+      }
+      else
+      {
+        ROS_ERROR("File is not Open! Aborting!");
+      }
+    }
+  }
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
+                 "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 ground_truth_dataset.size());
+  std::cout << "Ground Truth Model Intensity Variance saved on " << variance_distance_filename << std::endl;
 
   /*
     std::ifstream fin;  // file pointer
@@ -181,13 +378,13 @@ int main(int argc, char** argv)
 
   for (int i = 0; i < ground_truth_model_ptr->width; ++i)
   {
-    for (int j = 0; j < ground_truth_model_ptr->height; ++j)
+    for (int j = 0; j < ground_truth_dataset.height; ++j)
     {
       if (ground_truth_model_ptr->at(i, j).intensity != test.at(i, j).intensity)
       {
         ROS_ERROR("Data mismatch");
       }
-      std::cout << ground_truth_model_ptr->at(i, j).intensity << " vs " << test.at(i, j).intensity << std::endl;
+      std::cout << ground_truth_dataset.at(i, j).intensity << " vs " << test.at(i, j).intensity << std::endl;
     }
   }
   std::cout << num_elements_write << " vs " << num_elements_read << std::endl;
