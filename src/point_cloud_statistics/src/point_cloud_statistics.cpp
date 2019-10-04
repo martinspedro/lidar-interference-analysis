@@ -22,7 +22,8 @@ namespace point_cloud
 {
 namespace statistics
 {
-PointCloudXYZ icp(PointCloudXYZ::Ptr source, PointCloudXYZ::Ptr target, bool downsample = false)
+PointCloudXYZ icp(PointCloudXYZ::Ptr source, PointCloudXYZ::Ptr target, std::ofstream& logger_file,
+                  bool downsample = false)
 {
   if (downsample)
   {
@@ -50,14 +51,15 @@ PointCloudXYZ icp(PointCloudXYZ::Ptr source, PointCloudXYZ::Ptr target, bool dow
 
   PointCloudXYZ final;
   icp.align(final);
-  std::cout << "has converged:" << icp.hasConverged() << " score: " << icp.getFitnessScore() << std::endl;
-  std::cout << icp.getFinalTransformation() << std::endl;
+
+  logger_file << "Converged: " << icp.hasConverged() << " | With score: " << icp.getFitnessScore() << std::endl
+              << icp.getFinalTransformation() << std::endl;
 
   return *source + final;
 }
 
 velodyne::VelodynePointCloud icp(velodyne::VelodynePointCloud::Ptr source, velodyne::VelodynePointCloud::Ptr target,
-                                 bool downsample = false)
+                                 std::ofstream& logger_file, bool downsample = false)
 {
   if (downsample)
   {
@@ -85,11 +87,13 @@ velodyne::VelodynePointCloud icp(velodyne::VelodynePointCloud::Ptr source, velod
 
   velodyne::VelodynePointCloud final;
   icp.align(final);
-  std::cout << "has converged:" << icp.hasConverged() << " score: " << icp.getFitnessScore() << std::endl;
-  std::cout << icp.getFinalTransformation() << std::endl;
+
+  logger_file << "Converged: " << icp.hasConverged() << " | With score: " << icp.getFitnessScore() << std::endl
+              << icp.getFinalTransformation() << std::endl;
 
   return *source + final;
 }
+
 }  // namespace statistics
 
 }  // namespace point_cloud
