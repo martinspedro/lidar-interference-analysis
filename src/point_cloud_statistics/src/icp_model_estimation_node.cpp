@@ -52,10 +52,11 @@ int main(int argc, char** argv)
   std::string ground_truth_full_bag_path =
       datasets_path::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
 
-  ROS_INFO_STREAM("\nGROUND TRUTH GENERATION: " << std::endl
-                                                << "- Test folder name is: " << argv[1] << std::endl
-                                                << "- Ground Truth Full path: " << ground_truth_full_bag_path
-                                                << std::endl);
+  ROS_INFO_STREAM("\nGROUND TRUTH GENERATION: "
+                  << std::endl
+                  << "- Final Voxel Filter Edge Length (m): " << voxel_edge_length << std::endl
+                  << "- Test folder name is: " << argv[1] << std::endl
+                  << "- Ground Truth Full path: " << ground_truth_full_bag_path << std::endl);
 
   rosbag::Bag ground_truth_bag;
   ground_truth_bag.open(ground_truth_full_bag_path);  // open ground truth bag file
@@ -93,11 +94,12 @@ int main(int argc, char** argv)
         *source = ground_truth_point_cloud;
       }
 
-      logger_file << "Message number: " << count << std::endl;
-      std::cout << "Message number: " << count << std::endl;
+      logger_file << "Point Cloud Message number: " << count << std::endl;
+      std::cout << "\rPoint Cloud Message number: " << count << std::flush;
       ++count;
     }
   }
+  std::cout << std::endl;
   logger_file.close();
   ground_truth_bag.close();  // close ground truth bag file
 
