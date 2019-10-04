@@ -68,7 +68,7 @@ public:
           this->at(j, i).distance_var += this->at(j, i).euclidean_distance[k] * this->at(j, i).euclidean_distance[k];
           this->at(j, i).intensity_var +=
               this->at(j, i).data_points[k].intensity * this->at(j, i).data_points[k].intensity;
-          this->at(j, i).intensity_mean += this->at(j, i).data_points[k].intensity;
+          this->at(j, i).intensity += this->at(j, i).data_points[k].intensity;
         }
         if (this->at(j, i).data_points.size() > 0)
         {
@@ -80,16 +80,16 @@ public:
 
           this->at(j, i).distance_var += -(this->at(j, i).distance_mean * this->at(j, i).distance_mean) /
                                          (float)(this->at(j, i).data_points.size());
-          this->at(j, i).intensity_var += -(this->at(j, i).intensity_mean * this->at(j, i).intensity_mean) /
-                                          (float)(this->at(j, i).data_points.size());
+          this->at(j, i).intensity_var +=
+              -(this->at(j, i).intensity * this->at(j, i).intensity) / (float)(this->at(j, i).data_points.size());
 
           this->at(j, i).distance_mean /= (float)(this->at(j, i).data_points.size());
-          this->at(j, i).intensity_mean /= (float)(this->at(j, i).data_points.size());
+          this->at(j, i).intensity /= (float)(this->at(j, i).data_points.size());
         }
 
-        laser[i].mean += this->at(j, i).intensity_mean;
+        laser[i].mean += this->at(j, i).intensity;
 
-        azimuth[j].mean += (this->at(j, i).intensity_mean / (float)(this->height));
+        azimuth[j].mean += (this->at(j, i).intensity / (float)(this->height));
       }
       laser[i].mean /= (float)(this->width);
     }
@@ -107,7 +107,7 @@ public:
         point_cloud->at(j, i).y = this->at(j, i).y;
         point_cloud->at(j, i).z = this->at(j, i).z;
         point_cloud->at(j, i).ring = this->at(j, i).ring;
-        point_cloud->at(j, i).intensity = this->at(j, i).intensity_mean;
+        point_cloud->at(j, i).intensity = this->at(j, i).intensity;
       }
     }
   }
