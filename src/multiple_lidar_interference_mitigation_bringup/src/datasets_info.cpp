@@ -112,12 +112,12 @@ const std::string INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH = "Interference Ana
 
 const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME = "organized_ground_truth_model.pcd";
 const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model.pcd";
-const std::string GROUND_TRUTH_AZIMUTH_AVERAGE_INTENSITY_BIN_NAME = "ground_truth_azimuth_average_intensity.bin";
-const std::string GROUND_TRUTH_LASER_AVERAGE_INTENSITY_BIN_NAME = "ground_truth_laser_average_intensity.bin";
+const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME = "ground_truth_azimuth_intensity.bin";
+const std::string GROUND_TRUTH_LASER_INTENSITY_BIN_NAME = "ground_truth_laser_intensity.bin";
 const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME = "ground_truth_average_point_distance.bin";
 const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME = "ground_truth_point_distance_variance.bin";
 const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME = "ground_truth_average_point_intensity.bin";
-const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME = "ground_truth_point_intesity_variance.bin";
+const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME = "ground_truth_point_intensity_variance.bin";
 
 const std::string GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "ground_truth_bag_distance.bin";
 const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "ground_truth_bag_intensity.bin";
@@ -212,8 +212,8 @@ const std::map<const std::string, const std::string> datasets_map = {
 const std::map<const std::string, const std::string> results_map = {
   { ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { ICP_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
-  { GROUND_TRUTH_AZIMUTH_AVERAGE_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
-  { GROUND_TRUTH_LASER_AVERAGE_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_LASER_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
