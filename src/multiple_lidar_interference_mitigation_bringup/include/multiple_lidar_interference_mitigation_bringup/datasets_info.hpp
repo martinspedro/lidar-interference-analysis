@@ -15,6 +15,7 @@ const std::string constructFullPathToDataset(const std::string dataset_name, con
 const std::string getTestScenarioDatasetFullPath(const std::string test_name);
 const std::string getResultsFolderRelativePath(const std::string test_name);
 const std::string constructFullPathToResults(const std::string dataset_name, const std::string results_name);
+const std::string makeResultsDirectory(const std::string dataset_name, const std::string results_folder);
 
 void printAvailableDatasetsCodenames(void);
 

@@ -8,6 +8,9 @@
 #include <map>
 #include <iostream>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 namespace datasets_path
 {
 const std::string DATASETS_FULL_PATH = "/media/martinspedro/Elements/";
@@ -261,6 +264,27 @@ const std::string constructFullPathToResults(const std::string dataset_name, con
 {
   // already has the "/" character in the end
   return getTestScenarioDatasetFullPath(dataset_name) + getResultsFolderRelativePath(results_name) + results_name;
+}
+
+// https:// pubs.opengroup.org/onlinepubs/009695399/functions/mkdir.html
+const std::string makeResultsDirectory(const std::string dataset_name, const std::string results_folder)
+{
+  const std::string results_folder_name = datasets_path::getTestScenarioDatasetFullPath(dataset_name) + results_folder;
+
+
+  mode_t permissions = S_IRWXU     // user read, write and execute permission
+                       | S_IRWXG   // user group read, write and execute permission
+                       | S_IROTH   // others read permission
+                       | S_IXOTH;  // others execute permission (since it is a folder, means permission to transpose
+                                   // through the directory
+
+  if (mkdir(results_folder_name.c_str(), permissions) == EXIT_FAILURE)
+  {
+    throw std::ios_base::failure(("Cannot create directory on " + results_folder_name).c_str());
+  }
+
+  // already has the "/" character in the end
+  return results_folder_name;
 }
 
 void printAvailableDatasetsCodenames(void)
