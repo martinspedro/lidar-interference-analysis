@@ -105,23 +105,16 @@ int main(int argc, char** argv)
   ground_truth_dataset.computeStats<intensity>(azimuth, laser);
   ground_truth_dataset.generateModel(ground_truth_model_ptr);
 
-  std::cout << "Data computation ended. Ground Truth Model and related statistics caluldated." << std::endl;
+  ROS_INFO_STREAM("Data computation ended. Ground Truth Model and related statistics caluldated.");
 
   /*********************************************************************************************************************
    *                                                   Data Saving
    ********************************************************************************************************************/
   std::string ground_truth_results_folder =
-      datasets_path::getTestScenarioDatasetFullPath(argv[1]) + datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH;
+      datasets_path::makeResultsDirectory(argv[1], datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH);
 
-  // https:// pubs.opengroup.org/onlinepubs/009695399/functions/mkdir.html
-  // give write, read and execute permission to user and group. Read and Transpose for others
-  if (mkdir(ground_truth_results_folder.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == EXIT_FAILURE)
-  {
-    ROS_FATAL("Cannot create directory on %s", ground_truth_results_folder.c_str());
-    return EXIT_FAILURE;
-  }
-  std::cout << datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH << " folder created on "
-            << ground_truth_results_folder << std::endl;
+  ROS_INFO_STREAM(datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH << " folder created on "
+                                                                         << ground_truth_results_folder);
 
   /*
    * Organized PointCloud PCD Model
@@ -129,7 +122,7 @@ int main(int argc, char** argv)
   std::stringstream ss;
   ss << datasets_path::constructFullPathToResults(argv[1], datasets_path::ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME);
   pcl::io::savePCDFile(ss.str(), *ground_truth_model_ptr, true);
-  std::cout << "Ground Truth Model saved on " << ss.str() << std::endl;
+  ROS_INFO_STREAM("Ground Truth Model saved on " << ss.str());
 
   // statistcs variables
   int num_elem_written = 0;
@@ -163,7 +156,7 @@ int main(int argc, char** argv)
   ROS_ASSERT_MSG(num_elem_written == (azimuth.size() * 2),
                  "Azimuth Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
                  (azimuth.size() * 2));
-  std::cout << "Ground Truth Azimuth Intensity saved on " << azimuth_intensity_filename << std::endl;
+  ROS_INFO_STREAM("Ground Truth Azimuth Intensity saved on " << azimuth_intensity_filename);
 
   /*
    * Save Laser Average Intensity and respective Variance
@@ -194,7 +187,7 @@ int main(int argc, char** argv)
   ROS_ASSERT_MSG(num_elem_written == (laser.size() * 2),
                  "Laser Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
                  (laser.size() * 2));
-  std::cout << "Ground Truth laser Intensity saved on " << laser_intensity_filename << std::endl;
+  ROS_INFO_STREAM("Ground Truth laser Intensity saved on " << laser_intensity_filename);
 
   /*
    * Save Organized Point Cloud Average Intensity
@@ -232,7 +225,7 @@ int main(int argc, char** argv)
   ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
                  "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
                  ground_truth_dataset.size());
-  std::cout << "Ground Truth Model Average Intensity saved on " << average_intensity_filename << std::endl;
+  ROS_INFO_STREAM("Ground Truth Model Average Intensity saved on " << average_intensity_filename);
 
   /*
    * Save Organized Point Cloud Intensity Variance
@@ -270,7 +263,7 @@ int main(int argc, char** argv)
   ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
                  "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
                  ground_truth_dataset.size());
-  std::cout << "Ground Truth Model Intensity Variance saved on " << variance_intensity_filename << std::endl;
+  ROS_INFO_STREAM("Ground Truth Model Intensity Variance saved on " << variance_intensity_filename);
 
   /*
    * Save Organized Point Cloud Average Distance
@@ -308,7 +301,7 @@ int main(int argc, char** argv)
   ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
                  "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
                  ground_truth_dataset.size());
-  std::cout << "Ground Truth Model Intensity Variance saved on " << average_distance_filename << std::endl;
+  ROS_INFO_STREAM("Ground Truth Model Average Distance saved on " << average_distance_filename);
 
   /*
    * Save Organized Point Cloud Distance Variance
@@ -346,7 +339,7 @@ int main(int argc, char** argv)
   ROS_ASSERT_MSG(num_elem_written == ground_truth_dataset.size(),
                  "Average Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
                  ground_truth_dataset.size());
-  std::cout << "Ground Truth Model Intensity Variance saved on " << variance_distance_filename << std::endl;
+  ROS_INFO_STREAM("Ground Truth Model Distance Variance saved on " << variance_distance_filename);
 
   /*
     std::ifstream fin;  // file pointer
