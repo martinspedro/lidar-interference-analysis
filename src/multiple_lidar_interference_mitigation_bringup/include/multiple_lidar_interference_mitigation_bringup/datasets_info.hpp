@@ -103,6 +103,7 @@ extern const std::string INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH;
 
 extern const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME;
 extern const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME;
+extern const std::string ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME;
 extern const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME;
 extern const std::string GROUND_TRUTH_LASER_INTENSITY_BIN_NAME;
 extern const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME;
@@ -116,6 +117,8 @@ extern const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
 extern const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
 extern const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
 extern const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME;
+
+extern const std::string ICP_LOGGER_FILE_NAME;
 
 extern const std::string CLOSER_DISTANCE_AFFIX;
 extern const std::string HALFWAY_DISTANCE_AFFIX;

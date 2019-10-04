@@ -115,6 +115,7 @@ const std::string INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH = "Interference Ana
 
 const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME = "organized_ground_truth_model.pcd";
 const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model.pcd";
+const std::string ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model_unvoxelized.pcd";
 const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME = "ground_truth_azimuth_intensity.bin";
 const std::string GROUND_TRUTH_LASER_INTENSITY_BIN_NAME = "ground_truth_laser_intensity.bin";
 const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME = "ground_truth_average_point_distance.bin";
@@ -128,6 +129,8 @@ const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "ground_tr
 const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "interference_bag_distance.bin";
 const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interference_bag_intensity.bin";
 const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.bin";
+
+const std::string ICP_LOGGER_FILE_NAME = "icp_transformation_matrices.log";
 
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
@@ -215,6 +218,7 @@ const std::map<const std::string, const std::string> datasets_map = {
 const std::map<const std::string, const std::string> results_map = {
   { ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { ICP_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { GROUND_TRUTH_LASER_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
   { GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
@@ -270,7 +274,6 @@ const std::string constructFullPathToResults(const std::string dataset_name, con
 const std::string makeResultsDirectory(const std::string dataset_name, const std::string results_folder)
 {
   const std::string results_folder_name = datasets_path::getTestScenarioDatasetFullPath(dataset_name) + results_folder;
-
 
   mode_t permissions = S_IRWXU     // user read, write and execute permission
                        | S_IRWXG   // user group read, write and execute permission
