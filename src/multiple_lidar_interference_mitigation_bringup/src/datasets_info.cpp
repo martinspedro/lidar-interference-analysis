@@ -128,7 +128,7 @@ const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "ground_tr
 
 const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "interference_bag_distance.bin";
 const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interference_bag_intensity.bin";
-const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.bin";
+const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.csv";
 
 const std::string ICP_LOGGER_FILE_NAME = "icp_transformation_matrices.log";
 const std::string INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "interference_analysis_point_statistics.log";
