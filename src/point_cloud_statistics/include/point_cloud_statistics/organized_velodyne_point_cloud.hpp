@@ -40,8 +40,7 @@ public:
 
       ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
 
-      if (this->at(azimuth_index, unorganized_cloud.points[i].ring).intensity !=
-          std::numeric_limits<float>::quiet_NaN())
+      if (this->at(azimuth_index, unorganized_cloud.points[i].ring).ring != velodyne::DEFAULT_RING_VALUE)
       {
         this->at(azimuth_index, unorganized_cloud.points[i].ring) = unorganized_cloud.points[i];
       }
