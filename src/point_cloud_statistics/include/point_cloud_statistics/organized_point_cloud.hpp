@@ -92,8 +92,7 @@ public:
 
       ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
 
-      if (this->at(azimuth_index, unorganized_cloud.points[i].ring).intensity !=
-          std::numeric_limits<float>::quiet_NaN())
+      if (this->at(azimuth_index, unorganized_cloud.points[i].ring).ring != -1)
       {
         this->at(azimuth_index, unorganized_cloud.points[i].ring) = unorganized_cloud.points[i];
       }
@@ -130,8 +129,14 @@ public:
     return distance_map;
   }
 
+  /**
+   * \remark Despite the output being a vector, the distance and intensity calculations are pushed first by laser/ring
+   * and then by azimuth. The output vector can be resized to a 1800 x 16 matrix, where eacha column represents a
+   * laser/ring and each row a azimuth angle. If the vector accumulates results for consecutive frames, the number of
+   * rows is N * 1800, where N is the number of frames. Therefore, every 1800th row a new frame starts
+   */
   void computeDistanceBetweenPointClouds(OrganizedPointCloud<PointT> organized_point_cloud,
-                                         std::vector<double>& distance_vector)
+                                         std::vector<double>& distance_vector, std::vector<double>& intensity_vector)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeDistanceBetweenPointClouds] (%i, %i) vs (%i, %i)", this->width, this->height,
                     organized_point_cloud.width, organized_point_cloud.height);
@@ -146,6 +151,7 @@ public:
         double euclidean_distance = (double)(computeEuclideanDistance(this->at(i, j), organized_point_cloud.at(i, j)));
         ROS_DEBUG("euclidean_distance: %f", euclidean_distance);
         distance_vector.push_back(euclidean_distance);
+        intensity_vector.push_back((double)(this->at(i, j).intensity - organized_point_cloud.at(i, j).intensity));
       }
     }
   }
