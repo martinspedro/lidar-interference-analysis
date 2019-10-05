@@ -40,18 +40,23 @@ public:
 
       ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
 
-      if (this->at(azimuth_index, unorganized_cloud.points[i].ring).ring != velodyne::DEFAULT_RING_VALUE)
+      if (this->at(azimuth_index, unorganized_cloud.points[i].ring).ring == velodyne::DEFAULT_RING_VALUE)
       {
         this->at(azimuth_index, unorganized_cloud.points[i].ring) = unorganized_cloud.points[i];
       }
       else
       {
-        ROS_WARN("Point would erase previous point! (%f, %f, %d) vs (%f, %f, %d) and azimuth_index: %d. Point not "
-                 "added!",
-                 this->at(azimuth_index, unorganized_cloud.points[i].ring).x,
-                 this->at(azimuth_index, unorganized_cloud.points[i].ring).y,
-                 this->at(azimuth_index, unorganized_cloud.points[i].ring).ring, unorganized_cloud.points[i].x,
-                 unorganized_cloud.points[i].y, unorganized_cloud.points[i].ring, azimuth_index);
+        /* \TODO fix the point overload otherwise it replaces a lot of points
+      ROS_WARN("Point would erase previous point! (%f, %f, %f, %f, %d) vs (%f, %f, %f, %f, %d) and azimuth_index: "
+               "%d. Point not added!",
+               this->at(azimuth_index, unorganized_cloud.points[i].ring).x,
+               this->at(azimuth_index, unorganized_cloud.points[i].ring).y,
+               this->at(azimuth_index, unorganized_cloud.points[i].ring).z,
+               this->at(azimuth_index, unorganized_cloud.points[i].ring).intensity,
+               this->at(azimuth_index, unorganized_cloud.points[i].ring).ring, unorganized_cloud.points[i].x,
+               unorganized_cloud.points[i].y, unorganized_cloud.points[i].z, unorganized_cloud.points[i].intensity,
+               unorganized_cloud.points[i].ring, azimuth_index);
+               */
       }
     }
   }
