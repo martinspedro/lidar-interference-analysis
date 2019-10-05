@@ -55,10 +55,6 @@ cmake_install.cmake
 # Executable files or files without extension
 *~
 
-# Python Files
-*.py
-
-
 # eclipse stuff
 .project
 .cproject
