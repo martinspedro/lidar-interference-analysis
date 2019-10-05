@@ -61,12 +61,6 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
-  // define Velodyne related constants
-  const unsigned int VLP16_LASER_COUNT = 16u;
-  const float AZIMUTHAL_ANGULAR_RESOLUTION = 0.2F;
-  const unsigned int AZIMUTHAL_UNIQUE_ANGLES_COUNT =
-      (unsigned int)ceil(point_cloud::organized::FULL_REVOLUTION_DEGREE_F / AZIMUTHAL_ANGULAR_RESOLUTION);
-
   // Get full path to bags, giving the codename and the type of bag
   std::string ground_truth_full_bag_path =
       datasets_path::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
@@ -78,19 +72,21 @@ int main(int argc, char** argv)
                                         << "- Ground Truth Full path: " << ground_truth_full_bag_path << std::endl
                                         << "- Interference Full path: " << interference_full_bag_path << std::endl);
 
-  std::vector<double> ground_truth_errors, interference_errors;
+  std::vector<double> ground_truth_bag_distance, interference_bag_distance, ground_truth_bag_intensity,
+      interference_bag_intensity;
   velodyne::VelodynePointCloud::Ptr current_msg_cloud_ptr(new velodyne::VelodynePointCloud);
   velodyne::VelodynePointCloud::Ptr ground_truth_model_ptr(new velodyne::VelodynePointCloud);
 
-  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_model(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
-                                                                         VLP16_LASER_COUNT);
-  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_cloud(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
-                                                                         VLP16_LASER_COUNT);
-  point_cloud::organized::OrganizedVelodynePointCloud interference_cloud(AZIMUTHAL_UNIQUE_ANGLES_COUNT,
-                                                                         VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_model(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         velodyne::vlp16::VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud ground_truth_cloud(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         velodyne::vlp16::VLP16_LASER_COUNT);
+  point_cloud::organized::OrganizedVelodynePointCloud interference_cloud(velodyne::vlp16::AZIMUTHAL_UNIQUE_ANGLES_COUNT,
+                                                                         velodyne::vlp16::VLP16_LASER_COUNT);
 
   // Load Ground Truth Model for desired Test Scenario
-  std::string ground_truth_pcd = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
+  std::string ground_truth_pcd =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME);
   pcl::io::loadPCDFile<velodyne::PointXYZIR>(ground_truth_pcd, *ground_truth_model_ptr);
 
   ground_truth_model.organizePointCloud(*ground_truth_model_ptr);
@@ -106,8 +102,13 @@ int main(int argc, char** argv)
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
   rosbag::View interference_view(interference_bag, rosbag::TopicQuery(topics));
 
-  long long unsigned int mean = 0;
-  long long unsigned int msg_num_interference = 0;
+  point_cloud::statistics::CloudStatisticalData ground_truth_statistics;
+  point_cloud::statistics::CloudStatisticalData interference_statistics;
+
+  std::ofstream logger_file;
+  std::string logger_file_name =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME);
+  logger_file.open(logger_file_name, std::ios::out | std::ios::trunc);
 
   foreach (rosbag::MessageInstance const m, ground_truth_view)
   {
@@ -118,13 +119,21 @@ int main(int argc, char** argv)
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
-      mean += current_msg_cloud_ptr->size();
+      ground_truth_statistics.point_count += current_msg_cloud_ptr->size();
+      ++ground_truth_statistics.point_cloud_msg_count;
 
       ground_truth_cloud.organizePointCloud(*current_msg_cloud_ptr);
-      ground_truth_cloud.computeDistanceBetweenPointClouds(ground_truth_model, ground_truth_errors);
+      ground_truth_cloud.computeDistanceBetweenPointClouds(ground_truth_model, ground_truth_bag_distance,
+                                                           ground_truth_bag_intensity);
       ground_truth_cloud.clearPointsFromPointcloud();
     }
   }
+
+  std::stringstream ground_truth_statistics_text;
+  ground_truth_statistics_text << "GROUND TRUTH: " << std::endl
+                               << ground_truth_statistics.outputStringFormattedPointStatistics().str();
+  logger_file << ground_truth_statistics_text.str();
+  std::cout << ground_truth_statistics_text.str();
 
   foreach (rosbag::MessageInstance const m, interference_view)
   {
@@ -135,11 +144,12 @@ int main(int argc, char** argv)
       fromROSMsg(*msg, point_cloud);
       *current_msg_cloud_ptr = point_cloud;
 
-      mean += current_msg_cloud_ptr->size();
-      ++msg_num_interference;
+      interference_statistics.point_count += current_msg_cloud_ptr->size();
+      ++interference_statistics.point_cloud_msg_count;
 
       interference_cloud.organizePointCloud(*current_msg_cloud_ptr);
-      interference_cloud.computeDistanceBetweenPointClouds(ground_truth_model, interference_errors);
+      interference_cloud.computeDistanceBetweenPointClouds(ground_truth_model, interference_bag_distance,
+                                                           interference_bag_intensity);
       interference_cloud.clearPointsFromPointcloud();
     }
   }
@@ -147,146 +157,300 @@ int main(int argc, char** argv)
   ground_truth_bag.close();  // close ground truth bag file
   interference_bag.close();  // close interference bag
 
-  std::cout << "Nº messages received: " << msg_num_interference << std::endl
-            << "Nº points measures: " << mean << std::endl
-            << "Average Points per message: " << (1.0d * mean) / msg_num_interference << std::endl;
+  std::stringstream interference_statistics_text;
+  interference_statistics_text << "INTERFERENCE: " << std::endl
+                               << interference_statistics.outputStringFormattedPointStatistics().str();
+  logger_file << interference_statistics_text.str();
+  std::cout << interference_statistics_text.str();
 
-  // Statistical part of Code
-  const double DISTANCE_RESOLUTION = 0.1d;    // in meters
-  const unsigned int MAXIMUM_DISTANCE = 130;  // in meters
-  const unsigned int UNIQUE_DISTANCES_COUNT = (unsigned int)(ceil(MAXIMUM_DISTANCE / DISTANCE_RESOLUTION));
+  logger_file.close();
+  ROS_INFO_STREAM("Logger File saved on " << logger_file_name);
 
-  std::fstream fout;  // file pointer
-  std::string interference_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "interference_"
-                                                                                                "distance_"
-                                                                                                "errors.csv");
-  fout.open(interference_distance_errors, std::ios::out);  // creates a new csv file with writing permission
-  for (int i = 0; i < interference_errors.size(); i += VLP16_LASER_COUNT)
+  /*********************************************************************************************************************
+   *                                                   Data Saving
+   ********************************************************************************************************************/
+  std::string ground_truth_results_folder =
+      datasets_path::makeResultsDirectory(argv[1], datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH);
+
+  ROS_INFO_STREAM(datasets_path::GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH << " folder created on "
+                                                                         << ground_truth_results_folder);
+
+  std::string interference_results_folder =
+      datasets_path::makeResultsDirectory(argv[1], datasets_path::INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH);
+
+  ROS_INFO_STREAM(datasets_path::INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH << " folder created on "
+                                                                            << interference_results_folder);
+
+  int num_elem_written = 0;
+  std::ofstream fout;  // file pointer
+
+  /*
+   * Save the Ground Truth Bag Distance between Ground Truth Model and the Ground Truth Bag
+   */
+  std::string ground_truth_distance_vector_filename = datasets_path::constructFullPathToResults(
+      argv[1], datasets_path::GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME);
+
+  fout.open(ground_truth_distance_vector_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < ground_truth_bag_distance.size() && fout.is_open(); ++i)
   {
-    for (int j = i; j < i + VLP16_LASER_COUNT; ++j)
+    if (fout.good())
     {
-      fout << interference_errors[j] << ", ";
+      fout.write(reinterpret_cast<const char*>(&ground_truth_bag_distance[i]), sizeof(double));
+      ++num_elem_written;
     }
-    fout << "\n";
+    else
+    {
+      ROS_ERROR("Good bit no set!");
+    }
   }
+
   fout.close();
 
-  std::cout << "Interference Results saved on csv file on: " << interference_distance_errors << std::endl;
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_bag_distance.size(),
+                 "Laser Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 ground_truth_bag_distance.size());
+  ROS_INFO_STREAM("Ground Truth Bag Distance from Ground Truth Model saved on "
+                  << ground_truth_distance_vector_filename);
 
-  std::string ground_truth_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_"
-                                                                                                "distance_"
-                                                                                                "errors.csv");
-  fout.open(ground_truth_distance_errors, std::ios::out);  // creates a new csv file with writing permission
-  for (int i = 0; i < ground_truth_errors.size(); i += VLP16_LASER_COUNT)
+  /*
+   * Save the Ground Truth Bag Intensity Difference between Ground Truth Model and the Ground Truth Bag
+   */
+  num_elem_written = 0;
+  std::string ground_truth_intensity_vector_filename = datasets_path::constructFullPathToResults(
+      argv[1], datasets_path::GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME);
+
+  fout.open(ground_truth_intensity_vector_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < ground_truth_bag_intensity.size() && fout.is_open(); ++i)
   {
-    for (int j = i; j < i + VLP16_LASER_COUNT; ++j)
+    if (fout.good())
     {
-      fout << ground_truth_errors[j] << ", ";
+      fout.write(reinterpret_cast<const char*>(&ground_truth_bag_intensity[i]), sizeof(double));
+      ++num_elem_written;
     }
-    fout << "\n";
+    else
+    {
+      ROS_ERROR("Good bit no set!");
+    }
   }
+
   fout.close();
 
-  std::cout << "Interference Results saved on csv file on: " << ground_truth_distance_errors << std::endl;
+  ROS_ASSERT_MSG(num_elem_written == ground_truth_bag_intensity.size(),
+                 "Laser Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 ground_truth_bag_intensity.size());
+  ROS_INFO_STREAM("Ground Truth Bag Intensity Difference from Ground Truth Model saved on "
+                  << ground_truth_intensity_vector_filename);
 
-  // create arrays to count the frequency of interference and use default value initialization
-  std::array<int, UNIQUE_DISTANCES_COUNT> ground_truth_freq_count{}, interference_freq_count{};
-  std::array<double, UNIQUE_DISTANCES_COUNT> ground_truth_relative_freq_count{}, interference_relative_freq_count{};
+  /*
+   * Save the Interference Bag Distance between Ground Truth Model and the Interference Bag
+   */
+  num_elem_written = 0;
+  std::string interference_distance_vector_filename = datasets_path::constructFullPathToResults(
+      argv[1], datasets_path::INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME);
 
-  // Create array to hold x_axis values and initialize it
-  std::array<double, UNIQUE_DISTANCES_COUNT> x_axis{};
-  for (int i = 0; i < UNIQUE_DISTANCES_COUNT; ++i)
+  fout.open(interference_distance_vector_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < interference_bag_distance.size() && fout.is_open(); ++i)
   {
-    x_axis[i] = (double)(i)*0.1;
-  }
-
-  double total_valid_points_ground = 0;
-  double total_valid_points_interference = 0;
-
-  for (int i = 0; i < ground_truth_errors.size(); ++i)
-  {
-    if (ground_truth_errors[i] != std::numeric_limits<double>::quiet_NaN())
+    if (fout.good())
     {
-      ++ground_truth_freq_count[(unsigned int)(floor(ground_truth_errors[i] / DISTANCE_RESOLUTION))];
-      ++total_valid_points_ground;
+      fout.write(reinterpret_cast<const char*>(&interference_bag_distance[i]), sizeof(double));
+      ++num_elem_written;
+    }
+    else
+    {
+      ROS_ERROR("Good bit no set!");
     }
   }
 
-  for (int i = 0; i < interference_errors.size(); ++i)
+  fout.close();
+
+  ROS_ASSERT_MSG(num_elem_written == interference_bag_distance.size(),
+                 "Laser Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 interference_bag_distance.size());
+  ROS_INFO_STREAM("Interference Bag Distance from Ground Truth Model saved on  "
+                  << interference_distance_vector_filename);
+
+  /*
+   * Save the Interference Bag Distance between Ground Truth Model and the Interference Bag
+   */
+  num_elem_written = 0;
+  std::string interference_intensity_vector_filename = datasets_path::constructFullPathToResults(
+      argv[1], datasets_path::INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME);
+
+  fout.open(interference_intensity_vector_filename, std::ios::out | std::ios::trunc | std::ios::binary);
+
+  for (int i = 0; i < interference_bag_intensity.size() && fout.is_open(); ++i)
   {
-    if (interference_errors[i] != std::numeric_limits<double>::quiet_NaN())
+    if (fout.good())
     {
-      unsigned int index = (unsigned int)(floor(interference_errors[i] / DISTANCE_RESOLUTION));
-      // std::cout << index << std::endl;
-      if (index < interference_freq_count.size())
-      {
-        ++interference_freq_count[index];
-        ++total_valid_points_interference;
-      }
-      else
-      {
-        ROS_WARN("Index out of bounds: %d", index);
-      }
+      fout.write(reinterpret_cast<const char*>(&interference_bag_intensity[i]), sizeof(double));
+      ++num_elem_written;
+    }
+    else
+    {
+      ROS_ERROR("Good bit no set!");
     }
   }
-  std::cout << "Relative Interference Computed" << std::endl;
 
-  std::cout << "Total Valid Ground Points: " << total_valid_points_ground << std::endl;
-  std::cout << "Total Valid Intereference Points: " << total_valid_points_interference << std::endl;
+  fout.close();
 
-  std::vector<double> x_axis_v(x_axis.begin(), x_axis.end()),
-      interference_freq_count_v(interference_freq_count.begin(), interference_freq_count.end()),
-      ground_truth_freq_count_v(ground_truth_freq_count.begin(), ground_truth_freq_count.end());
+  ROS_ASSERT_MSG(num_elem_written == interference_bag_intensity.size(),
+                 "Laser Intensity Data could not be fully saved! Written: %d of %lu.", num_elem_written,
+                 interference_bag_intensity.size());
+  ROS_INFO_STREAM("Interference Bag Intensity Difference from Ground Truth Model saved on  "
+                  << interference_intensity_vector_filename);
+  /*
+  *
+  +
+  +
+  +
+  +
+  +
+  +
+  +
+  +
+  */
 
-  for (int i = 0; i < interference_freq_count_v.size(); ++i)
-  {
-    interference_freq_count_v[i] /= total_valid_points_interference;
-  }
+  /*
+    // Statistical part of Code
+    const double DISTANCE_RESOLUTION = 0.1d;    // in meters
+    const unsigned int MAXIMUM_DISTANCE = 130;  // in meters
+    const unsigned int UNIQUE_DISTANCES_COUNT = (unsigned int)(ceil(MAXIMUM_DISTANCE / DISTANCE_RESOLUTION));
 
-  for (int i = 0; i < ground_truth_freq_count_v.size(); ++i)
-  {
-    ground_truth_freq_count_v[i] /= total_valid_points_ground;
-  }
-  // Create Bar Plot object with Full HD resolution and the description for the data
-  BarChartPlotter* plotter =
-      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
-                          "Voxel edge Resolution", "Outliers/Inliers");
+    std::fstream fout;  // file pointer
+    std::string interference_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "interference_"
+                                                                                                  "distance_"
+                                                                                                  "errors.csv");
+    fout.open(interference_distance_errors, std::ios::out);  // creates a new csv file with writing permission
+    for (int i = 0; i < interference_errors.size(); i += VLP16_LASER_COUNT)
+    {
+      for (int j = i; j < i + VLP16_LASER_COUNT; ++j)
+      {
+        fout << interference_errors[j] << ", ";
+      }
+      fout << "\n";
+    }
+    fout.close();
 
-  // Add the outliers of the interfered and ground truth datasets
-  plotter->setColorScheme(vtkColorSeries::WARM);
-  plotter->addBarPlotData(x_axis_v, interference_freq_count_v, "Interference Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::BLUES);
-  plotter->addBarPlotData(x_axis_v, ground_truth_freq_count_v, "Ground Truth Bag vs Ground Truth Model");
+    std::cout << "Interference Results saved on csv file on: " << interference_distance_errors << std::endl;
 
-  plotter->plot();  // holds here until window is given the closing instruction
+    std::string ground_truth_distance_errors = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_"
+                                                                                                  "distance_"
+                                                                                                  "errors.csv");
+    fout.open(ground_truth_distance_errors, std::ios::out);  // creates a new csv file with writing permission
+    for (int i = 0; i < ground_truth_errors.size(); i += VLP16_LASER_COUNT)
+    {
+      for (int j = i; j < i + VLP16_LASER_COUNT; ++j)
+      {
+        fout << ground_truth_errors[j] << ", ";
+      }
+      fout << "\n";
+    }
+    fout.close();
 
-  // Saves the bar chart as a PNG file on the dataset directory
-  std::string bar_chart_filename = datasets_path::constructFullPathToDataset(argv[1], "chart.png").c_str();
-  plotter->saveBarChartPNG(bar_chart_filename);
-  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+    std::cout << "Interference Results saved on csv file on: " << ground_truth_distance_errors << std::endl;
 
-  plotter->close();  // Destroys bar chart object
+    // create arrays to count the frequency of interference and use default value initialization
+    std::array<int, UNIQUE_DISTANCES_COUNT> ground_truth_freq_count{}, interference_freq_count{};
+    std::array<double, UNIQUE_DISTANCES_COUNT> ground_truth_relative_freq_count{}, interference_relative_freq_count{};
 
-  if (!matplotlibcpp::semilogy(x_axis_v, ground_truth_freq_count_v))
-  {
-    ROS_WARN("No graph produced");
-  }
-  matplotlibcpp::show();
-  interference_errors.erase(
-      std::remove(interference_errors.begin(), interference_errors.end(), std::numeric_limits<double>::quiet_NaN()),
-      interference_errors.end());
+    // Create array to hold x_axis values and initialize it
+    std::array<double, UNIQUE_DISTANCES_COUNT> x_axis{};
+    for (int i = 0; i < UNIQUE_DISTANCES_COUNT; ++i)
+    {
+      x_axis[i] = (double)(i)*0.1;
+    }
 
-  if (!matplotlibcpp::bar(x_axis_v, interference_freq_count_v))
-  {
-    ROS_WARN("No bar2 produced");
-  }
-  matplotlibcpp::show();
-  if (!matplotlibcpp::hist(interference_errors))
-  {
-    ROS_WARN("No hist produced");
-  }
+    double total_valid_points_ground = 0;
+    double total_valid_points_interference = 0;
 
-  matplotlibcpp::show();
+    for (int i = 0; i < ground_truth_errors.size(); ++i)
+    {
+      if (ground_truth_errors[i] != std::numeric_limits<double>::quiet_NaN())
+      {
+        ++ground_truth_freq_count[(unsigned int)(floor(ground_truth_errors[i] / DISTANCE_RESOLUTION))];
+        ++total_valid_points_ground;
+      }
+    }
 
+    for (int i = 0; i < interference_errors.size(); ++i)
+    {
+      if (interference_errors[i] != std::numeric_limits<double>::quiet_NaN())
+      {
+        unsigned int index = (unsigned int)(floor(interference_errors[i] / DISTANCE_RESOLUTION));
+        // std::cout << index << std::endl;
+        if (index < interference_freq_count.size())
+        {
+          ++interference_freq_count[index];
+          ++total_valid_points_interference;
+        }
+        else
+        {
+          ROS_WARN("Index out of bounds: %d", index);
+        }
+      }
+    }
+    std::cout << "Relative Interference Computed" << std::endl;
+
+    std::cout << "Total Valid Ground Points: " << total_valid_points_ground << std::endl;
+    std::cout << "Total Valid Intereference Points: " << total_valid_points_interference << std::endl;
+
+    std::vector<double> x_axis_v(x_axis.begin(), x_axis.end()),
+        interference_freq_count_v(interference_freq_count.begin(), interference_freq_count.end()),
+        ground_truth_freq_count_v(ground_truth_freq_count.begin(), ground_truth_freq_count.end());
+
+    for (int i = 0; i < interference_freq_count_v.size(); ++i)
+    {
+      interference_freq_count_v[i] /= total_valid_points_interference;
+    }
+
+    for (int i = 0; i < ground_truth_freq_count_v.size(); ++i)
+    {
+      ground_truth_freq_count_v[i] /= total_valid_points_ground;
+    }
+    // Create Bar Plot object with Full HD resolution and the description for the data
+    BarChartPlotter* plotter =
+        new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                            "Voxel edge Resolution", "Outliers/Inliers");
+
+    // Add the outliers of the interfered and ground truth datasets
+    plotter->setColorScheme(vtkColorSeries::WARM);
+    plotter->addBarPlotData(x_axis_v, interference_freq_count_v, "Interference Bag vs Ground Truth Model");
+    plotter->setColorScheme(vtkColorSeries::BLUES);
+    plotter->addBarPlotData(x_axis_v, ground_truth_freq_count_v, "Ground Truth Bag vs Ground Truth Model");
+
+    plotter->plot();  // holds here until window is given the closing instruction
+
+    // Saves the bar chart as a PNG file on the dataset directory
+    std::string bar_chart_filename = datasets_path::constructFullPathToDataset(argv[1], "chart.png").c_str();
+    plotter->saveBarChartPNG(bar_chart_filename);
+    std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+
+    plotter->close();  // Destroys bar chart object
+
+    if (!matplotlibcpp::semilogy(x_axis_v, ground_truth_freq_count_v))
+    {
+      ROS_WARN("No graph produced");
+    }
+    matplotlibcpp::show();
+    interference_errors.erase(
+        std::remove(interference_errors.begin(), interference_errors.end(), std::numeric_limits<double>::quiet_NaN()),
+        interference_errors.end());
+
+    if (!matplotlibcpp::bar(x_axis_v, interference_freq_count_v))
+    {
+      ROS_WARN("No bar2 produced");
+    }
+    matplotlibcpp::show();
+    if (!matplotlibcpp::hist(interference_errors))
+    {
+      ROS_WARN("No hist produced");
+    }
+
+    matplotlibcpp::show();
+  */
   return EXIT_SUCCESS;
 }
