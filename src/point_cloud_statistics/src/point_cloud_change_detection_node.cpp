@@ -80,7 +80,7 @@ int main(int argc, char** argv)
       break;
   }
 
-  ROS_ERROR_COND(min_resolution <= max_resolution,
+  ROS_ASSERT_MSG(min_resolution <= max_resolution,
                  "Interval [%f, %f] is invalid! Inferior bound must be lower than upper bound", min_resolution,
                  max_resolution);
 
@@ -106,8 +106,14 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
-  std::string ground_truth_pcd = datasets_path::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
+  std::string ground_truth_pcd =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME);
   pcl::io::loadPCDFile<velodyne::PointXYZIR>(ground_truth_pcd, *ground_truth_ptr);
+
+  std::ofstream logger_file;
+  std::string logger_file_name =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME);
+  logger_file.open(logger_file_name, std::ios::out | std::ios::trunc);
 
   std::vector<double> ground_truth_errors, interference_errors, real_errors, resolution_values;
 
@@ -129,6 +135,9 @@ int main(int argc, char** argv)
     // Instantiate octree-based point cloud change detection class
     pcl::octree::OctreePointCloudChangeDetector<velodyne::PointXYZIR> octree(i);
 
+    logger_file << std::endl << "Voxel edge resolution: " << i << std::endl;
+    std::cout << std::endl << "Voxel edge resolution: " << i << std::endl;
+
     // Ground Truth Bag
     foreach (rosbag::MessageInstance const m, ground_truth_view)
     {
@@ -139,8 +148,6 @@ int main(int argc, char** argv)
         fromROSMsg(*msg, point_cloud);
         *current_msg_cloud_ptr = point_cloud;
 
-        ++ground_truth_bag_stats.point_cloud_msg_count;
-
         octree.setInputCloud(ground_truth_ptr);
         octree.addPointsFromInputCloud();
         octree.switchBuffers();
@@ -153,6 +160,7 @@ int main(int argc, char** argv)
         // Get vector of point indices from octree voxels which did not exist in previous buffer
         octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
+        ++ground_truth_bag_stats.point_cloud_msg_count;
         ground_truth_bag_stats.point_count += point_cloud.size();
         ground_truth_bag_stats.outliers_points_count += newPointIdxVector.size();
 
@@ -160,6 +168,13 @@ int main(int argc, char** argv)
       }
     }
 
+    ground_truth_bag_stats.computeOutliersRelativeValue();  // Compute Relative percentage of outliers
+
+    std::stringstream octree_ground_truth_statistics_text;
+    octree_ground_truth_statistics_text << "GROUND TRUTH: " << std::endl
+                                        << ground_truth_bag_stats.outputStringFormattedStatistics().str();
+    logger_file << octree_ground_truth_statistics_text.str();
+    std::cout << octree_ground_truth_statistics_text.str();
     // Interference Bag
     foreach (rosbag::MessageInstance const m, interference_view)
     {
@@ -170,8 +185,6 @@ int main(int argc, char** argv)
         fromROSMsg(*msg, point_cloud);
         *current_msg_cloud_ptr = point_cloud;
 
-        ++interference_bag_stats.point_cloud_msg_count;
-
         octree.setInputCloud(ground_truth_ptr);
         octree.addPointsFromInputCloud();
         octree.switchBuffers();
@@ -184,6 +197,7 @@ int main(int argc, char** argv)
         // Get vector of point indices from octree voxels which did not exist in previous buffer
         octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
+        ++interference_bag_stats.point_cloud_msg_count;
         interference_bag_stats.point_count += point_cloud.size();
         interference_bag_stats.outliers_points_count += newPointIdxVector.size();
 
@@ -191,15 +205,13 @@ int main(int argc, char** argv)
       }
     }
 
-    // Compute Relative percentage of outliers
-    ground_truth_bag_stats.computeOutliersRelativeValue();
-    interference_bag_stats.computeOutliersRelativeValue();
+    interference_bag_stats.computeOutliersRelativeValue();  // Compute Relative percentage of outliers
 
-    // Print statistical results
-    std::cout << "\nVoxel edge resolution: " << i << std::endl << "Ground Truth: " << std::endl;
-    ground_truth_bag_stats.printStatistics();
-    std::cout << "Interference: " << std::endl;
-    interference_bag_stats.printStatistics();
+    std::stringstream octree_interference_statistics_text;
+    octree_interference_statistics_text << "INTERFERENCE: " << std::endl
+                                        << interference_bag_stats.outputStringFormattedStatistics().str();
+    logger_file << octree_interference_statistics_text.str();
+    std::cout << octree_interference_statistics_text.str();
 
     // Generate Data for bar chart
     ground_truth_errors.push_back(ground_truth_bag_stats.getOutliersPercentage());
@@ -211,44 +223,54 @@ int main(int argc, char** argv)
   ground_truth_bag.close();  // close ground truth bag file
   interference_bag.close();  // close interference bag
 
-  std::cout << std::endl;
+  logger_file.close();
+  ROS_INFO_STREAM("Logger File saved on " << logger_file_name);
+
+  /*********************************************************************************************************************
+   *                                                   Data Saving
+   ********************************************************************************************************************/
 
   std::fstream fout;  // file pointer
-  std::string interference_csv_stats = datasets_path::constructFullPathToDataset(argv[1], "interference_"
-                                                                                          "results.csv");
-  fout.open(interference_csv_stats, std::ios::out);  // creates a new csv file with writing permission
+  std::string interference_csv_stats = datasets_path::constructFullPathToResults(
+      argv[1], datasets_path::INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME);
+  fout.open(interference_csv_stats, std::ios::out | std::ios::trunc);  // creates a new csv file with writing permission
+
+  std::stringstream full_statistics;
   for (int i = 0; i < resolution_values.size(); i++)
   {
-    fout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", " << interference_errors[i] / 100.0
-         << ", " << real_errors[i] / 100.0 << "\n";
-    std::cout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", "
-              << interference_errors[i] / 100.0 << ", " << real_errors[i] / 100.0 << std::endl;
+    full_statistics << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0d << ", "
+                    << interference_errors[i] / 100.0d << ", " << real_errors[i] / 100.0d << std::endl;
   }
+
+  fout << full_statistics.str();
   fout.close();
-  std::cout << "Interference Results saved on csv file on: " << interference_csv_stats << std::endl;
 
-  // Create Bar Plot object with Full HD resolution and the description for the data
-  BarChartPlotter* plotter =
-      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
-                          "Voxel edge Resolution", "Outliers/Inliers");
+  ROS_INFO_STREAM("Interference Results saved on csv file on: " << interference_csv_stats);
 
-  // Add the outliers of the interfered and ground truth datasets
-  plotter->setColorScheme(vtkColorSeries::WARM);
-  plotter->addBarPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::BLUES);
-  plotter->addBarPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::COOL);
-  plotter->addBarPlotData(resolution_values, real_errors, "Ground Truth Bag vs Ground Truth Model");
+  std::cout << std::endl << full_statistics.str();
+  /*
+    // Create Bar Plot object with Full HD resolution and the description for the data
+    BarChartPlotter* plotter =
+        new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                            "Voxel edge Resolution", "Outliers/Inliers");
 
-  plotter->plot();  // holds here until window is given the closing instruction
+    // Add the outliers of the interfered and ground truth datasets
+    plotter->setColorScheme(vtkColorSeries::WARM);
+    plotter->addBarPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model");
+    plotter->setColorScheme(vtkColorSeries::BLUES);
+    plotter->addBarPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model");
+    plotter->setColorScheme(vtkColorSeries::COOL);
+    plotter->addBarPlotData(resolution_values, real_errors, "Ground Truth Bag vs Ground Truth Model");
 
-  // Saves the bar chart as a PNG file on the dataset directory
-  std::string bar_chart_filename =
-      datasets_path::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
-  plotter->saveBarChartPNG(bar_chart_filename);
-  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+    plotter->plot();  // holds here until window is given the closing instruction
 
-  plotter->close();  // Destroys bar chart object
+    // Saves the bar chart as a PNG file on the dataset directory
+    std::string bar_chart_filename =
+        datasets_path::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
+    plotter->saveBarChartPNG(bar_chart_filename);
+    std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
+    plotter->close();  // Destroys bar chart object
+  */
   return EXIT_SUCCESS;
 }
