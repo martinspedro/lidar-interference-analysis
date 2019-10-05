@@ -119,6 +119,7 @@ extern const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
 extern const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME;
 
 extern const std::string ICP_LOGGER_FILE_NAME;
+extern const std::string INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME;
 
 extern const std::string CLOSER_DISTANCE_AFFIX;
 extern const std::string HALFWAY_DISTANCE_AFFIX;
