@@ -24,12 +24,40 @@ CloudStatisticalData::CloudStatisticalData()
   this->relative_out_points = 0.0d;
 }
 
+void CloudStatisticalData::printPointStatistics()
+{
+  std::cout << "Number of received Point Cloud Messages: " << this->point_cloud_msg_count << std::endl
+            << "Number of received Point Cloud 3D Points: " << this->point_count << std::endl
+            << "Average Points per message: " << (double)(this->point_count) / (double)(this->point_cloud_msg_count)
+            << std::endl;
+}
+
 void CloudStatisticalData::printStatistics()
 {
   std::cout << "Number of received Point Cloud Messages: " << this->point_cloud_msg_count << std::endl
             << "Number of received Point Cloud 3D Points: " << this->point_count << std::endl
             << "From which " << this->outliers_points_count << " (" << this->getOutliersPercentage()
             << "%) are interfered" << std::endl;
+}
+
+std::stringstream CloudStatisticalData::outputStringFormattedPointStatistics()
+{
+  std::stringstream temp_sstr;
+  temp_sstr << "Number of received Point Cloud Messages: " << this->point_cloud_msg_count << std::endl
+            << "Number of received Point Cloud 3D Points: " << this->point_count << std::endl
+            << "Average Points per message: " << (double)(this->point_count) / (double)(this->point_cloud_msg_count)
+            << std::endl;
+  return temp_sstr;
+}
+
+std::stringstream CloudStatisticalData::outputStringFormattedStatistics()
+{
+  std::stringstream temp_sstr;
+  temp_sstr << "Number of received Point Cloud Messages: " << this->point_cloud_msg_count << std::endl
+            << "Number of received Point Cloud 3D Points: " << this->point_count << std::endl
+            << "From which " << this->outliers_points_count << " (" << this->getOutliersPercentage()
+            << "%) are interfered" << std::endl;
+  return temp_sstr;
 }
 
 void CloudStatisticalData::computeOutliersRelativeValue()

@@ -7,6 +7,9 @@
 #ifndef CLOUD_STATISTICAL_DATA_H
 #define CLOUD_STATISTICAL_DATA_H
 
+#include <string>
+#include <sstream>
+
 namespace point_cloud
 {
 namespace statistics
@@ -26,6 +29,10 @@ struct CloudStatisticalData
   CloudStatisticalData();
 
   void printStatistics();
+  void printPointStatistics();
+  std::stringstream outputStringFormattedPointStatistics();
+  std::stringstream outputStringFormattedStatistics();
+
   void computeOutliersRelativeValue();
   inline double getOutliersPercentage();
 };
