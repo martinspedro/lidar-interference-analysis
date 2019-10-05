@@ -172,6 +172,7 @@ add_executable(point_cloud_interference_analysis_node
       src/cloud_statistical_data.cpp
       src/point_cloud_statistics.cpp
       src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp
     )
 
 ## Rename C++ executable without prefix
