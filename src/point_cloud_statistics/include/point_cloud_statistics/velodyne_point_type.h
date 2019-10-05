@@ -9,6 +9,8 @@
 
 #define PCL_NO_PRECOMPILE
 
+#include <climits>
+
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 
@@ -16,6 +18,9 @@
 
 namespace velodyne
 {
+const float DEFAULT_FLOAT_VALUE = std::numeric_limits<float>::quiet_NaN();
+const uint16_t DEFAULT_RING_VALUE = USHRT_MAX;
+
 /**
  * \brief Velodyne Point: Euclidean Coordinates, including intensity and laser ring number.
  */
@@ -27,11 +32,11 @@ struct PointXYZIR
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  //!< ensure proper alignment
 
   PointXYZIR()
-    : x(std::numeric_limits<float>::quiet_NaN())
-    , y(std::numeric_limits<float>::quiet_NaN())
-    , z(std::numeric_limits<float>::quiet_NaN())
-    , intensity(std::numeric_limits<float>::quiet_NaN())
-    , ring(-1)
+    : x(DEFAULT_FLOAT_VALUE)
+    , y(DEFAULT_FLOAT_VALUE)
+    , z(DEFAULT_FLOAT_VALUE)
+    , intensity(DEFAULT_FLOAT_VALUE)
+    , ring(DEFAULT_RING_VALUE)
   {
   }
 
