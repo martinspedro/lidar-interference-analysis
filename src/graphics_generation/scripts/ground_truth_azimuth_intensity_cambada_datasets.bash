@@ -48,5 +48,5 @@ direction_330
 
 
 for i in ${test_scenarios[@]}; do
-    rosrun graphics_generation ground_azimuth_intensity.py $i
+    rosrun graphics_generation ground_truth_azimuth_intensity.py $i
 done
