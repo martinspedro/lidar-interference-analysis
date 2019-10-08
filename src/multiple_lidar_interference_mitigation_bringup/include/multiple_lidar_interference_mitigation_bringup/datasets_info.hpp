@@ -11,10 +11,12 @@
 
 namespace datasets_path
 {
+const std::string getTestScenarioFullPath(const std::string test_scenario_name);
 const std::string getTestScenarioDatasetFullPath(const std::string test_name);
 const std::string getResultsFolderRelativePath(const std::string test_name);
 const std::string getGraphicsFolderRelativePath(const std::string test_name);
 
+const std::string constructFullPathToTestScenario(const std::string test_scenario_name, const std::string file_name);
 const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name);
 const std::string constructFullPathToResults(const std::string dataset_name, const std::string results_name);
 const std::string constructFullPathToGraphics(const std::string dataset_name, const std::string graphic_name);

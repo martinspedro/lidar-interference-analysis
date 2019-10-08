@@ -164,6 +164,20 @@ const std::string ICP_LOGGER_FILE_NAME = "icp_transformation_matrices.log";
 const std::string INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "interference_analysis_point_statistics.log";
 const std::string OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "octree_ocupation_statistics.log";
 
+const std::string INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME = "interference_distance_absolute_errors.csv";
+const std::string INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv";
+const std::string INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "interference_distance_normalized_errors.csv";
+
+const std::string INTERFERENCE_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "interference_distance_color_mesh.png";
+const std::string INTERFERENCE_DISTANCE_ERRORS_SCATTER_FILE_NAME = "interference_distance_scatter.png";
+
+const std::string GROUND_TRUTH_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME = "ground_truth_distance_absolute_errors.csv";
+const std::string GROUND_TRUTH_DISTANCE_TOTAL_POINTS_FILE_NAME = "ground_truth_distance_total_points.csv";
+const std::string GROUND_TRUTH_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "ground_truth_distance_normalized_errors.csv";
+
+const std::string GROUND_TRUTH_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_distance_color_mesh.png";
+const std::string GROUND_TRUTH_DISTANCE_ERRORS_SCATTER_FILE_NAME = "ground_truth_distance_scatter.png";
+
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
 const std::string FURTHER_DISTANCE_AFFIX = "further";
@@ -173,6 +187,14 @@ const std::string ALIGNED_HEIGHT_AFFIX = "aligned";
 const std::string ABOVE_HEIGHT_AFFIX = "above";
 
 const std::string AFFIX_SEPARATOR = "_";
+
+const std::map<const std::string, const std::string> test_scenario_map = {
+  { "distance", CAMBADA_SCENARIO_A_DISTANCE_INTERFERENCE_FOLDER_FULL_PATH },
+  { "height", CAMBADA_SCENARIO_A_HEIGHT_INTERFERENCE_FOLDER_FULL_PATH },
+  { "human", CAMBADA_SCENARIO_A_HUMAN_INTERFERENCE_FOLDER_FULL_PATH },
+  { "LOS", CAMBADA_SCENARIO_A_LIDARS_LOS_OBSTACLE_INTERFERENCE_FOLDER_FULL_PATH },
+  { "direction", CAMBADA_SCENARIO_B_DIRECTION_INTERFERENCE_FOLDER_FULL_PATH },
+};
 
 const std::map<const std::string, const std::string> datasets_map = {
   // IT2 Dark Room Interference Datasets (Setup B)
@@ -286,6 +308,19 @@ const std::map<const std::string, const std::string> graphics_map = {
   { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
 };
 
+const std::string getTestScenarioFullPath(const std::string test_scenario_name)
+{
+  std::map<std::string, const std::string>::const_iterator it = test_scenario_map.find(test_scenario_name);
+  if (it != test_scenario_map.end())
+  {
+    return it->second;  // return the value of the key
+  }
+  else
+  {
+    throw std::out_of_range("Dataset key is invalid");
+  }
+}
+
 const std::string getTestScenarioDatasetFullPath(const std::string test_name)
 {
   std::map<std::string, const std::string>::const_iterator it = datasets_map.find(test_name);
@@ -323,6 +358,12 @@ const std::string getGraphicsFolderRelativePath(const std::string test_name)
   {
     throw std::out_of_range("Dataset key is invalid");
   }
+}
+
+const std::string constructFullPathToTestScenario(const std::string test_scenario_name, const std::string file_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioFullPath(test_scenario_name) + file_name;
 }
 
 const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name)
