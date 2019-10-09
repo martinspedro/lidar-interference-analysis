@@ -131,8 +131,8 @@ const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "interferen
 const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interference_bag_intensity.bin";
 const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.csv";
 
-const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_HIST_FILE_NAME = "ground_truth_average_point_distance_histogram."
-                                                                       "png";
+const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_HIST_FILE_NAME = "ground_truth_average_point_distance_"
+                                                                       "histogram.png";
 const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_COLOR_MESH_FILE_NAME = "ground_truth_average_point_distance_"
                                                                              "color_mesh.png";
 const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_HIST_FILE_NAME = "ground_truth_average_point_intensity_"
@@ -145,8 +145,9 @@ const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_COLOR_MESH_FILE_NAME = "g
                                                                               "color_mesh.png";
 const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_HIST_FILE_NAME = "ground_truth_point_intensity_variance_"
                                                                          "histogram.png";
-const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_COLOR_MESH_FILE_NAME = "ground_truth_point_intensity_variance_"
-                                                                               "color_mesh.png";
+const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_COLOR_MESH_FILE_NAME = "ground_truth_point_intensity_"
+                                                                               "variance_color_mesh.png";
+
 const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_POLAR_FILE_NAME = "ground_truth_azimuth_intensity_polar.png";
 const std::string GROUND_TRUTH_LASER_INTENSITY_BAR_FILE_NAME = "ground_truth_laser_intensity_bar.png";
 
@@ -177,6 +178,41 @@ const std::string GROUND_TRUTH_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "ground_tr
 
 const std::string GROUND_TRUTH_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_distance_color_mesh.png";
 const std::string GROUND_TRUTH_DISTANCE_ERRORS_SCATTER_FILE_NAME = "ground_truth_distance_scatter.png";
+
+const std::string INTERFERENCE_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "interference_height_absolute_errors.csv";
+const std::string INTERFERENCE_HEIGHT_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv";
+const std::string INTERFERENCE_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "interference_height_normalized_errors.csv";
+
+const std::string INTERFERENCE_HEIGHT_ERRORS_COLOR_MESH_FILE_NAME = "interference_height_color_mesh.png";
+const std::string INTERFERENCE_HEIGHT_ERRORS_SCATTER_FILE_NAME = "interference_height_scatter.png";
+
+const std::string GROUND_TRUTH_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "ground_truth_height_absolute_errors.csv";
+const std::string GROUND_TRUTH_HEIGHT_TOTAL_POINTS_FILE_NAME = "ground_truth_height_total_points.csv";
+const std::string GROUND_TRUTH_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "ground_truth_height_normalized_errors.csv";
+
+const std::string GROUND_TRUTH_HEIGHT_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_height_color_mesh.png";
+const std::string GROUND_TRUTH_HEIGHT_ERRORS_SCATTER_FILE_NAME = "ground_truth_height_scatter.png";
+
+// clang-format off
+const std::string INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME =
+        "LOS_vs_distance_interference_normalized_errors.csv";
+const std::string GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME =
+        "LOS_vs_distance_ground_truth_normalized_errors.csv";
+const std::string INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE =
+        "LOS_vs_distance_interference_normalized_errors_bar.png";
+const std::string GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE =
+        "LOS_vs_distance_ground_truth_normalized_errors_bar.png";
+const std::string INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE =
+        "LOS_vs_distance_interference_normalized_errors_color_mesh.png";
+const std::string GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE =
+        "LOS_vs_distance_ground_truth_normalized_errors_color_mesh.png";
+// clang-format on
+
+const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME = "interference_direction_distance_"
+                                                                                      "errors_polar_plot_laser";
+const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME = "interference_direction_"
+                                                                                          "distance_errors_polar_plot_"
+                                                                                          "direction";
 
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
