@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import sys
+import os
 import warnings
 
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-#from datasets_path import datasets_path
-from datasets_path import *
+from datasets_path import datasets_path
 
 
 # if number of arguments is invalid
@@ -29,9 +29,9 @@ errors_absolute = np.zeros((len(distance_values), len(error_thresholds)), dtype=
 number_points  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.uint32)
 errors_normalized  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.double)
 
-errors_absolute_distance_filename = constructFullPathToTestScenario(test_codename, INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
-number_points_distance_filename = constructFullPathToTestScenario(test_codename, INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME)
-errors_normalized_distance_filename = constructFullPathToTestScenario(test_codename, INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
+errors_absolute_distance_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
+number_points_distance_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME)
+errors_normalized_distance_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
 
 if os.path.isfile(errors_absolute_distance_filename) and os.path.isfile(number_points_distance_filename) and os.path.isfile(errors_normalized_distance_filename):
     print("Loading older data..." ),
@@ -44,7 +44,7 @@ else:
         test_scenario = test_codename + "_" + str(i+1) + "m"
         print(test_scenario)
 
-        filename = constructFullPathToResults(test_scenario, INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
+        filename = constructFullPathToResults(test_scenario, datasets_path.INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
         f = open(filename, "rb")
         print(filename)
 
@@ -79,7 +79,7 @@ fig1.tight_layout()
 plt.show(block=False)
 
 print("Done! Saving Colored Mesh Graph... "),
-colored_mesh_filename = constructFullPathToTestScenario(test_codename, INTERFERENCE_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME)
+colored_mesh_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME)
 plt.savefig(colored_mesh_filename)
 
 print("Done! Colored Mesh saved on: " + colored_mesh_filename)
@@ -91,9 +91,9 @@ number_points  = np.zeros((len(distance_values), len(error_thresholds)), dtype=n
 errors_normalized  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.double)
 
 
-errors_absolute_distance_filename = constructFullPathToTestScenario(test_codename, GROUND_TRUTH_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
-number_points_distance_filename = constructFullPathToTestScenario(test_codename, GROUND_TRUTH_DISTANCE_TOTAL_POINTS_FILE_NAME)
-errors_normalized_distance_filename = constructFullPathToTestScenario(test_codename, GROUND_TRUTH_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
+errors_absolute_distance_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.GROUND_TRUTH_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
+number_points_distance_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.GROUND_TRUTH_DISTANCE_TOTAL_POINTS_FILE_NAME)
+errors_normalized_distance_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.GROUND_TRUTH_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
 
 if os.path.isfile(errors_absolute_distance_filename) and os.path.isfile(number_points_distance_filename) and os.path.isfile(errors_normalized_distance_filename):
     print("Loading older data..." ),
@@ -106,7 +106,7 @@ else:
         test_scenario = test_codename + "_" + str(i+1) + "m"
         print(test_scenario)
 
-        filename = constructFullPathToResults(test_scenario, GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
+        filename = constructFullPathToResults(test_scenario, datasets_path.GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
         f = open(filename, "rb")
         print(filename)
 
@@ -141,7 +141,7 @@ fig1.tight_layout()
 plt.show(block=False)
 
 print("Done! Saving Colored Mesh Graph... "),
-colored_mesh_filename = constructFullPathToTestScenario(test_codename, GROUND_TRUTH_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME)
+colored_mesh_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.GROUND_TRUTH_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME)
 
 plt.savefig(colored_mesh_filename)
 print("Done! Colored Mesh saved on: " + colored_mesh_filename)

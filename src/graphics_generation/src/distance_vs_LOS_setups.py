@@ -1,27 +1,13 @@
 #!/usr/bin/env python3
 import sys
+import os
 import warnings
 
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-#from datasets_path import datasets_path
-from datasets_path import *
-
-# from https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/barchart.html#sphx-glr-gallery-lines-bars-and-markers-barchart-py
-def autolabel(rects, axes, text_rotation=0):
-    """Attach a text label above each bar in *rects*, displaying its height."""
-    for rect in rects:
-        height = rect.get_height()
-        axes.annotate('{}'.format(height),
-                    xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(rect.get_width(), 3),  # 3 points vertical offset
-                    textcoords="offset points",
-                    rotation=text_rotation,
-                    ha='center', va='bottom')
-
-
+from datasets_path import datasets_path
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -40,9 +26,9 @@ distance_errors_absolute = np.zeros((len(distance_values), len(error_thresholds)
 distance_number_points  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.uint32)
 distance_errors_normalized  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.double)
 
-distance_errors_absolute_distance_filename = constructFullPathToTestScenario(distance_test_codename, INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
-distance_number_points_distance_filename = constructFullPathToTestScenario(distance_test_codename, INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME)
-distance_errors_normalized_distance_filename = constructFullPathToTestScenario(distance_test_codename, INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
+distance_errors_absolute_distance_filename = datasets_path.constructFullPathToTestScenario(distance_test_codename, datasets_path.INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
+distance_number_points_distance_filename = datasets_path.constructFullPathToTestScenario(distance_test_codename, datasets_path.INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME)
+distance_errors_normalized_distance_filename = datasets_path.constructFullPathToTestScenario(distance_test_codename, datasets_path.INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
 
 
 if os.path.isfile(distance_errors_absolute_distance_filename) and os.path.isfile(distance_number_points_distance_filename) and os.path.isfile(distance_errors_normalized_distance_filename):
@@ -58,9 +44,9 @@ LOS_errors_absolute = np.zeros((len(distance_values), len(error_thresholds)), dt
 LOS_number_points  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.uint32)
 LOS_errors_normalized  = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.double)
 
-LOS_errors_absolute_distance_filename = constructFullPathToTestScenario(LOS_test_codename, INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
-LOS_number_points_distance_filename = constructFullPathToTestScenario(LOS_test_codename, INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME)
-LOS_errors_normalized_distance_filename = constructFullPathToTestScenario(LOS_test_codename, INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
+LOS_errors_absolute_distance_filename = datasets_path.constructFullPathToTestScenario(LOS_test_codename, datasets_path.INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME)
+LOS_number_points_distance_filename = datasets_path.constructFullPathToTestScenario(LOS_test_codename, datasets_path.INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME)
+LOS_errors_normalized_distance_filename = datasets_path.constructFullPathToTestScenario(LOS_test_codename, datasets_path.INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME)
 
 if os.path.isfile(LOS_errors_absolute_distance_filename) and os.path.isfile(LOS_number_points_distance_filename) and os.path.isfile(LOS_errors_normalized_distance_filename):
     print("Loading older data..." ),
@@ -98,13 +84,13 @@ fig1.tight_layout()
 plt.show(block=False)
 print("Done! Saving Bar Chart figure... "),
 
-graphic_filename = constructFullPathToTestScenario(LOS_test_codename, INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE)
+graphic_filename = datasets_path.constructFullPathToTestScenario(LOS_test_codename, datasets_path.INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE)
 plt.savefig(graphic_filename)
 print("Done! Bar Chart saved on: " + graphic_filename)
 
 # Cpmute and save normalized errors difference
 errors_normalized_difference =  distance_errors_normalized[range(0, 12, 2), :] - LOS_errors_normalized
-errors_normalized_difference_filename = constructFullPathToTestScenario(LOS_test_codename, INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME)
+errors_normalized_difference_filename = datasets_path.constructFullPathToTestScenario(LOS_test_codename, datasets_path.INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME)
 np.savetxt(errors_normalized_difference_filename, errors_normalized_difference, delimiter=", ")
 
 
@@ -122,5 +108,5 @@ fig2.tight_layout()
 plt.show(block=False)
 
 print("Done! Saving Colored Mesh Graph... "),
-colored_mesh_filename = constructFullPathToTestScenario(LOS_test_codename, INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE)
+colored_mesh_filename = datasets_path.constructFullPathToTestScenario(LOS_test_codename, datasets_path.INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE)
 plt.savefig(colored_mesh_filename)

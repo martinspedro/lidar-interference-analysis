@@ -6,8 +6,7 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-#from datasets_path import datasets_path
-from datasets_path import *
+from datasets_path import datasets_path
 
 
 # if number of arguments is invalid
@@ -31,7 +30,7 @@ for i in range(0, len(direction_values), 1):
     test_scenario = test_codename + "_" + str(direction_values[i])
     print(test_scenario)
 
-    filename = constructFullPathToResults(test_scenario, INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
+    filename = datasets_path.constructFullPathToResults(test_scenario, datasets_path.INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
     f = open(filename, "rb")
     print(filename)
 
@@ -57,7 +56,7 @@ for i in range(0, len(direction_values), 1):
     fig1.suptitle(f"{direction_values[i]}º")
     fig1.tight_layout()
     plt.show(block=False)
-    graphic_filename = constructFullPathToTestScenario(test_codename, INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME + f"{direction_values[i]}.png")
+    graphic_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME + f"{direction_values[i]}.png")
     print(graphic_filename)
     plt.savefig(graphic_filename)
     plt.close()
@@ -80,7 +79,7 @@ for j in range(0, 16, 1):
         test_scenario = test_codename + "_" + str(direction_values[i])
         print(test_scenario)
 
-        filename = constructFullPathToResults(test_scenario, INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
+        filename = datasets_path.constructFullPathToResults(test_scenario, datasets_path.INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
         f = open(filename, "rb")
         print(filename)
 
@@ -103,7 +102,7 @@ for j in range(0, 16, 1):
     fig2.suptitle(f"Laser ID: {j}")
     fig2.tight_layout()
     plt.show(block=False)
-    graphic_filename = constructFullPathToTestScenario(test_codename, INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME + f"{j}.png")
+    graphic_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME + f"{j}.png")
     print(graphic_filename)
     plt.savefig(graphic_filename)
     plt.close()
