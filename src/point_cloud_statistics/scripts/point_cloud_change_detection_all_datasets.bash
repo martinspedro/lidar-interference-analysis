@@ -47,7 +47,7 @@ direction_30
 direction_60
 direction_90
 direction_120
-irection_150
+direction_150
 direction_180
 direction_210
 direction_240
