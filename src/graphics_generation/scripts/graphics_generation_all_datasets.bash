@@ -66,7 +66,7 @@ for i in ${test_scenarios[@]}; do
     rosrun graphics_generation ground_truth_laser_intensity.py $i
     rosrun graphics_generation ground_truth_point_distance_variance.py $i
     rosrun graphics_generation ground_truth_point_intensity_variance.py $i
-    rosrun graphics_generation interference_analysis_octree_ocupation.py $i
+    rosrun graphics_generation interference_analysis_octree_occupation.py $i
     rosrun graphics_generation interference_bag_distance.py $i
     rosrun graphics_generation interference_bag_intensity.py $i
 done
