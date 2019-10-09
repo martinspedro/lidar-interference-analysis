@@ -122,9 +122,48 @@ INTERFERENCE_BAG_DISTANCE_HIST_FILE_NAME = "interference_bag_distance_hist.png"
 INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_COMPARISON_BAR_FILE_NAME = "interference_analysis_octree_ocupation_comparison_bar.png"
 INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME = "interference_analysis_octree_ocupation_bar.png"
 
+INTERFERENCE_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "interference_height_absolute_errors.csv"
+INTERFERENCE_HEIGHT_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv"
+INTERFERENCE_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "interference_height_normalized_errors.csv"
+
+INTERFERENCE_HEIGHT_ERRORS_COLOR_MESH_FILE_NAME = "interference_height_color_mesh.png"
+INTERFERENCE_HEIGHT_ERRORS_SCATTER_FILE_NAME = "interference_height_scatter.png"
+
+GROUND_TRUTH_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "ground_truth_height_absolute_errors.csv"
+GROUND_TRUTH_HEIGHT_TOTAL_POINTS_FILE_NAME = "ground_truth_height_total_points.csv"
+GROUND_TRUTH_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "ground_truth_height_normalized_errors.csv"
+
+GROUND_TRUTH_HEIGHT_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_height_color_mesh.png"
+GROUND_TRUTH_HEIGHT_ERRORS_SCATTER_FILE_NAME = "ground_truth_height_scatter.png"
+
 ICP_LOGGER_FILE_NAME = "icp_transformation_matrices.log"
 INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "interference_analysis_point_statistics.log"
 OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "octree_ocupation_statistics.log"
+
+INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME = "interference_distance_absolute_errors.csv"
+INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv"
+INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "interference_distance_normalized_errors.csv"
+
+INTERFERENCE_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "interference_distance_color_mesh.png"
+INTERFERENCE_DISTANCE_ERRORS_SCATTER_FILE_NAME = "interference_distance_scatter.png"
+
+GROUND_TRUTH_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME = "ground_truth_distance_absolute_errors.csv"
+GROUND_TRUTH_DISTANCE_TOTAL_POINTS_FILE_NAME = "ground_truth_distance_total_points.csv"
+GROUND_TRUTH_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "ground_truth_distance_normalized_errors.csv"
+
+GROUND_TRUTH_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_distance_color_mesh.png"
+GROUND_TRUTH_DISTANCE_ERRORS_SCATTER_FILE_NAME = "ground_truth_distance_scatter.png"
+
+INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME = "LOS_vs_distance_interference_normalized_errors.csv"
+GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME = "LOS_vs_distance_ground_truth_normalized_errors.csv"
+INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE = "LOS_vs_distance_interference_normalized_errors.png"
+GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE = "LOS_vs_distance_ground_truth_normalized_errors.png"
+INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE = "LOS_vs_distance_interference_normalized_errors_color_mesh.png";
+GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE = "LOS_vs_distance_ground_truth_normalized_errors_color_mesh.png";
+
+
+INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME = "interference_direction_distance_errors_polar_plot_laser";
+INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME = "interference_direction_distance_errors_polar_plot_direction";
 
 CLOSER_DISTANCE_AFFIX = "closer"
 HALFWAY_DISTANCE_AFFIX = "halfway"
@@ -135,6 +174,14 @@ ALIGNED_HEIGHT_AFFIX = "aligned"
 ABOVE_HEIGHT_AFFIX = "above"
 
 AFFIX_SEPARATOR = "_"
+
+test_scenario_map = {
+  "distance" : CAMBADA_SCENARIO_A_DISTANCE_INTERFERENCE_FOLDER_FULL_PATH ,
+  "height" : CAMBADA_SCENARIO_A_HEIGHT_INTERFERENCE_FOLDER_FULL_PATH ,
+  "human" : CAMBADA_SCENARIO_A_HUMAN_INTERFERENCE_FOLDER_FULL_PATH ,
+  "LOS" : CAMBADA_SCENARIO_A_LIDARS_LOS_OBSTACLE_INTERFERENCE_FOLDER_FULL_PATH ,
+  "direction" : CAMBADA_SCENARIO_B_DIRECTION_INTERFERENCE_FOLDER_FULL_PATH ,
+}
 
 datasets_map =  {
    # IT2 Dark Room Interference Datasets (Setup B)
@@ -248,6 +295,9 @@ graphics_map = {
   INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME : GRAPHICS_FOLDER_RELATIVE_PATH ,
 }
 
+def getTestScenarioFullPath(test_scenario_name):
+    return test_scenario_map.get(test_scenario_name)
+
 def getTestScenarioDatasetFullPath( test_name):
     return datasets_map.get(test_name)
 
@@ -257,6 +307,11 @@ def getResultsFolderRelativePath( test_name):
 def getGraphicsFolderRelativePath( test_name):
     return graphics_map.get(test_name)
 
+
+def constructFullPathToTestScenario(test_scenario_name, file_name):
+    # already has the "/" character in the end
+    return getTestScenarioFullPath(test_scenario_name) + file_name
+
 def constructFullPathToDataset( dataset_name,  file_name):
   # already has the "/" character in the end
   return getTestScenarioDatasetFullPath(dataset_name) + file_name
@@ -264,7 +319,6 @@ def constructFullPathToDataset( dataset_name,  file_name):
 def constructFullPathToResults( dataset_name,  results_name):
   # already has the "/" character in the end
   return getTestScenarioDatasetFullPath(dataset_name) + getResultsFolderRelativePath(results_name) + results_name
-
 
 def constructFullPathToGraphics(dataset_name, graphic_name):
   # already has the "/" character in the end
