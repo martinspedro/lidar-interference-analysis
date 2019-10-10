@@ -44,7 +44,7 @@ else:
         test_scenario = test_codename + "_" + str(i+1) + "m"
         print(test_scenario)
 
-        filename = constructFullPathToResults(test_scenario, datasets_path.INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
+        filename = datasets_path.constructFullPathToResults(test_scenario, datasets_path.INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
         f = open(filename, "rb")
         print(filename)
 
@@ -106,7 +106,7 @@ else:
         test_scenario = test_codename + "_" + str(i+1) + "m"
         print(test_scenario)
 
-        filename = constructFullPathToResults(test_scenario, datasets_path.GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
+        filename = datasets_path.constructFullPathToResults(test_scenario, datasets_path.GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME)
         f = open(filename, "rb")
         print(filename)
 
