@@ -1,7 +1,9 @@
 /**
  * \file   bar_chart_plotter.hpp
- * \brief
+ * \brief Plots a Bar Chart using PCLPlotter
  *
+ * Header file of a wrapper class to plot Bar Charts using PCLPlotter
+ * Extra functionalities are added using vtkChart, the implementation underlying PClPlotter
  */
 
 #ifndef BAR_CHART_PLOTTER_H
@@ -10,6 +12,12 @@
 #include <pcl/visualization/pcl_plotter.h>
 #include <string>
 
+/**
+ * \brief Class to handle Bar Charts
+ *
+ * Inherits PClPlotter functionalities and wraps more complex features from PCLPlotter and vtkGraphs under its own
+ * methods
+ */
 class BarChartPlotter : public pcl::visualization::PCLPlotter
 {
 public:

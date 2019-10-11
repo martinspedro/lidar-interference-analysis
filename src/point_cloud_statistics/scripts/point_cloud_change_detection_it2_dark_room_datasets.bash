@@ -15,9 +15,9 @@ halfway_below
 )
 
 # Parameters for the datasets analysis
-min_voxel_resolution=0.1
-max_voxel_resolution=0.3
-voxel_resolution_step=0.1
+min_voxel_resolution=0.05
+max_voxel_resolution=1.5
+voxel_resolution_step=0.05
 
 # Datasets base path
 base_path="/media/martinspedro/Elements/mine/IT2 Dark Room/2019-07-31 (Scenario B)/Multiple LiDAR Interference"

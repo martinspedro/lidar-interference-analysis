@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(point_cloud_statistics)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+## Compile as C++14, supported in ROS Melodic and newer
+add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -15,12 +17,15 @@ find_package(catkin REQUIRED COMPONENTS
   rosbag
   multiple_lidar_interference_mitigation_bringup
   velodyne_pointcloud
+  rosconsole
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-find_package(PCL REQUIRED COMPONENTS common visualization)
+find_package(PCL REQUIRED COMPONENTS common visualization filters octree registration)
 find_package(VTK)
+
+find_package(PythonLibs 2.7)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -111,7 +116,7 @@ catkin_package(
    INCLUDE_DIRS include
    LIBRARIES datasets_info
    #  LIBRARIES point_cloud_statistics
-   CATKIN_DEPENDS roscpp rospy std_msgs multiple_lidar_interference_mitigation_bringup
+   CATKIN_DEPENDS roscpp rospy std_msgs multiple_lidar_interference_mitigation_bringup velodyne_pointcloud
 #  DEPENDS system_lib
 )
 
@@ -125,12 +130,12 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
 )
-
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/point_cloud_statistics.cpp
-# )
+# Declare a C++ library
+#add_library(organized_pointcloud
+#   include/point_cloud_statistics/organized_pointcloud.hpp
+#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -140,7 +145,6 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(histogram                              src/histogram.cpp)
 add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp src/box_filter)
 add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp src/box_filter)
 
@@ -152,13 +156,24 @@ add_executable(point_cloud_change_detection_node
 
 add_executable(ground_truth_model_estimation_node
       src/ground_truth_model_estimation_node.cpp
-      src/point_cloud_statistics.cpp)
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp)
+
+add_executable(icp_model_estimation_node
+      src/icp_model_estimation_node.cpp
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp)
 
 add_executable(point_cloud_interference_analysis_node
       src/point_cloud_interference_analysis_node.cpp
       src/bar_chart_plotter.cpp
       src/cloud_statistical_data.cpp
-      src/point_cloud_statistics.cpp)
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp
+    )
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -171,11 +186,6 @@ add_executable(point_cloud_interference_analysis_node
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(histogram
-   ${catkin_LIBRARIES}
-   ${PCL_LIBRARIES}
-)
-
 target_link_libraries(point_cloud_box_filtering_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
@@ -199,11 +209,19 @@ target_link_libraries(ground_truth_model_estimation_node
    datasets_info
 )
 
-target_link_libraries(point_cloud_interference_analysis_node
+target_link_libraries(icp_model_estimation_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    datasets_info
 )
+
+target_link_libraries(point_cloud_interference_analysis_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${PYTHON_LIBRARIES}
+   datasets_info
+)
+
 #############
 ## Install ##
 #############

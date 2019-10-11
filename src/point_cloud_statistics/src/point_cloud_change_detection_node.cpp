@@ -3,46 +3,40 @@
  * \brief
  *
  */
+#define PCL_NO_PRECOMPILE
 
 // ROS Bag related includes
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
+
 #include <boost/foreach.hpp>
 #define foreach BOOST_FOREACH
 
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/common/geometry.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <pcl/octree/octree_pointcloud_changedetector.h>
 
-#include <velodyne_pointcloud/point_types.h>
-
-#include <pcl/point_representation.h>
-
-#include <pcl/io/pcd_io.h>
-
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
-
 #include <string>
 #include <vector>
+
+// IO
+#include <pcl/io/pcd_io.h>
 #include <iostream>
+#include <fstream>
 
 // Bar Graph related includes
 #include <vtkColorSeries.h>
 #include "point_cloud_statistics/bar_chart_plotter.hpp"
 #include "point_cloud_statistics/cloud_statistical_data.hpp"
 
+#include "point_cloud_statistics/velodyne_point_type.h"
+#include "point_cloud_statistics/vlp_16_utilities.hpp"
+
 // Datasets related includes
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
-#include "point_cloud_statistics/point_cloud_statistics.hpp"
-
-// writing to CSV file
-#include <fstream>
-
-typedef pcl::PointCloud<velodyne_pointcloud::PointXYZIR> VelodynePointCloud;
 
 int main(int argc, char** argv)
 {
@@ -91,9 +85,9 @@ int main(int argc, char** argv)
                  max_resolution);
 
   std::string ground_truth_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::GROUND_TRUTH_BAG_NAME);
   std::string interference_full_bag_path =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
+      datasets_path::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
 
   std::cout << "TEST CONDITIONS:" << std::endl
             << "Voxel edge resolution interval: [" << min_resolution << ", " << max_resolution << "]" << std::endl
@@ -102,9 +96,8 @@ int main(int argc, char** argv)
             << "Ground Truth Full path: " << ground_truth_full_bag_path << std::endl
             << "Interference Full path: " << interference_full_bag_path << std::endl;
 
-  PointCloud::Ptr current_msg_cloud_ptr(new PointCloud);
-  PointCloud::Ptr ground_truth_ptr(new PointCloud);
-  // velodyne_pointcloud::PointcloudXYZIR::Ptr ground_truth_ptr(new velodyne_pointcloud::PointcloudXYZIR);
+  velodyne::VelodynePointCloud::Ptr current_msg_cloud_ptr(new velodyne::VelodynePointCloud),
+      ground_truth_ptr(new velodyne::VelodynePointCloud);
 
   rosbag::Bag interference_bag, ground_truth_bag;
   ground_truth_bag.open(ground_truth_full_bag_path);  // open ground truth bag file
@@ -113,8 +106,14 @@ int main(int argc, char** argv)
   topics.push_back(std::string("/velodyne_points"));
   rosbag::View ground_truth_view(ground_truth_bag, rosbag::TopicQuery(topics));
 
-  std::string ground_truth_pcd = point_cloud_statistics::constructFullPathToDataset(argv[1], "ground_truth_model.pcd");
-  pcl::io::loadPCDFile<pcl::PointXYZ>(ground_truth_pcd, *ground_truth_ptr);
+  std::string ground_truth_pcd =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME);
+  pcl::io::loadPCDFile<velodyne::PointXYZIR>(ground_truth_pcd, *ground_truth_ptr);
+
+  std::ofstream logger_file;
+  std::string logger_file_name =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME);
+  logger_file.open(logger_file_name, std::ios::out | std::ios::trunc);
 
   std::vector<double> ground_truth_errors, interference_errors, real_errors, resolution_values;
 
@@ -128,13 +127,16 @@ int main(int argc, char** argv)
   {
     resolution_values.push_back(i);
 
-    point_cloud_statistics::CloudStatisticalData ground_truth_bag_stats =
-        point_cloud_statistics::CloudStatisticalData();
-    point_cloud_statistics::CloudStatisticalData interference_bag_stats =
-        point_cloud_statistics::CloudStatisticalData();
+    point_cloud::statistics::CloudStatisticalData ground_truth_bag_stats =
+        point_cloud::statistics::CloudStatisticalData();
+    point_cloud::statistics::CloudStatisticalData interference_bag_stats =
+        point_cloud::statistics::CloudStatisticalData();
 
     // Instantiate octree-based point cloud change detection class
-    pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZ> octree(i);
+    pcl::octree::OctreePointCloudChangeDetector<velodyne::PointXYZIR> octree(i);
+
+    logger_file << std::endl << "Voxel edge resolution: " << i << std::endl;
+    std::cout << std::endl << "Voxel edge resolution: " << i << std::endl;
 
     // Ground Truth Bag
     foreach (rosbag::MessageInstance const m, ground_truth_view)
@@ -142,11 +144,9 @@ int main(int argc, char** argv)
       sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
       if (msg != NULL)
       {
-        PointCloud point_cloud;
+        velodyne::VelodynePointCloud point_cloud;
         fromROSMsg(*msg, point_cloud);
         *current_msg_cloud_ptr = point_cloud;
-
-        ++ground_truth_bag_stats.point_cloud_msg_count;
 
         octree.setInputCloud(ground_truth_ptr);
         octree.addPointsFromInputCloud();
@@ -160,6 +160,7 @@ int main(int argc, char** argv)
         // Get vector of point indices from octree voxels which did not exist in previous buffer
         octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
+        ++ground_truth_bag_stats.point_cloud_msg_count;
         ground_truth_bag_stats.point_count += point_cloud.size();
         ground_truth_bag_stats.outliers_points_count += newPointIdxVector.size();
 
@@ -167,17 +168,22 @@ int main(int argc, char** argv)
       }
     }
 
+    ground_truth_bag_stats.computeOutliersRelativeValue();  // Compute Relative percentage of outliers
+
+    std::stringstream octree_ground_truth_statistics_text;
+    octree_ground_truth_statistics_text << "GROUND TRUTH: " << std::endl
+                                        << ground_truth_bag_stats.outputStringFormattedStatistics().str();
+    logger_file << octree_ground_truth_statistics_text.str();
+    std::cout << octree_ground_truth_statistics_text.str();
     // Interference Bag
     foreach (rosbag::MessageInstance const m, interference_view)
     {
       sensor_msgs::PointCloud2::ConstPtr msg = m.instantiate<sensor_msgs::PointCloud2>();
       if (msg != NULL)
       {
-        PointCloud point_cloud;
+        velodyne::VelodynePointCloud point_cloud;
         fromROSMsg(*msg, point_cloud);
         *current_msg_cloud_ptr = point_cloud;
-
-        ++interference_bag_stats.point_cloud_msg_count;
 
         octree.setInputCloud(ground_truth_ptr);
         octree.addPointsFromInputCloud();
@@ -191,6 +197,7 @@ int main(int argc, char** argv)
         // Get vector of point indices from octree voxels which did not exist in previous buffer
         octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
+        ++interference_bag_stats.point_cloud_msg_count;
         interference_bag_stats.point_count += point_cloud.size();
         interference_bag_stats.outliers_points_count += newPointIdxVector.size();
 
@@ -198,15 +205,13 @@ int main(int argc, char** argv)
       }
     }
 
-    // Compute Relative percentage of outliers
-    ground_truth_bag_stats.computeOutliersRelativeValue();
-    interference_bag_stats.computeOutliersRelativeValue();
+    interference_bag_stats.computeOutliersRelativeValue();  // Compute Relative percentage of outliers
 
-    // Print statistical results
-    std::cout << "\nVoxel edge resolution: " << i << std::endl << "Ground Truth: " << std::endl;
-    ground_truth_bag_stats.printStatistics();
-    std::cout << "Interference: " << std::endl;
-    interference_bag_stats.printStatistics();
+    std::stringstream octree_interference_statistics_text;
+    octree_interference_statistics_text << "INTERFERENCE: " << std::endl
+                                        << interference_bag_stats.outputStringFormattedStatistics().str();
+    logger_file << octree_interference_statistics_text.str();
+    std::cout << octree_interference_statistics_text.str();
 
     // Generate Data for bar chart
     ground_truth_errors.push_back(ground_truth_bag_stats.getOutliersPercentage());
@@ -218,44 +223,54 @@ int main(int argc, char** argv)
   ground_truth_bag.close();  // close ground truth bag file
   interference_bag.close();  // close interference bag
 
-  std::cout << std::endl;
+  logger_file.close();
+  ROS_INFO_STREAM("Logger File saved on " << logger_file_name);
+
+  /*********************************************************************************************************************
+   *                                                   Data Saving
+   ********************************************************************************************************************/
 
   std::fstream fout;  // file pointer
-  std::string interference_csv_stats = point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_"
-                                                                                                   "results.csv");
-  fout.open(interference_csv_stats, std::ios::out);  // creates a new csv file with writing permission
+  std::string interference_csv_stats = datasets_path::constructFullPathToResults(
+      argv[1], datasets_path::INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME);
+  fout.open(interference_csv_stats, std::ios::out | std::ios::trunc);  // creates a new csv file with writing permission
+
+  std::stringstream full_statistics;
   for (int i = 0; i < resolution_values.size(); i++)
   {
-    fout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", " << interference_errors[i] / 100.0
-         << ", " << real_errors[i] / 100.0 << "\n";
-    std::cout << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0 << ", "
-              << interference_errors[i] / 100.0 << ", " << real_errors[i] / 100.0 << std::endl;
+    full_statistics << resolution_values[i] << ", " << ground_truth_errors[i] / 100.0d << ", "
+                    << interference_errors[i] / 100.0d << ", " << real_errors[i] / 100.0d << std::endl;
   }
+
+  fout << full_statistics.str();
   fout.close();
-  std::cout << "Interference Results saved on csv file on: " << interference_csv_stats << std::endl;
 
-  // Create Bar Plot object with Full HD resolution and the description for the data
-  BarChartPlotter* plotter =
-      new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
-                          "Voxel edge Resolution", "Outliers/Inliers");
+  ROS_INFO_STREAM("Interference Results saved on csv file on: " << interference_csv_stats);
 
-  // Add the outliers of the interfered and ground truth datasets
-  plotter->setColorScheme(vtkColorSeries::WARM);
-  plotter->addBarPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::BLUES);
-  plotter->addBarPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model");
-  plotter->setColorScheme(vtkColorSeries::COOL);
-  plotter->addBarPlotData(resolution_values, real_errors, "Ground Truth Bag vs Ground Truth Model");
+  std::cout << std::endl << full_statistics.str();
+  /*
+    // Create Bar Plot object with Full HD resolution and the description for the data
+    BarChartPlotter* plotter =
+        new BarChartPlotter(1920, 1080, "Interference Analysis based on Change Detection using an octree structure",
+                            "Voxel edge Resolution", "Outliers/Inliers");
 
-  plotter->plot();  // holds here until window is given the closing instruction
+    // Add the outliers of the interfered and ground truth datasets
+    plotter->setColorScheme(vtkColorSeries::WARM);
+    plotter->addBarPlotData(resolution_values, interference_errors, "Interference Bag vs Ground Truth Model");
+    plotter->setColorScheme(vtkColorSeries::BLUES);
+    plotter->addBarPlotData(resolution_values, ground_truth_errors, "Ground Truth Bag vs Ground Truth Model");
+    plotter->setColorScheme(vtkColorSeries::COOL);
+    plotter->addBarPlotData(resolution_values, real_errors, "Ground Truth Bag vs Ground Truth Model");
 
-  // Saves the bar chart as a PNG file on the dataset directory
-  std::string bar_chart_filename =
-      point_cloud_statistics::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
-  plotter->saveBarChartPNG(bar_chart_filename);
-  std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
+    plotter->plot();  // holds here until window is given the closing instruction
 
-  plotter->close();  // Destroys bar chart object
+    // Saves the bar chart as a PNG file on the dataset directory
+    std::string bar_chart_filename =
+        datasets_path::constructFullPathToDataset(argv[1], "interference_bar_chart.png").c_str();
+    plotter->saveBarChartPNG(bar_chart_filename);
+    std::cout << "Saved bar chart on: " << bar_chart_filename << std::endl;
 
+    plotter->close();  // Destroys bar chart object
+  */
   return EXIT_SUCCESS;
 }

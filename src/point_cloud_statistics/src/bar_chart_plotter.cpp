@@ -1,7 +1,9 @@
 /**
  * \file   bar_chart_plotter.cpp
- * \brief
+ * \brief Plots a Bar Chart using PCLPlotter
  *
+ * Implementation file of a wrapper class to plot Bar Charts using PCLPlotter
+ * Extra functionalities are added using vtkChart, the implementation underlying PClPlotter
  */
 
 #include "point_cloud_statistics/bar_chart_plotter.hpp"

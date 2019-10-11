@@ -6,6 +6,10 @@
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 #include <map>
+#include <iostream>
+
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace datasets_path
 {
@@ -106,6 +110,110 @@ const std::string GROUND_TRUTH_FINAL_BAG_NAME;
 const std::string INTERFERENCE_BAG_NAME = "interference.bag";
 const std::string RAW_BAG_NAME = "original_raw.bag";
 
+const std::string GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH = "Ground Truth Model/";
+const std::string INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH = "Interference Analysis/";
+const std::string GRAPHICS_FOLDER_RELATIVE_PATH = "Graphics/";
+
+const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME = "organized_ground_truth_model.pcd";
+const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model.pcd";
+const std::string ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model_unvoxelized.pcd";
+const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME = "ground_truth_azimuth_intensity.bin";
+const std::string GROUND_TRUTH_LASER_INTENSITY_BIN_NAME = "ground_truth_laser_intensity.bin";
+const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME = "ground_truth_average_point_distance.bin";
+const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME = "ground_truth_point_distance_variance.bin";
+const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME = "ground_truth_average_point_intensity.bin";
+const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME = "ground_truth_point_intensity_variance.bin";
+
+const std::string GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "ground_truth_bag_distance.bin";
+const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "ground_truth_bag_intensity.bin";
+
+const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "interference_bag_distance.bin";
+const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interference_bag_intensity.bin";
+const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.csv";
+
+const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_HIST_FILE_NAME = "ground_truth_average_point_distance_"
+                                                                       "histogram.png";
+const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_COLOR_MESH_FILE_NAME = "ground_truth_average_point_distance_"
+                                                                             "color_mesh.png";
+const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_HIST_FILE_NAME = "ground_truth_average_point_intensity_"
+                                                                        "histogram.png";
+const std::string GROUND_TRUTH_AVERAGE_POINT_INTENSITY_COLOR_MESH_FILE_NAME = "ground_truth_average_point_intensity_"
+                                                                              "color_mesh.png";
+const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_HIST_FILE_NAME = "ground_truth_point_distance_variance_"
+                                                                        "histogram.png";
+const std::string GROUND_TRUTH_POINT_DISTANCE_VARIANCE_COLOR_MESH_FILE_NAME = "ground_truth_point_distance_variance_"
+                                                                              "color_mesh.png";
+const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_HIST_FILE_NAME = "ground_truth_point_intensity_variance_"
+                                                                         "histogram.png";
+const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_COLOR_MESH_FILE_NAME = "ground_truth_point_intensity_"
+                                                                               "variance_color_mesh.png";
+
+const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_POLAR_FILE_NAME = "ground_truth_azimuth_intensity_polar.png";
+const std::string GROUND_TRUTH_LASER_INTENSITY_BAR_FILE_NAME = "ground_truth_laser_intensity_bar.png";
+
+const std::string GROUND_TRUTH_BAG_INTENSITY_HIST_FILE_NAME = "ground_truth_bag_intensity_hist.png";
+const std::string GROUND_TRUTH_BAG_DISTANCE_HIST_FILE_NAME = "ground_truth_bag_distance_hist.png";
+const std::string INTERFERENCE_BAG_INTENSITY_HIST_FILE_NAME = "interference_bag_intensity_hist.png";
+const std::string INTERFERENCE_BAG_DISTANCE_HIST_FILE_NAME = "interference_bag_distance_hist.png";
+
+const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_COMPARISON_BAR_FILE_NAME = "interference_analysis_octree_"
+                                                                                    "ocupation_comparison_bar.png";
+const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME = "interference_analysis_octree_ocupation_bar."
+                                                                         "png";
+
+const std::string ICP_LOGGER_FILE_NAME = "icp_transformation_matrices.log";
+const std::string INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "interference_analysis_point_statistics.log";
+const std::string OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "octree_ocupation_statistics.log";
+
+const std::string INTERFERENCE_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME = "interference_distance_absolute_errors.csv";
+const std::string INTERFERENCE_DISTANCE_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv";
+const std::string INTERFERENCE_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "interference_distance_normalized_errors.csv";
+
+const std::string INTERFERENCE_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "interference_distance_color_mesh.png";
+const std::string INTERFERENCE_DISTANCE_ERRORS_SCATTER_FILE_NAME = "interference_distance_scatter.png";
+
+const std::string GROUND_TRUTH_DISTANCE_ABSOLUTE_ERRORS_FILE_NAME = "ground_truth_distance_absolute_errors.csv";
+const std::string GROUND_TRUTH_DISTANCE_TOTAL_POINTS_FILE_NAME = "ground_truth_distance_total_points.csv";
+const std::string GROUND_TRUTH_DISTANCE_NORMALIZED_ERRORS_FILE_NAME = "ground_truth_distance_normalized_errors.csv";
+
+const std::string GROUND_TRUTH_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_distance_color_mesh.png";
+const std::string GROUND_TRUTH_DISTANCE_ERRORS_SCATTER_FILE_NAME = "ground_truth_distance_scatter.png";
+
+const std::string INTERFERENCE_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "interference_height_absolute_errors.csv";
+const std::string INTERFERENCE_HEIGHT_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv";
+const std::string INTERFERENCE_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "interference_height_normalized_errors.csv";
+
+const std::string INTERFERENCE_HEIGHT_ERRORS_COLOR_MESH_FILE_NAME = "interference_height_color_mesh.png";
+const std::string INTERFERENCE_HEIGHT_ERRORS_SCATTER_FILE_NAME = "interference_height_scatter.png";
+
+const std::string GROUND_TRUTH_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "ground_truth_height_absolute_errors.csv";
+const std::string GROUND_TRUTH_HEIGHT_TOTAL_POINTS_FILE_NAME = "ground_truth_height_total_points.csv";
+const std::string GROUND_TRUTH_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "ground_truth_height_normalized_errors.csv";
+
+const std::string GROUND_TRUTH_HEIGHT_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_height_color_mesh.png";
+const std::string GROUND_TRUTH_HEIGHT_ERRORS_SCATTER_FILE_NAME = "ground_truth_height_scatter.png";
+
+// clang-format off
+const std::string INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME =
+        "LOS_vs_distance_interference_normalized_errors.csv";
+const std::string GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_FILE_NAME =
+        "LOS_vs_distance_ground_truth_normalized_errors.csv";
+const std::string INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE =
+        "LOS_vs_distance_interference_normalized_errors_bar.png";
+const std::string GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_BAR_FILE =
+        "LOS_vs_distance_ground_truth_normalized_errors_bar.png";
+const std::string INTERFERENCE_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE =
+        "LOS_vs_distance_interference_normalized_errors_color_mesh.png";
+const std::string GROUND_TRUTH_LOS_VS_DISTANCE_ERRORS_NORMALIZED_DIFFERENCE_COMPARISON_COLOR_MESH_FILE =
+        "LOS_vs_distance_ground_truth_normalized_errors_color_mesh.png";
+// clang-format on
+
+const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME = "interference_direction_distance_"
+                                                                                      "errors_polar_plot_laser";
+const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME = "interference_direction_"
+                                                                                          "distance_errors_polar_plot_"
+                                                                                          "direction";
+
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
 const std::string FURTHER_DISTANCE_AFFIX = "further";
@@ -115,6 +223,14 @@ const std::string ALIGNED_HEIGHT_AFFIX = "aligned";
 const std::string ABOVE_HEIGHT_AFFIX = "above";
 
 const std::string AFFIX_SEPARATOR = "_";
+
+const std::map<const std::string, const std::string> test_scenario_map = {
+  { "distance", CAMBADA_SCENARIO_A_DISTANCE_INTERFERENCE_FOLDER_FULL_PATH },
+  { "height", CAMBADA_SCENARIO_A_HEIGHT_INTERFERENCE_FOLDER_FULL_PATH },
+  { "human", CAMBADA_SCENARIO_A_HUMAN_INTERFERENCE_FOLDER_FULL_PATH },
+  { "LOS", CAMBADA_SCENARIO_A_LIDARS_LOS_OBSTACLE_INTERFERENCE_FOLDER_FULL_PATH },
+  { "direction", CAMBADA_SCENARIO_B_DIRECTION_INTERFERENCE_FOLDER_FULL_PATH },
+};
 
 const std::map<const std::string, const std::string> datasets_map = {
   // IT2 Dark Room Interference Datasets (Setup B)
@@ -189,6 +305,58 @@ const std::map<const std::string, const std::string> datasets_map = {
   { "CAMBADA_B_Camera_Calibration", CAMBADA_SCENARIO_B_CAMERA_CALIBRATION_FOLDER_FULL_PATH },
 };
 
+const std::map<const std::string, const std::string> results_map = {
+  { ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { ICP_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { ICP_LOGGER_FILE_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_LASER_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_DISTANCE_VARIANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_INTENSITY_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME, GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+};
+
+const std::map<const std::string, const std::string> graphics_map = {
+  { GROUND_TRUTH_AVERAGE_POINT_DISTANCE_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_DISTANCE_COLOR_MESH_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_INTENSITY_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AVERAGE_POINT_INTENSITY_COLOR_MESH_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_DISTANCE_VARIANCE_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_DISTANCE_VARIANCE_COLOR_MESH_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_INTENSITY_VARIANCE_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_POINT_INTENSITY_VARIANCE_COLOR_MESH_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_AZIMUTH_INTENSITY_POLAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_LASER_INTENSITY_BAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_BAG_INTENSITY_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { GROUND_TRUTH_BAG_DISTANCE_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BAG_INTENSITY_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BAG_DISTANCE_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_COMPARISON_BAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+};
+
+const std::string getTestScenarioFullPath(const std::string test_scenario_name)
+{
+  std::map<std::string, const std::string>::const_iterator it = test_scenario_map.find(test_scenario_name);
+  if (it != test_scenario_map.end())
+  {
+    return it->second;  // return the value of the key
+  }
+  else
+  {
+    throw std::out_of_range("Dataset key is invalid");
+  }
+}
+
 const std::string getTestScenarioDatasetFullPath(const std::string test_name)
 {
   std::map<std::string, const std::string>::const_iterator it = datasets_map.find(test_name);
@@ -201,4 +369,104 @@ const std::string getTestScenarioDatasetFullPath(const std::string test_name)
     throw std::out_of_range("Dataset key is invalid");
   }
 }
+
+const std::string getResultsFolderRelativePath(const std::string test_name)
+{
+  std::map<std::string, const std::string>::const_iterator it = results_map.find(test_name);
+  if (it != results_map.end())
+  {
+    return it->second;  // return the value of the key
+  }
+  else
+  {
+    throw std::out_of_range("Dataset key is invalid");
+  }
+}
+
+const std::string getGraphicsFolderRelativePath(const std::string test_name)
+{
+  std::map<std::string, const std::string>::const_iterator it = graphics_map.find(test_name);
+  if (it != results_map.end())
+  {
+    return it->second;  // return the value of the key
+  }
+  else
+  {
+    throw std::out_of_range("Dataset key is invalid");
+  }
+}
+
+const std::string constructFullPathToTestScenario(const std::string test_scenario_name, const std::string file_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioFullPath(test_scenario_name) + file_name;
+}
+
+const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioDatasetFullPath(dataset_name) + file_name;
+}
+
+const std::string constructFullPathToResults(const std::string dataset_name, const std::string results_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioDatasetFullPath(dataset_name) + getResultsFolderRelativePath(results_name) + results_name;
+}
+
+const std::string constructFullPathToGraphics(const std::string dataset_name, const std::string graphic_name)
+{
+  // already has the "/" character in the end
+  return getTestScenarioDatasetFullPath(dataset_name) + getGraphicsFolderRelativePath(graphic_name) + graphic_name;
+}
+
+// https:// pubs.opengroup.org/onlinepubs/009695399/functions/mkdir.html
+const std::string makeResultsDirectory(const std::string dataset_name, const std::string results_folder)
+{
+  const std::string results_folder_name = datasets_path::getTestScenarioDatasetFullPath(dataset_name) + results_folder;
+
+  mode_t permissions = S_IRWXU     // user read, write and execute permission
+                       | S_IRWXG   // user group read, write and execute permission
+                       | S_IROTH   // others read permission
+                       | S_IXOTH;  // others execute permission (since it is a folder, means permission to transpose
+                                   // through the directory
+
+  if (mkdir(results_folder_name.c_str(), permissions) == EXIT_FAILURE)
+  {
+    throw std::ios_base::failure(("Cannot create directory on " + results_folder_name).c_str());
+  }
+
+  // already has the "/" character in the end
+  return results_folder_name;
+}
+
+const std::string makeGraphicsDirectory(const std::string dataset_name, const std::string graphics_folder)
+{
+  const std::string graphics_folder_name =
+      datasets_path::getTestScenarioDatasetFullPath(dataset_name) + graphics_folder;
+
+  mode_t permissions = S_IRWXU     // user read, write and execute permission
+                       | S_IRWXG   // user group read, write and execute permission
+                       | S_IROTH   // others read permission
+                       | S_IXOTH;  // others execute permission (since it is a folder, means permission to transpose
+                                   // through the directory
+
+  if (mkdir(graphics_folder_name.c_str(), permissions) == EXIT_FAILURE)
+  {
+    throw std::ios_base::failure(("Cannot create directory on " + graphics_folder_name).c_str());
+  }
+
+  // already has the "/" character in the end
+  return graphics_folder_name;
+}
+
+void printAvailableDatasetsCodenames(void)
+{
+  std::cout << "Codename -> full path to test scenario folder" << std::endl;
+  for (auto& element : datasets_map)
+  {
+    std::cout << element.first << " -> " << element.second << std::endl;
+  }
+}
+
 }  // namespace datasets_path

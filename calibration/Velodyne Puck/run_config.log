@@ -1,0 +1,75 @@
+roslaunch velodyne_pointcloud VLP16_points.launch
+... logging to /home/martinspedro/.ros/log/74f4055c-dddf-11e9-bde3-a08869347cdb/roslaunch-k3rn3l-pan1c-7762.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://k3rn3l-pan1c:41843/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.3
+ * /velodyne_nodelet_manager_cloud/calibration: /home/martinspedr...
+ * /velodyne_nodelet_manager_cloud/max_range: 130.0
+ * /velodyne_nodelet_manager_cloud/min_range: 0.4
+ * /velodyne_nodelet_manager_cloud/organize_cloud: False
+ * /velodyne_nodelet_manager_driver/cut_angle: -0.01
+ * /velodyne_nodelet_manager_driver/device_ip: 192.168.10.201
+ * /velodyne_nodelet_manager_driver/frame_id: velodyne
+ * /velodyne_nodelet_manager_driver/gps_time: False
+ * /velodyne_nodelet_manager_driver/model: VLP16
+ * /velodyne_nodelet_manager_driver/pcap:
+ * /velodyne_nodelet_manager_driver/port: 2368
+ * /velodyne_nodelet_manager_driver/read_fast: False
+ * /velodyne_nodelet_manager_driver/read_once: False
+ * /velodyne_nodelet_manager_driver/repeat_delay: 0.0
+ * /velodyne_nodelet_manager_driver/rpm: 600.0
+ * /velodyne_nodelet_manager_laserscan/resolution: 0.007
+ * /velodyne_nodelet_manager_laserscan/ring: -1
+
+NODES
+  /
+    velodyne_nodelet_manager (nodelet/nodelet)
+    velodyne_nodelet_manager_cloud (nodelet/nodelet)
+    velodyne_nodelet_manager_driver (nodelet/nodelet)
+    velodyne_nodelet_manager_laserscan (nodelet/nodelet)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[velodyne_nodelet_manager-1]: started with pid [7777]
+process[velodyne_nodelet_manager_driver-2]: started with pid [7778]
+process[velodyne_nodelet_manager_cloud-3]: started with pid [7779]
+process[velodyne_nodelet_manager_laserscan-4]: started with pid [7780]
+[ INFO] [1569228928.539883689]: Initializing nodelet with 8 worker threads.
+[ INFO] [1569228928.734573181]: correction angles: /home/martinspedro/catkin_ws/src/velodyne/velodyne_pointcloud/params/VLP16db.yaml
+[ INFO] [1569228928.752217203]: laser_ring[ 0] =  0, angle = -0.261799
+[ INFO] [1569228928.752250108]: laser_ring[ 2] =  1, angle = -0.226893
+[ INFO] [1569228928.752262203]: laser_ring[ 4] =  2, angle = -0.191986
+[ INFO] [1569228928.752286542]: laser_ring[ 6] =  3, angle = -0.157080
+[ INFO] [1569228928.752310334]: laser_ring[ 8] =  4, angle = -0.122173
+[ INFO] [1569228928.752326173]: laser_ring[10] =  5, angle = -0.087266
+[ INFO] [1569228928.752342146]: laser_ring[12] =  6, angle = -0.052360
+[ INFO] [1569228928.752366843]: laser_ring[14] =  7, angle = -0.017453
+[ INFO] [1569228928.752385655]: laser_ring[ 1] =  8, angle = +0.017453
+[ INFO] [1569228928.752407135]: laser_ring[ 3] =  9, angle = +0.052360
+[ INFO] [1569228928.752429147]: laser_ring[ 5] = 10, angle = +0.087266
+[ INFO] [1569228928.752446418]: laser_ring[ 7] = 11, angle = +0.122173
+[ INFO] [1569228928.752457531]: laser_ring[ 9] = 12, angle = +0.157080
+[ INFO] [1569228928.752472143]: laser_ring[11] = 13, angle = +0.191986
+[ INFO] [1569228928.752489820]: laser_ring[13] = 14, angle = +0.226893
+[ INFO] [1569228928.752510790]: laser_ring[15] = 15, angle = +0.261799
+[ INFO] [1569228928.752620271]: Number of lasers: 16.
+[ INFO] [1569228928.753419814]: Initialized container with min_range: 0, max_range: 0, target_frame: , fixed_frame: , init_with: 0, init_height: 1, is_dense: 1, scans_per_packet: 384
+[ INFO] [1569228928.760090674]: Reconfigure Request
+[ INFO] [1569228928.760137959]: Initialized container with min_range: 0.4, max_range: 130, target_frame: velodyne, fixed_frame: velodyne, init_with: 0, init_height: 1, is_dense: 1, scans_per_packet: 384
+[ INFO] [1569228928.810242007]: Velodyne VLP-16 rotating at 600 RPM
+[ INFO] [1569228928.810610281]: publishing 76 packets per scan
+[ INFO] [1569228928.811782332]: Cut at specific angle feature deactivated.
+[ INFO] [1569228928.815459001]: Reconfigure Request
+[ INFO] [1569228928.816234528]: expected frequency: 9.921 (Hz)
+[ INFO] [1569228928.817831850]: Only accepting packets from IP address: 192.168.10.201
+[ INFO] [1569228928.817874313]: Opening UDP socket: port 2368
+

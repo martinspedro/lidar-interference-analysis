@@ -37,7 +37,7 @@ direction_30
 direction_60
 direction_90
 direction_120
-irection_150
+direction_150
 direction_180
 direction_210
 direction_240
@@ -46,11 +46,7 @@ direction_300
 direction_330
 )
 
-# Parameters for the datasets analysis
-min_voxel_resolution=0.1
-max_voxel_resolution=0.3
-voxel_resolution_step=0.1
 
 for i in ${test_scenarios[@]}; do
-  rosrun point_cloud_statistics point_cloud_change_detection_node $i $min_voxel_resolution $max_voxel_resolution  $voxel_resolution_step
+  rosrun point_cloud_statistics point_cloud_interference_analysis_node $i
 done
