@@ -11,8 +11,8 @@ Description: TODO
    <!-- ARGUMENTS -->
    <!-- Kitti datasets -->
    <arg name="kitti_bags_folder_path"
-        value="/media/martinspedro/DATA/UA/Thesis/multiple-lidar-interference-mitigation/datasets/Kitti/" />
-   <arg name="kitti_bag"              default="kitti_2011_09_26_drive_0009_synced.bag" />
+        value="/media/martinspedro/Elements/Kitti/rosbag/" />
+   <arg name="kitti_bag"              default="2011_09_26/kitti_2011_09_26_drive_0009_synced.bag" />
 
 
 
@@ -41,7 +41,7 @@ Description: TODO
 
     <!-- ROS and network parameter files -->
     <arg name="ros_param_file"             default="$(find darknet_ros)/config/ros.yaml"/>
-    <arg name="network_param_file"         default="$(find darknet_ros)/config/yolov3-tiny.yaml"/>
+    <arg name="network_param_file"         default="$(find darknet_ros)/config/yolov3.yaml"/>
 
     <!-- Load parameters -->
     <rosparam command="load" ns="darknet_ros" file="$(arg ros_param_file)"/>
