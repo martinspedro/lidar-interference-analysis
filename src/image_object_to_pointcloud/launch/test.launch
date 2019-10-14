@@ -28,7 +28,7 @@ Description: TODO
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
    <node pkg="rosbag" type="play" name="KITTI_dataset"
-         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock -l">
+         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock -l -r 0.1">
          <remap from="$(arg left_camera_raw_image)" to="$(arg darknet_node_raw_image)" />
          <remap from="/kitti/velo/pointcloud" to="/velodyne_points" />
    </node>
