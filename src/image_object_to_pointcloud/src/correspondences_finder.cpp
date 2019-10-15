@@ -16,7 +16,7 @@
 #include <iostream>
 
 // OPENCV
-//#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 //#include <opencv2/imgproc/imgproc.hpp>
 //#include <opencv2/highgui/highgui.hpp>
 
@@ -68,10 +68,14 @@
 #include <point_cloud_statistics/velodyne_point_type.h>
 #include "point_cloud_statistics/point_cloud_statistics.hpp"
 
+#define _USE_MATH_DEFINES  // Define to use PI
+#include <math.h>
+
 const float NEAR_PLANE_DISTANCE = 1.0f;
 const float FAR_PLANE_DISTANCE = 30.0f;
+const double PIXEL_SIZE = 3.45e-6;
 
-#define KITTI
+//#define KITTI
 
 ros::Publisher pub;  //!< ROS Publisher
 
@@ -86,16 +90,15 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
        std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << std::endl;
     }
     */
+
+#ifdef KITTI
   point_cloud::PointCloudXYZ point_cloud_velodyne, point_cloud, target;
   point_cloud::PointCloudXYZ::Ptr cloudPtr, point_cloud_ptr(new point_cloud::PointCloudXYZ);
-  /*
-#ifdef KITTI
-
 #else
- velodyne::VelodynePointCloud point_cloud_velodyne, point_cloud, target;
- velodyne::VelodynePointCloud::Ptr cloudPtr, point_cloud_ptr(new velodyne::VelodynePointCloud);
+  velodyne::VelodynePointCloud point_cloud_velodyne, point_cloud, target;
+  velodyne::VelodynePointCloud::Ptr cloudPtr, point_cloud_ptr(new velodyne::VelodynePointCloud);
 #endif
-*/
+
   std::cout << "Ok" << std::endl;
   /*
     sensor_msgs::PointCloud2 point_cloud_camera_msg;
@@ -115,23 +118,58 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   *point_cloud_ptr = point_cloud;
   std::cout << "Stored" << std::endl;
   /*
-#ifdef KITTI
+  std::cout << "Sensor Origin:" << point_cloud.sensor_origin_ << std::endl;
+  std::cout << "Sensor Orientation: " << point_cloud.sensor_orientation_.x() << ", "
+            << point_cloud.sensor_orientation_.y() << ", " << point_cloud.sensor_orientation_.z() << ", "
+            << point_cloud.sensor_orientation_.w() << ", " << std::endl;
+*/
 
+  image_geometry::PinholeCameraModel cam_model_;
+  cam_model_.fromCameraInfo(cam_info);
+
+  cv::Size image_resolution = cam_model_.fullResolution();
+  float fovx = 2.0f * atan(image_resolution.width / (2.0f * cam_model_.fx())) * 180.0f / M_PI;
+  float fovy = 2.0f * atan(image_resolution.height / (2.0f * cam_model_.fy())) * 180.0f / M_PI;
+  std::cout << "FOVx: " << fovx << " | FOVy: " << fovy << std::endl;
+
+  double aperture_width = image_resolution.width * PIXEL_SIZE;
+  double aperture_height = image_resolution.height * PIXEL_SIZE;
+  double fov_x, fov_y, focal_length, aspect_ratio;
+  cv::Point2d principal_point;
+  cv::calibrationMatrixValues(cam_model_.fullIntrinsicMatrix(), image_resolution, aperture_width, aperture_height,
+                              fov_x, fov_y, focal_length, principal_point, aspect_ratio);
+
+  float fov_X = 2.0f *
+                atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (2.0f * cam_model_.fx())) *
+                180.0f / M_PI;
+  float fov_Y = 2.0f *
+                atan((b_boxes->bounding_boxes[0].ymax - b_boxes->bounding_boxes[0].ymin) / (2.0f * cam_model_.fy())) *
+                180.0f / M_PI;
+
+  std::cout << b_boxes->bounding_boxes[0].Class << ": " << b_boxes->bounding_boxes[0].probability << " (" << fov_X
+            << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
+
+#ifdef KITTI
+  pcl::FrustumCulling<pcl::PointXYZ> fc;
 #else
   pcl::FrustumCulling<velodyne::PointXYZIR> fc;
 #endif
-*/
-  pcl::FrustumCulling<pcl::PointXYZ> fc;
+
   fc.setInputCloud(point_cloud_ptr);
-  fc.setVerticalFOV(45);
-  fc.setHorizontalFOV(60);
+  fc.setVerticalFOV(fov_Y);
+  fc.setHorizontalFOV(fov_X);
   fc.setNearPlaneDistance(NEAR_PLANE_DISTANCE);
   fc.setFarPlaneDistance(FAR_PLANE_DISTANCE);
 
-  // image_geometry::PinholeCameraModel cam_model_;
-  // cam_model_.fromCameraInfo(cam_info);
+  // Constructor LiDAR Pose
+  Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();  // Camera Pose is unscaled
+  camera_pose.row(3).head(3) = point_cloud_ptr->sensor_origin_.head(3);
+  camera_pose(3, 0) = point_cloud_ptr->sensor_orientation_.x();
+  camera_pose(3, 1) = point_cloud_ptr->sensor_orientation_.y();
+  camera_pose(3, 2) = point_cloud_ptr->sensor_orientation_.z();
+  camera_pose(3, 3) = point_cloud_ptr->sensor_orientation_.w();
 
-  Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();
+  // std::cout << "Pose: " << camera_pose << std::endl;
   // .. read or input the camera pose from a registration algorithm.
   fc.setCameraPose(camera_pose);
   fc.filter(target);
@@ -157,18 +195,22 @@ int main(int argc, char** argv)
 
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
+  /*
+    geometry_msgs::TransformStamped transformStamped =
+        tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
 
-  geometry_msgs::TransformStamped transformStamped =
-      tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
-
-  geometry_msgs::Vector3 translation = transformStamped.transform.translation;
-  geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
-
+    geometry_msgs::Vector3 translation = transformStamped.transform.translation;
+    geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
+  */
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
 
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bounding_boxes_sub(nh, "/darknet_ros/bounding_boxes", 2);
+#ifdef KITTI
   message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub(nh, "/kitti/camera_color_left/camera_info", 20);
+#else
+  message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub(nh, "/camera/camera_info", 20);
+#endif
   message_filters::Subscriber<sensor_msgs::PointCloud2> point_cloud_sub(nh, "/velodyne_points", 20);
 
   typedef message_filters::sync_policies::ApproximateTime<

@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   image_transport
+  image_geometry
   point_cloud_statistics
 )
 
@@ -127,6 +128,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${point_cloud_statistics_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -142,7 +144,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(correspondences_finder_node src/correspondences_finder.cpp)
+add_executable(correspondences_finder_node
+src/correspondences_finder.cpp
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
