@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(image_object_to_pointcloud)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+## Compile as C++14, supported in ROS Melodic and newer
+add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -17,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   image_geometry
+  camera_info_manager
   point_cloud_statistics
 )
 
@@ -146,6 +149,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(correspondences_finder_node
 src/correspondences_finder.cpp
+src/pinhole_camera_model_utilities.cpp
 )
 
 ## Rename C++ executable without prefix

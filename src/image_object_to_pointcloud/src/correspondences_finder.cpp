@@ -68,14 +68,22 @@
 #include <point_cloud_statistics/velodyne_point_type.h>
 #include "point_cloud_statistics/point_cloud_statistics.hpp"
 
-#define _USE_MATH_DEFINES  // Define to use PI
-#include <math.h>
+#include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
+
+#include <cmath>
 
 const float NEAR_PLANE_DISTANCE = 1.0f;
 const float FAR_PLANE_DISTANCE = 30.0f;
 const double PIXEL_SIZE = 3.45e-6;
 
-//#define KITTI
+// Define types to be used depending on the dataset
+#ifdef KITTI
+typedef point_cloud::PointCloudXYZ PointCloudType;
+typedef pcl::PointXYZ PointType;
+#else
+typedef velodyne::VelodynePointCloud PointCloudType;
+typedef velodyne::PointXYZIR PointType;
+#endif
 
 ros::Publisher pub;  //!< ROS Publisher
 
@@ -84,25 +92,13 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
   std::cout << "Callback" << std::endl;
-  /*
-    for (int i = 0; i < object_count->count; ++i)
-    {
-       std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << std::endl;
-    }
-    */
 
-#ifdef KITTI
-  point_cloud::PointCloudXYZ point_cloud_velodyne, point_cloud, target;
-  point_cloud::PointCloudXYZ::Ptr cloudPtr, point_cloud_ptr(new point_cloud::PointCloudXYZ);
-#else
-  velodyne::VelodynePointCloud point_cloud_velodyne, point_cloud, target;
-  velodyne::VelodynePointCloud::Ptr cloudPtr, point_cloud_ptr(new velodyne::VelodynePointCloud);
-#endif
+  // Create Datatype dependent if operating with KITTI datasets or Experimental Dataype
+  PointCloudType point_cloud_velodyne, point_cloud, target;
+  PointCloudType::Ptr cloudPtr, point_cloud_ptr(new PointCloudType);
 
-  std::cout << "Ok" << std::endl;
-  /*
+  /* Convert ROS msg to Point Cloud
     sensor_msgs::PointCloud2 point_cloud_camera_msg;
-
     try
     {
       tf2::doTransform(*point_cloud_msg, point_cloud_camera_msg, transformStamped);
@@ -111,12 +107,12 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     {
       ROS_WARN("%s", ex.what());
     }
+    fromROSMsg(*point_cloud_camera_msg, point_cloud);
   */
-  // Convert ROS msg to Point Cloud
+
   fromROSMsg(*point_cloud_msg, point_cloud);
-  std::cout << "Converted" << std::endl;
   *point_cloud_ptr = point_cloud;
-  std::cout << "Stored" << std::endl;
+
   /*
   std::cout << "Sensor Origin:" << point_cloud.sensor_origin_ << std::endl;
   std::cout << "Sensor Orientation: " << point_cloud.sensor_orientation_.x() << ", "
@@ -124,17 +120,17 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
             << point_cloud.sensor_orientation_.w() << ", " << std::endl;
 */
 
+  // Get Camera Information from msg
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(cam_info);
 
   cv::Size image_resolution = cam_model_.fullResolution();
-  float fovx = 2.0f * atan(image_resolution.width / (2.0f * cam_model_.fx())) * 180.0f / M_PI;
-  float fovy = 2.0f * atan(image_resolution.height / (2.0f * cam_model_.fy())) * 180.0f / M_PI;
-  std::cout << "FOVx: " << fovx << " | FOVy: " << fovy << std::endl;
+  FOV image_fov = getImageFOV(cam_model_);
 
   double aperture_width = image_resolution.width * PIXEL_SIZE;
   double aperture_height = image_resolution.height * PIXEL_SIZE;
   double fov_x, fov_y, focal_length, aspect_ratio;
+
   cv::Point2d principal_point;
   cv::calibrationMatrixValues(cam_model_.fullIntrinsicMatrix(), image_resolution, aperture_width, aperture_height,
                               fov_x, fov_y, focal_length, principal_point, aspect_ratio);
@@ -149,12 +145,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   std::cout << b_boxes->bounding_boxes[0].Class << ": " << b_boxes->bounding_boxes[0].probability << " (" << fov_X
             << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
 
-#ifdef KITTI
-  pcl::FrustumCulling<pcl::PointXYZ> fc;
-#else
-  pcl::FrustumCulling<velodyne::PointXYZIR> fc;
-#endif
-
+  pcl::FrustumCulling<PointType> fc;
   fc.setInputCloud(point_cloud_ptr);
   fc.setVerticalFOV(fov_Y);
   fc.setHorizontalFOV(fov_X);
