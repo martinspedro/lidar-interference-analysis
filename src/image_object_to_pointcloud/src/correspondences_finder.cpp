@@ -5,8 +5,8 @@
  * @author Pedro Martins
  */
 
-#define PCL_NO_PRECOMPILE  // must be included before any PCL include on this CPP file or HPP included before
-
+#define PCL_NO_PRECOMPILE        // must be included before any PCL include on this CPP file or HPP included before
+#define EIGEN_RUNTIME_NO_MALLOC  // Define this symbol to enable runtime tests for allocations
 #include <ros/ros.h>
 
 #include <cv_bridge/cv_bridge.h>
@@ -15,8 +15,13 @@
 
 #include <iostream>
 
+#include <Eigen/Core>  // Needs to be included before the opencv eigen interface!
+#include <Eigen/Geometry>
+#include <opencv2/core/eigen.hpp>  // Needs to be included before other opencv headers!
 // OPENCV
 #include <opencv2/opencv.hpp>
+#include "opencv2/core.hpp"
+
 //#include <opencv2/imgproc/imgproc.hpp>
 //#include <opencv2/highgui/highgui.hpp>
 
@@ -38,6 +43,7 @@
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 #include <tf2_ros/transform_listener.h>
 #include "tf2/transform_datatypes.h"
+#include "tf2_eigen/tf2_eigen.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <tf2/convert.h>
 
@@ -70,7 +76,16 @@
 
 #include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
 
+#include <geometry_msgs/TransformStamped.h>
+
 #include <cmath>
+
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Transform.h>
+
+#include "tf2/LinearMath/Matrix3x3.h"
+#include <geometry_msgs/TransformStamped.h>
+#include "tf2/LinearMath/Quaternion.h"
 
 const float NEAR_PLANE_DISTANCE = 1.0f;
 const float FAR_PLANE_DISTANCE = 30.0f;
@@ -87,6 +102,9 @@ typedef velodyne::VelodynePointCloud PointCloudType;
 typedef velodyne::PointXYZIR PointType;
 #endif
 
+Eigen::Quaterniond tf_quaternion;
+Eigen::Vector3d tf_translation;
+Eigen::Affine3d transform_eigen;
 ros::Publisher pub;  //!< ROS Publisher
 
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
@@ -175,6 +193,24 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   camera_pose(3, 2) = point_cloud_ptr->sensor_orientation_.z();
   camera_pose(3, 3) = point_cloud_ptr->sensor_orientation_.w();
 
+  cv::Mat rotation_matrix = cv::Mat(3, 3, CV_32FC1);
+  cv::Vec3f camera_rotation_cv;
+  cv::eigen2cv<float, 3, 1>(camera_rotation, camera_rotation_cv);
+  cv::Rodrigues(camera_rotation_cv, rotation_matrix);  // Rodrigues overloads matrix type from float to double!
+
+  Eigen::Matrix3f rotation_matrix_eigen;
+  cv::cv2eigen<float, 3, 3>(rotation_matrix, rotation_matrix_eigen);
+  Eigen::Quaternionf q(rotation_matrix_eigen);
+
+  tf2::Matrix3x3 tf2_rotation_matrix(
+      rotation_matrix.at<double>(0, 0), rotation_matrix.at<double>(0, 1), rotation_matrix.at<double>(0, 2),
+      rotation_matrix.at<double>(1, 0), rotation_matrix.at<double>(1, 1), rotation_matrix.at<double>(1, 2),
+      rotation_matrix.at<double>(2, 0), rotation_matrix.at<double>(2, 1), rotation_matrix.at<double>(2, 2));
+
+  tf2::Quaternion rotation_quaternion;
+  tf2_rotation_matrix.getRotation(rotation_quaternion);
+  rotation_quaternion.normalize();  // always normalize the quaternion to avoid numerical errors
+
   // std::cout << "Pose: " << camera_pose << std::endl;
   // .. read or input the camera pose from a registration algorithm.
   fc.setCameraPose(camera_pose);
@@ -201,13 +237,22 @@ int main(int argc, char** argv)
 
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
-  /*
-    geometry_msgs::TransformStamped transformStamped =
-        tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
 
-    geometry_msgs::Vector3 translation = transformStamped.transform.translation;
-    geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
-  */
+  geometry_msgs::TransformStamped transformStamped =
+      tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
+
+  geometry_msgs::Vector3 translation = transformStamped.transform.translation;
+  geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
+
+  transform_eigen = tf2::transformToEigen(transformStamped);
+  // tf2::convert<geometry_msgs::Quaternion, Eigen::Quaterniond>(rotation_q, tf_quaternion);
+  // Eigen::fromMsg(rotation_q, tf_quaternion);
+  // tf2::convert<geometry_msgs::Vector3, Eigen::Vector3d>(translation, tf_translation);
+  // CHECK AFFINE 3D
+
+  // tf::quaternionMsgToEigen(rotation_q, tf_quaternion);
+  // tf::vectorMsgToEigen(translation, tf_translation);
+
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
 
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
