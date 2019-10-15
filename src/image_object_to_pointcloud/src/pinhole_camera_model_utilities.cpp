@@ -6,8 +6,7 @@
 inline cv::Point2f getImageCenterPoint(cv::Size dimensions)
 {
   // image is indexed (x, y) despite matrices/Mat being indexed (y, x)
-  cv::Point2f aux(dimensions.width / 2.0f, dimensions.height / 2.0f);
-  return aux;
+  return cv::Point2f(dimensions.width / 2.0f, dimensions.height / 2.0f);
 }
 
 inline float getFovRadian(const float length, const float distance_to_focal_point)
