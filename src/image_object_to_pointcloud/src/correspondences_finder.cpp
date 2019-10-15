@@ -77,7 +77,9 @@ const float FAR_PLANE_DISTANCE = 30.0f;
 const double PIXEL_SIZE = 3.45e-6;
 
 // Define types to be used depending on the dataset
-#ifdef KITTI
+#define USE_WITH_KITTI
+
+#ifdef USE_WITH_KITTI
 typedef point_cloud::PointCloudXYZ PointCloudType;
 typedef pcl::PointXYZ PointType;
 #else
@@ -96,7 +98,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   // Create Datatype dependent if operating with KITTI datasets or Experimental Dataype
   PointCloudType point_cloud_velodyne, point_cloud, target;
   PointCloudType::Ptr cloudPtr, point_cloud_ptr(new PointCloudType);
-
+  std::cout << "Init" << std::endl;
   /* Convert ROS msg to Point Cloud
     sensor_msgs::PointCloud2 point_cloud_camera_msg;
     try
@@ -109,9 +111,9 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     }
     fromROSMsg(*point_cloud_camera_msg, point_cloud);
   */
-
   fromROSMsg(*point_cloud_msg, point_cloud);
   *point_cloud_ptr = point_cloud;
+  std::cout << "Message" << std::endl;
 
   /*
   std::cout << "Sensor Origin:" << point_cloud.sensor_origin_ << std::endl;
@@ -123,9 +125,11 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   // Get Camera Information from msg
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(cam_info);
+  std::cout << "Camera Model" << std::endl;
 
   cv::Size image_resolution = cam_model_.fullResolution();
   FOV image_fov = getImageFOV(cam_model_);
+  std::cout << "FOV" << std::endl;
 
   double aperture_width = image_resolution.width * PIXEL_SIZE;
   double aperture_height = image_resolution.height * PIXEL_SIZE;
@@ -134,23 +138,34 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   cv::Point2d principal_point;
   cv::calibrationMatrixValues(cam_model_.fullIntrinsicMatrix(), image_resolution, aperture_width, aperture_height,
                               fov_x, fov_y, focal_length, principal_point, aspect_ratio);
+  std::cout << "OpenCV" << std::endl;
 
-  float fov_X = 2.0f *
-                atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (2.0f * cam_model_.fx())) *
-                180.0f / M_PI;
-  float fov_Y = 2.0f *
-                atan((b_boxes->bounding_boxes[0].ymax - b_boxes->bounding_boxes[0].ymin) / (2.0f * cam_model_.fy())) *
-                180.0f / M_PI;
+  FOV bounding_box_fov;
+  Eigen::Vector3f camera_rotation;
+  computeBoundingBoxFOV(cam_model_, b_boxes->bounding_boxes[0], &bounding_box_fov, camera_rotation);
+  std::cout << "Compute BBOxFOV" << std::endl;
 
+  float fov_X =
+      atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (cam_model_.fx())) * 180.0f / M_PI;
+  float fov_Y =
+      atan((b_boxes->bounding_boxes[0].ymax - b_boxes->bounding_boxes[0].ymin) / (cam_model_.fy())) * 180.0f / M_PI;
+
+  std::cout << "(" << b_boxes->bounding_boxes[0].xmin << ", " << b_boxes->bounding_boxes[0].xmax << ") e ("
+            << b_boxes->bounding_boxes[0].ymin << ", " << b_boxes->bounding_boxes[0].ymax << ") " << std::endl;
   std::cout << b_boxes->bounding_boxes[0].Class << ": " << b_boxes->bounding_boxes[0].probability << " (" << fov_X
             << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
+  std::cout << b_boxes->bounding_boxes[0].Class << ": " << b_boxes->bounding_boxes[0].probability << " ("
+            << bounding_box_fov.x << " ," << bounding_box_fov.y << ") with Principial Point: " << principal_point
+            << std::endl;
+  std::cout << "Rotation: " << camera_rotation << std::endl;
 
   pcl::FrustumCulling<PointType> fc;
   fc.setInputCloud(point_cloud_ptr);
-  fc.setVerticalFOV(fov_Y);
-  fc.setHorizontalFOV(fov_X);
+  fc.setVerticalFOV(bounding_box_fov.y);
+  fc.setHorizontalFOV(bounding_box_fov.x);
   fc.setNearPlaneDistance(NEAR_PLANE_DISTANCE);
   fc.setFarPlaneDistance(FAR_PLANE_DISTANCE);
+  std::cout << "FrustumCulling" << std::endl;
 
   // Constructor LiDAR Pose
   Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();  // Camera Pose is unscaled
@@ -197,11 +212,7 @@ int main(int argc, char** argv)
 
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bounding_boxes_sub(nh, "/darknet_ros/bounding_boxes", 2);
-#ifdef KITTI
-  message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub(nh, "/kitti/camera_color_left/camera_info", 20);
-#else
   message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub(nh, "/camera/camera_info", 20);
-#endif
   message_filters::Subscriber<sensor_msgs::PointCloud2> point_cloud_sub(nh, "/velodyne_points", 20);
 
   typedef message_filters::sync_policies::ApproximateTime<
