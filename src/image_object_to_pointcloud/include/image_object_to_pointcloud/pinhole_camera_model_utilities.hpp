@@ -36,6 +36,6 @@ FOV getImageFOV(image_geometry::PinholeCameraModel cam_model);
 FOV getImageFOV(cv::Size image_dimensions, cv::Matx33d intrinsic_matrix);
 
 void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet_ros_msgs::BoundingBox bounding_box,
-                           FOV* bounding_box_fov, Eigen::Ref<Eigen::Vector3f>& camera_rotation);
+                           FOV* bounding_box_fov, Eigen::Vector3f& camera_rotation);
 
 #endif  // PINHOLE_CAMERA_MODEL_UTILITIES_H

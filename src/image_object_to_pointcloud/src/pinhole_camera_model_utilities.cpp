@@ -5,8 +5,9 @@
 
 inline cv::Point2f getImageCenterPoint(cv::Size dimensions)
 {
-  // image is indexedc (y, x)
-  return cv::Point2f(dimensions.height / 2.0f, dimensions.width / 2.0f);
+  // image is indexed (x, y) despite matrices/Mat being indexed (y, x)
+  cv::Point2f aux(dimensions.width / 2.0f, dimensions.height / 2.0f);
+  return aux;
 }
 
 inline float getFovRadian(const float length, const float distance_to_focal_point)
@@ -52,21 +53,22 @@ FOV getImageFOV(cv::Size image_dimensions, cv::Matx33d intrinsic_matrix)
 }
 
 void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet_ros_msgs::BoundingBox bounding_box,
-                           FOV* bounding_box_fov, Eigen::Ref<Eigen::Vector3f>& camera_rotation)
+                           FOV* bounding_box_fov, Eigen::Vector3f& camera_rotation)
 {
   cv::Size im_dimensions = cam_model.fullResolution();
+  std::cout << "Camera" << std::endl;
 
   float x_min_fov = getFovDegree(bounding_box.xmin, cam_model.fx());
   float x_max_fov = getFovDegree(bounding_box.xmax, cam_model.fx());
 
   float y_min_fov = getFovDegree(bounding_box.ymin, cam_model.fy());
   float y_max_fov = getFovDegree(bounding_box.ymax, cam_model.fy());
-
+  std::cout << "FOV Degree" << std::endl;
   bounding_box_fov->x = x_min_fov - x_max_fov;
   bounding_box_fov->y = y_min_fov - y_max_fov;
-
+  std::cout << "FOV access" << std::endl;
   cv::Point2f image_center = getImageCenterPoint(im_dimensions);
-
+  std::cout << "Center Point" << std::endl;
   cv::Point2f bounding_box_center;
   bounding_box_center.x = bounding_box.xmin + (bounding_box.xmax - bounding_box.xmin) / 2;
   bounding_box_center.y = bounding_box.ymin + (bounding_box.ymax - bounding_box.ymin) / 2;
@@ -85,7 +87,8 @@ void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet
   /* The rotation only occurs in 2D and affects the other image axis
    * The rotation needs to be scaled
    */
-  camera_rotation[0] = asin(dy / hyp_y);
-  camera_rotation[1] = asin(dx / hyp_x);
+  std::cout << "Before Eigen" << std::endl;
+  camera_rotation[0] = asin(dy / hyp_y) * 180.0f / M_PI;
+  camera_rotation[1] = asin(dx / hyp_x) * 180.0f / M_PI;
   camera_rotation[2] = 0.0f;
 }
