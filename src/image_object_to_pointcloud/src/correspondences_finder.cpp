@@ -87,6 +87,8 @@
 #include <geometry_msgs/TransformStamped.h>
 #include "tf2/LinearMath/Quaternion.h"
 
+#include <string>
+
 const float NEAR_PLANE_DISTANCE = 1.0f;
 const float FAR_PLANE_DISTANCE = 30.0f;
 const double PIXEL_SIZE = 3.45e-6;
@@ -102,10 +104,29 @@ typedef velodyne::VelodynePointCloud PointCloudType;
 typedef velodyne::PointXYZIR PointType;
 #endif
 
-Eigen::Quaterniond tf_quaternion;
-Eigen::Vector3d tf_translation;
+// Eigen::Quaterniond tf_quaternion;
+// Eigen::Vector3d tf_translation;
 Eigen::Affine3d transform_eigen;
-ros::Publisher pub;  //!< ROS Publisher
+
+ros::Publisher pub, pub_camera, pub_camera_lidar, pub_lidar, pub_final;  //!< ROS Publisher
+
+Eigen::Matrix4f getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr)
+{
+  Eigen::Matrix4f lidar_pose_ = Eigen::Matrix4f::Identity();
+
+  lidar_pose_.block<3, 3>(0, 0) = point_cloud_ptr->sensor_orientation_.matrix();  // Quaternion to Rot Matrix
+  lidar_pose_.block<4, 1>(0, 3) = point_cloud_ptr->sensor_origin_;                // Vector 4f
+
+  /*
+  // lidar_pose.row(3).head(3) =.head(3);
+  lidar_pose(3, 0) = point_cloud_ptr->sensor_orientation_.x();
+  lidar_pose(3, 1) = point_cloud_ptr->sensor_orientation_.y();
+  lidar_pose(3, 2) = point_cloud_ptr->sensor_orientation_.z();
+  lidar_pose(3, 3) = point_cloud_ptr->sensor_orientation_.w();
+  */
+
+  return lidar_pose_;
+}
 
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
@@ -163,6 +184,46 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   computeBoundingBoxFOV(cam_model_, b_boxes->bounding_boxes[0], &bounding_box_fov, camera_rotation);
   std::cout << "Compute BBOxFOV" << std::endl;
 
+  // Pose Rotations
+
+  // Compute Camera Affine Transform from Angle Axis vector
+  cv::Mat rotation_matrix = cv::Mat(3, 3, CV_32FC1);
+  cv::Vec3f camera_rotation_cv;
+  Eigen::Matrix3f rotation_matrix_eigen;
+
+  cv::eigen2cv<float, 3, 1>(camera_rotation, camera_rotation_cv);
+  cv::Rodrigues(camera_rotation_cv, rotation_matrix);  // Rodrigues overloads matrix type from float to double!
+  cv::cv2eigen<float, 3, 3>(rotation_matrix, rotation_matrix_eigen);
+
+  std::cout << "Compute Camera Rotation" << std::endl;
+  Eigen::Quaternionf q_camera(rotation_matrix_eigen);
+  Eigen::Matrix4f camera_transform = Eigen::Matrix4f::Identity();
+  camera_transform.block<3, 3>(0, 0) = q_camera.matrix();  // Quaternion to Rot Matrix
+  std::cout << "Compute Rotation Matrix Done" << std::endl;
+  // lidar_pose_.block<4, 1>(0, 4) = point_cloud_ptr->sensor_origin_;  // Vector 4f
+
+  // Get Initial LiDAR Pose
+  Eigen::Matrix4f camera_to_lidar_6DOF = (transform_eigen.matrix()).cast<float>();  // Convert Eigen Affine3d Trans
+  std::cout << "6DOF" << std::endl;
+  Eigen::Matrix4f lidar_pose = getLiDARPose(point_cloud_ptr);
+  std::cout << "LiDAR Pose Done" << std::endl;
+
+  // Order is computed on the inverse order!
+  Eigen::Matrix4f frustrum_filter_pose = camera_to_lidar_6DOF * camera_transform * lidar_pose;
+  /* Note: This assumes a coordinate system where X is forward, Y is up, and Z is right. To convert from the
+  traditional
+  // camera coordinate system (X right, Y down, Z forward), one can use:
+  // clang-format off
+
+  Eigen::Matrix4f cam2robot;
+  cam2robot << 0, 0, 1, 0
+               0, -1, 0, 0
+               1, 0, 0, 0
+               0, 0, 0, 1;
+  // clang-format on
+*/
+
+  // Print Stuff
   float fov_X =
       atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (cam_model_.fx())) * 180.0f / M_PI;
   float fov_Y =
@@ -185,35 +246,9 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   fc.setFarPlaneDistance(FAR_PLANE_DISTANCE);
   std::cout << "FrustumCulling" << std::endl;
 
-  // Constructor LiDAR Pose
-  Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();  // Camera Pose is unscaled
-  camera_pose.row(3).head(3) = point_cloud_ptr->sensor_origin_.head(3);
-  camera_pose(3, 0) = point_cloud_ptr->sensor_orientation_.x();
-  camera_pose(3, 1) = point_cloud_ptr->sensor_orientation_.y();
-  camera_pose(3, 2) = point_cloud_ptr->sensor_orientation_.z();
-  camera_pose(3, 3) = point_cloud_ptr->sensor_orientation_.w();
-
-  cv::Mat rotation_matrix = cv::Mat(3, 3, CV_32FC1);
-  cv::Vec3f camera_rotation_cv;
-  cv::eigen2cv<float, 3, 1>(camera_rotation, camera_rotation_cv);
-  cv::Rodrigues(camera_rotation_cv, rotation_matrix);  // Rodrigues overloads matrix type from float to double!
-
-  Eigen::Matrix3f rotation_matrix_eigen;
-  cv::cv2eigen<float, 3, 3>(rotation_matrix, rotation_matrix_eigen);
-  Eigen::Quaternionf q(rotation_matrix_eigen);
-
-  tf2::Matrix3x3 tf2_rotation_matrix(
-      rotation_matrix.at<double>(0, 0), rotation_matrix.at<double>(0, 1), rotation_matrix.at<double>(0, 2),
-      rotation_matrix.at<double>(1, 0), rotation_matrix.at<double>(1, 1), rotation_matrix.at<double>(1, 2),
-      rotation_matrix.at<double>(2, 0), rotation_matrix.at<double>(2, 1), rotation_matrix.at<double>(2, 2));
-
-  tf2::Quaternion rotation_quaternion;
-  tf2_rotation_matrix.getRotation(rotation_quaternion);
-  rotation_quaternion.normalize();  // always normalize the quaternion to avoid numerical errors
-
   // std::cout << "Pose: " << camera_pose << std::endl;
   // .. read or input the camera pose from a registration algorithm.
-  fc.setCameraPose(camera_pose);
+  fc.setCameraPose(frustrum_filter_pose);
   fc.filter(target);
   std::cout << "Filtred. Target size = " << target.size() << std::endl;
 
@@ -225,7 +260,46 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   pub.publish(point_cloud_ptr);  // PointCloud Object is automacally serialized by ROS and there is no need to call
                                  // toROSMsg
   std::cout << "Published" << std::endl;
+
+  geometry_msgs::Pose pose_camera, pose_lidar_camera, pose_lidar, pose_final;
+  geometry_msgs::PoseStamped pose_camera_s, pose_lidar_s, pose_lidar_camera_s, pose_final_s;
+  Eigen::Affine3d camera_affine_transform, lidar_camera_affine_transform, lidar_affine_transform,
+      final_affine_transform;
+
+  camera_affine_transform.matrix() = camera_transform.cast<double>();
+  lidar_affine_transform.matrix() = lidar_pose.cast<double>();
+  lidar_camera_affine_transform.matrix() = camera_to_lidar_6DOF.cast<double>();
+  final_affine_transform.matrix() = frustrum_filter_pose.cast<double>();
+
+  pose_camera = Eigen::toMsg(camera_affine_transform);
+  pose_lidar = Eigen::toMsg(lidar_affine_transform);
+  pose_lidar_camera = Eigen::toMsg(lidar_camera_affine_transform);
+  pose_final = Eigen::toMsg(final_affine_transform);
+
+  pose_camera_s.header.stamp = ros::Time::now();
+  pose_lidar_s.header.stamp = ros::Time::now();
+  pose_lidar_camera_s.header.stamp = ros::Time::now();
+  pose_final_s.header.stamp = ros::Time::now();
+
+  pose_camera_s.header.frame_id = "camera_color_left";
+  pose_lidar_s.header.frame_id = "velo_link";
+  pose_lidar_camera_s.header.frame_id = "camera_color_left";
+  pose_final_s.header.frame_id = "velo_link";
+
+  pose_camera_s.pose = pose_camera;
+  pose_lidar_s.pose = pose_lidar;
+  pose_lidar_camera_s.pose = pose_lidar_camera;
+  pose_final_s.pose = pose_final;
+  // msg.header.frame_id = "detection";
+
+  pub_camera.publish(pose_camera_s);
+  pub_lidar.publish(pose_lidar_s);
+  pub_camera_lidar.publish(pose_lidar_camera_s);
+  pub_final.publish(pose_final_s);
 }
+
+const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
+const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 
 int main(int argc, char** argv)
 {
@@ -238,13 +312,16 @@ int main(int argc, char** argv)
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
 
-  geometry_msgs::TransformStamped transformStamped =
-      tfBuffer.lookupTransform("camera_color_left", "velo_link", ros::Time(0), ros::Duration(20.0));
+  geometry_msgs::TransformStamped transformStamped = tfBuffer.lookupTransform(
+      LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0), ros::Duration(20.0));
 
-  geometry_msgs::Vector3 translation = transformStamped.transform.translation;
-  geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
-
+  // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
   transform_eigen = tf2::transformToEigen(transformStamped);
+  std::cout << transform_eigen.matrix() << std::endl;
+
+  // geometry_msgs::Vector3 translation = transformStamped.transform.translation;
+  // geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
+
   // tf2::convert<geometry_msgs::Quaternion, Eigen::Quaterniond>(rotation_q, tf_quaternion);
   // Eigen::fromMsg(rotation_q, tf_quaternion);
   // tf2::convert<geometry_msgs::Vector3, Eigen::Vector3d>(translation, tf_translation);
@@ -254,6 +331,10 @@ int main(int argc, char** argv)
   // tf::vectorMsgToEigen(translation, tf_translation);
 
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
+  pub_camera = nh.advertise<geometry_msgs::PoseStamped>("/rotated_camera_pose", 1);
+  pub_camera_lidar = nh.advertise<geometry_msgs::PoseStamped>("/camera_pose_in_lidar", 1);
+  pub_lidar = nh.advertise<geometry_msgs::PoseStamped>("/lidar_pose", 1);
+  pub_final = nh.advertise<geometry_msgs::PoseStamped>("/final_pose", 1);
 
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bounding_boxes_sub(nh, "/darknet_ros/bounding_boxes", 2);
@@ -270,7 +351,12 @@ int main(int argc, char** argv)
 
   sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
 
-  ros::spin();
+  ros::Rate r(5);  // 10 hz
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    r.sleep();
+  }
 
   return EXIT_SUCCESS;
 }
