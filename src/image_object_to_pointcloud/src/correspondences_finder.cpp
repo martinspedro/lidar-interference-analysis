@@ -196,10 +196,12 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   cv::cv2eigen<float, 3, 3>(rotation_matrix, rotation_matrix_eigen);
 
   std::cout << "Compute Camera Rotation" << std::endl;
-  Eigen::Quaternionf q_camera(rotation_matrix_eigen);
+  // Eigen::Quaternionf q_camera(rotation_matrix_eigen);
+  // q_camera.normalize();
   Eigen::Matrix4f camera_transform = Eigen::Matrix4f::Identity();
-  camera_transform.block<3, 3>(0, 0) = q_camera.matrix();  // Quaternion to Rot Matrix
-  std::cout << "Compute Rotation Matrix Done" << std::endl;
+  camera_transform.block<3, 3>(0, 0) = rotation_matrix_eigen;  // q_camera.matrix();  // Quaternion to Rot Matrix
+  std::cout << "Compute Rotation Matrix Done" << camera_transform << std::endl;
+  std::cout << "Rotation Matrix: " << rotation_matrix_eigen << std::endl;
   // lidar_pose_.block<4, 1>(0, 4) = point_cloud_ptr->sensor_origin_;  // Vector 4f
 
   // Get Initial LiDAR Pose
@@ -208,21 +210,48 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   Eigen::Matrix4f lidar_pose = getLiDARPose(point_cloud_ptr);
   std::cout << "LiDAR Pose Done" << std::endl;
 
-  // Order is computed on the inverse order!
-  Eigen::Matrix4f frustrum_filter_pose = camera_to_lidar_6DOF * camera_transform * lidar_pose;
-  /* Note: This assumes a coordinate system where X is forward, Y is up, and Z is right. To convert from the
-  traditional
-  // camera coordinate system (X right, Y down, Z forward), one can use:
+  /* Order is computed on the inverse order!
+   * The first matrix/transform in the multiplication chain is the first you want to apply to the "object matrix"
+   * The first matrix to be multiplied by the object is the last transform you wnat to perform
+   *
+    Order:
+    1. Camera Rotation
+    2. 6 DOF Camera to LiDAR
+    3. LIDAR Pose
+    4. Convert LiDAR Pose to Frustum Pose
+   * First we need to apply the camera rotation to the camera pose. The camera pose, in this case is a Identity matrix
+   * After the Camera Pose is Rotated to face the FOV, we need to translate and rotate the referential from the Camera
+   * to the LiDAR Coordinates. Note that different coordinate reference frames are already covered in this transform and
+   * therefore no extra matrices are needed
+   * Despite not being a transformation, we must take into account the original LiDAR Pose, which is the last transform
+   to be applied
+   * Also, because Frustum Coordinate System is different from Velodyne's, a special transform must be carried out
+   * So the order is 1. * 2. * 3. * 4. * Camera Pose
+   *
+   * Useful links:
+   * - https://stackoverflow.com/questions/25058852/how-to-check-if-eigen-matrix-is-column-major-or-row-major
+   * - https://eigen.tuxfamily.org/dox/group__TopicStorageOrders.html
+   * -
+   https://stackoverflow.com/questions/18785938/combining-multiple-transformations-in-eigen-into-one-transformation-matrix
+   */
+
+  Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();
+  Eigen::Matrix4f lidar_pose_to_frustum_pose;
   // clang-format off
-
-  Eigen::Matrix4f cam2robot;
-  cam2robot << 0, 0, 1, 0
-               0, -1, 0, 0
-               1, 0, 0, 0
-               0, 0, 0, 1;
+  lidar_pose_to_frustum_pose << 1, 0, 0, 0,
+                                0, 0, 1, 0,
+                                0,-1, 0, 0,
+                                0, 0, 0, 1;
   // clang-format on
-*/
+  std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
+  std::cout << "Camera to LiDAR 6DOF Transform: " << camera_to_lidar_6DOF.IsRowMajor << std::endl;
+  std::cout << "Lidar Pose: " << lidar_pose.IsRowMajor << std::endl;
+  std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
 
+  Eigen::Matrix4f frustrum_filter_pose =
+      camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
+
+  std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
   // Print Stuff
   float fov_X =
       atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (cam_model_.fx())) * 180.0f / M_PI;
@@ -246,8 +275,13 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   fc.setFarPlaneDistance(FAR_PLANE_DISTANCE);
   std::cout << "FrustumCulling" << std::endl;
 
-  // std::cout << "Pose: " << camera_pose << std::endl;
-  // .. read or input the camera pose from a registration algorithm.
+  /*
+   * http://docs.pointclouds.org/trunk/frustum__culling_8hpp_source.html#l00047
+   * This assumes a coordinate system where X is forward,
+   * Y is up, and Z is right. To convert from the traditional camera
+   * coordinate system (X right, Y down, Z forward), one can use:
+   */
+
   fc.setCameraPose(frustrum_filter_pose);
   fc.filter(target);
   std::cout << "Filtred. Target size = " << target.size() << std::endl;
@@ -312,11 +346,27 @@ int main(int argc, char** argv)
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
 
+  /*
+   * lookupTransform(target_frame, source_frame)
+   * target_frame	The frame to which data should be transformed
+   * source_frame	The frame where the data originated
+   *
+   * If one wants to transform the data from one referential to another, the target frame most be the final on which the
+   * data will be processed.
+   * The function construction might seem conteur intitive , but notice that the transform from the Referential Frame A
+   * -> B allows the transformation of data from the frame B -> A
+   *
+   * On this case, since no data will be manipulated, onluy referentials, we want the transfrom from the Camera to the
+   * LiDAR
+   *
+   * Another perspective is: we want to transform from <target_frame> from this <source_frame> frame
+   */
   geometry_msgs::TransformStamped transformStamped = tfBuffer.lookupTransform(
       LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0), ros::Duration(20.0));
 
   // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
   transform_eigen = tf2::transformToEigen(transformStamped);
+  // transform_eigen(3, 0) = -transform_eigen(3, 0);
   std::cout << transform_eigen.matrix() << std::endl;
 
   // geometry_msgs::Vector3 translation = transformStamped.transform.translation;
