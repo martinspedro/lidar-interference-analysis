@@ -68,9 +68,11 @@ Bosch Car Multim\'edia Portugal, S.A \\
 \newacronym{icp}{ICP}{Iterative Closest Point}
 \newacronym{rpm}{RPM}{Rotations Per Minute}
 
+%Mas normalmente, quando há estes tipos de comentários dos reviewers basta relativizar um pouco mais: algo do género, o LiDAR é apontado como um dos sensores mais promissores e complementa alguns dos pontos fracos dos outros sensores, para além de introduzir redundância que, por sua vez, diminui o risco de acidentes (a.k.a., “paninhos quentes” J ) .
 
 \begin{abstract}
-A research on the interference between \gls{lidar} was conducted. The main objective is to assess its impact and behavior, since most of the self-driving vehicles rely on \gls{lidar} technology for navigation. Two conditions were studied: the distance between the \gls{lidar}s and the length of the voxel grid edges used for the statistical analysis. Our findings indicate that a smaller length of the voxel grid edges increases slightly the magnitude of the interference, for a fixed distance. Regarding the distance, no conclusion is possible, since other factor appear to be more relevant. In a worst case scenario, we conclude that one in each thousand points is expected to be interfered when two \gls{lidar}s coexist.
+A research on the interference between \gls{lidar} was conducted. The main objective is to assess its impact and behavior, crucial to self-driving vehicles, since \gls{lidar} is one of the most promising sensors to augment the autonomy of vehicles, being adopted both by car manufacturers and research teams. 
+Two conditions were studied: the distance between the \gls{lidar}s and the length of the voxel grid edges used for the statistical analysis. Our findings indicate that a smaller length of the voxel grid edges increases slightly the magnitude of the interference, for a fixed distance. Regarding the distance, no conclusion is possible, since other factors appear to be more relevant. In a worst case scenario, we conclude that one in each thousand points is expected to be interfered when two \gls{lidar}s coexist.
 \end{abstract}
 
 %------------------------------------------------------------------------- 
@@ -80,11 +82,11 @@ A research on the interference between \gls{lidar} was conducted. The main objec
 %Since the appearance of \gls{adas}, consumers, experts and governments hoped that ``smarter'' cars would result in safer roads. 
 Backed both by common sense and research, human error is still one of the causes of most accidents and injuries on the road \cite{Bimbraw2015, world2019global}. Despite increasingly road safety awareness campaigns, laws and heavier fines, annual global road traffic deaths have reached 1.35 million in 2018, being the leading cause of death for people aged 5-29 years \cite{world2019global}.
 
-Several studies have been conducted on self-driving technology and \Gls{adas} \cite{Fridman2017, ADAS1, Bimbraw2015}, which appears has one of the most promising solutions to mitigate road accidents. Along with some public datasets that have been made available to further the development of self-driving vehicles \cite{Geiger2012}, \gls{adas} is becoming more relevant, mainly due to the maturation of \gls{lidar} technology \cite{Sullivan2016}. 
+Several studies have been conducted on self-driving technology and \Gls{adas} \cite{Fridman2017, ADAS1, Bimbraw2015}, which appears as one of the most promising solutions to mitigate road accidents. Along with some public datasets that have been made available to enable progress of self-driving vehicles \cite{Geiger2012}, \gls{adas} is becoming more relevant, mainly due to the maturation of \gls{lidar} technology \cite{Sullivan2016}. 
 
-\gls{lidar} sensors map their surroundings thanks to their capability of precisely measure depth - with a few centimeters of error, over distances that can range until 100 meters \cite{vlp16, Sullivan2016}. \gls{tof} \gls{lidar}, the most common type, acquires depth information by measuring the time elapsed between the emission and reception of a laser pulse reflected from a surrounding target \cite{Sullivan2016}. To scan a single line, a single pair of laser and photodetector are assembled on a rotational device, creating a 2D \gls{lidar}. If multiple pairs are assembled together, on a rotational device, with different polar angles, the \gls{lidar} is said to be a 3D \gls{lidar}.
+\gls{lidar} sensors map their surroundings thanks to their capability of precisely measuring depth - with a few centimeters of error, over distances that can range until 100 meters \cite{vlp16, Sullivan2016}. \gls{tof} \gls{lidar}, the most common type, acquires depth information by measuring the time elapsed between the emission and reception of a laser pulse reflected from a surrounding target \cite{Sullivan2016}. To scan a single line, a single pair of laser and photodetector are assembled on a rotational device, creating a 2D \gls{lidar}. If multiple pairs are assembled together, on a rotational device, with different polar angles, the \gls{lidar} is said to be a 3D \gls{lidar}.
 
-These maps, commonly represented as point clouds or mesh clouds, are one of the preferred method for \gls{slam} algorithms, which allow a vehicle without previous knowledge of its surroundings to autonomous navigate them - a crucial task for \gls{adas} on self-driving vehicles.
+These maps, commonly represented as point clouds or mesh clouds, are one of the preferred method for \gls{slam} algorithms, which allows a vehicle without previous knowledge of its surroundings to autonomously navigate them - a crucial task for \gls{adas} on self-driving vehicles.
 
 %Normally, this pair of laser and photodetector is assembled on a rotational device, allowing a single pair to measure a line, creating a 2D \gls{lidar}. If multiple pairs are assembled together, with different polar angles, the \gls{lidar} is said to be 3D, since a total revolution can produce a three dimensional map of its surroundings. 
 
@@ -110,11 +112,11 @@ These maps, commonly represented as point clouds or mesh clouds, are one of the 
     \item The laser pulse returns with intensity below the noise floor.
 \end{enumerate}
 
-Interference and crosstalk between the pairs of laser and photodetectors on a \gls{lidar} are mitigated with different firing offsets, or in the case of mutual interference between \gls{lidar}, it is possible to synchronize their firing time using specialized clock signals \cite{vlp16}.
+Interference and crosstalk between the pairs of lasers and photodetectors on a \gls{lidar} are mitigated with different firing offsets, or in the case of mutual interference between \gls{lidar}, it is possible to synchronize their firing time using specialized clock signals \cite{vlp16}.
 
-However, in a society when self-driving vehicles coexist, another scenario is possible: a \gls{lidar} ``A'' fires a laser pulse that is received, directly or indirectly, by the photodetector on a \gls{lidar} ``B''. Since \gls{lidar} ``B'' measures the distance to an obstacle by measuring the time between the firing and reception of its own laser pulse, the reception of another laser pulse causes an erroneous measure with an unpredictable behavior. If this interference is significant, the reliability of the \gls{lidar} and consequently autonomous vehicles and \gls{adas} is seriously undermined, due to the incapability to accurately mapping their surroundings.
+However, in a society when self-driving vehicles coexist, another scenario is possible: a \gls{lidar} ``A'' fires a laser pulse that is received, directly or indirectly, by the photodetector on a \gls{lidar} ``B''. Since \gls{lidar} ``B'' measures the distance to an obstacle by measuring the time between the firing and reception of its own laser pulse, the reception of another laser pulse results in an erroneous measure with an unpredictable behavior. If this interference is significant, the reliability of the \gls{lidar}, and consequently autonomous vehicles and \gls{adas}, is seriously undermined due to the incapability to accurately mapping their surroundings.
 
-To the best of the author' knowledge, despite the relevance of the topic to a society of self-driving cars, there are only available the studies conducted by Kim \etal \cite{Kim2017, Kim2015}, which seek to characterize this interference; and by Retterath and Laumeyer \cite{Al.2013}, seeking to provide an apparatus for reducing the mutual interference of \gls{lidar} sensors on the same vehicle.
+To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only available the studies conducted by Kim \etal \cite{Kim2017, Kim2015}, which seek to characterize this interference; and by Retterath and Laumeyer \cite{Al.2013}, seeking to provide an apparatus for reducing the mutual interference of \gls{lidar} sensors on the same vehicle.
 
 %Despite the relevance of the topic for the massification of self-driving vehicles and the hazardous impact on \Gls{adas} reliability, the research topic presented in this paper has received very reduced attention by the research community. 
 %A major \gls{lidar} manufacture also addresses the problem of mutual interference of the \gls{lidar} sensors on the same vehicle, by allowing their synchronization and laser firing in different instants \cite{vlp16}.
@@ -129,7 +131,7 @@ is the only study to use two independent 2D \gls{lidar}s interfering with each o
 This research intends to understand the impact of the interference between 3D \gls{lidar}, whose reliability is crucial for self-driving vehicles, consequently expanding Kim's research.
 Our proposal consists on assessing the interference behavior with the relative distance between \gls{lidar}s and the length of the voxel\footnote{A voxel is an element of a 3D grid that is equally spaced, representing a single point.} grid used to quantify this interference.
 
-This paper is organized as follows. Section 1 presents the introduction and motivation for this work. Section 2 debates the related work. The third section shows the experimental results obtained. Section 4 contains the method developed for interference analysis. The results and their discussion is presented on Section 5. Section 6 deliberates on the paper's conclusions.
+This paper is organized as follows. Section 1 presents the introduction, motivation for this work and briefly summarizes the related work. The second section explains the experimental setup. Section 3 contains the method developed for interference analysis. The results and their discussion is presented on Section 4. Section 5 deliberates on the paper's conclusions.
 
 
 %\section{Related Work}
@@ -164,7 +166,7 @@ Figure \ref{fig:experimental_setup} shows a picture of the described setup on on
 
 \section{Methodology}
 \label{sec:methodology}
-Since it is not possible to distinguish an interfered from a valid measure (from an hardware standpoint, both of them are valid measures), we propose a method to distinguish which measures result from \gls{lidar} interference.
+Since it is not possible to distinguish an interfered from a valid measure (from a hardware standpoint, both of them are valid measures), we propose a method to distinguish which measures result from \gls{lidar} interference.
 
 The proposed method assumes a static scenario and compares the point clouds with and without interference. First, the \gls{lidar}s are positioned and the interference generator \gls{lidar} is off. On these conditions, several point clouds are recorded and merged to create a ground truth model. Then, the \gls{lidar} that causes the interference is switched on and several point clouds are registered.
 
@@ -191,7 +193,7 @@ The occurrence of interference is measured relatively to the total number of vox
 \section{Results}
 For a fixed \gls{lidar} height, direction and rotation speed, both \gls{lidar}s optical center were aligned and several point clouds were recorded while the interference generator \gls{lidar} was active. Using the method described in Section \ref{sec:methodology}, the quotient of interfered vs total number of voxels was calculated for a relative distance varying meter by meter from 1 to 12 m and considering voxel edge lengths ranging from 10 to 50 centimeters, with steps of 10 cm. The results are presented on figure \ref{fig:results}, on the form of a contour graph. 
 
-The smaller the voxel edge length (horizontal axis), the higher the number of voxels per point cloud. Analyzing figure \ref{fig:results} concludes that the number of voxels affected by interference increases with the decrease of the voxel edge length. If a fixed voxel edge length is considered, one can noticed that the results are more prone to variations with the distance, being this variation more significantly at smaller voxel edge lengths.
+The smaller the voxel edge length (horizontal axis), the higher the number of voxels per point cloud. Analyzing figure \ref{fig:results} we can conclude that the number of voxels affected by interference increases with the decrease of the voxel edge length. If a fixed voxel edge length is considered, one can noticed that the results are more prone to variations with the distance, being this variation more significant at smaller voxel edge lengths.
 
 
 These results lead us to believe that despite the variation with the distance between the \gls{lidar}, there are other factors that drastically influence the interference. Such analysis is yet to be conducted and it is left for future work.
@@ -201,12 +203,12 @@ The experimental results also show that on the worst case scenario, in every 100
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{images/contour.eps}
-    \caption{Contour graph of the results. On the horizontal axis the voxel edge length is varied between 0.1 and 0.5 m with steps of 0.1 m. On the vertical axis, the relative distance (keeping the \gls{lidar} orientation with zero azimutal angle) is varied meter by meter between 1 and 12 meters.}
+    \caption{Contour graph of the results. On the horizontal axis the voxel edge length is varied between 0.1 and 0.5 m with steps of 0.1 m. On the vertical axis, the relative distance (keeping the \gls{lidar} orientation with zero azimuthal angle) is varied meter by meter between 1 and 12 meters.}
     \label{fig:results}
 \end{figure}
 
 \section{Conclusion}
-Interference between \gls{tof} \gls{lidar} is a research topic that is yet to receive the attention of the academic community, due to its impact on self-driving vehicles. The extensive adoption and reliance on \gls{lidar} technology for self-driving vehicles will force the coexistent of these laser sensors on real world scenarios, which, by our findings, will resulting on mutual interference between \gls{lidar}s, causing errors on the measured data.
+Interference between \gls{tof} \gls{lidar} is a research topic that is yet to receive the attention of the academic community, due to its impact on self-driving vehicles. The extensive adoption and reliance on \gls{lidar} technology for self-driving vehicles will force the coexistence of these laser sensors on real world scenarios, which, by our findings, will result on mutual interference between \gls{lidar}s, causing errors on the measured data.
 
 On this article, a study of the interference between \gls{tof} \gls{lidar}s is conducted. Previous available results have shown that on 2D \gls{lidar}s an error of 1 in 10000 points is expected \cite{Kim2017, Kim2015}. Our findings not only extended this study to 3D \gls{lidar}s, more common in self-driving vehicles, but also discovered that the severity of errors is highly volatile and can be one order of magnitude higher than previous findings.
 
