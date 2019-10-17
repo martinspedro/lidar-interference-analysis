@@ -252,6 +252,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
       camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
 
   std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
+
   // Print Stuff
   float fov_X =
       atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (cam_model_.fx())) * 180.0f / M_PI;
@@ -401,7 +402,7 @@ int main(int argc, char** argv)
 
   sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
 
-  ros::Rate r(5);  // 10 hz
+  ros::Rate r(100);  // 100 hz
   while (ros::ok())
   {
     ros::spinOnce();
