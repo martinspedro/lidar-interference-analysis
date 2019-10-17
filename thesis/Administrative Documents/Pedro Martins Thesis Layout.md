@@ -36,7 +36,6 @@ Thesis Layout
 - List of Figures
 - List of tables
 - List of Acronyms
-- Glossary (?)
 
 # 1. Introduction
 - Summary of the topic
@@ -47,11 +46,15 @@ Thesis Layout
     - Road accidents
     - ADAS
     - Self-driving
+		- Small Description of the types of sensors used (Ultrasons, RADAR, Camera, LIDAR)
     - LiDAR
     - LiDAR Interference (?)
 
 ## 1.1 Scope and Motivation
+- What is the problem 
+- How am I going to try to solve it
 - Why is the topic important
+- Motivation & Relevance for and to the problem
 - Why and how it matters
 
 ## 1.2 Objectives
@@ -78,6 +81,11 @@ Thesis Layout
 ## 3.3 LiDAR
 ## 3.4 Camera and LiDAR Extrinsic Calibration
 ## 3.5 Sensor Fusion
+- What is sensor fusion and what are its advantages?
+- Requirements for sensor Fusion:
+    - Data must be on the same referential
+    - Why Udacity was the first to be chosen as a dataset and then was abandoned for Kitti
+-
 ## 3.6 Object Detection
 - On Image: YOLO, Fast-CNN, Faster-CNN, etc.
 - Correspondence between images and point cloud
@@ -99,6 +107,7 @@ Thesis Layout
 ## 4.3 Extrinsic Camera and LiDAR Calibration
 - Mathematical Principle (referential, 6DOF, Rigid Body Transforms)
 - Experimental Setup
+- How to calibrate (tutorial like)
 - Calibration method implemented
 - Results
 - Test with sensor fusion (apply sensor fusion to calibrated experimental data)
@@ -106,10 +115,6 @@ Thesis Layout
 ## 4.4 Final Remarks
 
 # 5. Sensor Fusion
-- What is sensor fusion and what are its advantages?
-- Requirements for sensor Fusion:
-    - Data must be on the same referential
-    - Why Udacity was the first to be chosen as a dataset and then was abandoned for Kitti
 - Mathematical Principle
 - How it was implemented
 - Results
@@ -118,7 +123,6 @@ Thesis Layout
 
 # 6. Object Detection
 ## 6.1 On Image
-- YOLO (and other algorithms)
 - Results
 
 ## 6.2 Correspondence between bounding boxes on image and point cloud
