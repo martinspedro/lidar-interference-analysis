@@ -106,7 +106,7 @@
 
 %Biber using IEEE style for proper UTF-8 support
 \usepackage[backend=biber,style=ieee, sorting=none]{biblatex}
-\bibliography{bib/references.bib, bib/rfc.bib}
+\bibliography{bib/Thesis.bib}
 
 %Use acronyms
 \usepackage[printonlyused]{acronym} % For acronyms
@@ -194,6 +194,10 @@
 %Or custom spacing
 %\addtolength{\parskip}{0.5\baselineskip}
 \linespread{1.5}
+
+%Custom macros
+\def\etal{\emph{et al}}
+
 
 \begin{document}
 \ifthenelse{\equal{\useoverleaf}{0}}{}{\makecoverfile{}}%
