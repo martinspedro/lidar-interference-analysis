@@ -195,8 +195,12 @@
 %\addtolength{\parskip}{0.5\baselineskip}
 \linespread{1.5}
 
-%Custom macros
-\def\etal{\emph{et al}}
+% Custom packages
+\usepackage{nameref} 
+\usepackage{enumitem} 
+
+% Custom macros
+\def\etal{\emph{et al}} 
 
 
 \begin{document}
@@ -299,11 +303,12 @@
 \OnehalfSpacing
 
 \include{chapters/chapter1}
-%\include{chapter2}
-%\include{chapter3}
-%\include{chapter4}
-
-
+\include{chapters/chapter2}
+\include{chapters/chapter3}
+\include{chapters/chapter4}
+\include{chapters/chapter5}
+\include{chapters/chapter6}
+\include{chapters/chapter7}
 
 % End of Thesis text ---------------------------------------------------------
 % Including files is advised:
@@ -330,7 +335,6 @@
 
 
 %Load appendix
-%\include{appendix-a}
-
+\input{appendix/appendix-a}
 
 \end{document}
