@@ -19,9 +19,16 @@ Gathered in 2009, in Michigan, the Ford Campus \ac{lidar} dataset contains camer
 
 The data is provided in raw format, accompanied by log files with timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm} protocol for estimating delays between the registered of sensory data on master-slave systems, see~\cite{VelodyneHDL64}.} logs with all raw data. The images from an omnidirectional camera, a Point Grey Ladybug3, are stored on \ac{ppm}; \ac{lidar} data from a Velodyne HDL-64E on \ac{pcap} format, from the \ac{tcp} connection socket; two Riegl LMS-Q120 \acp{lidar} also provide more information on the scan.
 
-The data is rectified and synced under \ac{matlab} \textit{.mat} files. Along with the raw data and synced and rectified \textit{.mat} files, source code is also provided for parsing the raw data, visualizing the \ac{lcm} logs and pre-processed data on \ac{matlab}. A C and \ac{openGl} software that can render textured point clouds is also available.
+The data is rectified and synced under \ac{matlab} \textit{.mat} files. Along with the raw data and synced and rectified \textit{.mat} files, source code is also provided for parsing the raw data, visualizing the \ac{lcm} logs and pre-processed data on \ac{matlab}. A C and \ac{opengl} software that can render textured point clouds is also available.
 
-For navigation, the modified Ford F-250 pickup truck uses 3 sensors~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E lidar~\cite{VelodyneHDL64}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar. More details about the sensors, their relative positioning and data formats and files can be found~\cite{Pandey2011}.
+The modified Ford F-250 pickup truck, which can be seen on figure~\ref{fig:sota:ford_sensors}, uses 3 sensors for navigation~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E \ac{lidar}~\cite{VelodyneHDL64}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar. More details about the sensors, their relative positioning and data formats and files can be found~\cite{Pandey2011}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/sensor_fusion/ford_sensors.jpg}
+	\caption{Ford 250 pickup equipped with the sensors descibed in the previous paragraphs. On the top, the Ladybug omnidirectional camera, on the back the \ac{imu} and \ac{gps} unit. }
+	\label{fig:sota:ford_sensors}
+\end{figure}
 
 
 \subsection{\ac{kitti}}
@@ -31,7 +38,14 @@ The test car, a Volkswagen Passat is equipped with two stereo pairs, one with co
 
 Along with the data and calibration parameters, several tools written in C++ or \ac{matlab} are also provided. The dataset offers two types of data categories: (1) unsynced and unrectified data or (2) synced and rectified data. 
 
-The sensory apparatus contains 2 PointGray Flea2 greyscale and color cameras, a Velodyne HDL-64E lidar~\cite{VelodyneHDL64}, among others less relevant sensors~\cite{Geiger2013a}.
+The sensory apparatus contains 2 PointGray Flea2 greyscale and color cameras, a Velodyne HDL-64E \ac{lidar}~\cite{VelodyneHDL64}, among others less relevant sensors~\cite{Geiger2013a}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/sensor_fusion/passat_sensors.jpg}
+	\caption{Volkswagen Passat equipped with the sensors descibed in the previous paragraphs, for the \ac{kitti} dataset. On the top, the Velodyne \ac{lidar} and below the 2 stereo pairs (color and grey). On the back, the \ac{imu} and {gps} systems are present.}
+	\label{fig:sota:kitti_sensors}
+\end{figure}
 
 
 \subsection{Udacity Self-Driving Car Nanodegree Dataset}
