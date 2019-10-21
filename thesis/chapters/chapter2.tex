@@ -4,42 +4,42 @@
 \section{Datasets}
 \label{section:sota:datasets}
 
-Training an autonomous vehicle to be capable of driving himself is a challenge that requires huge amounts of data: both to train neural networks and to test algorithms. Collaborative effort has been made to ease the process and several data sets are available online for public usage. They vary in the sensory data available, conditions whose data has been acquired, driving conditions and format on which they are provided, among others. 
+Training an autonomous vehicle to be capable of driving himself is a complex challenge with multiple parts and problems to be solve: recognizing other users of the road (persons, vehicles, cyclists); understanding traffic signs; track and estimate the movement of the road users; plan the path; accurate modelling of the environment; among many others. To both train neural networks and other genetic algorithms, but also to intensevely test systems and other software, huge amounts of data are required.
 
-Despite this work not being focus on autonomous driving, the algorithms developed for calibration, sensor fusion and correspondence detection between image and point cloud are not meant to be particular applied on datasets with interference. Using public available datasets not only allow the development of those algorithms before experimental data can be gathered, but also ensures that they are no application specific and can be reused on public datasets.
+To accelerate this progress, a collaborative effort is being made to release datasets online for free public usage under permissive licenses. This datasets vary in their objective, sensory data available, conditions whose data has been acquired, driving conditions and format on which they are provided, among other aspects. 
 
-During this research work, several new datasets have become online, such as
-nuScenes~\cite{nuScenes2019} and Waymo~\cite{Waymo}. Those were not investigated nor used as a part
-of this research since the datasets that were been used suffice.
+Despite this work having no intentions to study autonomous driving, the algorithms developed for calibration, sensor fusion and computing the correspondence between objects of interest in image and point cloud are not meant to be particular applied on datasets with interference. Therefore, using public available datasets not only allow the development of those algorithms before experimental data can be gathered, but also wides the aplicability of such work, without losing their applicability to the particular situation of \ac{lidar} interference.
 
-For the purposes of this research, several datasets were analyzed and searched. Above are listed only the ones that made it to the final decision criteria, i.e., have \ac{lidar} and camera:
+During the months when this research work was carried, several new datasets were made available online, such as nuScenes~\cite{nuScenes2019} and Waymo~\cite{Waymo}. Since no new contribute was expectd from their usage besides the ones already provided by the datasets already in use on this research, no further reseach on them was carried. 
+
+For the purposes of this research, several datasets were considered and tested. On the next sections, a brief summary is given about the ones that have sensory data from camera and \ac{lidar}. Those were the candidates to be used on this work.
 
 \subsection{Ford Campus \ac{lidar} dataset}
-Gathered in 2009, on the Ford Research campus and downtown Dearborn, in Michigan, this dataset contains camera, \ac{lidar}, \ac{imu} and \ac{gps} data. The dataset consists of two test runs, one inside the campus and another on downtown. 
+Gathered in 2009, in Michigan, the Ford Campus \ac{lidar} dataset contains camera, \ac{lidar}, \ac{imu} and \ac{gps} data. The dataset consists of two test scenarios, one inside the Ford Research campus and another on downtown Dearborn. A small subset of the former test scenario is also provided.
 
-The data is provided in raw format, accompanied by log files for pose, timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm}, see~\cite{Wang2018a}.}. Images are stored on \ac{ppm} and \ac{lidar} data on \ac{pcap} format. The data is unrectified and unsynced, but source code to parse and analyze the data is provided, along with some calibration parameters, in C or \ac{matlab}.
+The data is provided in raw format, accompanied by log files with timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm} protocol for estimating delays between the registered of sensory data on master-slave systems, see~\cite{VelodyneHDL64}.} logs with all raw data. The images from an omnidirectional camera, a Point Grey Ladybug3, are stored on \ac{ppm}; \ac{lidar} data from a Velodyne HDL-64E on \ac{pcap} format, from the \ac{tcp} connection socket; two Riegl LMS-Q120 \acp{lidar} also provide more information on the scan.
 
-For the navigation, the modified Ford F-250 pickup truck uses 3 sensors~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E lidar~\cite{Wang2018a}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar.
+The data is rectified and synced under \ac{matlab} \textit{.mat} files. Along with the raw data and synced and rectified \textit{.mat} files, source code is also provided for parsing the raw data, visualizing the \ac{lcm} logs and pre-processed data on \ac{matlab}. A C and \ac{openGl} software that can render textured point clouds is also available.
+
+For navigation, the modified Ford F-250 pickup truck uses 3 sensors~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E lidar~\cite{VelodyneHDL64}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar. More details about the sensors, their relative positioning and data formats and files can be found~\cite{Pandey2011}.
 
 
 \subsection{\ac{kitti}}
-\ac{kitti} dataset is a well known dataset for researchers of computer vision and autonomous driving. Recorded in 2011 and released for the public in 2013, this dataset contains various driving scenarios, from suburban, highways, residential and campus areas. It also provides some datasets with only people and calibration data.
+A well known dataset for researchers of computer vision, autonomous driving and \ac{ml}, \ac{kitti} was recorded in 2011 and released for the public in 2013. This dataset contains various driving scenarios: suburban, highways, residential and campus areas; with trucks, cars, cyclists and persons. Alongside with data for testing, calibration measures are provided for all sensors.
 
-This dataset was acquired using a Volkswagen Passat station wagon and the data is provided in raw format, accompanied by logs containing the timestamps. The dataset contains two stereo pairs, one with color and other with gray cameras, a \ac{lidar} and \ac{imu}+\ac{gps} sensor. Camera data is stored on \ac{png} format and \ac{lidar} data as a binary float matrix. \ac{gps} and {imu} data are stored textually. Additionally, tracklets can be provided for some datasets on \ac{xml} files.
+The test car, a Volkswagen Passat is equipped with two stereo pairs, one with color and other with gray cameras, a \ac{lidar}, an \ac{imu} and a\ac{gps} sensor. Data from all four cameras is stored on \ac{png} format, \ac{lidar} measurements as a binary float matrix, \ac{gps} and {imu} data textually. Additionally to the raw data, logs containing the timestamps and the transforms between the sensors are also provided. Labeled data is also available for some test scenarios on \ac{xml} files.
 
-Along with the data and calibration parameters, several tools written in C++ or \ac{matlab} are also provided. The dataset offers unsynced and unrectified data but also synced and rectified data. Calibration parameters and the data used to estimate it is also provided.
+Along with the data and calibration parameters, several tools written in C++ or \ac{matlab} are also provided. The dataset offers two types of data categories: (1) unsynced and unrectified data or (2) synced and rectified data. 
 
-The sensory apparatus contains 2 PointGray Flea2 greyscale and color cameras, a Velodyne HDL-64E lidar~\cite{Wang2018a}, among others~\cite{Geiger2013a}.
-
-
+The sensory apparatus contains 2 PointGray Flea2 greyscale and color cameras, a Velodyne HDL-64E lidar~\cite{VelodyneHDL64}, among others less relevant sensors~\cite{Geiger2013a}.
 
 
+\subsection{Udacity Self-Driving Car Nanodegree Dataset}
+Available publicly is also the data from Udacity online course on self-driving car. This dataset dates back to 2016 and was gathered with the intent to develop a level 4 autonomy vehicle, containing much more data diversity than the previous two. The data available contains images from 3 color cameras, a \ac{lidar} data, \ac{imu} and \ac{gps}, among other sensory data, such as speed, braking, etc.
 
+Their data is not available in raw format, only structured in \ac{ros} \textit{.bag} files. Some tools for visualizing and interacting with their data are provided for \ac{ros}~\cite{udacity}. 
 
-\subsection{Udacity Self-Driving Car Nanodegree Dataset:}
-Udacity online course on self-driving technology shares its data and some tools to help students enroll.
-
-Their dataset is presented on an organized format ready to be used by \ac{ros} and they also provide some tools for visualizing and interacting with their data~\cite{udacity}. Furthermore, this data contains images from 3 color cameras, a \ac{lidar},  \ac{imu} and \ac{gps}, and data from other sensors, such as speed, braking, etc.
+Not much information is publicaly available, and the dataset contains to calibration data between its sensors.
 
 \subsection{Summary}
 Table~\ref{tab:sota:datasets_comparison} summarizes all the relevant data from the datasets~\cite{udacity, Pandey2011, Geiger2013a}. We can see that there are few differences between the relevant types of data gather but major differences can be seen on the format provided. While \ac{kitti} not only provides the largest dataset in quantity, but also provides rectified and synced data. For the purposes of this research, there is no interest in testing syncing and rectification methods, which penalizes Ford dataset. 
