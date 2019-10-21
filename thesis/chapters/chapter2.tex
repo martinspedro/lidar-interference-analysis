@@ -56,7 +56,9 @@ Their data is not available in raw format, only structured in \ac{ros} \textit{.
 Not much information is publicaly available, and the dataset contains to calibration data between its sensors.
 
 \subsection{Summary}
-Table~\ref{tab:sota:datasets_comparison} summarizes all the relevant data from the datasets~\cite{udacity, Pandey2011, Geiger2013a}. We can see that there are few differences between the relevant types of data gather but major differences can be seen on the format provided. While \ac{kitti} not only provides the largest dataset in quantity, but also provides rectified and synced data. For the purposes of this research, there is no interest in testing syncing and rectification methods, which penalizes Ford dataset. 
+Table~\ref{tab:sota:datasets_comparison} summarizes all the relevant data from the datasets~\cite{udacity, Pandey2011, Geiger2013a}. One notices that while there are few differences between the relevant types of data gather, major differences can be observed on the format in which they are provided. 
+
+The diversity of scenarios and size of the dataset is also an aspect to considered. On this matter, \ac{kitti} and Udacity's are superior to Ford dataset, with \ac{kitti} providing the largest dataset in quantity, with already rectified and synced data. 
 
 While Udacity dataset is the newest and provides direct out-off-the-shelf integration with \ac{ros}, that type of integration can also be achieved for \ac{kitti} by using other tools, such as \textit{kitti2bag}~\cite{TomasKrejci}. 
 	
@@ -67,29 +69,34 @@ While Udacity dataset is the newest and provides direct out-off-the-shelf integr
 	\begin{tabular}{llccc}
 																& & \multicolumn{3}{c}{Datasets} \\ \cline{3-5}
 																& & Ford Campus  & \acs{kitti} & Udacity \\ \midrule
-																& \ac{lidar}	& \checkmark  & \checkmark & \checkmark \\ 
-																& Color Camera & \checkmark   &  \checkmark  &  \checkmark  \\
-																& Grey Cameras &  &  \checkmark  &  \\
-																& Stereo Camera &  &  \checkmark  &  \checkmark  \\
+																%
+																& \ac{lidar}	   & \checkmark  & \checkmark & \checkmark \\ 
+																& Color Camera	 & \checkmark  & \checkmark & \checkmark  \\
+																& Grey Cameras   &             & \checkmark &  \\
+																& Stereo Camera  &             & \checkmark & \checkmark  \\
 																& Omnidirectional Camera &  \checkmark  &  &  \\
-																& \acs{imu} &  \checkmark  &  \checkmark  &  \checkmark  \\
-																& \acs{gps} &  \checkmark  &  \checkmark  &  \checkmark  \\
-		\rowcolor{white}\multirow{-8}{*}{Data Types} 														& Other data relevant to autonomous driving & & & \checkmark \\
-		\multirow{5}{*}{Formats and Tools} & Raw data available &  \checkmark  &  \checkmark  &  \\
-																			 & Data parsing tools &  \checkmark  &\checkmark    &  \checkmark  \\
-																			 & Rectified data & & \checkmark  & \\
-																			 & Synced data &  & \checkmark   &  \checkmark  \\ 
-																			 & Calibration parameters & \checkmark  & \checkmark  & \checkmark  \\
-		\multicolumn{2}{l}{Raw data for calibration} & & \checkmark & \\
-		\multicolumn{2}{l}{\ac{ros} data compatibility} &  &  \checkmark\footnotemark &  \checkmark  \\
+																& \acs{imu}      & \checkmark  & \checkmark & \checkmark  \\
+																& \acs{gps}      & \checkmark  & \checkmark & \checkmark  \\
+		\rowcolor{white}\multirow{-8}{*}{Sensors and Data} & Driving data\footnotemark & & & \checkmark \\ \hline
+		\multirow{5}{*}{Data Formats and Tools} & Raw data available & \checkmark & \checkmark &  \\
+																			 & Data parsing tools & \checkmark & \checkmark & \checkmark  \\
+																			 & Rectified data & \checkmark & \checkmark & \checkmark \\
+																			 & Synced data & \checkmark & \checkmark &  \checkmark  \\ 
+																			 & Calibration parameters & \checkmark  & \checkmark  & \checkmark  \\\hline 
+		\multicolumn{2}{l}{Raw data for sensors calibration} & \checkmark & \checkmark & \\
+		\multicolumn{2}{l}{Direct \ac{ros} data compatibility} &  & \checkmark & \checkmark \\
+		\multicolumn{2}{l}{Data of acquisition} & 2009  & 2011 & 2016 \\
 		\bottomrule
 	\end{tabular}
 \caption{Comparison between the datasets more appropriated to this thesis objectives}
 \label{tab:sota:datasets_comparison}
 \end{table}
-\footnotetext{Requires the usage of an external tool \textit{kitti2bag}~\cite{TomasKrejci}} 
+\footnotetext{Other driving data includes, but it is not limited to: vehicle speed, joints states, twist, brakes, suspension, fuel level, \ac{can} bus data, steering, tire pressure, among many others.}
 
-At the time this research began, Udacity and \ac{kitti} data sets are the most appealing to be used. Prioritizing ease of use, Udacity data set trumps over \ac{kitti}, since \ac{ros} will be a tool usage on this research as well.
+Comparing the 3 datasets, not only using table~\ref{tab:sota:datasets_comparison} but also the previous sections, Udacity and \ac{kitti} are more suited to the purposes of this work. They provide a larger dataset than Ford, have \ac{ros} compatibility and the tools provided are open-source and not developed to be used on proprietary software.
 
+Since Udacity dataset integrates more easily with \ac{ros} than \ac{kitti}, providing also some tools for \ac{ros} preliminar tests, learning and earlier development stages will occur with this dataset. Later, due to the lack of calibration parameters and raw data for sensors calibration\footnote{Note that, despite Udacity dataset not providing data to ease the calibration of its sensors, such as camera intrinsic calibration or the extrinsic calibration between \ac{lidar} and camera, such calibration parameters can be obtained from this data. Those parameters are not accurate as those obtained using a proper calibration setup and are out the scope of this research (being another research topic on itself) and therefore no effort will be dedicated to this topic.}, this research will use the \ac{kitti} dataset.
+
+\section{Camera}
 
 	
