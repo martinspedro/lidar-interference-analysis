@@ -98,5 +98,119 @@ Comparing the 3 datasets, not only using table~\ref{tab:sota:datasets_comparison
 Since Udacity dataset integrates more easily with \ac{ros} than \ac{kitti}, providing also some tools for \ac{ros} preliminar tests, learning and earlier development stages will occur with this dataset. Later, due to the lack of calibration parameters and raw data for sensors calibration\footnote{Note that, despite Udacity dataset not providing data to ease the calibration of its sensors, such as camera intrinsic calibration or the extrinsic calibration between \ac{lidar} and camera, such calibration parameters can be obtained from this data. Those parameters are not accurate as those obtained using a proper calibration setup and are out the scope of this research (being another research topic on itself) and therefore no effort will be dedicated to this topic.}, this research will use the \ac{kitti} dataset.
 
 \section{Camera}
+Vision is the human sensor that only is the most relevant on who we perceive the world, but also on how we navigate it~\cite{Ekstrom2015}. Replicating this ability on machines, through the usage of cameras, has been widely researched topic on computer vision and instrumentation~\citeneeded. 
 
-	
+Cameras, as our eyes, take advantage of the pinhole effect: a small hole (or pin), that is used to spatially filter the non-focused light beams through an aperture~\citeneeded, that otherwise will reduce the \ac{dof} at which an object is focused.
+
+Therefore, to proper use a camera on the field of computer vision, some notions of photography are required. Since this research is focused on the usage of industrial cameras and consumer cameras, such notions will be simplified to the minimum necessary. 
+
+\subsection{Focusing a Camera}
+Focusing a camera can only be attained for an exact distance from the camera at a time. This exact distance, measured perpendicularly to the plane of the \ac{cmos} or \ac{ccd} chip is called the plan of focus. Therefore, on every image, there is a focus plan and what ``looks focused'' is actually ``acceptably sharp focus'', since precise focus is only theoretical possible.
+
+``Acceptably sharp focus'' means that a point in the real world would not result in a point on the image (as happens in precise focus), but will result in a blur spot that is circular (due to the form of the aperture. If the size of blur is small enough, little to no differences can be perceived and the image is considered to be focused. The maximum size at which this blur is not noticed by the viewer (given a specific sensor size, dimension of the viewed photo, viewing distance and acuity of the viewer) is called the \ac{coc}.
+
+The first step in focusing an image requires the calculation of the hyperfocal distance, $H$: the distance at which the camera is focused to ensure objects from half of this distance to the infinity are in a ``acceptably sharp focus''. This can be calculated using the equation~\ref{eq:hyperfocal_distance}, below, where $f$ is the focal length, $N$ is the F-number and $c$ the \ac{coc} limit. Hyperfocal near limit is defined as $H_{near} = \frac{H}{2}$
+
+\begin{equation}
+	\label{eq:hyperfocal_distance}
+	H = \frac{f^2}{Nc} + f \approx \frac{f^2}{Nc} 
+\end{equation}
+
+Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is the subtraction of the farthest and nearest distance at each objects are in ``acceptably sharp focus'' (see equation~\ref{eq:dof}), indicating the distance between this two points. The nearest and farthest points can be calculated using the equations~\ref{eq:dof_near} and~\ref{eq:dof_far}, respectively.
+
+\begin{subequations}
+	\label{eq:dof_all}
+	\begin{align}
+		DoF & = DoF_{far} - DoF_{near} \label{eq:dof} \\
+		DoF_{far} & = \frac{H\times d}{H - (d - f)} \label{eq:dof_far} \\
+		DoF_{near} & = \frac{H\times d}{H + (d - f))} \label{eq:dof_near} 
+	\end{align}
+\end{subequations}
+
+Using equations~\ref{eq:dof_all} is possible to select a desired \acl{dof} for an image, guaranting that all the objects of interest are ``acceptably sharp focus''. Taking in consideration that smaller apertures (bigger F-numbers) will increase the exposition time, a target distance can be selected with the garantee that all the objects from the near \ac{dof} point to the far \ac{dof} will be sharp.
+
+\section{Camera Geometry}
+A world point in a 3-dimensional Euclidean space can be represented by a vector with 3 real coordinates: $(X, Y, Z)$ and an image pixel as an element of a 2D matrix with integer coordinates $(u, v)$. From a mathematical standpoint, a camera can be considered as a mapping tool between the tridimensionality of the world into a 2D image plan, such as depicted in equation~\ref{eq:camera_transform}. 
+
+\begin{equation}
+	\label{eq:camera_transform}
+	(X, Y, Z) \xrightarrow[]{\text{transformation}} (u, v)
+\end{equation}
+
+Several camera models exist \citeneeded, but on this work only the pinhole camera model will be considered. The pinhole camera model is based on the pinhole effect, which states that a small hole (or aperture) can be used to spatially filter the light rays by angle of incidence, reducing the  overlapping of the light rays coming from different incident angles throught the pinhole. 
+
+This model describes the perspective transformation on equation~\ref{eq:camera_transform} onto a central projection where all light rays meet, known as the camera center, $\mathcal{F_c}$. A diagram of the pinhole camera is shown on figure~\ref{fig:pinhole_camera_model}. On this model, the z axis is along optical axis\footnote{Also called principal axis} (which is at the same orientation that the camera is facing). The image plane is at the coordinates $z = f$, where $f$ is the focal length, being intersect by the optical axis on the principial point, with coordinates $(c_x, c_y)$ on the image plane axis. Note that the principial point is not the origin of the coordinates on the image plane, but the middle point, being the origin located on the top left corner, with a downward yy axis.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{img/camera/pinhole_camera_model.png}
+\caption{Pinhole camera model}
+\label{fig:pinhole_camera_model}
+\end{figure}
+
+When operating with a pinhole camera model, is more convenient to use a Projective Space instead of the more common Euclidean Space\citeneeded, which has the advantage of all of its points being oriented through a single point, following the visual effect of perspective. By using a projective space instead of an Euclidian for addressing the transformations of a pinhole camera model, mathematics become more intuitive and relatable to the the actual geometry of the model. Projective spaces use homogeneous coordinates and have non-Euclidian geometry, but that allow for changes between the two.
+
+A tridimensional Euclidian Space can be represented on a Projective space using 3+1 coordinates. Therefore, the previous tridimensional vector can be rewritten in homogeneous coordinates as $(wX, wY, wZ, w)$. If $w \neq 0$, we can transform from the Projective to Euclidian Space, obtaining the world representation of such points, by dividing the the homogeneous point by $w$. For the cases in which $w =  0$, we have purely projective points/planes that only exist in Projective Space named Points at Infinity\citeneeded (in this case, at an infinite plane). A point at infinity in projection geometry, is the projection of the picture plane of the point at infinity of a class of parallel lines is called their vanishing point. 
+
+
+The relation depicted in equation~\ref{eq:camera_transform} can expressed in projective geometry as:
+
+\begin{equation}
+	\begin{bmatrix}
+		u \\ v \\ 1
+	\end{bmatrix}
+= P \times 
+\begin{bmatrix}
+		X \\ Y \\ Z \\ 1
+\end{bmatrix}
+\end{equation}
+
+Where $P$ is the projection matrix and $w = 1$. The projection matrix in a pinhole camera model is the result of three other matrices: the camera matrix (or matrix of the camera intrinsic parameters), $K$, and a joint rotation, $R$, and translation matrix, $t$, represented as $[R|t]$. The combination of this matrices are represented on equation~\ref{eq:projective_matrix} and the full camera transform is given on equation~\ref{eq:camera_transform_full}.
+
+\begin{equation}
+	\label{eq:projective_matrix}
+	P = K[R|t]
+\end{equation}
+
+\begin{equation}
+	\label{eq:camera_transform_full}
+	\begin{bmatrix}
+		u \\
+		v \\
+		1
+	\end{bmatrix}
+	= 
+	\overbrace{
+		\underbrace{
+			\begin{bmatrix}
+				f_x & 0 & c_x \\
+				0 & f_y & c_y \\
+				0 & 0 & 1 
+			\end{bmatrix}
+		}_\text{\large\textbf{K}}
+		\underbrace{
+			\left[
+				\begin{array}{ccc|c}
+					r_{xx} & r_{yx} & r_{zx} & t_x \\
+					r_{xy} & r_{yy} & r_{zy} & t_y \\
+					r_{xz} & r_{yz} & r_{zz} & t_z 
+				\end{array}
+		\right]
+		}_\text{\large\textbf{[R|t]}}
+	}^\text{\large\textbf{P}}
+	\begin{bmatrix}
+		X \\
+		Y \\
+		Z \\
+		1
+	\end{bmatrix}
+\end{equation}
+
+
+In the pinhole camera model depicted in figure~\ref{fig:pinhole_camera_model}, 
+
+
+\section{Camera Intrinsic Calibration}
+
+\section{Computer Vision}
+
