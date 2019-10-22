@@ -98,14 +98,14 @@ Comparing the 3 datasets, not only using table~\ref{tab:sota:datasets_comparison
 Since Udacity dataset integrates more easily with \ac{ros} than \ac{kitti}, providing also some tools for \ac{ros} preliminary tests, learning and earlier development stages will occur with this dataset. Later, due to the lack of calibration parameters and raw data for sensors calibration\footnote{Note that, despite Udacity dataset not providing data to ease the calibration of its sensors, such as camera intrinsic calibration or the extrinsic calibration between \ac{lidar} and camera, such calibration parameters can be obtained from this data. Those parameters are not accurate as those obtained using a proper calibration setup and are out the scope of this research (being another research topic on itself) and therefore no effort will be dedicated to this topic.}, this research will use the \ac{kitti} dataset.
 
 \section{Camera on computer vision}
-Vision is the human sense most relevant to how we perceive the world and how we navigate it~\cite{Ekstrom2015}. Replicating this ability on machines, through the usage of cameras, is a widely researched topic on computer vision and instrumentation~\citeneeded. The most common cameras \citeneeded, as our eyes, take advantage of the pinhole effect: a small hole (or pin), that is used to spatially filter the non-focused light beams through an aperture~\citeneeded, producing a mirrored, but focused image.
+Vision is the human sense most relevant to how we perceive the world and how we navigate it~\cite{Ekstrom2015}. Replicating this ability on machines, through the usage of cameras, is a widely researched topic on computer vision and instrumentation~\citeneeded. The most common cameras, as our eyes, take advantage of the pinhole effect: a small hole (or pin), that is used to spatially filter the non-focused light beams through an aperture~\cite{camera_models, Sturm2010}, producing a mirrored, but focused image.
 
 Therefore, to proper use a camera on the field of computer vision, some notions of photography are required. Since this research is focused on the usage of industrial cameras and not consumer cameras, such notions will be simplified to the minimum necessary. 
 
 \subsection{Camera Focus and \acl{dof}}
-Focusing a camera can only be attained for an exact distance from the camera\citeneeded, measured perpendicularly to the plane of focus, which is the plane containing the \ac{cmos} or \ac{ccd} chip. Therefore, on every image, there is a plane of focus and what actually ``looks focused'' is really just ``acceptably sharp focus'', since precise focus is only possible to an exact distance, and not for an entire tridimensional object.
+Focusing a camera can only be attained for an exact distance from the camera~\cite{Merklinger1993, Photopillers}, measured perpendicularly to the plane of focus, which is the plane containing the \ac{cmos} or \ac{ccd} chip. Therefore, on every image, there is a plane of focus and what actually ``looks focused'' is really just ``acceptably sharp focus'', since precise focus is only possible to an exact distance, and not for an entire tridimensional object.
 
-``Acceptably sharp focus'' means that a point in the real world would not result in a point on the image (as happens in precise focus), but in a blurred spot that is circular (due to the form of the aperture)\citeneeded. However, if the size of blur is small enough, little to no differences can be perceived and the image is considered to be focused\citeneeded. The maximum size at which this blur is not noticed by the viewer (given a specific sensor size, dimension of the viewed photo, viewing distance and acuity of the viewer) is called the \ac{coc}.
+``Acceptably sharp focus'' means that a point in the real world would not result in a point on the image (as happens in precise focus), but in a blurred spot that is circular (due to the form of the aperture)\cite{Photopillers}. However, if the size of blur is small enough, little to no differences can be perceived and the image is considered to be focused\cite{Photopillers}. The maximum size at which this blur is not noticed by the viewer (given a specific sensor size, dimension of the viewed photo, viewing distance and acuity of the viewer) is called the \ac{coc}\cite{Photopillers, Merklinger1993}.
 
 The first step in focusing an image requires the calculation of the hyperfocal distance, $H$: the distance at which the camera is focused to ensure objects from half of this distance to the infinity are in an ``acceptably sharp focus'' (refer to as just focus, from now on). This distance can be calculated using the equation~\ref{eq:hyperfocal_distance}, below, where $f$ is the focal length, $N$ is the F-number and $c$ the \ac{coc} limit. Hyperfocal near limit is defined as $H_{near} = \frac{H}{2}$.
 
@@ -114,7 +114,7 @@ The first step in focusing an image requires the calculation of the hyperfocal d
 	H = \frac{f^2}{Nc} + f \approx \frac{f^2}{Nc} 
 \end{equation}
 
-Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is the subtraction of the farthest and nearest distance at each objects are focused (see equation~\ref{eq:dof}), indicating the distance between this two points. The nearest and farthest points can be calculated using the equations~\ref{eq:dof_near} and~\ref{eq:dof_far}, respectively.
+Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is the subtraction of the farthest and nearest distance at each objects are focused (see equation~\ref{eq:dof}), indicating the distance between this two points\cite{Photopillers, Merklinger1993, mvg_book}. The nearest and farthest points can be calculated using the equations~\ref{eq:dof_near} and~\ref{eq:dof_far}, respectively.
 
 \begin{subequations}
 	\label{eq:dof_all}
@@ -125,7 +125,7 @@ Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is meas
 	\end{align}
 \end{subequations}
 
-Using equations~\ref{eq:dof_all} is possible to select a desired \acl{dof} for an image that guarantees that all the objects of interest are focused. Taking in consideration that smaller apertures (bigger F-numbers) will increase the exposition time\citeneeded, a target distance can be selected with the guarantee that all the objects from the near \ac{dof} point to the far \ac{dof} will be sharp.
+Using equations~\ref{eq:dof_all} is possible to select a desired \acl{dof} for an image that guarantees that all the objects of interest are focused. Taking in consideration that smaller apertures (bigger F-numbers) will increase the exposition time\cite{Merklinger1993}, a target distance can be selected with the guarantee that all the objects from the near \ac{dof} point to the far \ac{dof} will be sharp.
 
 \subsection{Camera Geometry}
 A world point in a 3-dimensional Euclidean space can be represented by a vector with 3 real coordinates: $(X, Y, Z)$ and an image pixel of a digital image as an element of a 2D matrix with integer coordinates $(u, v)$. From a mathematical standpoint, a camera can be considered as a mapping tool between the world three dimensions objects into a 2D image plan, such as depicted by equation~\ref{eq:camera_transform}. 
@@ -135,13 +135,13 @@ A world point in a 3-dimensional Euclidean space can be represented by a vector 
 	(X, Y, Z) \xrightarrow[]{\text{transformation}} (u, v)
 \end{equation}
 
-Several camera models exist \citeneeded, such as weak-perspective, fisheye, affine, etc., but on this work only the pinhole camera model will be considered. The pinhole camera model is based on the pinhole effect, represented on figure~\ref{fig:pinhole_effect}, which states that a small hole (or aperture) can be used to spatially filter the light rays by angle of incidence, reducing the  overlapping of the light rays coming from different incident angles through the pinhole. 
+Several camera models exist \cite{camera_models, Sturm2010}, such as weak-perspective, fisheye, affine, etc., but on this work only the pinhole camera model will be considered. The pinhole camera model is based on the pinhole effect, represented on figure~\ref{fig:pinhole_effect}, which states that a small hole (or aperture) can be used to spatially filter the light rays by angle of incidence, reducing the overlapping of the light rays coming from different incident angles through the pinhole. 
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\textwidth]{img/camera/pnhole_effect.png}
+	\caption{Pinhole effect on a small aperture. Source: CS231A Course Notes~\cite{camera_models}}
 	\label{fig:pinhole_effect}
-	\caption{Pinhole effect on a small aperture. Source~\citeneeded}
 \end{figure}
 
 The pinhole camera model describes the perspective transformation on equation~\ref{eq:camera_transform} as a central projection where all light rays meet at the camera center, $\mathcal{F}_c$. A diagram of the pinhole camera is shown on figure~\ref{fig:pinhole_camera_model}. On this model, the z axis collinear with the optical axis\footnote{Also called principal axis. The two terms can be used.} , which is the same orientation that the camera is facing. The image plane is at the coordinates $z = f$, where $f$ is the focal length, being intersect by the optical axis on the principal point, with coordinates $(c_x, c_y)$ on the image plane axis. Note that the principal point is not the origin of the coordinates on the image plane, but the middle point, being the origin located on the top left corner, with a downward y axis.
@@ -149,13 +149,13 @@ The pinhole camera model describes the perspective transformation on equation~\r
 \begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{img/camera/pinhole_camera_model.png}
-\caption{Pinhole camera model}
+\caption{Pinhole camera model. Source: \acl{opencv}\cite{opencv_doc}}
 \label{fig:pinhole_camera_model}
 \end{figure}
 
-When operating with a pinhole camera model, is more convenient to use a Projective Space instead of the more common Euclidean Space\citeneeded, which has the advantage of all of its points being oriented through a single point, following the visual effect of a central perspective. By using a projective space instead of an Euclidean for addressing the transformations of a pinhole camera model, mathematics become more intuitive and relatable to the actual geometry of the model. Projective spaces use homogeneous coordinates and has non-Euclidean geometry, but that allow for changes between the two.
+When operating with a pinhole camera model, is more convenient to use a Projective Space instead of the more common Euclidean Space\cite{mvg_book}, which has the advantage of all of its points being oriented through a single point, following the visual effect of a central perspective. By using a projective space instead of an Euclidean for addressing the transformations of a pinhole camera model, mathematics become more intuitive and relatable to the actual geometry of the model. Projective spaces use homogeneous coordinates and has non-Euclidean geometry, but that allow for changes between the two\cite{mvg_book, camera_models}.
 
-A tridimensional Euclidean Space can be represented on a Projective space using 3+1 coefficients. Therefore, the previous tridimensional vector can be rewritten in homogeneous coordinates as $(wX, wY, wZ, w)$. If $w \neq 0$, we can transform from the Projective to Euclidean Space, obtaining the world representation of such points, by dividing the homogeneous point by $w$. For the cases in which $w =  0$, we have purely projective points at infinity, that only exist in Projective Space~\citeneeded. 
+A tridimensional Euclidean Space can be represented on a Projective space using 3+1 coefficients. Therefore, the previous tridimensional vector can be rewritten in homogeneous coordinates as $(wX, wY, wZ, w)$ \cite{mvg_book}. If $w \neq 0$, we can transform from the Projective to Euclidean Space, obtaining the world representation of such points, by dividing the homogeneous point by $w$. For the cases in which $w =  0$, we have purely projective points at infinity, that only exist in Projective Space~\cite{mvg_book}. 
 
 
 The relation depicted in equation~\ref{eq:camera_transform} can expressed in projective geometry as:
@@ -167,7 +167,7 @@ The relation depicted in equation~\ref{eq:camera_transform} can expressed in pro
 = P \times 
 \begin{bmatrix}
 		X \\ Y \\ Z \\ 1
-	\end{bmatrix} \qquad, \text{if} w = 1
+	\end{bmatrix}, \qquad \text{if } w = 1
 \end{equation}
 
 Where $P$ is the projection matrix that performs the transform from world points to image points. The projection matrix in a pinhole camera model is the result of multiplication of two matrices: the camera matrix (or matrix of the camera intrinsic parameters), $K$; and a joint rotation and translation matrix, $[R|t]$, where $R$ is the rotation matrix and $t$ the translation vector. The combination of this matrices is given on equation~\ref{eq:projective_matrix} and the full camera transform is expanded on equation~\ref{eq:camera_transform_full}, through the replacement of equation~\ref{eq:projective_matrix} in~\ref{eq:camera_transform}.
@@ -211,17 +211,59 @@ Where $P$ is the projection matrix that performs the transform from world points
 	\end{bmatrix}
 \end{equation}
 
-The intrinsic parameter matrix is used to represent the calibration parameters of the camera, namely, the focal lengths of each axis, $f_x$ and $f_y$, and the principal point offset to the axis origin. 
+The intrinsic parameter matrix is used to represent the calibration parameters of the camera, namely, the focal lengths of each axis, $f_x$ and $f_y$, and the principal point offset to the axis origin, $c_x$ and $c_y$, for the x and y axis, respectively. 
 
 The joint rotational-translation matrix, $[R|t]$, is also known as the extrinsic camera parameters, translates the coordinates of a point to the Cartesian coordinate system fixed to the camera.
 	
-The model used is also extended with radial and tangential distortion parameters, that will not be detailed here. For more information, see .
+The model used is also extended with radial and tangential distortion parameters, that will not be detailed here. Such parameters indicate how the distortion of the camera lenses affects the image project on the camera plane~\cite{camera_models, Sturm2010} in a non-linear way and how this can be corrected. Extracted from Hata and Savarese course notes~\cite{camera_models}, below (figure~\ref{fig:lense_distortion_types}), the effects of lens aberration on images are show.
 
-\section{Camera Intrinsic Calibration}
-Calibrating a camera implies determine the parameters of its intrinsic matrix. Several methods can be used
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/camera/distortion.png}
+	\caption{Examples of barrel and pincushion distortion on an image. Source: \cite{camera_models}}
+	\label{fig:lense_distortion_types}
+\end{figure}
 
+For more information, see Hartley and Zisserman Multi View Geometry in Computer Vision~\cite{mvg_book}, Hata and Savarese course notes\cite{camera_models} and \acf{opencv} official documentation\cite{opencv_doc}. 
+
+\subsection{Camera Intrinsic Calibration}
+Calibrating a camera is the process on which the parameters of the model that describes its behavior are determined. For the pinhole camera model, this means determining the parameters of its intrinsic matrix, $K$, but also the distortion coefficients of the lens used~\cite{mvg_book, camera_models}. This parameters are called the intrinsic parameters and are independent of the scenario being viewed, if the focal length is keep constant. On the other hand, extrinsic camera parameters are different for every situation and scenario dependent.
+
+The joint rotational-translation matrix, for a fixed camera in relation to the world frame of reference, is used to describe the rigid motion of an object on its front~\cite{opencv_doc}. Using this notion, Zhang proposed a method for calibration a camera based on the movement of a planar pattern in front of it, without the necessity to know how the planar plan was freely moved~\cite{Zhengyou2000, mvg_book}. Zhang also a maximum-likelihood estimation to miminize the error, using a such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other techniques includes Tsai's algorithm \cite{Roger1987, mvg_book}, a 2-stage technique for camera calibration first presented in 1987, does not determins the camera center. A \ac{dlt} algorithm can also be used to determine the camera calibration parameters~\cite{mvg_book}.
+
+Previous technics required 3 dimensional object based calibration \citeneeded, with expensive experimental apparatus or no calibration object, computing the intrinsic parameters only by rotating the camera on a static environment~\citeneeded. Bouguet also provides a Camera Calibration toolbox for \ac{matlab}~\cite{Jean_Yves} and \ac{opencv} also provides calibration algorithms based on Bouguet and Zhang~\cite{opencv}.
+
+The calibration algorithm proposed by Zhang finds the correspondences between 2D and 3D points (see equations~\ref{eq:camera_transform} and~\ref{eq:camera_transform_full}), by variating the planar calibration object. For every configuration, a match between the two 2D and 3D points allows the determination of the projective matrix, $P$. However, if several translations and rotations of the pattern are made, it is possible to determine the intrinsic camera matrix, $K$, that is independent from the scene, using minimization algorithms. 
+
+The correspondences between the 2D and 3D representations of the pattern can be made by finding the corners or circles on planar patterns~\citeneeded. Chessboards are the most common patterns used, allowing corner detection for each cell. Since the dimensions of the cell and their arrangment is known previously, it is possible to compute the orientation of the chessboard and to match the 2D to the 3D points \cite{Zhengyou2000, opencv_doc, mvg_book}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\textwidth, keepaspectratio]{img/camera/calib_pattern.jpg}
+	\label{fig:opencv_calib_pattern}
+	\caption{Chessboard calibration pattern with corners detection results show on image. Corner order is also given on the corner color. Source:~\cite{OpenCV_camera_calib}.}
+\end{figure}
+For error estimation, algorithm x is used. \citeneeded
 
 \subsection{Camera as a sensor for computer vision}
-Working with a camera for computer vision 
+On the field of computer vision, several tools and libraries are available, capable of performing low image operations, image detection, filtering, among others. 
 
-Sensor for computer vision requires not only the right tools, but also the usage 
+\begin{itemize}
+	\item \textbf{BoofCV~\cite{boofcv}:} written in java, this library is oriented to real-time image operations, such as low-level image processing, camera calibration and feature/object  detection, tracking and recognition;
+	\item \textbf{Dlib~\cite{dlib}:} modern C++ toolkit containing \acl{ml} algorithms and tools, some on the field of computer vision;
+	\item \textbf{\ac{matlab} Computer Vision Toolbox\texttrademark~\cite{matlabcvtoolbox}:} toolbox for computer vision algorithms, 3D vision, and video processing systems. Can be perform object detection and tracking. Detects, extracts and matches features;
+	\item \textbf{\acf{opencv}:} open source library for C++, Python and C that implements \acl{sota} algorithms on computer vision;
+	\item \textbf{Vlfeat~\cite{vlfeat}:} open source library for C that implements many \acl{sota} algorithms on computer vision;
+	\item \textbf{SimpleCV~\cite{simplecv}:} Open source framework, written in python, that can be used to implement computer vision software using other libraries;
+\end{itemize}
+
+Since a goal of this research is to use Open-Source tools as far as possible (instead of using closed source tools or code that is harder to integrate with other libraries), \ac{matlab} \acl{cv} Toolbox\texttrademark~does not suit. The code of this research is mainly develop in C++ (see chapter \citeneeded), so Python and Java libraries will not be considered, resulting only in \ac{opencv} and Dlib (Vlfeat uses plain C, so also not ideal). 
+
+\ac{opencv} has a great community and is considered by many research and industry as the \textit{de facto standard} library when refering to computer vision. Dlib is a robust library, but no significant differences can be when comparing with \ac{opencv}. Therefore, the final choice for a computer vision library is \ac{opencv}, due to the already implemented compatilibility with \ac{ros}.
+
+\section{\acl{lidar}}
+
+
+
+\section{Object Detection}
+Several paid and cloud based alternatives exist, such as Amazon Rekognition~\ref{awsRecognition}, Google Could Vision \ac{api}~\cite{googlevision}, IBM Watson Visual Recognition~\cite{watson} and Microsoft Computer Vision software~\cite{azurecv}. 
