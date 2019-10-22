@@ -243,7 +243,8 @@ The correspondences between the 2D and 3D representations of the pattern can be 
 	\label{fig:opencv_calib_pattern}
 	\caption{Chessboard calibration pattern with corners detection results show on image. Corner order is also given on the corner color. Source:~\cite{OpenCV_camera_calib}.}
 \end{figure}
-For error estimation, algorithm x is used. \citeneeded
+
+For error estimation, algorithm x\todo is used.
 
 \subsection{Camera as a sensor for computer vision}
 On the field of computer vision, several tools and libraries are available, capable of performing low image operations, image detection, filtering, among others. 
@@ -252,7 +253,7 @@ On the field of computer vision, several tools and libraries are available, capa
 	\item \textbf{BoofCV~\cite{boofcv}:} written in java, this library is oriented to real-time image operations, such as low-level image processing, camera calibration and feature/object  detection, tracking and recognition;
 	\item \textbf{Dlib~\cite{dlib}:} modern C++ toolkit containing \acl{ml} algorithms and tools, some on the field of computer vision;
 	\item \textbf{\ac{matlab} Computer Vision Toolbox\texttrademark~\cite{matlabcvtoolbox}:} toolbox for computer vision algorithms, 3D vision, and video processing systems. Can be perform object detection and tracking. Detects, extracts and matches features;
-	\item \textbf{\acf{opencv}:} open source library for C++, Python and C that implements \acl{sota} algorithms on computer vision;
+	\item \textbf{\acf{opencv}~\cite{opencv}:} open source library for C++, Python and C that implements \acl{sota} algorithms on computer vision;
 	\item \textbf{Vlfeat~\cite{vlfeat}:} open source library for C that implements many \acl{sota} algorithms on computer vision;
 	\item \textbf{SimpleCV~\cite{simplecv}:} Open source framework, written in python, that can be used to implement computer vision software using other libraries;
 \end{itemize}
@@ -261,9 +262,87 @@ Since a goal of this research is to use Open-Source tools as far as possible (in
 
 \ac{opencv} has a great community and is considered by many research and industry as the \textit{de facto standard} library when refering to computer vision. Dlib is a robust library, but no significant differences can be when comparing with \ac{opencv}. Therefore, the final choice for a computer vision library is \ac{opencv}, due to the already implemented compatilibility with \ac{ros}.
 
-\section{\acl{lidar}}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LIDAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Automotive \ac{lidar}}
+\ac{lidar} sensors map their surroundings thanks to their capability of precisely measuring depth. Already used in topography, spectography and air poluttion studies, \ac{lidar} found its importance on the automotive industry as one of the sensors of autonomous cars and \ac{adas}\cite{Sullivan2016}. 
+
+These maps produced by the \ac{lidar}, commonly represented as point clouds or mesh clouds models, (see figure~\ref{fig:bunny}), are one of the preferred method for \ac{slam} algorithms, which allow a vehicle without previous knowledge of its surroundings to autonomously navigate them - a crucial task for \ac{adas} on self-driving vehicles.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[c]{0.45\textwidth}
+	\includegraphics[width=\textwidth]{img/lidar/bunny_point.png}
+		\caption{Point Cloud representation}
+		\label{fig:bunnyPointCloud}
+	\end{subfigure}
+	\quad
+	\begin{subfigure}[c]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar/bunny_mesh.png}
+		\caption{Mesh Cloud representation}
+		\label{fig:bunnyMeshCloud}
+	\end{subfigure}
+	\caption{Standford bunny~\cite{bunny} point cloud (\subref{fig:bunnyPointCloud}) and mesh cloud (\subref{fig:bunnyMeshCloud})}
+	\label{fig:bunny}
+\end{figure}
+
+
+Typically, four major technologies are used on the construction of a \ac{lidar}:
+
+\begin{enumerate}
+	\item \textbf{\ac{tof}:} the most common type, acquires depth information by measuring the time elapsed between the emission and reception of a \ac{laser} pulse reflected from a surrounding target \cite{Sullivan2016};
+	\item \textbf{Flash:} organized in a matricial structure, similar to a camera \ac{ccd}, every element of the matrix contains a photodetector. A ``flash'' simultaneous illuminates all the \ac{fov}, and the reflected light intensity and time of arrival is measured to provide depth calculations; 
+	\item \textbf{Phased Arrays:} using a microscopic array of antennas, similar to a \ac{radar}, the phase of each antenna is controled to allow the \ac{lidar} to sweep and/or focus on a specific area, using beamforming theory;
+	\item \textbf{\ac{mems}:} operate by controlling the angle at which a rotating microscopic mirror is aligned with the \ac{laser}. By varying the angle a single line can be scanned and using multiple \acp{laser} with the samer mirror allows to scan vertically.
+
+\end{enumerate}
+
+
+\subsection{\acl{tof} vs Solid State \acp{lidar}}
+Despite the existance of several technologies that can be used for \ac{lidar} construction, two majuor types of \ac{lidar} can be distringuished: \ac{tof} or Solid State. The former as no moving parts while the latter working principle is the rotational device.
+
+To construct a \ac{tof} \ac{lidar}, a single pair of \ac{laser} and photodetector is assembled on a fast rotational device (typically 5 to 20 Hz), allowing that pair to measure a single line while rotating, creating a 2D \ac{lidar}. If multiple pairs are assembled together, with different polar angles, on a rotational device, the \ac{lidar} is said to be a 3D \ac{lidar}, since a total revolution can produce a three dimensional map of its surroundings~\cite{Sullivan2016}.
+
+Solid State \ac{lidar} has no moving parts, and can either use flash or phased arrays on its construction, depending if it uses a flash of light to illumianate the scene or performs beam steering to scan the same scene. They are theoretically more reliable, durable cheaper and consume less power. However, this technology is not yet mature, which makes the current models impratical f or automotive. 
+
+While \ac{tof} \acp{lidar} consumes more power, they can also achieve ranges until 100 meters \cite{vlp16, Sullivan2016} or even 300 meters\citeneeded, higher than solid state \ac{lidar}, which in best conditions reaches 50 meters~\citeneeded. That is due to the attenuation of the flash intensity, due to its power being inversely proportional with the distance squared\citeneeded. Considering the current \ac{sota} on \ac{tof} \ac{lidar} has less error (a few centimeters) than the \ac{sota} of Solid State \ac{lidar}.
+
+However, Solid State \ac{lidar} have more point density than a \ac{tof} counterpart and measure the depth image of a scene on the same frame, theoretically allowing for more accurate data and faster refresh rates\citeneeded. 
+
+
+
+%Combining the reliability of the depth measurement with the assemblage of multiple pairs of \ac{laser} and photodetectors on a fast rotational device (typically 5 to 20 Hz) creates one of the most appealing and reliable sensors for self-driving vehicles and \ac{adas}.
+
+%Despite the relevance of the topic for the massification of self-driving vehicles and the hazardous impact on \Gls{adas} reliability, the research topic presented in this paper has received very reduced attention by the research community. 
+%A major \ac{lidar} manufacture also addresses the problem of mutual interference of the \ac{lidar} sensors on the same vehicle, by allowing their synchronization and \ac{laser} firing in different instants \cite{vlp16}.
 
 \section{Object Detection}
 Several paid and cloud based alternatives exist, such as Amazon Rekognition~\ref{awsRecognition}, Google Could Vision \ac{api}~\cite{googlevision}, IBM Watson Visual Recognition~\cite{watson} and Microsoft Computer Vision software~\cite{azurecv}. 
+
+
+
+
+\section{\ac{lidar} Interference}
+\ac{tof} \ac{lidar}s basic principle implies that when a \ac{laser} pulse is emitted, three different scenarios are possible, being the first one the only one that produces a valid measurement:
+
+\begin{enumerate}
+\item The \ac{laser} pulse returns, due to the reflection of an obstacle;
+\item The \ac{laser} pulse does not return;
+\item The \ac{laser} pulse returns with intensity below the noise floor.
+\end{enumerate}
+
+Interference and crosstalk between the pairs of \acp{laser} and photodetectors on a \ac{lidar} are mitigated with different firing offsets, or in the case of mutual interference between \ac{lidar}, it is possible to synchronize their firing time using specialized clock signals \cite{vlp16}.
+
+However, in a society when self-driving vehicles coexist, another scenario is possible: a \ac{lidar} `A'' fires a \ac{laser} pulse that is received, directly or indirectly, by the photodetector on a \ac{lidar} `B''. Since \ac{lidar} `B'' measures the distance to an obstacle by measuring the time between the firing and reception of its own \ac{laser} pulse, the reception of another \ac{laser} pulse results in an erroneous measure with an unpredictable behavior. If this interference is significant, the reliability of the \ac{lidar}, and consequently autonomous vehicles and \ac{adas}, is seriously undermined due to the incapability to accurately mapping their surroundings.
+
+To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only available the studies conducted by Kim \etal \cite{Kim2017, Kim2015}, which seek to characterize this interference; and by Retterath and Laumeyer \cite{Al.2013}, seeking to provide an apparatus for reducing the mutual interference of \ac{lidar} sensors on the same vehicle.
+
+
+Kim \etal research %despite using a 2D \ac{lidar}%instead of a 3D \ac{lidar}
+is the only study to use two independent 2D \ac{lidar}s interfering with each other. Kim \etal results indicate that interference has spatial and temporal locality \cite{Kim2015} and in any given time, in Kim's setup, a data point has 0.05 \% probability of being interfered \cite{Kim2015}.
+The former states that if a particular angle is interfered, the following angles are likely to also be interfered; while the latter indicates that if a measure is interfered, on the following frame that same measure is also likely to be interfered. 
+%However, 
+
+
