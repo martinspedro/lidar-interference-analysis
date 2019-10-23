@@ -4,9 +4,9 @@
 \section{Datasets}
 \label{section:sota:datasets}
 
-Training an autonomous vehicle to be capable of driving himself is a complex challenge with multiple parts and problems to be solve: recognizing other users of the road (persons, vehicles, cyclists); understanding traffic signs; track and estimate the movement of the road users; plan the path; accurate modelling of the environment; among many others. To both train neural networks and other genetic algorithms, but also to intensively test systems and other software, huge amounts of data are required.
+Training an autonomous vehicle to be capable of driving himself is a complex challenge with multiple parts and problems to be solved: recognizing other users of the road (persons, vehicles, cyclists); understanding traffic signs; track and estimate the movement of the road users; plan the path; accurate modelling of the environment; among many others. To both train neural networks and other genetic algorithms, but also to intensively test systems and other software, huge amounts of data are required.
 
-To accelerate this progress, a collaborative effort is being made to release datasets online for free public usage under permissive licenses. This datasets vary in their objective, sensory data available, conditions whose data has been acquired, driving conditions and format on which they are provided, among other aspects. 
+To accelerate this progress, a collaborative effort is being made to release datasets online for free public usage under permissive licenses. These datasets vary in their objective, sensory data available, conditions whose data has been acquired, driving conditions and format on which they are provided, among other aspects. 
 
 Despite this work having no intentions to study autonomous driving, the algorithms developed for calibration, sensor fusion and computing the correspondence between objects of interest in image and point cloud are not meant to be particular applied on datasets with interference. Therefore, using public available datasets not only allow the development of those algorithms before experimental data can be gathered, but also widen the applicability of such work, without losing their applicability to the particular situation of \ac{lidar} interference.
 
@@ -17,16 +17,16 @@ For the purposes of this research, several datasets were considered and tested. 
 \subsection{Ford Campus \acl{lidar} dataset}
 Gathered in 2009, in Michigan, the Ford Campus \ac{lidar} dataset contains camera, \ac{lidar}, \ac{imu} and \ac{gps} data. The dataset consists of two test scenarios, one inside the Ford Research campus and another on downtown Dearborn. A small subset of the former test scenario is also provided.
 
-The data is provided in raw format, accompanied by log files with timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm} protocol for estimating delays between the registered of sensory data on master-slave systems, see~\cite{VelodyneHDL64}.} logs with all raw data. The images from an omnidirectional camera, a Point Grey Ladybug3, are stored on \ac{ppm}; \ac{lidar} data from a Velodyne HDL-64E on \ac{pcap} format, from the \ac{tcp} connection socket; two Riegl LMS-Q120 \acp{lidar} also provide more information on the scan.
+The data is provided in raw format, accompanied by log files with timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm} protocol for estimating delays between sensory data registration on master-slave systems, see~\cite{VelodyneHDL64}.} logs with all raw data. The images from an omnidirectional camera, a Point Grey Ladybug3, are stored on \ac{ppm}; \ac{lidar} data from a Velodyne HDL-64E on \ac{pcap} format, from the \ac{tcp} connection socket; two Riegl LMS-Q120 \acp{lidar} also provide more information on the scan.
 
-The data is rectified and synced under \ac{matlab} \textit{.mat} files. Along with the raw data and synced and rectified \textit{.mat} files, source code is also provided for parsing the raw data, visualizing the \ac{lcm} logs and pre-processed data on \ac{matlab}. A C and \ac{opengl} software that can render textured point clouds is also available.
+Rectified and synced data is stored under \ac{matlab} \textit{.mat} files. Along with the raw data and synced and rectified \textit{.mat} files, source code is also provided for parsing the raw data, visualizing the \ac{lcm} logs and pre-processed data on \ac{matlab}. A C and \ac{opengl} software that can render textured point clouds is also available.
 
 The modified Ford F-250 pickup truck, which can be seen on figure~\ref{fig:sota:ford_sensors}, uses 3 sensors for navigation~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E \ac{lidar}~\cite{VelodyneHDL64}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar. More details about the sensors, their relative positioning and data formats and files can be found~\cite{Pandey2011}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.5\textwidth]{img/sensor_fusion/ford_sensors.jpg}
-	\caption{Ford 250 pickup equipped with the sensors described in the previous paragraphs. On the top, the Ladybug omnidirectional camera, on the back the \ac{imu} and \ac{gps} unit. }
+	\caption{Ford 250 pickup equipped with the sensors described in the previous paragraphs. On the top, the Ladybug omnidirectional camera, on the back the \ac{imu} and \ac{gps} unit.}
 	\label{fig:sota:ford_sensors}
 \end{figure}
 
@@ -34,7 +34,7 @@ The modified Ford F-250 pickup truck, which can be seen on figure~\ref{fig:sota:
 \subsection{\acl{kitti} Dataset}
 A well known dataset for researchers of computer vision, autonomous driving and \ac{ml}, \ac{kitti} was recorded in 2011 and released for the public in 2013. This dataset contains various driving scenarios: suburban, highways, residential and campus areas; with trucks, cars, cyclists and persons. Alongside with data for testing, calibration measures are provided for all sensors.
 
-The test car, a Volkswagen Passat is equipped with two stereo pairs, one with color and other with gray cameras, a \ac{lidar}, an \ac{imu} and a\ac{gps} sensor. Data from all four cameras is stored on \ac{png} format, \ac{lidar} measurements as a binary float matrix, \ac{gps} and {imu} data textually. Additionally to the raw data, logs containing the timestamps and the transforms between the sensors are also provided. Labeled data is also available for some test scenarios on \ac{xml} files.
+The test car, a Volkswagen Passat is equipped with two stereo pairs, one with color and other with gray cameras, a \ac{lidar}, an \ac{imu} and a\ac{gps} sensor. Data from all four cameras is stored on \ac{png} format, \ac{lidar} measurements as a binary float matrix, \ac{gps} and {imu} data textually. Additionally, the raw data logs containing the timestamps and the transforms between the sensors are also provided. Labeled data is also available for some test scenarios on \ac{xml} files.
 
 Along with the data and calibration parameters, several tools written in C++ or \ac{matlab} are also provided. The dataset offers two types of data categories: (1) unsynced and unrectified data or (2) synced and rectified data. 
 
@@ -49,7 +49,7 @@ The sensory apparatus contains 2 PointGray Flea2 greyscale and color cameras, a 
 
 
 \subsection{Udacity Self-Driving Car Nanodegree Dataset}
-Available publicly is also the data from Udacity online course on self-driving car. This dataset dates back to 2016 and was gathered with the intent to develop a level 4 autonomy vehicle, containing much more data diversity than the previous two. The data available contains images from 3 color cameras, a \ac{lidar} data, \ac{imu} and \ac{gps}, among other sensory data, such as speed, braking, etc.
+Available publicly is also the data from Udacity online course on self-driving car. This dataset dates back to 2016 and was gathered with the intent to develop a level 4 autonomy vehicles, containing much more data diversity than the previous two. The data available contains images from 3 color cameras, a \ac{lidar} data, \ac{imu} and \ac{gps}, among other sensory data, such as speed, braking, etc.
 
 Their data is not available in raw format, only structured in \ac{ros} \textit{.bag} files. Some tools for visualizing and interacting with their data are provided for \ac{ros}~\cite{udacity}. 
 
@@ -114,7 +114,7 @@ The first step in focusing an image requires the calculation of the hyperfocal d
 	H = \frac{f^2}{Nc} + f \approx \frac{f^2}{Nc} 
 \end{equation}
 
-Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is the subtraction of the farthest and nearest distance at each objects are focused (see equation~\ref{eq:dof}), indicating the distance between this two points\cite{Photopillers, Merklinger1993, mvg_book}. The nearest and farthest points can be calculated using the equations~\ref{eq:dof_near} and~\ref{eq:dof_far}, respectively.
+Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is the subtraction of the farthest and nearest distance at each object is focused (see equation~\ref{eq:dof}), indicating the distance between this two points\cite{Photopillers, Merklinger1993, mvg_book}. The nearest and farthest points can be calculated using the equations~\ref{eq:dof_near} and~\ref{eq:dof_far}, respectively.
 
 \begin{subequations}
 	\label{eq:dof_all}
@@ -144,7 +144,7 @@ Several camera models exist \cite{camera_models, Sturm2010}, such as weak-perspe
 	\label{fig:pinhole_effect}
 \end{figure}
 
-The pinhole camera model describes the perspective transformation on equation~\ref{eq:camera_transform} as a central projection where all light rays meet at the camera center, $\mathcal{F}_c$. A diagram of the pinhole camera is shown on figure~\ref{fig:pinhole_camera_model}. On this model, the z axis collinear with the optical axis\footnote{Also called principal axis. The two terms can be used.} , which is the same orientation that the camera is facing. The image plane is at the coordinates $z = f$, where $f$ is the focal length, being intersect by the optical axis on the principal point, with coordinates $(c_x, c_y)$ on the image plane axis. Note that the principal point is not the origin of the coordinates on the image plane, but the middle point, being the origin located on the top left corner, with a downward y axis.
+The pinhole camera model describes the perspective transformation on equation~\ref{eq:camera_transform} as a central projection where all light rays meet at the camera center, $\mathcal{F}_c$. A diagram of the pinhole camera is shown on figure~\ref{fig:pinhole_camera_model}. On this model, the z axis collinear with the optical axis\footnote{Also called principal axis. The two terms can be used.} which is the same orientation that the camera is facing. The image plane is at the coordinates $z = f$, where $f$ is the focal length, being intersected by the optical axis on the principal point, with coordinates $(c_x, c_y)$ on the image plane axis. Note that the principal point is not the origin of the coordinates on the image plane, but the middle point, being the origin locatein the top left cornerer, with a downwary-axisis.
 
 \begin{figure}
 \centering
@@ -153,10 +153,9 @@ The pinhole camera model describes the perspective transformation on equation~\r
 \label{fig:pinhole_camera_model}
 \end{figure}
 
-When operating with a pinhole camera model, is more convenient to use a Projective Space instead of the more common Euclidean Space\cite{mvg_book}, which has the advantage of all of its points being oriented through a single point, following the visual effect of a central perspective. By using a projective space instead of an Euclidean for addressing the transformations of a pinhole camera model, mathematics become more intuitive and relatable to the actual geometry of the model. Projective spaces use homogeneous coordinates and has non-Euclidean geometry, but that allow for changes between the two\cite{mvg_book, camera_models}.
+When operating with a pinhole camera model, is more convenient to use a Projective Space instead of the more common Euclidean Space\cite{mvg_book}, which has the advantage of all of its points being oriented through a single point, following the visual effect of a central perspective. By using a projective space instead of a Euclidean for addressing the transformations of a pinhole camera model, mathematics become more intuitive and relatable to the actual geometry of the model. Projective spaces use homogeneous coordinates and has non-Euclidean geometry, but that allow for changes between the two\cite{mvg_book, camera_models}.
 
 A tridimensional Euclidean Space can be represented on a Projective space using 3+1 coefficients. Therefore, the previous tridimensional vector can be rewritten in homogeneous coordinates as $(wX, wY, wZ, w)$ \cite{mvg_book}. If $w \neq 0$, we can transform from the Projective to Euclidean Space, obtaining the world representation of such points, by dividing the homogeneous point by $w$. For the cases in which $w =  0$, we have purely projective points at infinity, that only exist in Projective Space~\cite{mvg_book}. 
-
 
 The relation depicted in equation~\ref{eq:camera_transform} can expressed in projective geometry as:
 
@@ -170,7 +169,7 @@ The relation depicted in equation~\ref{eq:camera_transform} can expressed in pro
 	\end{bmatrix}, \qquad \text{if } w = 1
 \end{equation}
 
-Where $P$ is the projection matrix that performs the transform from world points to image points. The projection matrix in a pinhole camera model is the result of multiplication of two matrices: the camera matrix (or matrix of the camera intrinsic parameters), $K$; and a joint rotation and translation matrix, $[R|t]$, where $R$ is the rotation matrix and $t$ the translation vector. The combination of this matrices is given on equation~\ref{eq:projective_matrix} and the full camera transform is expanded on equation~\ref{eq:camera_transform_full}, through the replacement of equation~\ref{eq:projective_matrix} in~\ref{eq:camera_transform}.
+$P$ represents the projection matrix that performs the transform from world points to image points. The projection matrix in a pinhole camera model is the result of multiplication of two matrices: the camera matrix (or matrix of the camera intrinsic parameters), $K$; and a joint rotation and translation matrix, $[R|t]$, where $R$ is the rotation matrix and $t$ the translation vector. The combination of these matrices is given on equation~\ref{eq:projective_matrix} and the full camera transform is expanded on equation~\ref{eq:camera_transform_full}, through the replacement of equation~\ref{eq:projective_matrix} in~\ref{eq:camera_transform}.
 
 \begin{equation}
 	\label{eq:projective_matrix}
@@ -211,11 +210,9 @@ Where $P$ is the projection matrix that performs the transform from world points
 	\end{bmatrix}
 \end{equation}
 
-The intrinsic parameter matrix is used to represent the calibration parameters of the camera, namely, the focal lengths of each axis, $f_x$ and $f_y$, and the principal point offset to the axis origin, $c_x$ and $c_y$, for the x and y axis, respectively. 
+The intrinsic parameter matrix is used to represent the calibration parameters of the camera, namely, the focal lengths of each axis, $f_x$ and $f_y$, and the principal point offset to the axis origin, $c_x$ and $c_y$, for the x and y-axis, respectively. The joint rotational-translation matrix, $[R|t]$, is also known as the extrinsic camera parameters, translates the coordinates of a point to the Cartesian coordinate system fixed to the camera.
 
-The joint rotational-translation matrix, $[R|t]$, is also known as the extrinsic camera parameters, translates the coordinates of a point to the Cartesian coordinate system fixed to the camera.
-	
-The model used is also extended with radial and tangential distortion parameters, that will not be detailed here. Such parameters indicate how the distortion of the camera lenses affects the image project on the camera plane~\cite{camera_models, Sturm2010} in a non-linear way and how this can be corrected. Extracted from Hata and Savarese course notes~\cite{camera_models}, below (figure~\ref{fig:lense_distortion_types}), the effects of lens aberration on images are show.
+The model used is also extended with radial and tangential distortion parameters, that will not be detailed here. Such parameters indicate how the non-linear distortion of the camera lenses affects the image projection on the camera plane~\cite{camera_models, Sturm2010} and how can this be corrected. Extracted from Hata and Savarese course notes~\cite{camera_models}, below (figure~\ref{fig:lense_distortion_types}), the effects of lens aberration on images are show.
 
 \begin{figure}[h]
 	\centering
@@ -229,13 +226,13 @@ For more information, see Hartley and Zisserman Multi View Geometry in Computer 
 \subsection{Camera Intrinsic Calibration}
 Calibrating a camera is the process on which the parameters of the model that describes its behavior are determined. For the pinhole camera model, this means determining the parameters of its intrinsic matrix, $K$, but also the distortion coefficients of the lens used~\cite{mvg_book, camera_models}. This parameters are called the intrinsic parameters and are independent of the scenario being viewed, if the focal length is keep constant. On the other hand, extrinsic camera parameters are different for every situation and scenario dependent.
 
-The joint rotational-translation matrix, for a fixed camera in relation to the world frame of reference, is used to describe the rigid motion of an object on its front~\cite{opencv_doc}. Using this notion, Zhang proposed a method for calibration a camera based on the movement of a planar pattern in front of it, without the necessity to know how the planar plan was freely moved~\cite{Zhengyou2000, mvg_book}. Zhang also a maximum-likelihood estimation to miminize the error, using a such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other techniques includes Tsai's algorithm \cite{Roger1987, mvg_book}, a 2-stage technique for camera calibration first presented in 1987, does not determins the camera center. A \ac{dlt} algorithm can also be used to determine the camera calibration parameters~\cite{mvg_book}.
+The joint rotational-translation matrix, for a fixed camera in relation to the world frame of reference, is used to describe the rigid motion of an object on its front~\cite{opencv_doc}. Using this notion, Zhang proposed a method for calibration a camera based on the movement of a planar pattern in front of it, without the necessity to know how the planar plan was freely moved~\cite{Zhengyou2000, mvg_book}. Zhang also a maximum-likelihood estimation to minimize the error, using a such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other techniques includes Tsai's algorithm \cite{Roger1987, mvg_book}, a 2-stage technique for camera calibration first presented in 1987, does notdetermines the camera center. A \ac{dlt} algorithm can also be used to determine the camera calibration parameters~\cite{mvg_book}.
 
-Previous technics required 3 dimensional object based calibration \citeneeded, with expensive experimental apparatus or no calibration object, computing the intrinsic parameters only by rotating the camera on a static environment~\citeneeded. Bouguet also provides a Camera Calibration toolbox for \ac{matlab}~\cite{Jean_Yves} and \ac{opencv} also provides calibration algorithms based on Bouguet and Zhang~\cite{opencv}.
+Previous techniques required 3 dimensional object based calibration \citeneeded, with expensive experimental apparatus or no calibration object, computing the intrinsic parameters only by rotating the camera on a static environment~\citeneeded. Bouguet also provides a Camera Calibration toolbox for \ac{matlab}~\cite{Jean_Yves} and \ac{opencv} also provides calibration algorithms based on Bouguet and Zhang~\cite{opencv}.
 
-The calibration algorithm proposed by Zhang finds the correspondences between 2D and 3D points (see equations~\ref{eq:camera_transform} and~\ref{eq:camera_transform_full}), by variating the planar calibration object. For every configuration, a match between the two 2D and 3D points allows the determination of the projective matrix, $P$. However, if several translations and rotations of the pattern are made, it is possible to determine the intrinsic camera matrix, $K$, that is independent from the scene, using minimization algorithms. 
+The calibration algorithm proposed by Zhang finds the correspondences between 2D and 3D points (see equations~\ref{eq:camera_transform} and~\ref{eq:camera_transform_full}), by varying the planar calibration object. For every configuration, a match between the two 2D and 3D points allows the determination of the projective matrix, $P$. However, if several translations and rotations of the pattern are made, it is possible to determine the intrinsic camera matrix, $K$, that isindependent of the scene, using minimization algorithms. 
 
-The correspondences between the 2D and 3D representations of the pattern can be made by finding the corners or circles on planar patterns~\citeneeded. Chessboards are the most common patterns used, allowing corner detection for each cell. Since the dimensions of the cell and their arrangment is known previously, it is possible to compute the orientation of the chessboard and to match the 2D to the 3D points \cite{Zhengyou2000, opencv_doc, mvg_book}.
+The correspondences between the 2D and 3D representations of the pattern can be made by finding the corners or circles on planar patterns~\citeneeded. Chessboards are the most common patterns used, allowing corner detection for each cell. Since the dimensions of the cell and their arrangement is known previously, it is possible to compute the orientation of the chessboard and to match the 2D to the 3D points \cite{Zhengyou2000, opencv_doc, mvg_book}.
 
 \begin{figure}[H]
 	\centering
@@ -252,7 +249,7 @@ On the field of computer vision, several tools and libraries are available, capa
 \begin{itemize}
 	\item \textbf{BoofCV~\cite{boofcv}:} written in java, this library is oriented to real-time image operations, such as low-level image processing, camera calibration and feature/object  detection, tracking and recognition;
 	\item \textbf{Dlib~\cite{dlib}:} modern C++ toolkit containing \acl{ml} algorithms and tools, some on the field of computer vision;
-	\item \textbf{\ac{matlab} Computer Vision Toolbox\texttrademark~\cite{matlabcvtoolbox}:} toolbox for computer vision algorithms, 3D vision, and video processing systems. Can be perform object detection and tracking. Detects, extracts and matches features;
+	\item \textbf{\ac{matlab} Computer Vision Toolbox\texttrademark~\cite{matlabcvtoolbox}:} toolbox for computer vision algorithms, 3D vision, and video processing systems. Can be performed object detection and tracking. Detects, extracts and matches features;
 	\item \textbf{\acf{opencv}~\cite{opencv}:} open source library for C++, Python and C that implements \acl{sota} algorithms on computer vision;
 	\item \textbf{Vlfeat~\cite{vlfeat}:} open source library for C that implements many \acl{sota} algorithms on computer vision;
 	\item \textbf{SimpleCV~\cite{simplecv}:} Open source framework, written in python, that can be used to implement computer vision software using other libraries;
@@ -260,16 +257,16 @@ On the field of computer vision, several tools and libraries are available, capa
 
 Since a goal of this research is to use Open-Source tools as far as possible (instead of using closed source tools or code that is harder to integrate with other libraries), \ac{matlab} \acl{cv} Toolbox\texttrademark~does not suit. The code of this research is mainly develop in C++ (see chapter \citeneeded), so Python and Java libraries will not be considered, resulting only in \ac{opencv} and Dlib (Vlfeat uses plain C, so also not ideal). 
 
-\ac{opencv} has a great community and is considered by many research and industry as the \textit{de facto standard} library when refering to computer vision. Dlib is a robust library, but no significant differences can be when comparing with \ac{opencv}. Therefore, the final choice for a computer vision library is \ac{opencv}, due to the already implemented compatilibility with \ac{ros}.
+\ac{opencv} has a great community and is considered by many researchers and industry leaders as the \textit{de facto standard} library when refereeing to computer vision. Dlib is a robust library, but no significant differences can be when comparing with \ac{opencv}. Therefore, the final choice for a computer vision library is \ac{opencv}, due to the already implemented compatibility with \ac{ros}.
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LIDAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Automotive \ac{lidar}}
-\ac{lidar} sensors map their surroundings thanks to their capability of precisely measuring depth. Already used in topography, spectography and air poluttion studies, \ac{lidar} found its importance on the automotive industry as one of the sensors of autonomous cars and \ac{adas}\cite{Sullivan2016}. 
+\ac{lidar} sensors map their surroundings thanks to their capability of precisely measuring depth. Already used in topography, spectrography and air pollution studies, \ac{lidar} found its importance on the automotive industry as one of the sensors of autonomous cars and \ac{adas}\cite{Sullivan2016}. 
 
-These maps produced by the \ac{lidar}, commonly represented as point clouds or mesh clouds models, (see figure~\ref{fig:bunny}), are one of the preferred method for \ac{slam} algorithms, which allow a vehicle without previous knowledge of its surroundings to autonomously navigate them - a crucial task for \ac{adas} on self-driving vehicles.
+These maps produced by the \ac{lidar}, commonly represented as point clouds or mesh clouds models,(see figure~\ref{fig:bunny}), are one of the preferred method for \ac{slam} algorithms, which allow a vehicle without previous knowledge of its surroundings to autonomously navigate them, a crucial task for \ac{adas} on self-driving vehicles.
 
 \begin{figure}[H]
 	\centering
@@ -284,7 +281,7 @@ These maps produced by the \ac{lidar}, commonly represented as point clouds or m
 		\caption{Mesh Cloud representation}
 		\label{fig:bunnyMeshCloud}
 	\end{subfigure}
-	\caption{Standford bunny~\cite{bunny} point cloud (\subref{fig:bunnyPointCloud}) and mesh cloud (\subref{fig:bunnyMeshCloud})}
+	\caption{Stanford bunny~\cite{bunny} point cloud (\subref{fig:bunnyPointCloud}) and mesh cloud (\subref{fig:bunnyMeshCloud})}
 	\label{fig:bunny}
 \end{figure}
 
@@ -293,19 +290,18 @@ Typically, four major technologies are used on the construction of a \ac{lidar}:
 
 \begin{enumerate}
 	\item \textbf{\ac{tof}:} the most common type, acquires depth information by measuring the time elapsed between the emission and reception of a \ac{laser} pulse reflected from a surrounding target \cite{Sullivan2016};
-	\item \textbf{Flash:} organized in a matricial structure, similar to a camera \ac{ccd}, every element of the matrix contains a photodetector. A ``flash'' simultaneous illuminates all the \ac{fov}, and the reflected light intensity and time of arrival is measured to provide depth calculations; 
-	\item \textbf{Phased Arrays:} using a microscopic array of antennas, similar to a \ac{radar}, the phase of each antenna is controled to allow the \ac{lidar} to sweep and/or focus on a specific area, using beamforming theory;
-	\item \textbf{\ac{mems}:} operate by controlling the angle at which a rotating microscopic mirror is aligned with the \ac{laser}. By varying the angle a single line can be scanned and using multiple \acp{laser} with the samer mirror allows to scan vertically.
-
+	\item \textbf{Flash:} organized in a matrix structure, similar to a camera \ac{ccd}, every element of the matrix contains a photodetector. A ``flash'' simultaneous illuminates all the \ac{fov}, and the reflected light intensity and time of arrival is measured to provide depth calculations; 
+	\item \textbf{Phased Arrays:} using a microscopic array of antennas, similar to a \ac{radar}, the phase of each antenna is controlled to allow the \ac{lidar} to sweep and/or focus on a specific area, using beamforming theory;
+	\item \textbf{\ac{mems}:} operate by controlling the angle at which a rotating microscopic mirror is aligned with the \ac{laser}. By varying the angle a single line can be scanned and using multiple \acp{laser} with the same mirror allows verticla scan.
 \end{enumerate}
 
 
 \subsection{\acl{tof} vs Solid State \acp{lidar}}
-Despite the existance of several technologies that can be used for \ac{lidar} construction, two majuor types of \ac{lidar} can be distringuished: \ac{tof} or Solid State. The former as no moving parts while the latter working principle is the rotational device.
+Despite the existence of several technologies that can be used for \ac{lidar} construction, two major types of \ac{lidar} can be distinguished: \ac{tof} or Solid State. The former as no moving parts while the latter working principle is the rotational device.
 
-To construct a \ac{tof} \ac{lidar}, a single pair of \ac{laser} and photodetector is assembled on a fast rotational device (typically 5 to 20 Hz), allowing that pair to measure a single line while rotating, creating a 2D \ac{lidar}. If multiple pairs are assembled together, with different polar angles, on a rotational device, the \ac{lidar} is said to be a 3D \ac{lidar}, since a total revolution can produce a three dimensional map of its surroundings~\cite{Sullivan2016}.
+To construct a \ac{tof} \ac{lidar}, a single pair of \ac{laser} and photodetector is assembled on a fast rotational device (typically 5 to 20 Hz), allowing that pair to measure a single line while rotating, creating a 2D \ac{lidar}. If multiple pairs are assembled together, with different polar angles, on a rotational device, the \ac{lidar} is said to be a 3D \ac{lidar}, since a total revolution can produce a three-dimensionall map of its surroundings~\cite{Sullivan2016}.
 
-Solid State \ac{lidar} has no moving parts, and can either use flash or phased arrays on its construction, depending if it uses a flash of light to illumianate the scene or performs beam steering to scan the same scene. They are theoretically more reliable, durable cheaper and consume less power. However, this technology is not yet mature, which makes the current models impratical f or automotive. 
+Solid State \ac{lidar} has no moving parts, and can either use flash or phased arrays on its construction, depending on a flash of light to illuminate the scene or performs beam steering to scan the same scene. They are theoretically more reliable, durable cheaper and consume less power. However, this technology is not yet mature, which makes the current models impractical f or automotive. 
 
 While \ac{tof} \acp{lidar} consumes more power, they can also achieve ranges until 100 meters \cite{vlp16, Sullivan2016} or even 300 meters\citeneeded, higher than solid state \ac{lidar}, which in best conditions reaches 50 meters~\citeneeded. That is due to the attenuation of the flash intensity, due to its power being inversely proportional with the distance squared\citeneeded. Considering the current \ac{sota} on \ac{tof} \ac{lidar} has less error (a few centimeters) than the \ac{sota} of Solid State \ac{lidar}.
 
@@ -315,8 +311,26 @@ However, Solid State \ac{lidar} have more point density than a \ac{tof} counterp
 
 %Combining the reliability of the depth measurement with the assemblage of multiple pairs of \ac{laser} and photodetectors on a fast rotational device (typically 5 to 20 Hz) creates one of the most appealing and reliable sensors for self-driving vehicles and \ac{adas}.
 
-%Despite the relevance of the topic for the massification of self-driving vehicles and the hazardous impact on \Gls{adas} reliability, the research topic presented in this paper has received very reduced attention by the research community. 
+%Despite the relevance of the topic for the massification of self-driving vehicles and the hazardous impact on \ac{adas} reliability, the research topic presented in this paper has received very reduced attention by the research community. 
 %A major \ac{lidar} manufacture also addresses the problem of mutual interference of the \ac{lidar} sensors on the same vehicle, by allowing their synchronization and \ac{laser} firing in different instants \cite{vlp16}.
+
+
+\section{Extrinsic Calibration between camera and \ac{lidar}}
+On a multiple sensor setup, coordinated frames from one sensor must be able to be referred on another sensor reference frame. To do that, extrinsic calibration between them must be performed, by determining the rigid body transform~\citeneeded that can convert the data from one reference plan to the other without lost of meaning. 
+
+Therefore, the sole purpose of calibration is to determine the coefficients of this transform, that can be described as a rotation and a translation, similarly to the joint rotation-translation matrix $[R|t]$ used for camera intrinsic calibration (equation~\ref{eq:camera_calibration_full}). However, on this case, instead of this matrix representing the rotation of the object to the camera or the camera movement in the world, it represents the rotation and translation operations that need to be applied to the coordinate system of one sensor (and its data) to align the data with the 
+
+Several algorithms have been suggested to perform extrinsic calibration on data
+
+geometric \cite{Silva2018, DeSilva2018}
+automatic \cite{Bileschi2009, Shaukat2016, Taylor2013, Pandey2012, Jeong2019, Ishikawa2018}
+automatic with calibration patter \cite{Geiger2012a, Guindel2018, Guindel2018a, Mirzaei2012 }
+Deep CNN \cite{Wang2018a}
+calibration pattern \cite{Fremont2013, Pereira2016, Liao2019, MartinVelas2013, Park2014, Pusztai2018 }
+semi-automatic \cite{brabec2014}
+temporal \cite{Chien2017}
+
+
 
 \section{Object Detection}
 Several paid and cloud based alternatives exist, such as Amazon Rekognition~\ref{awsRecognition}, Google Could Vision \ac{api}~\cite{googlevision}, IBM Watson Visual Recognition~\cite{watson} and Microsoft Computer Vision software~\cite{azurecv}. 
