@@ -85,7 +85,7 @@ While Udacity dataset is the newest and provides direct out-off-the-shelf integr
 																			 & Calibration parameters & \checkmark  & \checkmark  & \checkmark  \\\hline 
 		\multicolumn{2}{l}{Raw data for sensors calibration} & \checkmark & \checkmark & \\
 		\multicolumn{2}{l}{Direct \ac{ros} data compatibility} &  & \checkmark & \checkmark \\
-		\multicolumn{2}{l}{Data of acquisition} & 2009  & 2011 & 2016 \\
+		\multicolumn{2}{l}{Date of acquisition} & 2009  & 2011 & 2016 \\
 		\bottomrule
 	\end{tabular}
 \caption{Comparison between the datasets more appropriated to this thesis objectives}
@@ -315,21 +315,92 @@ However, Solid State \ac{lidar} have more point density than a \ac{tof} counterp
 %A major \ac{lidar} manufacture also addresses the problem of mutual interference of the \ac{lidar} sensors on the same vehicle, by allowing their synchronization and \ac{laser} firing in different instants \cite{vlp16}.
 
 
-\section{Extrinsic Calibration between camera and \ac{lidar}}
-On a multiple sensor setup, coordinated frames from one sensor must be able to be referred on another sensor reference frame. To do that, extrinsic calibration between them must be performed, by determining the rigid body transform~\citeneeded that can convert the data from one reference plan to the other without lost of meaning. 
+\section{Camera and \ac{lidar} Extrinsic Calibration}
+\label{sec:sota:extrinsic_calibration}
 
-Therefore, the sole purpose of calibration is to determine the coefficients of this transform, that can be described as a rotation and a translation, similarly to the joint rotation-translation matrix $[R|t]$ used for camera intrinsic calibration (equation~\ref{eq:camera_calibration_full}). However, on this case, instead of this matrix representing the rotation of the object to the camera or the camera movement in the world, it represents the rotation and translation operations that need to be applied to the coordinate system of one sensor (and its data) to align the data with the 
+On a multiple sensor setup, coordinated frames from one sensor must be able to be referred on another sensor reference frame. Transforming data from one frame to another requires performing extrinsic calibration between them, by determining the rigid body transform~\citeneeded that can convert the data from one reference plan to the other without lost of meaning. 
 
-Several algorithms have been suggested to perform extrinsic calibration on data
+Therefore, the sole purpose of extrinsic calibration is to determine the coefficients of this transform, that can be described as a rotation and a translation, similarly to the joint rotation-translation matrix $[R|t]$ used for camera intrinsic calibration (equation~\ref{eq:camera_calibration_full}). However, on this case, instead of this matrix representing the rotation of the object to the camera or the camera movement in the world, it represents the rotation and translation operations that need to be applied to the coordinate system of one sensor (and its data) to align the data with the coordinate system of another sensor. The precision of this transformation takes particular interest when data fusion (or sensor fusion) is trying to be achieved, i.e., merging from this data sources o reduce errors and improve the significance of data each sensor is capable of giving~\citeneeded. 
 
-geometric \cite{Silva2018, DeSilva2018}
-automatic \cite{Bileschi2009, Shaukat2016, Taylor2013, Pandey2012, Jeong2019, Ishikawa2018}
-automatic with calibration patter \cite{Geiger2012a, Guindel2018, Guindel2018a, Mirzaei2012 }
-Deep CNN \cite{Wang2018a}
-calibration pattern \cite{Fremont2013, Pereira2016, Liao2019, MartinVelas2013, Park2014, Pusztai2018 }
-semi-automatic \cite{brabec2014}
-temporal \cite{Chien2017}
+Several algorithms have been suggested for performing extrinsic calibration on data. They range from the necessity of well controlled environments to require no human intervention, using or not a calibration pattern. 
 
+
+\subsection{Calibration using Patterns}
+Typical extrinsic calibration between \ac{lidar} and camera with intersecting \ac{fov} use calibration patterns: Fremont \etal uses a planar calibration target with an hole surrounded by a solid color, matching the depth discountinities from the \ac{lidar} with the color discontinuities from the camera \cite{Fremont2013} and Velas uses a planar pattern with geometric objects carved on its surface~\cite{MartinVelas2013}; Liao \etal proposes a method that only requires the usage of a planar polygon of known shape~\cite{Liao2019} and Park \etal tests and presents results of this calibration method applied to multiple polygons, specially with triangular shape~\cite{Park2014}; Mirzaei \etal use a planar pattern with fiducial marker~\cite{Mirzaei2012}. Regarding calibration with three dimensional calibration targets, Pusztai uses a box with different colors on each face~\cite{Pusztai2018}; Pereira a ball (for performing multiple sensor calibration, instead of only 3D \ac{lidar} and monocular camera)~\cite{Pereira}; Gong a trihedral object, determining the extrinsic calibration parameters using a nonlinear least squares algorithm~\cite{Gong2013}.
+
+While the previous methods where focused on calibrating monocular cameras with tridimensional \ac{lidar}, alternative methods exist for stereo systems, taking advantage of the disparity map obtained with a stereo camera. Automatica methods are proposed by Geiger \etal and Guindel \etal. Geiger\footnote{One of the researchers behind \ac{kitti}} and Moosmann propose a method for calibrating such setup with a single shot, using chessboards with multiple sizes and orientations, detected through seed point growing on camera and planar detection and sucessive refinement on \ac{lidar}\cite{Geiger2012a}. Guindel \etal use a planar calibration target with four holes that can be detected on the stereo map from the camera and \ac{lidar} point cloud, extrinsically calibrating both sensors by detecting the holes center and compute the rotation and translation that minimizes error. 
+
+\subsection{Calibration without human intervention or patterns}
+Some automatic methods (that do not require human intervention neither calibration patterns) are also present on the literature. Bileschi's method estimates all intrinsic camera parameters  (including radial distortion) and the rotation and translation between a camera and \ac{lidar}, that is later refined by discontinuity association~\cite{Bileschi2009}. Shaukat proposes a solution for planeatary space robots using stereopsis, depth maps matching using mesh grids stecthing~\cite{Shaukat2016}. Ishikawa \etal calibration method, computes the calibration parameters using two main steps: first, initializes the parameters from the movement of the camera and \ac{lidar} and secondly, refines the parameters using sensor-fusion until convergence~\cite{Ishikawa2018}. 
+
+Jeong \etal presents a framework for calibrating \ac{lidar} and stereo cameras with non-overlapping \ac{fov}, by utilizing road markings and robust optimization algorithms and costs functions~\cite{Jeong2019}.
+
+Using mutual information tecnhiques, Taylor and Nieto's approach uses normalized mutual information between camera and \ac{lidar}, maximing the features to be matched on a particle swarm map, with refinment techiques~\ref{Taylor2013}; Pandey's \etal approach define a cost function for the mutual information and using know methods, minimize and refine the results to obtain the best parameters~\cite{Pandey2012}.
+
+
+\subsection{Other calibration methods}
+Other calibration techniques use data variation through time \cite{Chien2017} or Deep learning on \ac{cnn} \cite{Wang2018a}. Brabec uses a semi-automatic method where correspondences between the camera and \ac{lidar} (presented as a range image) data are selected by the user and refined using local correction and \ac{ransac} algorithms~\cite{brabec2014}.
+
+Varuna De Silva \etal proposes an approach based on the geometric positioning of the sensors on the setup, determining the parameters through geometric description between them, later refining this estimate using depth maps and a non-linear refinement tecnique (Guassian Process Regression) \cite{DeSilva2018}. On anothers of its works, a planar calibration pattern with holes is used, follow by the same refinement technique \cite{Silva2018}.
+
+% The most common either resort to the usage of calibration pattern \cite{Fremont2013, Pereira2016, Liao2019, MartinVelas2013, Park2014, Pusztai2018, Geiger2012a, Guindel2018, Guindel2018a, Mirzaei2012} or extracting semantics from the background, with \cite{Bileschi2009, Shaukat2016, Taylor2013, Pandey2012, Jeong2019, Ishikawa2018} or without human interaction.\cite{Fremont2013, Pereira2016, Liao2019, MartinVelas2013, Park2014, Pusztai2018 }
+
+\section{Sensor Fusion}
+Fusing sensorial data is the task of combining different data formats, acquired by different sensors  into a multi-modal view of the world. This multi modal view not only allows a better interpretation of the individual data, but also allows the 
+
+Sensor needs to be predeced from proper extrinsic sensor calibration before data can be fused,
+For monocular RGB cameras and \ac{lidar}, sensor fusion translates to augmenting the depth information of a point cloud by adding color from the image obtained with the camera or overlapping on the camera image the distances at which objects appear on \ac{lidar} data.
+
+There are two major types of sensor fusion: 
+
+\begin{enumerate}
+	\item \textbf{Calibration + Fusion:} Sensors are first calibrated among themselves, using one of the techniques described on section~\ref{sec:sota:extrinsic_calibration}, and then data is converted to a referencial of choice and merged;
+	\item \textbf{Simultaneous Calibration and Fusion:} the implemented algorithms attempt to merge the data by minimizing some arbitrary cost function. The final result consists on the multimodal merged data and the extrinsic calibration parameters can be calculated;
+	\item \textbf{``Direct'' Sensor Fusion:} Genetic algorithms, \ac{nn} or other imilar ools analize \ac{lidar} and camera data, without knowing any previous information about them, and outputs the merged data in the desired format.
+\end{enumerate} 
+
+\subsection{Calibration + Fusion}
+For the first case, every author cited on section \nameref{sec:sota:extrinsic_calibration} shows the results of sensory fusion applied to the results of their calibration algorithms, as a proof of calibration correctness.
+
+\begin{equation}
+	\label{eq:jointRotationTranslationTransform}
+	\begin{bmatrix}
+		X_{cam} \\
+		Y_{cam} \\
+		Z_{cam} 
+	\end{bmatrix}
+	= 
+		\underbrace{
+	\left[
+			\begin{array}{ccc|c}
+				r_{xx} & r_{yx} & r_{zx} & t_x \\
+					r_{xy} & r_{yy} & r_{zy} & t_y \\
+					r_{xz} & r_{yz} & r_{zz} & t_z 
+				\end{array}
+		\right]
+		}_\text{\large\textbf{[R|t]}}
+	\begin{bmatrix}
+		X_{LiDAR} \\
+		Y_{LiDAR} \\
+		Z_{LiDAR} 
+	\end{bmatrix}
+\end{equation}
+
+
+\subsection{Simultaneous Calibration and Fusion}
+Castorena \etal approach for sensor fusion matches the edges using a weighted total variation norm, that is also capable of providing additional information, useful not only for calibration, but also to refine the results of the fusion process and generate a more accurate colored point cloud~\cite{Castorena2016}.
+
+Park \etal also proposes a method for fusion uncalibrated \ac{lidar} and stereo camera data, using two \ac{cnn}: one for calibration, by reducing error between disparity images; and a second to refine the fused disparity maps with the left image \cite{Park2019}. 
+
+Li \etal proposes a method for very simple setups consisting of a single camera and a \ac{lidar} on a servo motor. The mechanism is rotated for three angular positions and a point cloud and image is taken for each one. The every image and point cloud are stetching together using fiducial features, resulting on a colored point cloud and on the determination of the calibration parameters~\cite{Li2016}. 
+
+Yang \etal also proposes a method for stereo image and \ac{lidar} point cloud fusion using a Generalized \acl{icp} algorithm to match features and extracted a fused tridimensional refined model, at the same time it estimates the rigid body transform between camera and \ac{lidar}~\cite{Yang2017}.
+
+
+\subsection{``Direct'' Sensor Fusion}
+Liang \etal approach uses a multi-task multi-sensor dense fusion network for camera and \ac{lidar} fusion for object detection and 3D bounding box estimation.
+
+Wei \etal for a real-time multi-sensor collision avoidance system develops a sensor fusion algorithm between a monocular camera and \ac{lidar} that uses \ac{cnn} and feature extraction to fuse \ac{lidar} and camera data for increasing the amount of beacons detected on a particular application~\cite{Wei2018}.
 
 
 \section{Object Detection}
