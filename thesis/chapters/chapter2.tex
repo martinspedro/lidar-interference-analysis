@@ -97,6 +97,9 @@ Comparing the 3 datasets, not only using table~\ref{tab:sota:datasets_comparison
 
 Since Udacity dataset integrates more easily with \ac{ros} than \ac{kitti}, providing also some tools for \ac{ros} preliminary tests, learning and earlier development stages will occur with this dataset. Later, due to the lack of calibration parameters and raw data for sensors calibration\footnote{Note that, despite Udacity dataset not providing data to ease the calibration of its sensors, such as camera intrinsic calibration or the extrinsic calibration between \ac{lidar} and camera, such calibration parameters can be obtained from this data. Those parameters are not accurate as those obtained using a proper calibration setup and are out the scope of this research (being another research topic on itself) and therefore no effort will be dedicated to this topic.}, this research will use the \ac{kitti} dataset.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CAMERA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Camera as a sensor on \acl{cv} applications}
 Vision is the human sense most relevant to how we perceive the world and how we navigate it~\cite{Ekstrom2015, Beck1983}. Replicating this ability on machines, through the usage of cameras, is a widely researched topic on computer vision and instrumentation~\cite{Beck1983}. The most common cameras, as our eyes, take advantage of the pinhole effect: a small hole (or pin), that is used to spatially filter the non-focused light beams through an aperture or lense~\cite{Beck1983, camera_models, Sturm2010}, producing a mirrored, but focused image.
 
@@ -223,26 +226,25 @@ Since lenses introduce non-linear distortion, the pinhole camera model needs to 
 For more information on the pinhole camera model and lense distortion, see Hartley and Zisserman Multi View Geometry in Computer Vision~\cite{mvg_book}, Hata and Savarese course notes\cite{camera_models} or \acf{opencv} official documentation\cite{opencv_doc}. 
 
 \subsection{Camera Intrinsic Calibration}
-Calibrating a camera is the process on which the parameters of the model that describes its behavior are determined. For the extended pinhole camera model, this means determining the parameters of its intrinsic matrix, $K$, but also the distortion coefficients of the lens used~\cite{mvg_book, camera_models, Bouguet2010, Heikkila1997}. This parameters are called the intrinsic parameters and are independent of the scenario being viewed, if the focal length is keep constant. On the other hand, extrinsic camera parameters are different for every situation and therefore scenario dependent~\cite{opencv_doc, Bouguet2010, Heikkila1997}.
+Calibrating a camera is the process on which the parameters of the model that describes its behavior are determined. For the extended pinhole camera model, this means determining the parameters of its intrinsic matrix, $K$, but also the distortion coefficients of the lens used~\cite{mvg_book, camera_models, Bouguet2010, Heikkila1997}. This parameters are called the intrinsic parameters and are independent of the scenario being viewed, if the focal length is keept constant. On the other hand, extrinsic camera parameters are different for every situation and therefore scenario dependent~\cite{opencv_doc, Bouguet2010, Heikkila1997}.
 
-The joint rotational-translation matrix, for a fixed camera in relation to the world frame of reference, is used to describe the rigid motion of an object on its front~\cite{opencv_doc}. Using this notion, Zhang proposed in 2000 a method for calibration a camera based on the movement of a planar pattern in front of it, without the necessity to know how the planar plan was freely moved~\cite{Zhengyou2000, mvg_book}. \todo
+Zhang proposed in 2000 a method for calibrating a camera that unlike previous others\citeneeded, does not require a special setup, expensive experimental apparatus or complicated calibration patterns: it uses a planar object with a known pattern, which can be freely moved in front of the camera~\cite{Zhang2000}. Only two images are necessary for camera calibration, as long the pattern movement between them is not a pure translation. The estimation of the camera intrinsic parameters and distortion caused by the lenses can be determined by solving the equation~\ref{eq:camera_transform_full}, once the $2D \leftrightarrow 3D$ correspondences have been established.
 
-Zhang also a maximum-likelihood estimation to minimize the error, using a such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other techniques includes Tsai's algorithm \cite{Roger1987, mvg_book}, a 2-stage technique for camera calibration first presented in 1987, does notdetermines the camera center. A \ac{dlt} algorithm can also be used to determine the camera calibration parameters~\cite{mvg_book}.
+The correspondences between the 2D and 3D representations of the pattern can be made by finding the corners or circles on planar patterns~\cite{opencv, mvg_book}. Chessboards are the most common patterns used today~\cite{opencv}, allowing corner detection for each cell. Since the dimensions of the cell and their arrangement is known previously, it is possible to compute the orientation of the chessboard~\cite{Zhang2000, opencv_doc, mvg_book}. On that conditions, revisiting equation~\ref{eq:camera_transform_full}, only the $K$ matrix is left to be determined. An example is a chessboard calibration pattern with is interest point for calibration is shown on figure~\ref{fig:opencv_calib_pattern}.
 
-Previous techniques required 3 dimensional object based calibration \citeneeded, with expensive experimental apparatus or no calibration object, computing the intrinsic parameters only by rotating the camera on a static environment~\citeneeded. Bouguet also provides a Camera Calibration toolbox for \ac{matlab}~\cite{Bouguet2010} and \ac{opencv} also provides calibration algorithms based on Bouguet and Zhang~\cite{opencv}.
-
-The calibration algorithm proposed by Zhang finds the correspondences between 2D and 3D points (see equations~\ref{eq:camera_transform} and~\ref{eq:camera_transform_full}), by varying the planar calibration object. For every configuration, a match between the two 2D and 3D points allows the determination of the projective matrix, $P$. However, if several translations and rotations of the pattern are made, it is possible to determine the intrinsic camera matrix, $K$, that isindependent of the scene, using minimization algorithms. 
-
-The correspondences between the 2D and 3D representations of the pattern can be made by finding the corners or circles on planar patterns~\citeneeded. Chessboards are the most common patterns used, allowing corner detection for each cell. Since the dimensions of the cell and their arrangement is known previously, it is possible to compute the orientation of the chessboard and to match the 2D to the 3D points \cite{Zhengyou2000, opencv_doc, mvg_book}.
-
-\begin{figure}[H]
+\begin{figure}
 	\centering
 	\includegraphics[width=0.4\textwidth, keepaspectratio]{img/camera/calib_pattern.jpg}
-	\label{fig:opencv_calib_pattern}
 	\caption{Chessboard calibration pattern with corners detection results show on image. Corner order is also given on the corner color. Source:~\cite{OpenCV_camera_calib}.}
+	\label{fig:opencv_calib_pattern}
 \end{figure}
 
-For error estimation, algorithm x\todo is used.
+This estimation can then be refined using a maximum-likelihood estimation to minimize the error using a non-linear method, such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other optimizations are possible, such as Powell’s dog leg non-linear least squares technique~\cite{Lourakis2005}. Further reading can be conducted on~\cite{mvg_book, Sturm2010, camera_models, Hata, Xu1996a}.
+
+Zhang's algorithm differs from other methods at the time that attempted to calibrate a camera by rotating it on a static environment~\citeneeded. Other alternative algorithms include Tsai's algorithm \cite{Roger1987, mvg_book}, a 2-stage technique for camera calibration first presented in 1987, that does not determine the camera center. A \ac{dlt} algorithm can also be used to determine the camera calibration parameters (see~\cite{mvg_book}).
+
+Bouguet in 2010 provides a Camera Calibration toolbox for \ac{matlab}~\cite{Bouguet2010}, which serves as the basis for many camera calibration toolboxes, such as \ac{opencv}, which is based on the works of Bouguet and Zhang~\cite{opencv}.
+
 
 \subsection{Camera as a sensor for computer vision}
 On the field of computer vision, several tools and libraries are available, capable of performing low image operations, image detection, filtering, among others. 
@@ -287,26 +289,26 @@ These maps produced by the \ac{lidar}, commonly represented as point clouds or m
 \end{figure}
 
 
-Typically, four major technologies are used on the construction of a \ac{lidar}:
+Typically, four major technologies are used on the construction of a \ac{lidar}~\cite{Hecht2018, Sullg}:
 
 \begin{enumerate}
 	\item \textbf{\ac{tof}:} the most common type, acquires depth information by measuring the time elapsed between the emission and reception of a \ac{laser} pulse reflected from a surrounding target \cite{Sullivan2016};
-	\item \textbf{Flash:} organized in a matrix structure, similar to a camera \ac{ccd}, every element of the matrix contains a photodetector. A ``flash'' simultaneous illuminates all the \ac{fov}, and the reflected light intensity and time of arrival is measured to provide depth calculations; 
-	\item \textbf{Phased Arrays:} using a microscopic array of antennas, similar to a \ac{radar}, the phase of each antenna is controlled to allow the \ac{lidar} to sweep and/or focus on a specific area, using beamforming theory;
+	\item \textbf{Flash~\cite{Ouster, Gelbart2002,Stettner2010, Simpson2019}:} organized in a matrix structure, similar to a camera \ac{ccd}, every element of the matrix contains a photodetector. A ``flash'' simultaneous illuminates all the \ac{fov}, and the reflected light intensity and time of arrival is measured to provide depth calculations; 
+	\item \textbf{Phased Arrays~\cite{Quanergy2018, Yu2016}:} using a microscopic array of antennas, similar to a \ac{radar}, the phase of each antenna is controlled to allow the \ac{lidar} to sweep and/or focus on a specific area, using beamforming theory;
 	\item \textbf{\ac{mems}:} operate by controlling the angle at which a rotating microscopic mirror is aligned with the \ac{laser}. By varying the angle a single line can be scanned and using multiple \acp{laser} with the same mirror allows verticla scan.
 \end{enumerate}
 
 
 \subsection{\acl{tof} vs Solid State \acp{lidar}}
-Despite the existence of several technologies that can be used for \ac{lidar} construction, two major types of \ac{lidar} can be distinguished: \ac{tof} or Solid State. The former as no moving parts while the latter working principle is the rotational device.
+Despite the existence of several technologies that can be used for \ac{lidar} construction, two major types of \ac{lidar} can be distinguished: \ac{tof} or Solid State~\cite{Hecht2018}. The former as no moving parts while the latter working principle is the rotational device.
 
 To construct a \ac{tof} \ac{lidar}, a single pair of \ac{laser} and photodetector is assembled on a fast rotational device (typically 5 to 20 Hz), allowing that pair to measure a single line while rotating, creating a 2D \ac{lidar}. If multiple pairs are assembled together, with different polar angles, on a rotational device, the \ac{lidar} is said to be a 3D \ac{lidar}, since a total revolution can produce a three-dimensionall map of its surroundings~\cite{Sullivan2016}.
 
-Solid State \ac{lidar} has no moving parts, and can either use flash or phased arrays on its construction, depending on a flash of light to illuminate the scene or performs beam steering to scan the same scene. They are theoretically more reliable, durable cheaper and consume less power. However, this technology is not yet mature, which makes the current models impractical f or automotive. 
+Solid State \ac{lidar} has no moving parts, and can either use flash or phased arrays on its construction, depending on a flash of light to illuminate the scene or performs beam steering to scan the same scene. They are theoretically more reliable, durable cheaper and consume less power. However, this technology is not yet mature, which makes the current models impractical for automotive~\cite{Fersch2017a}. 
 
-While \ac{tof} \acp{lidar} consumes more power, they can also achieve ranges until 100 meters \cite{vlp16, Sullivan2016} or even 300 meters\citeneeded, higher than solid state \ac{lidar}, which in best conditions reaches 50 meters~\citeneeded. That is due to the attenuation of the flash intensity, due to its power being inversely proportional with the distance squared\citeneeded. Considering the current \ac{sota} on \ac{tof} \ac{lidar} has less error (a few centimeters) than the \ac{sota} of Solid State \ac{lidar}.
+While \ac{tof} \acp{lidar} consumes more power, they can also achieve ranges until 100 meters \cite{vlp16, Sullivan2016} or even 200 meters\cite{VelodyneHDL64, Sullivan2016}, higher than solid state \ac{lidar}, which is still on laboratorial tests and development, with the first prototypes reaching 2 meters~\cite{Hecht2018}. That is due to the attenuation of the flash intensity, due to its power being inversely proportional with the distance squared or losses in the phased array. Considering the current \ac{sota} on \ac{tof} \ac{lidar} has less error (a few centimeters) than the \ac{sota} of Solid State \ac{lidar}~\cite{Hecht2018, Fersch2017a}.
 
-However, Solid State \ac{lidar} have more point density than a \ac{tof} counterpart and measure the depth image of a scene on the same frame, theoretically allowing for more accurate data and faster refresh rates\citeneeded. 
+However, Solid State \ac{lidar} have more point density than a \ac{tof} counterpart and measure the depth image of a scene on the same frame, theoretically allowing for more accurate data and faster refresh rates\cite{Sullivan2016, Hecht2018, Fersch2017a}
 
 
 
@@ -327,12 +329,14 @@ Several algorithms have been suggested for performing extrinsic calibration on d
 
 
 \subsection{Calibration using Patterns}
-Typical extrinsic calibration between \ac{lidar} and camera with intersecting \ac{fov} use calibration patterns: Fremont \etal uses a planar calibration target with an hole surrounded by a solid color, matching the depth discountinities from the \ac{lidar} with the color discontinuities from the camera \cite{Fremont2013} and Velas uses a planar pattern with geometric objects carved on its surface~\cite{MartinVelas2013}; Liao \etal proposes a method that only requires the usage of a planar polygon of known shape~\cite{Liao2019} and Park \etal tests and presents results of this calibration method applied to multiple polygons, specially with triangular shape~\cite{Park2014}; Mirzaei \etal use a planar pattern with fiducial marker~\cite{Mirzaei2012}. Regarding calibration with three dimensional calibration targets, Pusztai uses a box with different colors on each face~\cite{Pusztai2018}; Pereira a ball (for performing multiple sensor calibration, instead of only 3D \ac{lidar} and monocular camera)~\cite{Pereira}; Gong a trihedral object, determining the extrinsic calibration parameters using a nonlinear least squares algorithm~\cite{Gong2013}.
+Typical extrinsic calibration between \ac{lidar} and camera with intersecting \ac{fov} use calibration patterns: Unnikrishnan first proposed a \ac{lidar}-Camera extrinsic calibration using a toolbox developed to manually selected correspondences between a calibration pattern on image and point cloud~\cite{Unnikrishnan2005}. A \ac{matlab} toolbox to ease the process has also developed in 2005 from Unnikrishnan \etal. Fremont \etal uses a planar calibration target with an hole surrounded by a solid color, matching the depth discountinities from the \ac{lidar} with the color discontinuities from the camera \cite{Fremont2013} and Velas uses a planar pattern with geometric objects carved on its surface~\cite{MartinVelas2013}. Liao \etal proposes a method that only requires the usage of a planar polygon of known shape~\cite{Liao2019} and Park \etal tests and presents results of this calibration method applied to multiple polygons, specially with triangular shape~\cite{Park2014}. Mirzaei \etal uses a planar pattern with fiducial marker~\cite{Mirzaei2012}. 
 
-While the previous methods where focused on calibrating monocular cameras with tridimensional \ac{lidar}, alternative methods exist for stereo systems, taking advantage of the disparity map obtained with a stereo camera. Automatica methods are proposed by Geiger \etal and Guindel \etal. Geiger\footnote{One of the researchers behind \ac{kitti}} and Moosmann propose a method for calibrating such setup with a single shot, using chessboards with multiple sizes and orientations, detected through seed point growing on camera and planar detection and sucessive refinement on \ac{lidar}\cite{Geiger2012a}. Guindel \etal use a planar calibration target with four holes that can be detected on the stereo map from the camera and \ac{lidar} point cloud, extrinsically calibrating both sensors by detecting the holes center and compute the rotation and translation that minimizes error. 
+Regarding calibration with three dimensional calibration targets, Pusztai uses a box with different colors on each face~\cite{Pusztai2018}; Pereira a ball (for performing multiple sensor calibration, instead of only 3D \ac{lidar} and monocular camera)~\cite{Pereira}; Gong a trihedral object, determining the extrinsic calibration parameters using a nonlinear least squares algorithm~\cite{Gong2013}.
+
+While the previous methods where focused on calibrating monocular cameras with tridimensional \ac{lidar}, alternative methods exist for stereo systems, taking advantage of the disparity map obtained with a stereo camera. Automatic methods are proposed by Geiger \etal and Guindel \etal. Geiger\footnote{One of the researchers behind \ac{kitti}} and Moosmann propose a method for calibrating such setup with a single shot, using chessboards with multiple sizes and orientations, detected through seed point growing on camera and planar detection and sucessive refinement on \ac{lidar}\cite{Geiger2012a}. Guindel \etal use a planar calibration target with four holes that can be detected on the stereo map from the camera and \ac{lidar} point cloud, extrinsically calibrating both sensors by detecting the holes center and compute the rotation and translation that minimizes error. 
 
 \subsection{Calibration without human intervention or patterns}
-Some automatic methods (that do not require human intervention neither calibration patterns) are also present on the literature. Bileschi's method estimates all intrinsic camera parameters  (including radial distortion) and the rotation and translation between a camera and \ac{lidar}, that is later refined by discontinuity association~\cite{Bileschi2009}. Shaukat proposes a solution for planeatary space robots using stereopsis, depth maps matching using mesh grids stecthing~\cite{Shaukat2016}. Ishikawa \etal calibration method, computes the calibration parameters using two main steps: first, initializes the parameters from the movement of the camera and \ac{lidar} and secondly, refines the parameters using sensor-fusion until convergence~\cite{Ishikawa2018}. 
+Some automatic methods (that do not require human intervention neither calibration patterns) are also present on the literature. Bileschi's method estimates all intrinsic camera parameters  (including radial distortion) and the rotation and translation between a camera and \ac{lidar}, that is later refined by discontinuity association~\cite{Bileschi2009}. Naroditsky \etal proposes an automatic calibration method using the multi-polynomial Macaulay resultant, that paired with \ac{ransac} and least-squares refinement can automatically calibrate the camera-\ac{lidar} setup~\cite{Naroditsky2011}. Shaukat proposes a solution for planeatary space robots using stereopsis, depth maps matching using mesh grids stecthing~\cite{Shaukat2016}. Ishikawa \etal calibration method, computes the calibration parameters using two main steps: first, initializes the parameters from the movement of the camera and \ac{lidar} and secondly, refines the parameters using sensor-fusion until convergence~\cite{Ishikawa2018}. 
 
 Jeong \etal presents a framework for calibrating \ac{lidar} and stereo cameras with non-overlapping \ac{fov}, by utilizing road markings and robust optimization algorithms and costs functions~\cite{Jeong2019}.
 
@@ -340,7 +344,8 @@ Using mutual information tecnhiques, Taylor and Nieto's approach uses normalized
 
 
 \subsection{Other calibration methods}
-Other calibration techniques use data variation through time \cite{Chien2017} or Deep learning on \ac{cnn} \cite{Wang2018a}. Brabec uses a semi-automatic method where correspondences between the camera and \ac{lidar} (presented as a range image) data are selected by the user and refined using local correction and \ac{ransac} algorithms~\cite{brabec2014}.
+Other calibration techniques use data variation through time \cite{Chien2017} or Deep learning on \ac{cnn} \cite{Wang2018a}. Scaramuzza \etal introduces a simple technique for extrinsic calibration that does need calibration patterns~\cite{Scaramuzza}: instead it requires the user to manually select correspondences between the camera and \ac{lidar}, easing the selection with the transformation of point clouds to Bearing Angle images. Brabec offers advances on this method, using a semi-automatic process where correspondences between the camera and \ac{lidar} (presented as a directional image) data are selected by the user and refined using local correction and \ac{ransac} algorithms~\cite{brabec2014}.
+
 
 Varuna De Silva \etal proposes an approach based on the geometric positioning of the sensors on the setup, determining the parameters through geometric description between them, later refining this estimate using depth maps and a non-linear refinement tecnique (Guassian Process Regression) \cite{DeSilva2018}. On anothers of its works, a planar calibration pattern with holes is used, follow by the same refinement technique \cite{Silva2018}.
 
@@ -350,7 +355,24 @@ Varuna De Silva \etal proposes an approach based on the geometric positioning of
 Fusing sensorial data is the task of combining different data formats, acquired by different sensors  into a multi-modal view of the world. This multi modal view not only allows a better interpretation of the individual data, but also allows the 
 
 Sensor needs to be predeced from proper extrinsic sensor calibration before data can be fused,
-For monocular RGB cameras and \ac{lidar}, sensor fusion translates to augmenting the depth information of a point cloud by adding color from the image obtained with the camera or overlapping on the camera image the distances at which objects appear on \ac{lidar} data.
+For monocular RGB cameras and \ac{lidar}, sensor fusion translates to augmenting the depth information of a point cloud by adding color from the image obtained with the camera or overlapping on the camera image the distances at which objects appear on \ac{lidar} data. An example of a colored point cloud (retrived from~\cite{Gong2013}) can be seen on figure~\ref{fig:colored_point_cloud_example} and a image overlapped with \ac{lidar} distance measurements (retrieved from~\cite{Bileschi2009}) can be seen on figure~\ref{fig:image_with_lidar_distance}.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[c]{0.55\textwidth}
+		\includegraphics[width=\textwidth]{img/sensor_fusion/colored_point_cloud.png}
+		\caption{Colored Point Cloud. Pixels are projected to the point cloud and nearby 3D points are colored with the colored of the correspondent pixel. Since \ac{lidar} \ac{fov} is bigger than camera, several points are black because no correspondences can be made. Source~\cite{Gong2013}}
+		\label{fig:colored_point_cloud_example}
+	\end{subfigure}
+	\quad
+	\begin{subfigure}[c]{0.40\textwidth}
+		\includegraphics[width=\textwidth]{img/sensor_fusion/image_with_distance_point_cutted.png}
+		\caption{Image with overlapping distance measurements. Point cloud points in the image \ac{fov} are projected into the image and colormap with intensity. Source~\cite{Bileschi2009}}
+		\label{fig:image_with_lidar_distance}
+	\end{subfigure}
+	\caption{Examples of sensor fusion between camera and \ac{lidar} and the projection of camera color into the \ac{lidar} reference frame, augmenting its value (\subref{fig:colored_point_cloud_example}) and projecting distance information on camera image (\subref{fig:image_with_lidar_distance}).}
+	\label{fig:point_cloud_camera_fusion_example}
+\end{figure}
 
 There are two major types of sensor fusion: 
 
@@ -359,6 +381,7 @@ There are two major types of sensor fusion:
 	\item \textbf{Simultaneous Calibration and Fusion:} the implemented algorithms attempt to merge the data by minimizing some arbitrary cost function. The final result consists on the multimodal merged data and the extrinsic calibration parameters can be calculated;
 	\item \textbf{``Direct'' Sensor Fusion:} Genetic algorithms, \ac{nn} or other imilar ools analize \ac{lidar} and camera data, without knowing any previous information about them, and outputs the merged data in the desired format.
 \end{enumerate} 
+
 
 \subsection{Calibration + Fusion}
 For the first case, every author cited on section \nameref{sec:sota:extrinsic_calibration} shows the results of sensory fusion applied to the results of their calibration algorithms, as a proof of calibration correctness.
