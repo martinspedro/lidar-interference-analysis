@@ -384,8 +384,10 @@ There are two major types of sensor fusion:
 
 
 \subsection{Calibration + Fusion}
-For the first case, every author cited on section \nameref{sec:sota:extrinsic_calibration} shows the results of sensory fusion applied to the results of their calibration algorithms, as a proof of calibration correctness.
+For the first case, authors cited on section \nameref{sec:sota:extrinsic_calibration} shows the results of sensory fusion applied to the results of their calibration algorithms, as a proof of calibration correctness. 
 
+Their sensor fusion technique is based on the application of the transformation described in equation~\ref{eq:jointRotationTranslationTransform}, which transforms data from the \ac{lidar} reference frame to the camera, allowing for a $3D point \leftrightarrow pixel$ mapping, enabling either point cloud coloring or overlapping the distance measurements on the image, as previously shown in figure~\ref{fig:point_cloud_camera_fusion_example}.
+	
 \begin{equation}
 	\label{eq:jointRotationTranslationTransform}
 	\begin{bmatrix}
@@ -428,9 +430,28 @@ Wei \etal for a real-time multi-sensor collision avoidance system develops a sen
 
 
 \section{Object Detection}
-Several paid and cloud based alternatives exist, such as Amazon Rekognition~\ref{awsRecognition}, Google Could Vision \ac{api}~\cite{googlevision}, IBM Watson Visual Recognition~\cite{watson} and Microsoft Computer Vision software~\cite{azurecv}. 
+Object Detection is a field of \acl{cv} that intends to detect objects in image. Currently, two approachs to tackle this problem are possible:
+
+\begin{enumerate}
+	\item \textbf{\acl{ml} based approach:} objection detection is performed on two steps: first a set of feature descriptors are choosen and extracted from reference images; secondly a \acl{nn} takes those features and perform the classification;
+	\item \textbf{Deep-Learning based approach:} end-to-end object detection without the need of specifing features.
+\end{enumerate}
+
+When refering to the first solution, Haar-like features~\cite{Messom2006}, \ac{sift}~\cite{Hughes2011a}, \ac{surf}~\cite{Bay2008} and \ac{hog}~\cite{Dalal2010, Surasak2018} features are normally used, on a Viola-Jones \ac{nn} (or its extensions)~\cite{Viola2001, ViolaP2004}. % For more details see 
+
+The second solution is normally implemented with a Region Proposal \acf{cnn}, developed by Girshick on 2014 \etal~\cite{Girshick2014}. A common \ac{cnn} cannot be used on object detection on a image because the number of detected objects is variable, therefore the size of the output layer would also need to be, which is not possible on this architecture. A \ac{rcnn} differs from a \ac{cnn} due to the region proposal algorithm that precedes it, that limits the number of regions to be evaluated on an image to approximately 2000, therefore limiting the number of objects on an image~\cite{Girshick2014}. However, this \acl{nn} needs to be run for every one of the 2 thousand regions, making it slow and unfeasible for real-time object detection~\cite{Girshick2014}. One year later, Girshick proposes a new architecture called Fast \ac{rcnn}, that runs the convolutional model only once and generates a feature map and bounding box offsets, increasing the speed of its \ac{rcnn} up to 20 times and improving \ac{map}~\cite{Girshick2015}. 
+
+On 2016, Shaoqing Ren \etal proposes a newer architecture that does not use a selective search for the region proposal algorithm, but instead has a Region Proposal Network to generate \ac{roi} for the proposal classification stage, called Faster \ac{rcnn}~\cite{Ren2017}. Such architecture achieve state-of-the-art object detection at a frame-rate of 5 \ac{fps}. Alternative networks, such as \ac{spp} Deep \acl{cnn}~\cite{He2015}, will not be discussed here.
+
+While the previous \ac{nn} use separated networks for region proposal of a possible object on an image and region classification to locate a possible object on an image, \ac{yolo}, developed by Joseph Redmon, is an alternative solution that analyzes the image only once, therefore keeping global context of the image while dividing it into regions and predicting bounding boxes. Those bounding boxes are weighted by the computed probabilities of each region and thresholded by the user~\cite{Redmon2016} . \ac{yolo}v2, released in 2017, at best can achieve, at best, 78.6 \ac{map} on the PASCAl VOC 2007 dataset at 40 \ac{fps} (see more details~\cite{Redmon2017}). \ac{yolo}v3, released in 2018, achieves at best, 57.9 \ac{map}-50 on COCOs dataset, at almost 20 \ac{fps} (3x faster than other networks with the same \ac{map}-50)~\cite{Redmon2018}.
+
+\ac{yolo} runs on Darknet, an open source neural network framework written in C and CUDA of the same author~\cite{Redmon2013}.
 
 
+\subsection{Plataforms}
+Several paid and cloud based alternatives exist, such as Amazon Rekognition~\cite{awsRecognition}, Google Could Vision \ac{api}~\cite{googlevision}, IBM Watson Visual Recognition~\cite{watson} and Microsoft Computer Vision software~\cite{azurecv}. 
+
+Since those plataforms are paid and required connection to the Internet, they are not good candidates to the solution we are trying to develop. Therefore, they are discarted.
 
 
 \section{\ac{lidar} Interference}
@@ -446,12 +467,34 @@ Interference and crosstalk between the pairs of \acp{laser} and photodetectors o
 
 However, in a society when self-driving vehicles coexist, another scenario is possible: a \ac{lidar} `A'' fires a \ac{laser} pulse that is received, directly or indirectly, by the photodetector on a \ac{lidar} `B''. Since \ac{lidar} `B'' measures the distance to an obstacle by measuring the time between the firing and reception of its own \ac{laser} pulse, the reception of another \ac{laser} pulse results in an erroneous measure with an unpredictable behavior. If this interference is significant, the reliability of the \ac{lidar}, and consequently autonomous vehicles and \ac{adas}, is seriously undermined due to the incapability to accurately mapping their surroundings.
 
-To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only available the studies conducted by Kim \etal \cite{Kim2017, Kim2015}, which seek to characterize this interference; and by Retterath and Laumeyer \cite{Al.2013}, seeking to provide an apparatus for reducing the mutual interference of \ac{lidar} sensors on the same vehicle.
+To the best of the author knowledge, the first consideration about \ac{lidar} interference is given by Retterath and Laumeyer \cite{Al.2013}, seeking to provide an apparatus for reducing the mutual interference of \ac{lidar} sensors on the same vehicle. Their patented work, however, is more of a ``preventive matter'' than a actual study of the interference behavior. 
+
+Gunzung Kim \etal, in 2015, presents the first results on multiple \ac{lidar} interfence on its three papers \cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single laser and photoreceptor are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is keep fixed, scanning a single line of the environment.}. Kim \etal setups consists on box with $5.3m \times 4m$ \cite{Kim2015a} or $5.3m \times 5.3m$ \cite{Kim2015b, Kim2015c}, where the \acp{lidar} are positioned. The walls are made of a low glossy wood. A test example can be seen below\todo.
+
+% Kim \etal research despite using a 2D \ac{lidar} instead of a 3D \ac{lidar} is the only study to use two independent 2D \ac{lidar}s interfering with each other. Kim \etal results indicate that interference has spatial and temporal locality \cite{Kim2015} and in any given time, in Kim's setup, a data point has 0.05 \% probability of being interfered \cite{Kim2015}.  The former states that if a particular angle is interfered, the following angles are likely to also be interfered; while the latter indicates that if a measure is interfered, on the following frame that same measure is also likely to be interfered. 
+
+Kim \etal tests show the temporal and spatial locality of the data. Temporal locality implies that a given angular direction is more likely to be interfered if it was been interfered has been interfered in the past, indicating that interferance persists throught time. Spatial locality implies that for a current scan, if an interference occurs, it is more likely that the next angle will also be interfered, indicating that interference persists throught space. 
 
 
-Kim \etal research %despite using a 2D \ac{lidar}%instead of a 3D \ac{lidar}
-is the only study to use two independent 2D \ac{lidar}s interfering with each other. Kim \etal results indicate that interference has spatial and temporal locality \cite{Kim2015} and in any given time, in Kim's setup, a data point has 0.05 \% probability of being interfered \cite{Kim2015}.
-The former states that if a particular angle is interfered, the following angles are likely to also be interfered; while the latter indicates that if a measure is interfered, on the following frame that same measure is also likely to be interfered. 
-%However, 
+Kim's research is misleading. 
+
+The experiment conduct in~\cite{Kim2015a} captured a ground-truth model for 4 hours and the interference data on 50 hours. For a given angle, Kim research concluded that for his experimental setup, 4.4\% of the total number of full line scans were interfered, but that number only translate to one in each 2000 point (0.05\% interfered points for the total number o point registered). When considering the nature of interference, spatial interference is rare: 78\% of the interfered points are not interfered on their next measurement (against 15\% that are), and onlye 7\% of the angles are interfered consecutively 3 or more times, for a record of 13 (meaning 0.5seconds of interference). For consecutive interference on nearby azimuthal angles on the same scan, only 30\% of the interference happens a single angle and 26\% on a second. The largest consecutive number of angles with interference are 102, which translates to 25.5º.
+
+
+Kim's side by side arrangment \#1 on~\cite{Kim2015b}, coincides
+which seek to characterize this interference; and by 
+
+
+To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only three different studies available
+
+
+In 2017, Kim \etal presents the results on the above papers \cite{Kim2015a, Kim2015b, Kim2015c} and introduces a theoretical analysis of the multipath interference based on a Lambertian distribution for modelling the reflections on the walls~\cite{Kim2017}. The models lacks generality, as it assumes average values for several parameters and some simplifications on the multipath interference, but nevertheless allows to conclude that:
+
+\begin{enumerate}
+	\item After the second reflection on an obstacle, the attenuation suffered by the light ray is not sufficient for the receiving \ac{lidar} to detect it as an interference;
+	\item Direct interference (on Kim's experimental setup and hardware) is likely to saturate the receptor of the interfered \ac{lidar}, which may or may not be considered a valid measurement by the hardware;
+	\item Indirect interference with only one reflection can be interpreted as a valid measurement, snce the intensity of the received interfered ray is similar to the intensity of valid measurement ray.
+\end{enumerate}
+
 
 
