@@ -467,28 +467,51 @@ Interference and crosstalk between the pairs of \acp{laser} and photodetectors o
 
 However, in a society when self-driving vehicles coexist, another scenario is possible: a \ac{lidar} `A'' fires a \ac{laser} pulse that is received, directly or indirectly, by the photodetector on a \ac{lidar} `B''. Since \ac{lidar} `B'' measures the distance to an obstacle by measuring the time between the firing and reception of its own \ac{laser} pulse, the reception of another \ac{laser} pulse results in an erroneous measure with an unpredictable behavior. If this interference is significant, the reliability of the \ac{lidar}, and consequently autonomous vehicles and \ac{adas}, is seriously undermined due to the incapability to accurately mapping their surroundings.
 
-To the best of the author knowledge, the first consideration about \ac{lidar} interference is given by Retterath and Laumeyer \cite{Al.2013}, seeking to provide an apparatus for reducing the mutual interference of \ac{lidar} sensors on the same vehicle. Their patented work, however, is more of a ``preventive matter'' than a actual study of the interference behavior. 
+% This problem, deeply researched for automotive \ac{radar} \cite{}, as yet to gain the attention of the research community of automotive \ac{lidar} and 
 
-Gunzung Kim \etal, in 2015, presents the first results on multiple \ac{lidar} interfence on its three papers \cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single laser and photoreceptor are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is keep fixed, scanning a single line of the environment.}. Kim \etal setups consists on box with $5.3m \times 4m$ \cite{Kim2015a} or $5.3m \times 5.3m$ \cite{Kim2015b, Kim2015c}, where the \acp{lidar} are positioned. The walls are made of a low glossy wood. A test example can be seen below\todo.
+
+To the best of the author knowledge, the first consideration about \ac{lidar} interference is given by Hebert and Krotkov in 1991~\cite{Heberta}. Their study was conducted for \ac{amcw} \ac{lidar} systems, and among other findings, they state that range and intensity measurements on \ac{lidar} are not completely independent, since lower intensity reflection can lead to an increase on range noise and shifts. 
+
+Gunzung Kim \etal, in 2015, presents the first results on multiple \ac{lidar} interfence on its three papers \cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single laser and photoreceptor are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is keep fixed, scanning a single line of the environment.}. Kim \etal setups consists on box with $5.3m \times 4m$ \cite{Kim2015a} or $5.3m \times 5.3m$ \cite{Kim2015b, Kim2015c}, where the \acp{lidar} are positioned. The walls are made of a low glossy wood. His classification of interference is based on the determination of a majorant and minorant for the distance of the wall, with a 10\% tolerance around the mean value.
 
 % Kim \etal research despite using a 2D \ac{lidar} instead of a 3D \ac{lidar} is the only study to use two independent 2D \ac{lidar}s interfering with each other. Kim \etal results indicate that interference has spatial and temporal locality \cite{Kim2015} and in any given time, in Kim's setup, a data point has 0.05 \% probability of being interfered \cite{Kim2015}.  The former states that if a particular angle is interfered, the following angles are likely to also be interfered; while the latter indicates that if a measure is interfered, on the following frame that same measure is also likely to be interfered. 
 
 Kim \etal tests show the temporal and spatial locality of the data. Temporal locality implies that a given angular direction is more likely to be interfered if it was been interfered has been interfered in the past, indicating that interferance persists throught time. Spatial locality implies that for a current scan, if an interference occurs, it is more likely that the next angle will also be interfered, indicating that interference persists throught space. 
 
 
-Kim's research is misleading. 
 
 The experiment conduct in~\cite{Kim2015a} captured a ground-truth model for 4 hours and the interference data on 50 hours. For a given angle, Kim research concluded that for his experimental setup, 4.4\% of the total number of full line scans were interfered, but that number only translate to one in each 2000 point (0.05\% interfered points for the total number o point registered). When considering the nature of interference, spatial interference is rare: 78\% of the interfered points are not interfered on their next measurement (against 15\% that are), and onlye 7\% of the angles are interfered consecutively 3 or more times, for a record of 13 (meaning 0.5seconds of interference). For consecutive interference on nearby azimuthal angles on the same scan, only 30\% of the interference happens a single angle and 26\% on a second. The largest consecutive number of angles with interference are 102, which translates to 25.5º.
 
 
-Kim's side by side arrangment \#1 on~\cite{Kim2015b}, coincides
-which seek to characterize this interference; and by 
+On~\cite{Kim2015b}, Kim~\etal realized new tests on \ac{lidar} interference, adding two new tests: a side by side with a small displacement and a face to face test. On~\cite{Kim2015c} a back to back test is also performed. Note that despite the experimental setup \textit{Side by side \#1} being dentical to the setup on~\cite{Kim2015a}, disagreements on all metrics occur. Therefore, for this test, the results discussed before~\cite{Kim2015a} and results presented on table~\ref{tab:kim_2015_results}, based on~\cite{Kim2015b, Kim2015c}, are not in agreement.
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+		\begin{tabular}{@{}l|c|c@{}}
+			                 & \% of Lines Interfered & Relative Frequence of Interfered Points \\ \midrule
+			Side by side \#1 & $1.795$                & $3.103E^{-5}$  \\
+			Side by side \#2 & $10.33$                & $1.667E^{-4}$ \\
+			Face to Face     & $1.433$                & $2.583E^{-5}$  \\
+			Back to Back A   & $0.211$                & $3.387E^{-6}$  \\
+			Back to Back B   & $0.216$                & $3.514E^{-6}$  \\ \bottomrule
+		\end{tabular}%
+		\caption{Summary of Kim's \etal the interference results from \cite{Kim2015b, Kim2015c}, for all tests. On the second column, the percentage of lines with a single interfered point are presented and on the second column the relative frequency of interfered point for all the points measured}
+	\label{tab:kim_2015_results}
+\end{table}
+
+The results of the second column, \textit{\% of Lines Interfered}, characterizes the number of lines on which interference as been found. For every test scenario on this column, the line interference caused are mostly non consecutive (above 90\% for Face to Face and 94.3\% for all the other tests).
+
+The third column, \textit{Relative Frequence of Interfered Points}, charactizes the number of measures that have been interfered regarding all measures made. Despite the maximum of consective spatial interference (4 scans), more than $99.7$ of all interferences happens isolated on a given azimuth, with no repetion on the next scan for the same interfered angle~\cite{Kim2015c}.
 
 
-To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only three different studies available
+
+% To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only three different studies available
 
 
-In 2017, Kim \etal presents the results on the above papers \cite{Kim2015a, Kim2015b, Kim2015c} and introduces a theoretical analysis of the multipath interference based on a Lambertian distribution for modelling the reflections on the walls~\cite{Kim2017}. The models lacks generality, as it assumes average values for several parameters and some simplifications on the multipath interference, but nevertheless allows to conclude that:
+In 2017, Kim \etal presents the results on the above papers \cite{Kim2015a, Kim2015b, Kim2015c}, extending its resarch by performing a intensity analisys~\cite{Kim2017}. His findings are that on a mutual interference scenario, the intensity of the received laser pulses varies signifcantly, comproving Hebert and Krotkov early findings that on a \ac{lidar} system range and intensity measures are not completely independent and interfering with one affects the results of other~\cite{Hebert}.
+
+On the same paper, he also introduces a theoretical analysis of the multipath interference based on a Lambertian distribution for modelling the reflections on the walls~\cite{Kim2017}. The models lacks generality, as it assumes average values for several parameters and some simplifications on the multipath interference, but nevertheless allows to conclude that:
 
 \begin{enumerate}
 	\item After the second reflection on an obstacle, the attenuation suffered by the light ray is not sufficient for the receiving \ac{lidar} to detect it as an interference;
@@ -496,5 +519,41 @@ In 2017, Kim \etal presents the results on the above papers \cite{Kim2015a, Kim2
 	\item Indirect interference with only one reflection can be interpreted as a valid measurement, snce the intensity of the received interfered ray is similar to the intensity of valid measurement ray.
 \end{enumerate}
 
+On 2013, Retterath and Laumeyer \cite{Retterath2015}, seeking to provide an apparatus for an array based system with reduced interference. Their patented work is an array \ac{lidar} that was lower probility of crosstalk than other solutions, which was latter patented worldwide~\cite{Retterath2015WO}. On 2016, another patent is filled for the same array based \ac{lidar}~\cite{Retterath2016}, this time for object detection and in 2017, Facet Technology, the patent applicant, sends out a Press Release indicating that they have been developed a \textit{``Safe and Secure LiDAR\textregistered Crosstalk Elimination Licensing Program''}, and that they have experienced crosstalk interferences up 2\%~\cite{Facet}.
+
+Jonathan Petit \etal present a study on how to remote attack automotive cameras and \acp{lidar} on vehicles~\cite{Petit2015}. For \ac{lidar} relay, replaying and spoofing attacks are explained. Petit work shows, for laboratorial scenarios, how to make obstacles disappear and how to make the \ac{lidar} see ``ghost'' objects, for distances further than the distance of the spoofer. Hocheol Shin \etal, two years later, presents a improved method that not only is able to spoof obstacles at a distance further than the distance of the spoofer, but also closer~\cite{Shin2017}. His work used more commonly used \acp{lidar}, such as Velodyne VLP-16~\cite{vlp16}. Shin \etal also find that the curved reception glass of \acp{lidar} allow for reflection of an attacking light source inside its case, allowing the attacker to be at a different direction that of the perceived attack. Despite their work being extremely experimental, and laser alignment required for an effective attack on real driving scenarios, Petit \etal and Shin \etal research show that such result is possible. Some results from Shin research are shown on figure~\ref{fig:shinInterference}.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[c]{0.4\textwidth}
+	\includegraphics[width=\textwidth]{img/lidar/interference_angle_control.png}
+		\caption{Spoffing an obstacle at a different angle of the spoffer}
+		\label{fig:shinInterferenceAngle}
+	\end{subfigure}
+	\quad
+	\begin{subfigure}[c]{0.55\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar/interference_distance_control.png}
+		\caption{Spoffing an obstacle at a closer distance than the spoffer}
+		\label{fig:shinInterferenceDistance}
+	\end{subfigure}
+	\caption{Spoffing examples on a Velodyne VLP-16 \ac{lidar}. Source~\cite{Shin2017}}
+	\label{fig:shinInterference}
+\end{figure}
+
+
+On 2017, Velodyne Inc., one of the major fabricants of \ac{lidar}, filled a patent an a new implementation that reduced crosstalk~\cite{Hall2017}. Their main focus was to solve multi-channel crosstalk, but multi-\ac{lidar} crosstalk reduction is also referred on the patent.
+
+Axel Diehm \etal, on 2018, proposes a spatial temporal filter for eliminating a crosstalk problem between two Velodyne HDL-64\acp{lidar}~\cite{Hebel2018}. Their crosstalk behaviour is very well defined as a area of interfered points at a particular orientation, and their work is focused on how to filter out those points and partially expanded their analysis to the time domain of interference, instead of searching to understand the behaviour that is causing them.
+
+On 2019, Gerald Popko \etal presents a mathematical descritpion on how stationary, coplanar and circular 2D scanning \ac{lidar} can interfere through beam path interference of the optical \ac{fov}, see~\cite{Popko2019a}. Based on his description, he repeats Kim's \etal experiments proposing a new statistical interference detector, instead of Kim's maximum distance minorants and majorants~\cite{Kim2015a}, and also performs a Monte-Carlo simulation~\cite{Popko2019b}. Popko resultsd Popko \etal findings are that:
+
+\begin{enumerate}
+	\item The interference behavior dependends majorly on the target geometry and beam intersection, and not on radiometric considerations;
+	\item Simulating the \ac{lidar} interference can only provide good qualititative results, since only the scattered interference provided a value closed to the real value measured;
+	\item The direct interference is dominant over the scattering interference;
+	\item The direct interference is mainly responsible for small distance measurement errors, while scattering interference is mainly present for large distance measurement errors;
+\end{enumerate}
+
+Lastly, Popko \etal interference results are two orders of magnitude higher than Kim's \etal measurements, $1.041 \%$~\cite{Popko2019b} vs $0.05\%$~\cite{Kim2015a}.
 
 
