@@ -226,6 +226,7 @@ Since lenses introduce non-linear distortion, the pinhole camera model needs to 
 For more information on the pinhole camera model and lens distortion, see Hartley and Zisserman Multi View Geometry in Computer Vision~\cite{mvg_book}, Hata and Savarese course notes\cite{camera_models} or \acf{opencv} official documentation\cite{opencv_doc}. 
 
 \subsection{Camera Intrinsic Calibration}
+\label{subsec:sota:camera-intrinisc-calibration}
 Calibrating a camera is the process on which the parameters of the model that describes its behavior are determined. For the extended pinhole camera model, this means determining the parameters of its intrinsic matrix, $K$, but also the distortion coefficients of the lens used~\cite{mvg_book, camera_models, Bouguet2010, Heikkila1997}. These parameters are called the intrinsic parameters and are independent of the scenario being viewed, if the focal length is kept constant. On the other hand, extrinsic camera parameters are different for every situation and therefore scenario dependent~\cite{opencv_doc, Bouguet2010, Heikkila1997}.
 
 Zhang proposed in 2000 a method for calibrating a camera that unlike previous others\citeneeded, does not require a special setup, expensive experimental apparatus or complicated calibration patterns: it uses a planar object with a known pattern, which can be freely moved in front of the camera~\cite{Zhang2000}. Only two images are necessary for camera calibration, as long the pattern movement between them is not a pure translation. The estimation of the camera intrinsic parameters and distortion caused by the lenses can be determined by solving the equation~\ref{eq:camera_transform_full}, once the $2D \leftrightarrow 3D$ correspondences have been established.
@@ -554,5 +555,4 @@ On 2019, Gerald Popko \etal presents a mathematical description on how stationar
 \end{enumerate}
 
 Lastly, Popko \etal interference results are two orders of magnitude higher than Kim's \etal measurements, $1.041 \%$~\cite{Popko2019b} vs $0.05\%$~\cite{Kim2015a}.
-
 
