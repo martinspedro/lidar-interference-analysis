@@ -255,19 +255,26 @@ To interact with the Manta AVT G-504C, \emph{avt\_vimba\_camera} \ac{ros} packag
 \subsection{Camera Calibration Results}
 The \ac{ros} node diagrams can be seen on figure~\ref{fig:camera-calibration-rosgraph}. On sub-figure~\subref{fig:camera-calibration-avt-rosgraph}, the nodes and topics for the calibration procedure using the data directly from the driver are shown. Sub-figure~\subref{fig:camera-calibration-bag-rosgraph} shows the difference node graph if the data is played using the \emph{rosbag} tool.
 
+
 \begin{figure}[H]
 	\vspace{5mm}
 	\centering
 	\begin{subfigure}[c]{0.8\textwidth}
 		\centering
-		\includegraphics[width=0.8\textwidth]{img/camera-calibration/bag-rosgraph.png}
+		\def\svgwidth{\columnwidth}
+		\graphicspath{{img/camera-calibration/}}
+		\includesvg{img/camera-calibration/bag-rosgraph}
+		%\includegraphics[width=0.8\textwidth]{img/camera-calibration/bag-rosgraph.png}
 		\caption{\ac{ros} node graph for the camera calibration procedure using the \emph{rosbag} tool. \emph{RosbagPlayer} is the node that plays back the data stored on the bag file.}
 		\label{fig:camera-calibration-bag-rosgraph}
 	\end{subfigure}
 	\vspace{5mm} \\ 
 	\begin{subfigure}[c]{0.8\textwidth}
 		\centering
-		\includegraphics[width=0.8\textwidth]{img/camera-calibration/avt-rosgraph.png}		
+		\def\svgwidth{\columnwidth}
+		\graphicspath{{img/camera-calibration/}}
+		\includesvg{img/camera-calibration/avt-rosgraph}
+		%\includegraphics[width=0.8\textwidth]{img/camera-calibration/avt-rosgraph.png}		
 		\caption{\ac{ros} node for the camera calibration procedure using the \ac{avt} Vimba \ac{ros} driver. \emph{camera} node refers to \ac{ros} node that wraps the \ac{avt} Vimba driver.}
 		\label{fig:camera-calibration-avt-rosgraph}
 	\end{subfigure}
@@ -307,4 +314,7 @@ Unlike a camera, \acp{lidar} does not possess a typical calibration procedure. F
 This file is must be converted to a more suitable format, \acs{yaml}~\footnote{\acs{yaml} is an acrononym for \acl{yaml}. The author chose not to expand such  ``peculiar'' acronym on the text to facilitate reading.}, which is \ac{ros} default and can be loaded by the Velodyne \ac{ros} driver package, \emph{velodyne}, for correction of the \ac{lidar} measurements. After observing the point cloud with tests objects such as boxes and walls, this calibration is concluded to be accurate and no further procedures were necessary.
 
 \section{Camera and \ac{lidar} Extrinsic Calibration}
+Calibrating the camera and \ac{lidar}, as explained in section \ref{subsec:sota:camera-intrinisc-calibration},
 
+The calibration between the camera and \ac{lidar} 
+Intrinsic Camera Calibration can be made 
