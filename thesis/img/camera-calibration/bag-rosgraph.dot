@@ -1,0 +1,28 @@
+digraph graphname {
+	graph [bb="0,0,394.08,36",
+		compound=True,
+		rank=same,
+		rankdir=LR,
+		ranksep=0.2
+	];
+	node [label="\N"];
+	n___cameracalibrator	 [URL=__cameracalibrator,
+		height=0.5,
+		label="/cameracalibrator",
+		pos="321.28,18",
+		shape=ellipse,
+		tooltip="/cameracalibrator",
+		width=2.022];
+	n___RosbagPlayer	 [URL=__RosbagPlayer,
+		height=0.5,
+		label="/RosbagPlayer",
+		pos="61.745,18",
+		shape=ellipse,
+		tooltip="/RosbagPlayer",
+		width=1.7151];
+	n___RosbagPlayer -> n___cameracalibrator	 [URL=topic_3A__camera__image_raw,
+		label="/camera/image_raw",
+		lp="185.99,25.5",
+		penwidth=1,
+		pos="e,248.4,18 123.58,18 157.84,18 200.9,18 238.08,18"];
+}
