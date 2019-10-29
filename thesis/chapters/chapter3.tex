@@ -129,6 +129,7 @@ No significant interference is expected between the camera and the \ac{lidar}. D
 
 
 \section{Camera Intrinsic Calibration}
+\label{sec:calibration:camera}
 The act of calibrating a camera consists on determining its intrinsic parameters, as detailed in subsection~\ref{subsec:sota:camera-intrinisc-calibration}. This can be done by taking different images with a know pattern fully visible on the camera \ac{fov}, changing its rotation an translation relating tho the camera.
 
 The calibration procedure undertaken uses a chessboard of $13 \times 9$ squares, with each square having an edge length of $44.0mm$. The chessboard used can be seen on figure~\ref{fig:chessboard}. It was laser printed on paper and then glued to a plywood board.
@@ -311,10 +312,53 @@ The camera was calibrated everyday experimental measures were taken. The calibra
 \section{\ac{lidar} Intrinsic Calibration}
 Unlike a camera, \acp{lidar} does not possess a typical calibration procedure. For Velodyne VLP-16 reflectivity measurements are factory calibrated, in a procedure described in~\cite{vlp16} and a \ac{xml} file is provided with the \ac{lidar}, which contain offset parameters for the polar angles of each laser.
 
-This file is must be converted to a more suitable format, \acs{yaml}~\footnote{\acs{yaml} is an acrononym for \acl{yaml}. The author chose not to expand such  ``peculiar'' acronym on the text to facilitate reading.}, which is \ac{ros} default and can be loaded by the Velodyne \ac{ros} driver package, \emph{velodyne}, for correction of the \ac{lidar} measurements. After observing the point cloud with tests objects such as boxes and walls, this calibration is concluded to be accurate and no further procedures were necessary.
+This file must be converted to a more suitable format, \acs{yaml}~\footnote{\acs{yaml} is an acrononym for \acl{yaml}. The author chose not to expand such  ``peculiar'' acronym on the text to facilitate reading.}, which is \ac{ros} default and can be loaded by the Velodyne \ac{ros} driver package, \emph{velodyne}, for correction of the \ac{lidar} measurements. After observing the point cloud with tests objects such as boxes and walls, this calibration is concluded to be accurate and no further procedures were necessary.
 
 \section{Camera and \ac{lidar} Extrinsic Calibration}
-Calibrating the camera and \ac{lidar}, as explained in section \ref{subsec:sota:camera-intrinisc-calibration},
+Calibrating the camera and \ac{lidar}, as explained in section~\ref{subsec:sota:camera-intrinisc-calibration}, requires determining the rigid body transform between the reference frames of the two sensors. A rigid body transform, also know as an Euclidean Isometry, since it preserves the distance between points~\cite{mvg_book}, has 6 \ac{degof}, that can be represented by a translation and a rotation vector.
 
-The calibration between the camera and \ac{lidar} 
-Intrinsic Camera Calibration can be made 
+Due to the variety of interpretations, and since the rotattion vector notation is ambiguous, since it can represente one of twelve Euler angles notation, or angle axis notation, this notation is normally replaced by the unambigous rotation matrix (see equation~\ref{eq:camera_transform_full} for an example) or a quaternion. Such representations are also free from gimbal lock, a mathematical limitation of the vector representation, that causes one rotation axis ``lock'' on another, causing their rotation to no longer being independent, removing one \ac{degof}. For more details on gimbal lock see~\cite{mvg_book, Slabaugh, camera_models}.
+
+On this thesis, the preferred notation is a quaternion. A quaternion is a mathematical object belonging to $\mathbb{R}^4$, that as a vector (or imaginary) part and a scalar (or real) part. Its representation is denoted on equation~\ref{eq:quaternion-notation}, where $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ are the versors of the $x$, $y$ and $z$ axis, respectively; and $w$ is the scalar part. More information on quaternions can be found on~\cite{mvg_book}.
+
+\begin{equation}
+	\label{eq:quaternion-notation}
+	q = (x\mathbf{i}, y\mathbf{j}, z\mathbf{k}, w)
+\end{equation}
+
+\subsection{Calibration Method}
+Given the nature of the sensors: a camera image is two dimensional and the \ac{lidar} data is tridimensional; the extrinsic calibration needs to consider the projective geometry and its transformations on the camera. Revisiting equation~\ref{eq:jointRotationTranslationTransform}, our goal is to determine the joint rotation and translation matrix that allows the convertion of coordinates from the \ac{lidar} to the camera frame. To account for projective geometry, equation~\ref{eq:camera_transform_full} must be considered when establishing 3D points to image pixels correspondences.
+
+The method implemented to calibrate the camera and \ac{lidar} is inspired by Scaramuzza~\etal~\cite{Scaramuzza} and Brabec's~\cite{brabec2014} work. The method proposed consists on manually selecting the correspondences between the image pixels and the 3D points on the \ac{lidar} point cloud. If a single synchronized frame from the camera and \ac{lidar} is used, one can consider the scene as static, and therefore, the joint rotation and translation matrix present in equation~\ref{eq:camera_transform_full} is actually the same as the matrix present on~\ref{eq:jointRotationTranslationTransform}. 
+
+Since the intrinsic calibration matrix is already obtained by the method described above, on section~\ref{sec:calibration:camera}, and the correspondences are selected by the user, the only incognit remaining is the joint rotation and translation matrix. Also, since this method ``reuses'' the equations that are the basis for intrinsic camera calibration, it can also ``reuse'', with some constraints and modifications, the same algorithms~\cite{opencv_doc}.
+
+
+
+Show referential frames\todo
+
+\subsection{Implementation}
+To extrinsicaly calibrate a camera, a multi-node network approach was followed, which can be seen on figure~\ref{}. Using \ac{opencv} and \ac{pcl}, two visualizers were encapsulated under \ac{ros} nodes were written in C++, that subscribe camera and \ac{lidar} messages, respectively. Each of the visualizers provides callbacks to be interacted with, supporting frame freezing for correspondences selection.
+
+Another node is responsible to listen for the messages containing the selected pixels and points and register them in order. This node instantiates two \ac{ros} services, that can be called assynchronasly: one for computing the rigid body transform and another to save the correspondences on a \ac{csv} file. 
+
+The algorithm implemented uses \ac{opencv} \emph{solvePnP}, that given the intrinsic camera parameters and the correspondences between the object points (3D points from \ac{lidar}), computes the rotation and translation vectors. For solving the \ac{pnp} problem, several algorithms can be used: Levenberg-Marquardt~\cite{Levenberg1943}, Effective~\ac{pnp}~\cite{Lepetit2009}, Perspective-Three-Point~\cite{Gao2003}, Direct-Least-Squares~\cite{Hesch2011} or Exaustive Linearization - Uncalibrated \ac{pnp}~\cite{Penate-Sanchez2013a}. After resolving the \ac{pnp} with one of the methods, Rodrigues algorithm is used to convert a rotation vector to a rotation matrix~\cite{Dai2015}, which can then be used to contruct the quaternion.
+
+After the computation, a static transform can be published with the quaternion and translation vector. Additional nodes are also created to load the 3D point to image pixels correspondences from the \ac{csv} and the camera intrinsic parameters from an \ac{yaml} file, compute the transform and publish it under a static transform node, for usage in a \ac{ros} network.
+
+
+Rosgraph
+Exaplain code strutcure
+https://answers.opencv.org/question/30518/how-to-draw-a-circle-on-an-image-using-mouse-clickevents/
+https://stackoverflow.com/questions/53532429/point-cloud-library-sliced-points-to-custom-colors
+
+\subsection{Calibration Result}
+To ease the calibration file, a \ac{ros} launch file is created. A launch file is written in \ac{xml} a provides to \ac{ros} instructions on how to run all the necessary nodes to implement a funcitionality. On this case, \emph{rigid\_transform\_computation.launch}, commands the \ac{ros} Master node to launch the two visualizers and the node responsible for listening to the selected correspondences. 
+
+Several tests were performed with the possible algorithms for solving \ac{pnp}. Since for the version of \ac{opencv} used (3.2.0), the Direct-Least-Squares and Uncalibrated \ac{pnp} methods are unstable, only the Levenberg-Marquardt, Perspective-Three-Point and Effective~\ac{pnp} were tested. 
+
+Despite the extrinsic calibration scenario using the planar chessboard present on the camera intrinsic calibration procedure, the algorithm implemented does not required the usage of a calibration object. For calibration, 5 points were selected on the point cloud and five pixels on the image: 4 correspond to the corners of the chessboard and one two a background object. The selected correspondences can be seen on figure~\ref{}
+
+
+Show images with selected points
+Show matrix resulting
