@@ -49,7 +49,8 @@ int main(int argc, char* argv[])
   csv_file_manager::read(THESIS_FILE_PATH + argv[1], &image_pixels, &point_cloud_points);
 
   std::cout << "Done!" << std::endl << "Creating LiDAR & Camera Calibration Object... ";
-  LiDARCameraCalibrationData calibration_data_object("velo_link", "camera_link", point_cloud_points, image_pixels);
+  // LiDARCameraCalibrationData calibration_data_object("velod_link", "camera_link", point_cloud_points, image_pixels);
+  LiDARCameraCalibrationData calibration_data_object("velodyne", "camera_link", point_cloud_points, image_pixels);
 
   std::cout << "Done!" << std::endl << "Loading Camera Info YAML file... ";
   calibration_data_object.readCameraInfoFromYAML(argv[2]);
