@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
   // Services Server
   ros::ServiceServer computationSrv =
-      nh.advertiseService("computeRigidBodyTransform", &LiDARCameraCalibrationData::computeRigidTransformSrvCallback,
+      nh.advertiseService("compute_rigid_body_transform", &LiDARCameraCalibrationData::computeRigidTransformSrvCallback,
                           &calibration_data_object);
   ros::ServiceServer saveSrv = nh.advertiseService(
       "save_correspondences", &LiDARCameraCalibrationData::saveCorrespondencesSrvCallback, &calibration_data_object);

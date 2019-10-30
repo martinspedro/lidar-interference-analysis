@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    ROS_ERROR("Failed to call service computeRigidBodyTransform");
+    ROS_ERROR("Failed to call service compute_rigid_body_transform");
     return EXIT_FAILURE;
   }
 
