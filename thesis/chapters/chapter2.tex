@@ -49,11 +49,11 @@ The sensory apparatus contains 2 PointGray Flea2 greyscale and color cameras, a 
 
 
 \subsection{Udacity Self-Driving Car Nanodegree Dataset}
-the data from Udacity online course on self-driving car is also publicly available. This dataset dates to 2016 and was gathered to develop a level 4 autonomy vehicle, containing much more data diversity than the previous two. The data available contains images from 3 color cameras,  \ac{lidar}, \ac{imu} and \ac{gps}, among other sensory data, such as speed, braking, etc.
+the data from Udacity online course on self-driving car is also publicly available. This dataset dates to 2016 and was gathered to develop level 4 autonomy vehicles, containing much more data diversity than the previous two. The data available contains images from 3 color cameras,  \ac{lidar}, \ac{imu} and \ac{gps}, among other sensory data, such as speed, braking, etc.
 
 This information is not available in raw format, only structured in \ac{ros} \textit{.bag} files. Some tools for visualizing and interacting with their data are provided for \ac{ros}~\cite{udacity}. 
 
-Not much information about the sensors and their positioning positioning is publicly available, and the dataset does not contain information for calibration.
+Not much information about the sensors and their positioning is publicly available, and the dataset does not contain information for calibration.
 
 \subsection{Summary}
 Table~\ref{tab:sota:datasets_comparison} summarizes all the relevant data from the datasets~\cite{udacity, Pandey2011, Geiger2013a}. While there are few differences between the relevant types of data gathered, major differences can be observed on the format in which they are provided. 
@@ -472,7 +472,7 @@ However, in a society when self-driving vehicles coexist, another scenario is po
 
 To the best of the author knowledge, the first consideration about \ac{lidar} interference is given by Hebert and Krotkov in 1991~\cite{Hebert}. Their study was conducted for \ac{amcw} \ac{lidar} systems, and among other findings, they state that range and intensity measurements on \ac{lidar} are not completely independent, since lower intensity reflection can lead to an increase on range noise and shifts. 
 
-Gunzung Kim \etal, in 2015, presents the first results on multiple \ac{lidar} interference on its three papers \cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single laser and photoreceptor are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is keep fixed, scanning a single line of the environment.}. Kim \etal setups consists on box with $5.3m \times 4m$ \cite{Kim2015a} or $5.3m \times 5.3m$ \cite{Kim2015b, Kim2015c}, where the \acp{lidar} are positioned. The walls are made of a low glossy wood. His classification of interference is based on the determination of a majorant and minorant for the distance of the wall, with a 10\% tolerance around the mean value.
+Gunzung Kim \etal, in 2015, presents the first results on multiple \ac{lidar} interference on its three papers \cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single laser and photoreceptor are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is keep fixed, scanning a single line of the environment.}. Kim \etal setups consists on box with $5.3 m \times 4 m$ \cite{Kim2015a} or $5.3 m \times 5.3 m$ \cite{Kim2015b, Kim2015c}, where the \acp{lidar} are positioned. The walls are made of a low glossy wood. His classification of interference is based on the determination of a majorant and minorant for the distance of the wall, with a 10\% tolerance around the mean value.
 
 % Kim \etal research despite using a 2D \ac{lidar} instead of a 3D \ac{lidar} is the only study to use two independent 2D \ac{lidar}s interfering with each other. Kim \etal results indicate that interference has spatial and temporal locality \cite{Kim2015} and in any given time, in Kim's setup, a data point has 0.05 \% probability of being interfered \cite{Kim2015}. The former states that if a particular angle is interfered, the following angles are likely to also be interfered; while the latter indicates that if a measure is interfered, on the following frame that same measure is also likely to be interfered. 
 
@@ -509,7 +509,7 @@ The third column, \textit{Relative Frequence of Interfered Points}, characterize
 % To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only three different studies available
 
 
-In 2017, Kim \etal presents the results on the above papers \cite{Kim2015a, Kim2015b, Kim2015c}, extending its research by performing a intensity analysis~\cite{Kim2017}. His findings are that on a mutual interference scenario, the intensity of the received laser pulses varies significantly, confirming Hebert and Krotkov early findings that on a \ac{lidar} system range and intensity measures are not completely independent and interfering with one affects the results of other~\cite{Hebert}.
+In 2017, Kim \etal presents the results on the above papers \cite{Kim2015a, Kim2015b, Kim2015c}, extending its research by performing an intensity analysis~\cite{Kim2017}. His findings are that on a mutual interference scenario, the intensity of the received laser pulses varies significantly, confirming Hebert and Krotkov early findings that on a \ac{lidar} system range and intensity measures are not completely independent and interfering with one affects the results of other~\cite{Hebert}.
 
 On the same paper, he also introduces a theoretical analysis of the multipath interference based on a Lambertian distribution for modelling the reflections on the walls~\cite{Kim2017}. The model lack generality, as it assumes average values for several parameters and some simplifications on the multipath interference, but allows to conclude that:
 
@@ -543,7 +543,7 @@ Jonathan Petit \etal present a study on how to remote attack automotive cameras 
 
 On 2017, Velodyne Inc., one of the major manufacturer of \ac{lidar}, filled a patent on a new implementation that reduced crosstalk~\cite{Hall2017}. Their focus was to solve multi-channel crosstalk, but multi-\ac{lidar} crosstalk reduction is also referred on the patent.
 
-Axel Diehm \etal, on 2018, proposes a spatial temporal filter for eliminating a crosstalk problem between two Velodyne HDL-64 \acp{lidar}~\cite{Hebel2018}. Their crosstalk behaviour is well defined as a area of interfered points at a particular orientation, and their work is focused on how to filter out those points and partially expanded their analysis to the time domain of interference, instead of searching to understand the behaviour that is causing them.
+Axel Diehm \etal, on 2018, proposes a spatial temporal filter for eliminating a crosstalk problem between two Velodyne HDL-64 \acp{lidar}~\cite{Hebel2018}. Their crosstalk behaviour is well-defined as an area of interfered points at a particular orientation, and their work is focused on how to filter out those points and partially expanded their analysis to the time domain of interference, instead of searching to understand the behaviour that is causing them.
 
 On 2019, Gerald Popko \etal presents a mathematical description on how stationary, coplanar and circular 2D scanning \ac{lidar} can interfere through beam path interference of the optical \ac{fov}, see~\cite{Popko2019a}. Based on his description, he repeats Kim's \etal experiments proposing a new statistical interference detector, instead of Kim's maximum distance minorant and majorant~\cite{Kim2015a}, and also performs a Monte-Carlo simulation~\cite{Popko2019b}. Popko \etal findings are that:
 
