@@ -29,6 +29,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/extract_indices.h>
 //#include <pcl/registration/icp.h>
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -104,6 +105,8 @@ typedef velodyne::VelodynePointCloud PointCloudType;
 typedef velodyne::PointXYZIR PointType;
 #endif
 
+geometry_msgs::TransformStamped transformStamped;
+
 // Eigen::Quaterniond tf_quaternion;
 // Eigen::Vector3d tf_translation;
 Eigen::Affine3d transform_eigen;
@@ -118,6 +121,33 @@ Eigen::Matrix4f getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr)
   lidar_pose_.block<4, 1>(0, 3) = point_cloud_ptr->sensor_origin_;                // Vector 4f
 
   return lidar_pose_;
+}
+
+Eigen::Matrix4f getLiDARRotation(image_geometry::PinholeCameraModel cam_model_,
+                                 darknet_ros_msgs::BoundingBox bounding_box)
+{
+  // Get middle point of the bounding box
+  cv::Point2d bounding_box_center;
+  bounding_box_center.x = (bounding_box.xmin + bounding_box.xmax) / 2.0f;
+  bounding_box_center.y = (bounding_box.ymin + bounding_box.ymax) / 2.0f;
+
+  cv::Point3d bbox_ray = cam_model_.projectPixelTo3dRay(bounding_box_center);
+
+  cv::Size im_dimensions = cam_model_.fullResolution();
+  cv::Point2d image_center = getImageCenterPoint(im_dimensions);
+
+  cv::Point3d center_ray = cam_model_.projectPixelTo3dRay(image_center);
+
+  // Convert to Eigen
+  Eigen::Vector3d bbox_ray_eigen(bbox_ray.x, bbox_ray.y, bbox_ray.z);
+  Eigen::Vector3d center_ray_eigen(center_ray.x, center_ray.y, center_ray.z);
+
+  Eigen::Quaterniond fov_lidar_quaternion = Eigen::Quaterniond().setFromTwoVectors(bbox_ray_eigen, center_ray_eigen);
+
+  Eigen::Matrix4f fov_lidar_rotation = Eigen::Matrix4f::Identity();
+  fov_lidar_rotation.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
+
+  return fov_lidar_rotation;
 }
 
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
@@ -217,14 +247,17 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
                                 0,-1, 0, 0,
                                 0, 0, 0, 1;
   // clang-format on
+
+  Eigen::Matrix4f lidar_rotation = getLiDARRotation(cam_model_, b_boxes->bounding_boxes[0]);
+
   std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
   std::cout << "Camera to LiDAR 6DOF Transform: " << camera_to_lidar_6DOF.IsRowMajor << std::endl;
   std::cout << "Lidar Pose: " << lidar_pose.IsRowMajor << std::endl;
   std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
 
   Eigen::Matrix4f frustrum_filter_pose =
-      camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
-
+      // camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
+      camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * lidar_rotation;
   std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
 
   // Print Stuff
@@ -251,15 +284,14 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   std::cout << "FrustumCulling" << std::endl;
 
   /*
-   * http://docs.pointclouds.org/trunk/frustum__culling_8hpp_source.html#l00047
-   * This assumes a coordinate system where X is forward,
-   * Y is up, and Z is right. To convert from the traditional camera
-   * coordinate system (X right, Y down, Z forward), one can use:
+   * http://docs.pointclouds.org/trunk/frustum__culling_8hpp_source.html#l00047 cv::Size im_dimensions =
+   * cam_model_.fullResolution(); This assumes a coordinate system where X is forward, Y is up, and Z is right. To
+   * convert from the traditional camera coordinate system (X right, Y down, Z forward), one can use:
    */
 
   fc.setCameraPose(frustrum_filter_pose);
   fc.filter(target);
-  std::cout << "Filtred. Target size = " << target.size() << std::endl;
+  std::cout << "Filtered. Target size = " << target.size() << std::endl;
 
   sensor_msgs::PointCloud2 out_cloud;
   *point_cloud_ptr = target;
@@ -270,6 +302,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
                                  // toROSMsg
   std::cout << "Published" << std::endl;
 
+  // POSE Publishing
   geometry_msgs::Pose pose_camera, pose_lidar_camera, pose_lidar, pose_final;
   geometry_msgs::PoseStamped pose_camera_s, pose_lidar_s, pose_lidar_camera_s, pose_final_s;
   Eigen::Affine3d camera_affine_transform, lidar_camera_affine_transform, lidar_affine_transform,
@@ -310,6 +343,69 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 
+void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
+               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
+               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
+{
+  PointCloudType point_cloud_camera, point_cloud;
+  PointCloudType::Ptr cloudCameraPtr(new PointCloudType);
+  PointCloudType::Ptr cloudPtr(new PointCloudType);
+  PointCloudType::Ptr cloudColoredPtr(new PointCloudType);
+
+  static bool first_callback = true;
+
+  sensor_msgs::PointCloud2 point_cloud_camera_msg;
+
+  try
+  {
+    tf2::doTransform(*point_cloud_msg, point_cloud_camera_msg, transformStamped);
+  }
+  catch (tf2::TransformException& ex)
+  {
+    ROS_WARN("%s", ex.what());
+  }
+  // Convert ROS msg to Point Cloud
+  fromROSMsg(point_cloud_camera_msg, point_cloud_camera);
+  fromROSMsg(*point_cloud_msg, point_cloud);
+
+  // Initialize pointer to point cloud data
+  *cloudCameraPtr = point_cloud_camera;
+  *cloudPtr = point_cloud;
+
+  image_geometry::PinholeCameraModel cam_model_;
+  cam_model_.fromCameraInfo(cam_info);
+
+  cv::Size im_dimensions = cam_model_.fullResolution();
+
+  std::vector<int> indices_in;
+  boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
+  for (int i = 0; i < cloudCameraPtr->points.size(); i++)
+  {
+    cv::Point2d uv = cam_model_.project3dToPixel(
+        cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z));
+
+    if (((int)(uv.x) >= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= im_dimensions.width) &&
+        ((int)uv.y <= im_dimensions.height) && (cloudCameraPtr->points[i].z >= 0))
+    {
+      for (int j = 0; j < object_count->count; ++j)
+      {
+        if (((int)(uv.x) >= b_boxes->bounding_boxes[j].xmin) && ((int)uv.y >= b_boxes->bounding_boxes[j].ymin) &&
+            ((int)(uv.x) <= b_boxes->bounding_boxes[j].xmax) && ((int)uv.y <= b_boxes->bounding_boxes[j].ymax))
+        {
+          index_ptr->push_back(i);
+        }
+      }
+    }
+  }
+
+  pcl::ExtractIndices<PointType> eifilter(true);  // Initializing with true will allow us to extract the removed indices
+  eifilter.setInputCloud(cloudCameraPtr);
+  eifilter.setIndices(index_ptr);
+  eifilter.filter(*cloudCameraPtr);
+
+  pub.publish(cloudCameraPtr);
+}
+
 int main(int argc, char** argv)
 {
   // Initialize ROS
@@ -336,8 +432,8 @@ int main(int argc, char** argv)
    *
    * Another perspective is: we want to transform from <target_frame> from this <source_frame> frame
    */
-  geometry_msgs::TransformStamped transformStamped = tfBuffer.lookupTransform(
-      LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0), ros::Duration(20.0));
+  transformStamped = tfBuffer.lookupTransform(LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0),
+                                              ros::Duration(20.0));
 
   // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
   transform_eigen = tf2::transformToEigen(transformStamped);
@@ -379,7 +475,7 @@ int main(int argc, char** argv)
                                                             bounding_boxes_sub, cam_info_sub, point_cloud_sub);
 
   // Bind Callback to function to each of the subscribers
-  sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
+  sync.registerCallback(boost::bind(&callback2, _1, _2, _3, _4));
 
   ros::Rate r(100);  // 100 hz
   while (ros::ok())

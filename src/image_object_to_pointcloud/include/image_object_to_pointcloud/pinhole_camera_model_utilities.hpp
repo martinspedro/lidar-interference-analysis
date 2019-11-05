@@ -28,9 +28,28 @@ struct FOV
   };
 };
 
-inline cv::Point2f getImageCenterPoint(cv::Size dimensions);
-inline float getFovRadian(const float length, const float distance_to_focal_point);
-inline float getFovDegree(const float length, const float distance_to_focal_point);
+inline cv::Point2f getImageCenterPoint(cv::Size dimensions)
+{
+  // image is indexed (x, y) despite matrices/Mat being indexed (y, x)
+  // Point constructor is (x, y)
+  return cv::Point2f(dimensions.width / 2.0f, dimensions.height / 2.0f);
+};
+
+/**
+ *  Assumes a retangular triangle
+ */
+inline float getFovRadian(const float length, const float distance_to_focal_point)
+{
+  return atan(length / distance_to_focal_point);
+};
+
+/**
+ *  Assumes a retangular triangle
+ */
+inline float getFovDegree(const float length, const float distance_to_focal_point)
+{
+  return getFovRadian(length, distance_to_focal_point) * 180.0f / M_PI;
+};
 
 FOV getImageFOV(image_geometry::PinholeCameraModel cam_model);
 FOV getImageFOV(cv::Size image_dimensions, cv::Matx33d intrinsic_matrix);

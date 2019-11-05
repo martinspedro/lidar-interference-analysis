@@ -3,29 +3,6 @@
 
 #include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
 
-inline cv::Point2f getImageCenterPoint(cv::Size dimensions)
-{
-  // image is indexed (x, y) despite matrices/Mat being indexed (y, x)
-  // Point constructor is (x, y)
-  return cv::Point2f(dimensions.width / 2.0f, dimensions.height / 2.0f);
-}
-
-/**
- *  Assumes a retangular triangle
- */
-inline float getFovRadian(const float length, const float distance_to_focal_point)
-{
-  return atan(length / distance_to_focal_point);
-}
-
-/**
- *  Assumes a retangular triangle
- */
-inline float getFovDegree(const float length, const float distance_to_focal_point)
-{
-  return getFovRadian(length, distance_to_focal_point) * 180.0f / M_PI;
-}
-
 /**
  *   \remark ROS image_geometry package compatible
  */
