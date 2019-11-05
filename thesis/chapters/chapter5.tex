@@ -1,0 +1,21 @@
+\chapter{Object Detection}
+\label{chapter:object_detection}
+
+
+Object Detection is a field of \ac{cv} whose objectives are to classify and locate an object on an image. Contrary to Object Detection, whose goal is to identify which objects are present on a image, object detection only intends to classify the objects on an image, without giving any notions of its location. 
+
+
+On this chapter, Object Detection algorithms are applied to an image, under \ac{ros} network
+
+\section{Object Detection on Image}
+Object Detection is a task mainly performed with \acfp{cnn}, as detailed in Section~\ref{sec:sota:object-detection}. From the available solutions, one implementation, \ac{yolo} is choosen and used to perform object detection on image. This \ac{cnn} runs under a Darkent framework.
+
+\subsection{darknet-ros Package}
+\verb`darknet-ros` is a \ac{ros} package that encapsulates this \ac{cnn}, Darknet, so that it can be used under a \ac{ros} network, and connected with other nodes. Under this package, \ac{yolo} is loaded.
+
+Darknet-ros is an Open-Source project developed by . However, since the code lacked  functionalities use to this thesis, such as an easy synchronozation between the number of objects found and their classes, boudning boxes and probability. Ti improve that synchronization, some changes were maded to the original darknet-ros soruvce code, that were later made public. This changes are public and consitute one of the Open-Source contributions of this thesis
+
+
+\section{Correspondences between objects on image and point-cloud}
+
+\section{Final Remarks}
