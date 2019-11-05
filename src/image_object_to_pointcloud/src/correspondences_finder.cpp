@@ -349,8 +349,8 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 {
   PointCloudType point_cloud_camera, point_cloud;
   PointCloudType::Ptr cloudCameraPtr(new PointCloudType);
-  PointCloudType::Ptr cloudPtr(new PointCloudType);
-  PointCloudType::Ptr cloudColoredPtr(new PointCloudType);
+  // PointCloudType::Ptr cloudPtr(new PointCloudType);
+  PointCloudType::Ptr cloudFilteredPtr(new PointCloudType);
 
   static bool first_callback = true;
 
@@ -366,16 +366,17 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   }
   // Convert ROS msg to Point Cloud
   fromROSMsg(point_cloud_camera_msg, point_cloud_camera);
-  fromROSMsg(*point_cloud_msg, point_cloud);
+  // fromROSMsg(*point_cloud_msg, point_cloud);
 
   // Initialize pointer to point cloud data
   *cloudCameraPtr = point_cloud_camera;
-  *cloudPtr = point_cloud;
+  //*cloudPtr = point_cloud;
 
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(cam_info);
 
   cv::Size im_dimensions = cam_model_.fullResolution();
+  std::cout << im_dimensions << std::endl;
 
   std::vector<int> indices_in;
   boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
@@ -384,8 +385,9 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     cv::Point2d uv = cam_model_.project3dToPixel(
         cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z));
 
-    if (((int)(uv.x) >= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= im_dimensions.width) &&
-        ((int)uv.y <= im_dimensions.height) && (cloudCameraPtr->points[i].z >= 0))
+    // Note that Kitti width and height are swapped so we swap them here also
+    if (((int)(uv.x) >= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= im_dimensions.height) &&
+        ((int)uv.y <= im_dimensions.width) && (cloudCameraPtr->points[i].z >= 0))
     {
       for (int j = 0; j < object_count->count; ++j)
       {
@@ -401,9 +403,10 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   pcl::ExtractIndices<PointType> eifilter(true);  // Initializing with true will allow us to extract the removed indices
   eifilter.setInputCloud(cloudCameraPtr);
   eifilter.setIndices(index_ptr);
-  eifilter.filter(*cloudCameraPtr);
+  eifilter.filter(*cloudFilteredPtr);
 
-  pub.publish(cloudCameraPtr);
+  std::cout << index_ptr->size() << std::endl;
+  pub.publish(cloudFilteredPtr);
 }
 
 int main(int argc, char** argv)
@@ -432,7 +435,7 @@ int main(int argc, char** argv)
    *
    * Another perspective is: we want to transform from <target_frame> from this <source_frame> frame
    */
-  transformStamped = tfBuffer.lookupTransform(LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0),
+  transformStamped = tfBuffer.lookupTransform(CAMERA_TF2_REFERENCE_FRAME, LIDAR_TF2_REFERENCE_FRAME, ros::Time(0),
                                               ros::Duration(20.0));
 
   // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
