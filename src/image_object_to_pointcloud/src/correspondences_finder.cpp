@@ -117,14 +117,6 @@ Eigen::Matrix4f getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr)
   lidar_pose_.block<3, 3>(0, 0) = point_cloud_ptr->sensor_orientation_.matrix();  // Quaternion to Rot Matrix
   lidar_pose_.block<4, 1>(0, 3) = point_cloud_ptr->sensor_origin_;                // Vector 4f
 
-  /*
-  // lidar_pose.row(3).head(3) =.head(3);
-  lidar_pose(3, 0) = point_cloud_ptr->sensor_orientation_.x();
-  lidar_pose(3, 1) = point_cloud_ptr->sensor_orientation_.y();
-  lidar_pose(3, 2) = point_cloud_ptr->sensor_orientation_.z();
-  lidar_pose(3, 3) = point_cloud_ptr->sensor_orientation_.w();
-  */
-
   return lidar_pose_;
 }
 
@@ -138,28 +130,10 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   PointCloudType point_cloud_velodyne, point_cloud, target;
   PointCloudType::Ptr cloudPtr, point_cloud_ptr(new PointCloudType);
   std::cout << "Init" << std::endl;
-  /* Convert ROS msg to Point Cloud
-    sensor_msgs::PointCloud2 point_cloud_camera_msg;
-    try
-    {
-      tf2::doTransform(*point_cloud_msg, point_cloud_camera_msg, transformStamped);
-    }
-    catch (tf2::TransformException& ex)
-    {
-      ROS_WARN("%s", ex.what());
-    }
-    fromROSMsg(*point_cloud_camera_msg, point_cloud);
-  */
+
   fromROSMsg(*point_cloud_msg, point_cloud);
   *point_cloud_ptr = point_cloud;
   std::cout << "Message" << std::endl;
-
-  /*
-  std::cout << "Sensor Origin:" << point_cloud.sensor_origin_ << std::endl;
-  std::cout << "Sensor Orientation: " << point_cloud.sensor_orientation_.x() << ", "
-            << point_cloud.sensor_orientation_.y() << ", " << point_cloud.sensor_orientation_.z() << ", "
-            << point_cloud.sensor_orientation_.w() << ", " << std::endl;
-*/
 
   // Get Camera Information from msg
   image_geometry::PinholeCameraModel cam_model_;
@@ -341,7 +315,7 @@ int main(int argc, char** argv)
   // Initialize ROS
   ros::init(argc, argv, "correspondences_finder");
 
-  std::cout << "Estou" << std::endl;
+  std::cout << "Init Successfull" << std::endl;
   ros::NodeHandle nh;
 
   tf2_ros::Buffer tfBuffer;
@@ -354,7 +328,7 @@ int main(int argc, char** argv)
    *
    * If one wants to transform the data from one referential to another, the target frame most be the final on which the
    * data will be processed.
-   * The function construction might seem conteur intitive , but notice that the transform from the Referential Frame A
+   * The function construction might seem counter intuitive , but notice that the transform from the Referential Frame A
    * -> B allows the transformation of data from the frame B -> A
    *
    * On this case, since no data will be manipulated, onluy referentials, we want the transfrom from the Camera to the
@@ -387,6 +361,7 @@ int main(int argc, char** argv)
   pub_lidar = nh.advertise<geometry_msgs::PoseStamped>("/lidar_pose", 1);
   pub_final = nh.advertise<geometry_msgs::PoseStamped>("/final_pose", 1);
 
+  // Subscribers list to be synchronized
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bounding_boxes_sub(nh, "/darknet_ros/bounding_boxes", 2);
   message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub(nh, "/camera/camera_info", 20);
@@ -394,12 +369,16 @@ int main(int argc, char** argv)
 
   typedef message_filters::sync_policies::ApproximateTime<
       darknet_ros_msgs::ObjectCount, darknet_ros_msgs::BoundingBoxes, sensor_msgs::CameraInfo, sensor_msgs::PointCloud2>
-      MySyncPolicy;
+      syncPolicyForCallback;
 
-  // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-  message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(20), object_count_sub, bounding_boxes_sub, cam_info_sub,
-                                                   point_cloud_sub);
+  // queue size for syncPolicyForCallback;
+  unsigned int queue_size = 20;
 
+  // ApproximateTime takes a queue size as its constructor argument, hence SyncPolicy(20)
+  message_filters::Synchronizer<syncPolicyForCallback> sync(syncPolicyForCallback(queue_size), object_count_sub,
+                                                            bounding_boxes_sub, cam_info_sub, point_cloud_sub);
+
+  // Bind Callback to function to each of the subscribers
   sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
 
   ros::Rate r(100);  // 100 hz
