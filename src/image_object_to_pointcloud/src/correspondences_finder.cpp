@@ -105,6 +105,9 @@ typedef velodyne::VelodynePointCloud PointCloudType;
 typedef velodyne::PointXYZIR PointType;
 #endif
 
+const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
+const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
+
 geometry_msgs::TransformStamped transformStamped;
 
 // Eigen::Quaterniond tf_quaternion;
@@ -157,12 +160,14 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   std::cout << "Callback" << std::endl;
 
   // Create Datatype dependent if operating with KITTI datasets or Experimental Dataype
-  PointCloudType point_cloud_velodyne, point_cloud, target;
-  PointCloudType::Ptr cloudPtr, point_cloud_ptr(new PointCloudType);
+  PointCloudType point_cloud, target, final_point_cloud;
+  PointCloudType::Ptr cloudPtr, point_cloud_ptr(new PointCloudType), final_point_cloud_ptr(new PointCloudType);
   std::cout << "Init" << std::endl;
 
   fromROSMsg(*point_cloud_msg, point_cloud);
   *point_cloud_ptr = point_cloud;
+  *final_point_cloud_ptr = final_point_cloud;
+
   std::cout << "Message" << std::endl;
 
   // Get Camera Information from msg
@@ -183,124 +188,134 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
                               fov_x, fov_y, focal_length, principal_point, aspect_ratio);
   std::cout << "OpenCV" << std::endl;
 
-  FOV bounding_box_fov;
-  Eigen::Vector3f camera_rotation;
-  computeBoundingBoxFOV(cam_model_, b_boxes->bounding_boxes[0], &bounding_box_fov, camera_rotation);
-  std::cout << "Compute BBOxFOV" << std::endl;
+  Eigen::Matrix4f camera_transform;
+  Eigen::Matrix4f lidar_pose;
+  Eigen::Matrix4f frustrum_filter_pose;
+  Eigen::Matrix4f camera_to_lidar_6DOF;
 
-  // Pose Rotations
+  for (int i = 0; i < object_count->count; ++i)
+  {
+    FOV bounding_box_fov;
+    Eigen::Vector3f camera_rotation;
+    computeBoundingBoxFOV(cam_model_, b_boxes->bounding_boxes[i], &bounding_box_fov, camera_rotation);
+    std::cout << "Compute BBOxFOV" << std::endl;
 
-  // Compute Camera Affine Transform from Angle Axis vector
-  cv::Mat rotation_matrix = cv::Mat(3, 3, CV_32FC1);
-  cv::Vec3f camera_rotation_cv;
-  Eigen::Matrix3f rotation_matrix_eigen;
+    // Pose Rotations
 
-  cv::eigen2cv<float, 3, 1>(camera_rotation, camera_rotation_cv);
-  cv::Rodrigues(camera_rotation_cv, rotation_matrix);  // Rodrigues overloads matrix type from float to double!
-  cv::cv2eigen<float, 3, 3>(rotation_matrix, rotation_matrix_eigen);
+    // Compute Camera Affine Transform from Angle Axis vector
+    cv::Mat rotation_matrix = cv::Mat(3, 3, CV_32FC1);
+    cv::Vec3f camera_rotation_cv;
+    Eigen::Matrix3f rotation_matrix_eigen;
 
-  std::cout << "Compute Camera Rotation" << std::endl;
-  // Eigen::Quaternionf q_camera(rotation_matrix_eigen);
-  // q_camera.normalize();
-  Eigen::Matrix4f camera_transform = Eigen::Matrix4f::Identity();
-  camera_transform.block<3, 3>(0, 0) = rotation_matrix_eigen;  // q_camera.matrix();  // Quaternion to Rot Matrix
-  std::cout << "Compute Rotation Matrix Done" << camera_transform << std::endl;
-  std::cout << "Rotation Matrix: " << rotation_matrix_eigen << std::endl;
-  // lidar_pose_.block<4, 1>(0, 4) = point_cloud_ptr->sensor_origin_;  // Vector 4f
+    cv::eigen2cv<float, 3, 1>(camera_rotation, camera_rotation_cv);
+    cv::Rodrigues(camera_rotation_cv, rotation_matrix);  // Rodrigues overloads matrix type from float to double!
+    cv::cv2eigen<float, 3, 3>(rotation_matrix, rotation_matrix_eigen);
 
-  // Get Initial LiDAR Pose
-  Eigen::Matrix4f camera_to_lidar_6DOF = (transform_eigen.matrix()).cast<float>();  // Convert Eigen Affine3d Trans
-  std::cout << "6DOF" << std::endl;
-  Eigen::Matrix4f lidar_pose = getLiDARPose(point_cloud_ptr);
-  std::cout << "LiDAR Pose Done" << std::endl;
+    std::cout << "Compute Camera Rotation" << std::endl;
+    // Eigen::Quaternionf q_camera(rotation_matrix_eigen);
+    // q_camera.normalize();
+    camera_transform = Eigen::Matrix4f::Identity();
+    camera_transform.block<3, 3>(0, 0) = rotation_matrix_eigen;  // q_camera.matrix();  // Quaternion to Rot Matrix
+    std::cout << "Compute Rotation Matrix Done" << camera_transform << std::endl;
+    std::cout << "Rotation Matrix: " << rotation_matrix_eigen << std::endl;
+    // lidar_pose_.block<4, 1>(0, 4) = point_cloud_ptr->sensor_origin_;  // Vector 4f
 
-  /* Order is computed on the inverse order!
-   * The first matrix/transform in the multiplication chain is the first you want to apply to the "object matrix"
-   * The first matrix to be multiplied by the object is the last transform you wnat to perform
-   *
-    Order:
-    1. Camera Rotation
-    2. 6 DOF Camera to LiDAR
-    3. LIDAR Pose
-    4. Convert LiDAR Pose to Frustum Pose
-   * First we need to apply the camera rotation to the camera pose. The camera pose, in this case is a Identity matrix
-   * After the Camera Pose is Rotated to face the FOV, we need to translate and rotate the referential from the Camera
-   * to the LiDAR Coordinates. Note that different coordinate reference frames are already covered in this transform and
-   * therefore no extra matrices are needed
-   * Despite not being a transformation, we must take into account the original LiDAR Pose, which is the last transform
-   to be applied
-   * Also, because Frustum Coordinate System is different from Velodyne's, a special transform must be carried out
-   * So the order is 1. * 2. * 3. * 4. * Camera Pose
-   *
-   * Useful links:
-   * - https://stackoverflow.com/questions/25058852/how-to-check-if-eigen-matrix-is-column-major-or-row-major
-   * - https://eigen.tuxfamily.org/dox/group__TopicStorageOrders.html
-   * -
-   https://stackoverflow.com/questions/18785938/combining-multiple-transformations-in-eigen-into-one-transformation-matrix
-   */
+    // Get Initial LiDAR Pose
+    camera_to_lidar_6DOF = (transform_eigen.matrix()).cast<float>();  // Convert Eigen Affine3d Trans
+    std::cout << "6DOF" << std::endl;
+    lidar_pose = getLiDARPose(point_cloud_ptr);
+    std::cout << "LiDAR Pose Done" << std::endl;
 
-  Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();
-  Eigen::Matrix4f lidar_pose_to_frustum_pose;
-  // clang-format off
+    /* Order is computed on the inverse order!
+     * The first matrix/transform in the multiplication chain is the first you want to apply to the "object matrix"
+     * The first matrix to be multiplied by the object is the last transform you wnat to perform
+     *
+      Order:
+      1. Camera Rotation
+      2. 6 DOF Camera to LiDAR
+      3. LIDAR Pose
+      4. Convert LiDAR Pose to Frustum Pose
+     * First we need to apply the camera rotation to the camera pose. The camera pose, in this case is a Identity matrix
+     * After the Camera Pose is Rotated to face the FOV, we need to translate and rotate the referential from the Camera
+     * to the LiDAR Coordinates. Note that different coordinate reference frames are already covered in this transform
+     and
+     * therefore no extra matrices are needed
+     * Despite not being a transformation, we must take into account the original LiDAR Pose, which is the last
+     transform to be applied
+     * Also, because Frustum Coordinate System is different from Velodyne's, a special transform must be carried out
+     * So the order is 1. * 2. * 3. * 4. * Camera Pose
+     *
+     * Useful links:
+     * - https://stackoverflow.com/questions/25058852/how-to-check-if-eigen-matrix-is-column-major-or-row-major
+     * - https://eigen.tuxfamily.org/dox/group__TopicStorageOrders.html
+     * -
+     https://stackoverflow.com/questions/18785938/combining-multiple-transformations-in-eigen-into-one-transformation-matrix
+     */
+
+    Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f lidar_pose_to_frustum_pose;
+    // clang-format off
   lidar_pose_to_frustum_pose << 1, 0, 0, 0,
                                 0, 0, 1, 0,
                                 0,-1, 0, 0,
                                 0, 0, 0, 1;
-  // clang-format on
+    // clang-format on
 
-  Eigen::Matrix4f lidar_rotation = getLiDARRotation(cam_model_, b_boxes->bounding_boxes[0]);
+    Eigen::Matrix4f lidar_rotation = getLiDARRotation(cam_model_, b_boxes->bounding_boxes[i]);
 
-  // std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
-  // std::cout << "Camera to LiDAR 6DOF Transform: " << camera_to_lidar_6DOF.IsRowMajor << std::endl;
-  // std::cout << "Lidar Pose: " << lidar_pose.IsRowMajor << std::endl;
-  // std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
+    // std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
+    // std::cout << "Camera to LiDAR 6DOF Transform: " << camera_to_lidar_6DOF.IsRowMajor << std::endl;
+    // std::cout << "Lidar Pose: " << lidar_pose.IsRowMajor << std::endl;
+    // std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
 
-  Eigen::Matrix4f frustrum_filter_pose =
-      // camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
-      // lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * lidar_rotation;
-      lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * camera_transform;
-  std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
+    frustrum_filter_pose =
+        // camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
+        lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * lidar_rotation;
+    // lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * camera_transform;
+    std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
 
-  // Print Stuff
-  float fov_X =
-      atan((b_boxes->bounding_boxes[0].xmax - b_boxes->bounding_boxes[0].xmin) / (cam_model_.fx())) * 180.0f / M_PI;
-  float fov_Y =
-      atan((b_boxes->bounding_boxes[0].ymax - b_boxes->bounding_boxes[0].ymin) / (cam_model_.fy())) * 180.0f / M_PI;
+    // Print Stuff
+    float fov_X =
+        atan((b_boxes->bounding_boxes[i].xmax - b_boxes->bounding_boxes[i].xmin) / (cam_model_.fx())) * 180.0f / M_PI;
+    float fov_Y =
+        atan((b_boxes->bounding_boxes[i].ymax - b_boxes->bounding_boxes[i].ymin) / (cam_model_.fy())) * 180.0f / M_PI;
 
-  std::cout << "(" << b_boxes->bounding_boxes[0].xmin << ", " << b_boxes->bounding_boxes[0].xmax << ") e ("
-            << b_boxes->bounding_boxes[0].ymin << ", " << b_boxes->bounding_boxes[0].ymax << ") " << std::endl;
-  std::cout << b_boxes->bounding_boxes[0].Class << ": " << b_boxes->bounding_boxes[0].probability << " (" << fov_X
-            << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
-  std::cout << b_boxes->bounding_boxes[0].Class << ": " << b_boxes->bounding_boxes[0].probability << " ("
-            << bounding_box_fov.x << " ," << bounding_box_fov.y << ") with Principial Point: " << principal_point
-            << std::endl;
-  std::cout << "Rotation: " << camera_rotation << std::endl;
+    std::cout << "(" << b_boxes->bounding_boxes[i].xmin << ", " << b_boxes->bounding_boxes[i].xmax << ") e ("
+              << b_boxes->bounding_boxes[i].ymin << ", " << b_boxes->bounding_boxes[i].ymax << ") " << std::endl;
+    std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << " (" << fov_X
+              << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
+    std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << " ("
+              << bounding_box_fov.x << " ," << bounding_box_fov.y << ") with Principial Point: " << principal_point
+              << std::endl;
+    std::cout << "Rotation: " << camera_rotation << std::endl;
 
-  pcl::FrustumCulling<PointType> fc;
-  fc.setInputCloud(point_cloud_ptr);
-  fc.setVerticalFOV(bounding_box_fov.y);
-  fc.setHorizontalFOV(bounding_box_fov.x);
-  fc.setNearPlaneDistance(NEAR_PLANE_DISTANCE);
-  fc.setFarPlaneDistance(FAR_PLANE_DISTANCE);
-  std::cout << "FrustumCulling" << std::endl;
+    pcl::FrustumCulling<PointType> fc;
+    fc.setInputCloud(point_cloud_ptr);
+    fc.setVerticalFOV(bounding_box_fov.y);
+    fc.setHorizontalFOV(bounding_box_fov.x);
+    fc.setNearPlaneDistance(NEAR_PLANE_DISTANCE);
+    fc.setFarPlaneDistance(FAR_PLANE_DISTANCE);
+    std::cout << "FrustumCulling" << std::endl;
 
-  /*
-   * http://docs.pointclouds.org/trunk/frustum__culling_8hpp_source.html#l00047 cv::Size im_dimensions =
-   * cam_model_.fullResolution(); This assumes a coordinate system where X is forward, Y is up, and Z is right. To
-   * convert from the traditional camera coordinate system (X right, Y down, Z forward), one can use:
-   */
+    /*
+     * http://docs.pointclouds.org/trunk/frustum__culling_8hpp_source.html#l00047 cv::Size im_dimensions =
+     * cam_model_.fullResolution(); This assumes a coordinate system where X is forward, Y is up, and Z is right. To
+     * convert from the traditional camera coordinate system (X right, Y down, Z forward), one can use:
+     */
 
-  fc.setCameraPose(frustrum_filter_pose);
-  fc.filter(target);
-  std::cout << "Filtered. Target size = " << target.size() << std::endl;
+    fc.setCameraPose(frustrum_filter_pose);
+    fc.filter(target);
+    std::cout << "Filtered. Target size = " << target.size() << std::endl;
+    *final_point_cloud_ptr += target;
+  }  // FOR ENDS HERE
 
-  sensor_msgs::PointCloud2 out_cloud;
+  // sensor_msgs::PointCloud2 out_cloud;
   *point_cloud_ptr = target;
   std::cout << "Atributed" << std::endl;
   // pcl::toROSMsg(target, *out_cloud);
   std::cout << "toROSMsg Done" << std::endl;
-  pub.publish(point_cloud_ptr);  // PointCloud Object is automacally serialized by ROS and there is no need to call
-                                 // toROSMsg
+  pub.publish(final_point_cloud_ptr);  // PointCloud Object is automacally serialized by ROS and there is no need to
+                                       // call toROSMsg
   std::cout << "Published" << std::endl;
 
   // POSE Publishing
@@ -341,16 +356,13 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   pub_final.publish(pose_final_s);
 }
 
-const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
-const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
-
 void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
                const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
                const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
   PointCloudType point_cloud_camera, point_cloud;
   PointCloudType::Ptr cloudCameraPtr(new PointCloudType);
-  // PointCloudType::Ptr cloudPtr(new PointCloudType);
+  PointCloudType::Ptr cloudPtr(new PointCloudType);
   PointCloudType::Ptr cloudFilteredPtr(new PointCloudType);
 
   static bool first_callback = true;
@@ -367,11 +379,11 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   }
   // Convert ROS msg to Point Cloud
   fromROSMsg(point_cloud_camera_msg, point_cloud_camera);
-  // fromROSMsg(*point_cloud_msg, point_cloud);
+  fromROSMsg(*point_cloud_msg, point_cloud);
 
   // Initialize pointer to point cloud data
   *cloudCameraPtr = point_cloud_camera;
-  //*cloudPtr = point_cloud;
+  *cloudPtr = point_cloud;
 
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(cam_info);
@@ -381,6 +393,7 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   std::vector<int> indices_in;
   boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
+
   for (int i = 0; i < cloudCameraPtr->points.size(); i++)
   {
     cv::Point2d uv = cam_model_.project3dToPixel(
@@ -402,11 +415,12 @@ void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   }
 
   pcl::ExtractIndices<PointType> eifilter(true);  // Initializing with true will allow us to extract the removed indices
-  eifilter.setInputCloud(cloudCameraPtr);
+  eifilter.setInputCloud(cloudPtr);
   eifilter.setIndices(index_ptr);
   eifilter.filter(*cloudFilteredPtr);
 
   std::cout << index_ptr->size() << std::endl;
+  cloudFilteredPtr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub.publish(cloudFilteredPtr);
 }
 
@@ -436,6 +450,7 @@ int main(int argc, char** argv)
    *
    * Another perspective is: we want to transform from <target_frame> from this <source_frame> frame
    */
+
   transformStamped = tfBuffer.lookupTransform(CAMERA_TF2_REFERENCE_FRAME, LIDAR_TF2_REFERENCE_FRAME, ros::Time(0),
                                               ros::Duration(20.0));
 
@@ -479,7 +494,7 @@ int main(int argc, char** argv)
                                                             bounding_boxes_sub, cam_info_sub, point_cloud_sub);
 
   // Bind Callback to function to each of the subscribers
-  sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
+  sync.registerCallback(boost::bind(&callback2, _1, _2, _3, _4));
 
   ros::Rate r(100);  // 100 hz
   while (ros::ok())
