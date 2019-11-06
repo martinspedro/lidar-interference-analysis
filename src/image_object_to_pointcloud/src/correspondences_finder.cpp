@@ -250,14 +250,15 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   Eigen::Matrix4f lidar_rotation = getLiDARRotation(cam_model_, b_boxes->bounding_boxes[0]);
 
-  std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
-  std::cout << "Camera to LiDAR 6DOF Transform: " << camera_to_lidar_6DOF.IsRowMajor << std::endl;
-  std::cout << "Lidar Pose: " << lidar_pose.IsRowMajor << std::endl;
-  std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
+  // std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
+  // std::cout << "Camera to LiDAR 6DOF Transform: " << camera_to_lidar_6DOF.IsRowMajor << std::endl;
+  // std::cout << "Lidar Pose: " << lidar_pose.IsRowMajor << std::endl;
+  // std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
 
   Eigen::Matrix4f frustrum_filter_pose =
       // camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
-      camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * lidar_rotation;
+      // lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * lidar_rotation;
+      lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * camera_transform;
   std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
 
   // Print Stuff
@@ -478,7 +479,7 @@ int main(int argc, char** argv)
                                                             bounding_boxes_sub, cam_info_sub, point_cloud_sub);
 
   // Bind Callback to function to each of the subscribers
-  sync.registerCallback(boost::bind(&callback2, _1, _2, _3, _4));
+  sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
 
   ros::Rate r(100);  // 100 hz
   while (ros::ok())
