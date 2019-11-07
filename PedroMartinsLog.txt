@@ -1,0 +1,380 @@
+﻿- Reunião com o André, 3/7/2018
+	- Setup
+		- Definir setup inicial: 1 LIDAR + 1 interferer + obstáculos
+		- Definir medições a tirar
+	- António Neves: 
+		- Ver disponibilidade do LIDAR da robótica (Velodyne 16) e de um RADAR (Francisco Curado)
+	- https://www.nvidia.com/en-us/autonomous-machines/embedded-systems-dev-kits-modules/
+	
+- Reunião 10 de Julho de 2018
+	- Discussão de ideias:
+		- Combinar com estereoscopia
+		- Usar um polarizador (como os óculos de sol), ver equações de Fresnel
+		- Identificar superficie com câmara/LIDAR -> conjunto de pontos dentro do objeto têm aproximadamente a mesma distância -> tirar outliers e fazer a média
+	- Informação necessária a pedir ao André
+		- Pedir o material necessário tirar resultados experimentais
+		- Diretividade do recetor (FOV)?
+		- Resolução angular do LIDAR?
+		- Arranjar uma câmara IR para ver até que ponto uma imagem tirada com a iluminação do LIDAR é melhor que uma imagem tirada com uma camara visível standard
+			- Comparar camara visivel vs. mono vs. IR
+			
+- Reunião 19 de Setembro
+	- Participantes: Miguel, Pedro e António
+	- Hardware: 
+		- Plano A é usar um Velodyne da Bosch, plano B é usar o LIDAR do ATLASCAR
+		- Material necessário: 1 LIDAR, 1 jammer, 1 câmera (IR ou VIS)
+			- António disponibiliza câmeras (FLIR multi-espetral ou GOBI)
+			- Jammer tem de ser construido
+			- Bifurcações (a pensar): 
+				- Câmara VIS vs. IR: VIS é mau para ambientes noturnos
+				- Iluminação para a câmara obtida através do LIDAR vs. LED
+	- Alteração do sensor para evitar interferência
+		- Fora do âmbito da tese
+		- O recetor é diretivo, pelo que nada há a alterar relativamente a este aspeto
+		- Ideia estilo OCDMA simplificado: 
+			1. 2 pulsos são enviados com um intervalo de tempo de T.
+			2. O Rx calcula o TOF a partir do 1º pulso
+			3. O Rx aguarda pelo 2º pulso
+			4. Se o 2º pulso chegar T segundos depois, o pulso foi o transmitido.
+	- Objetivos
+		1. (Principal): Identificar outliers
+		2. Corrigir outliers
+		- Método para os cumprir: 
+			1. Câmera: Para cada frame, segmentar imagem
+			2. Câmera: Identificar objetos (estrada, peão, carro, delimitadores, sinais
+			3. LIDAR: Segmentar point cloud para cada objeto identificado (ex. fazer um conjunto de todos os voxels pertencentes a um carro)
+			4. Tratar estatisticamente esses voxels principalmente para remover outliers
+			5. Devolver uma destas clouds:
+				- Point cloud: nº máximo possivel de Voxels, quase fotografia 3D. Enorme quantidade de dados.
+				- Mesh cloud: apenas devolver superficies e voxels necessários apenas para definir superficies. Quantidade razoável de dados.
+				- Object cloud: apenas devolver cada objeto identificado, fotografia, distância e orientação. Muitos poucos pontos.
+	- TPC:
+		- António: falar com Miguel para averiguar acesso ao LIDAR do ATLASCAR
+		- Pedro: experimentar softwares de processamento de imagem (openCV, ?), pesquisar SOTA (artigos e patentes)
+		- André: empréstimo do Velodyne
+		
+- Skype com André 21 de Setembro
+	- André sugeriu usar Linux, instalar ROS e familiarizar com software de processamento de imagem
+	- Enquanto não podemos tirar point clouds com interferência, começar com:
+		- point clouds disponiveis na NET: experimentar segmentação, identificação de objetos, etc.
+		- point coulds a arranjar pela Bosch (1 Velodyne + 1 câmara): de preferência num carro protótipo. O André ficou de arranjar isto.
+		
+- Reunião 26 de Setembro
+	- Discussão de softwares e onde os utilizar: ROS, openCV, PCL e YOLO 
+	- Estratégia do Pedro: avaliar as potencialidades e aplicabilidade de cada software, e depois fazer um diagrama de blocos
+	- Faz-se-se tudo em ROS, ou só se utiliza o ROS para comunicar com o LIDAR?
+	- Ver que point clouds existem disponiveis na net
+	
+- Reunião 3 de Outubro
+	- O Pedro está a familiarizar-se com ROS, openCV, PCL e YOLO, em breve dará para fazer um diagrama de blocos
+	- O Pedro gostou do Mendeley para referências
+	- Avaliação do toolbox de ADAS da Matlab: não agradou ao Pedro, Miguel e António Neves. Permite um arranque rápido, mas não permite ter um conhecimento profundo dos algoritmos. Também dificulta o passar de um conceito para um produto. Por último, a comunidade de robótica e condução autónoma usa quase toda ferramentas open source, tais como nós estamos a utilizar.
+		- https://www.mathworks.com/videos/introduction-to-automated-driving-system-toolbox-1497301373787.html
+	- Discussão da utilização do GTA V para extração de point clouds: parece uma excelente ideias	
+		- https://github.com/UsmanJafri/LiDAR-GTA-V (Este parece ser o mais direto para sacar point clouds)
+		- https://github.com/aitorzip/DeepGTAV (mais completo dá para automatizar o GTA, i.e., entrar em modo de condução autónoma)
+
+--- Reunião 15 de Novembro ---
+	- point clouds enviadas pelo André foram vistas no ROS, ou seja ROS está operacional
+	- TPC: diagrama de blocos
+	- Pedro arranjou uma base de dados aberta com point clouds (Velodyne) e câmara. Vai para já usar essas point clouds para começar nos algoritmos
+	- Falta assim o miolo da ideia: fundir point cloud com câmara e retirar outliers
+	
+--- Reunião 28 de Novembro ---
+	- State of art
+		- revisão sistemática feita para literatura (falta para patentes)
+		- De interferência encontra-se apenas o artigo referenciado na proposta de tese, e várias soluções para a mitigar, mas nenhuma semelhante à proposta.
+	- Utilização do ROS para incluir dados da câmara é vantajosa
+		- Permite visualização em simultâneo de point could e camara
+		- ROS suporta openCV e PCL de igual forma ao Linux, usa-se assim um unico OS
+	- Synchronization
+		- Temporal
+			- Necessária dado o frame rate do LIDAR ser diferente da câmara
+			- Neste momento é melhor usar datasets francamente estáticos para evitar desenvolver um bloco de sincronização temporal (baixa prioridade)
+		- Espacial
+			- Necessária para fazer o match entre voxel do LIDAR e pixel da câmara.
+			- O resultado é uma lookup table para fazer correspondência
+			- 2 métodos
+				- "À mão": sabendo a posição relativa entre câmara e LIDAR é possivel derivar a look up table
+				- Automatic learning: com o treino de várias frames, a tabela é automaticamente aprendida, e há de convergir ao fim de algumas frames
+			- Não dá para escapar ao desenvolvimento do bloco de sync. espacial
+			- Dada a maturidade do ROS e do PCL, o bloco de sincronização será de todos os blocos o mais custom-made
+			- Atenção que a câmara pode ser stereo, pelo que pode também devolver uma point cloud, embora francamente imprecisa.
+	- Próximos passos
+		- Conseguir visualizar em simultâneo no ROS LIDAR e camara
+		- Conseguir isolar frames
+		- Desenvolver bloco de sincronização espacial e ver point cloud colorida
+		- Atualizar diagrama de blocos
+		- Experimentar datasets da udacity:
+			- Tutorial da Udacity: http://petermoran.org/exploring-udacitys-open-source-lidar-dataset/
+			- Dataset no Github: https://github.com/udacity/self-driving-car/tree/master/datasets
+			- datasets vêm com script/tutorial compatível com ROS. LIDAR é um Velodyne HDL-32E.
+		- Quando todo o diagrama de blocos estiver implementado
+			- testar com datasets com LIDAR corrompido aleatoriamente (rand), e com diferentes esparsidades
+			- testar com datasets com LIDAR corrompido de acordo com o artigo referênciado na proposta de tese (correlação temporal e espacial da interferência)
+		- Esperar por point clouds da Bosch
+			- em áreas mais extensas
+			- com interferência entre 2 LIDARs
+		- Identificação de objetos a incluir, mas só no fim do do diagrama de blocos
+		
+--- Reunião 6 de Dezembro ---
+	- ATLASCAR está estacionado na entrada do IRIS
+		- https://photos.app.goo.gl/GmG7oh9WC1D23X8f8
+	- Dataset da udacity usado com sucesso
+	- Visualização em simultâneo no ROS LIDAR e camara conseguida
+		- Cor da point cloud é proporcional à intensidade
+		- Nota-se que os carros refletem pouco, mas a vegetação envolvente reflete bastante
+		- o LIDAR tem um alcance de facto muito fraco, ~40 m
+	- Todos os tutorials de ROS feitos, foi necessário dado haver alguns bugs estranhos nos data sets, muita pedra partida
+		- ROS está dominado
+	- Próximos passos
+		- Tutorial de PCL em ROS, com o objetivo de fazer downsampling de uma point cloud
+			- Tutorial feito com sucesso
+			- Objetivo é dominar integração de PCL em ROS
+			- Integração de openCV em ROS deve ser semelhante
+		- Sincronização espacial e temporal
+			- colorir a point cloud com a imagem da câmara, em tempo real
+			- Método 1: fazer match frame a frame com openCV e PCL. Match começa do zero a cada frame. Computacionalmente muito pesado para tempo real.
+			- Método 2: Arranjar uma matriz de correspondência entre pixel e voxel ao fim de algumas frames.
+				- Aplicar depois a matriz de correspondência, talvez sem openCV ou PCL. Computacionalmente muito leve.
+		- Ir atualizado o diagrama de blocos, mas deixar versões
+			- Tese: deverá ter 2 diagramas de blocos: 1 mais geral, e outro mais detalhado.
+	- Dúvidas
+		- Se a sincronização espacial e temporal for feita com sucesso pelo ROS, o que parece ser possível, talvez deixe de fazer sentido haver os blocos "Frame"
+		- Segmentação: 
+			- Sem interferência provavelmente faria sentido fazer a segmentação apenas da point cloud colorida.
+			- Com interferência provavelmente isto é arriscado, é melhor segmentar imagem da câmara e point cloud (colorida?) separadamente, dado a point cloud estar corrompida
+		- Processing
+			- No dominio do tempo, pode-se fazer tracking de superficies em vez de apenas objetos inteiros
+			
+--- Reunião 13 de Dezembro ---
+	- Próximo desafio: fusão entre point cloud e câmara por forma a colorir a point cloud
+		- Quase feito: colorir a point cloud com uma cor à escolha
+		- Sincronização espacial e temporal
+			- Ver o que está feito neste domínio (SOTA) e propor estratégia para realizar este bloco complexo
+			- Método 1: fazer match frame a frame com openCV e PCL. Match começa do zero a cada frame. Computacionalmente muito pesado para tempo real.
+			- Método 2: Arranjar uma matriz de correspondência entre pixel e voxel ao fim de algumas frames.
+				- Aplicar depois a matriz de correspondência, talvez sem openCV ou PCL. Computacionalmente muito leve.
+				
+--- Reunião 19 de Dezembro ---
+	- LIDARs Sick do Atlascar têm apenas uma linha, pelo que não servem para praticamente nada, mesmo sem interferência
+	- Colorir a point cloud como uma cor à escolha está feito
+	- Sincronização espacial e temporal
+		- dataset da udacity tem informação sobre a calibração da câmara e do LIDAR, mas não dos dois, o que impede uma sincronização entre dois direta
+		- neste caso há duas soluções
+			1. continuar com o dataset, mas fazer calibração automática (e on the fly) com o dataset que há
+				- Aqui é necessário 1º ver SOTA para averiguar a complexidade e efetividade desta abordagem. No fundo é o método 2 da reunião acima
+				- É o método mais automático que se pode ter (evita uma etapa de calibração), mas requer algum esforço de implementação, não é só chamar funções diretamente de PCL ou openCV
+				- Para já o Pedro vai averiguar a fasibilidade desta solução, e o esforço que requer. O foco do trabalho dele recairá nos próximos tempos aqui.
+			2. comprar o curso (~1000€) para ter acesso às descições do dataset, mas nada garante que a calibração necessária exista
+			3. abandonar o dataset, e tirar dados e respetivas calibrações
+	- Segmentação dos dados da câmara: provavelmente é mais direto identificar e localizar objetos logo de imediato, por exemplo através do YOLO
+	- Interferência
+		- Quando o algoritmo estiver completo, para se fazer debug é preciso ter um cenário realista de interferência. Há duas maneiras de o gerar, e convém testar as duas:
+			1. Gerar interferência artificialmente de diversas formas variando aleatoriedade, esparsidade e intensidade (ex. interferência apenas ao longo da mesma linha)
+			2. Tirar dados reais com 2 Velodynes ou 1 Velodyne + 1 Hesai. Isto terá de ser feito com a ajuda da Bosch, dado que o Altascar não servirá para nada.
+			
+--- Reunião 9 de Janeiro ---
+	- Férias serviram para arrumar a casa: Mendeley, código, planear
+	- Falta sincronização espacial (e temporal)
+		- Datasets a usar: Udacity e KITTI
+		- Usar algoritmos de autocalibração do livro Multiple view geometry in computer vision, Capítulo 4, especialmente secção 4.8, pag. 154 e finalmente página 181
+			- https://en.wikipedia.org/wiki/Camera_matrix
+				- Transformar point cloud em pontos cartesianos X
+				- Calcular diretamente matrix P, tal que x = PX
+					- um ponto x na câmara corresponde a um ponto cartesiano X
+					- Ver métodos para estimação de P em sistemas sobre-determinados
+					- os pontos correspondentes podem vir de diferent frames, sem problema (é mais um ponto no sistema de equações)
+				- A partir daqui é simples desenvolver um código para dar cor à point cloud
+	- Ideia: RANSAC for interference mitigation
+	- Segmentação dos dados da câmara: usar YOLO de imediato
+		- Ideia: Fazer contorno com LIDAR(?)
+		
+--- Reunião 23 de Janeiro ---
+	- O Pedro está neste momento a atacar o problema mais crucial da tese: fundir câmara com LIDAR com vista a obter-se uma point cloud colorida
+	- Na literatura vista até agora, ainda não apareceu tal point cloud colorida
+	- O ponto mais crucial da tese é conseguir fundir LIDAR e câmara sem qualquer pré-calibração destes (auto-calibração)
+		- Isto vai exigir ler o livro do Hartley quase todo, e implementar alguns métodos lá descrito.
+	- Sincronismo temporal entre camara e LIDAR: o mais conveniente é operar a câmara via um nó de ROS, garantindo assim um bom sincronismo entre LIDAR e câmara
+	- Datasets
+		- Interferência à parte, datasets da Udacity e do KITTI devem bastar
+		- A Cláudia Simões da Bosch está a iniciar a construção de um dataset, que incluirá ruído e interferência
+		- Pedro: AI: pensar nos datasets necessários
+			- Em principio um com 2 LIDARs lado a lado (talvez VLP16 e Quanergy M8)
+		- André: tentar encontra dataset que se tirou quando se colocaram 2 Velodynes lado a lado
+	- Ideias discutidas
+		- Emulação de interferência nas point clouds ideais: é preciso sacar um bom modelo dos testes feitos
+		- RANSAC para remover interferência
+		- Usar LIDAR para fazer contorno da imagem da câmara
+		- Anomaly detection with ML: pag. 102 do livro "Deep learning"
+		
+--- Reunião 21 de Fevereiro ---
+	- Foco nos próximos tempos auto-calibração entre câmara e LIDAR com base nos algoritmos do livro do Zisserman
+	- O António Neves mencionou que o colega Paulo Dias está a trabalhar em mapeamento 3D de interiores com exatamente a mesma problemática
+		- Pedro: Marcar reunião com o Paulo Dias para perceber a abordagem tomada por ele
+		- O António mencionou também que já viu point clouds coloridas (com short range, mapeamento, por exemplo Kinect)
+	- O Pedro já assinou o NDA, pelo que os datasets da Bosch tirados até agora podem ser enviados assim que seja útil
+		- 1 LIDAR + camara
+		- 2 LIDARs lado a lado
+		- André: enviar dataset que se tirou quando se colocaram 2 Velodynes lado a lado
+	- Sugestão do algoritmo
+		1.	Segmentar point cloud por forma a que sobrem apenas os pontos que caibam no FOV da câmara (atenção que devem ficar sempre alguns pontos “a mais”)
+		2.	Converter point cloud segmentada em pontos cartesianos ([x_w y_w z_w 1] na notação da wikipedia)
+		3.	Para cada ponto da point cloud
+			- procurar o pixel correspondente [u v] a partir da 1ª equação da wikipedia -> Precisas de saber a matriz da câmara
+			- Sacar a cor desse pixel
+			- Pintar o ponto da point cloud com a cor correspondente
+		4.	(Bónus(?): fazer uma interpolação da point cloud se a resolução da câmara for superior à do LIDAR no FoV da câmara)
+		Portanto, em 1º lugar e antes de tudo o que está acima, precisas de determinar a matriz da câmara via auto-calibração (o que está bem descrito no livro que indicas).
+		Neste ponto sugiro que a par de adquirires as bases teóricas para auto-calibração, que procures tutorials para openCV dado muito provavelmente o openCV suportar isso.
+		
+--- Reunião 7 de Março --- 
+	- Leitura de state of the art: encontrou-se fusão de LIDAR e câmara com base em parâmetros geométricos previamente conhecidos, marcadores, e também redes neuronais (que pode ser útil para interpolação)
+		- ROS, livro, openCV, PCL, Kinect e automotive
+	- Em termos de algoritmos disponiveis na net, pouco se encontrou, mas o Paulo Dias deve ter algo muito parecido que usa para o Kinnekt dos robos da Cambada
+	- O algoritmo será supervisionado e iterativo, com base no ICP: https://en.wikipedia.org/wiki/Iterative_closest_point 
+	- Apontou-se o algoritmo estar pronto (fusão point cloud e câmara) daqui por 15 dias
+	
+--- Reunião 21 de Março --- 
+	- A abordagem tomada, apesar de penosa, é a final no sentido de que permitirá processar .bags com informação tanto da(s) câmara(s) como do(s) LIDAR(s) de forma live
+	- Conversão da point cloud .Bag -> ROS -> PCL praticamente feita (não é, ao contrário do que se esperava, um processo direto), o que vai atrasar o objetivo de colorir a point cloud
+	- Leitura de state of art (livros, tutorial, artigos)
+	- Abordagem a tomar
+		- 2 tarefas a fazer: merge (colorir _este_ voxel com _aquele_ pixel) + auto-calibração
+		- 1º com 2 câmaras laterais fazer uma point cloud com stereo. Com isto validar o merge
+		- Com o merge validade, pode-se ir para auto-calibração
+		- Pedro: Fazer esquema
+	- Marcar reunião com o Paulo Dias
+	- Ficheiros .bag com informação da interferência estão na cloud
+	
+--- Reunião 18 de Abril ---
+	- Nova abordagem: numa primeira fase copiar trabalho: [Brabec] - Automated camera calibration from laser scanning data in natural environments
+		- Calibração e fusão entre câmara e LIDAR são feitas ao mesmo tempo, com intervenção humana (alguns pontos são picados)
+		- Restante calibração é automática e feita com RANSAC
+		- Grande enfase na visualização, provavelmente desnecessário para o nosso caso
+	- Plano
+		1. Fusão + calibração (cópia do Brabek), ver se se consegue automatismo total por exemplo através de contornos
+		2. Caracterização da interferência
+		3. Discussão de abordagens para deteção e mitigação de interferência
+			- Abordagem algoritmica
+			- Abordagem com redes neuronais
+	- Para o ponto 2 faz falta mais um resultado: tirar a point cloud com 2 LIDARs lado a lado (exatamente como foi tirada antes), mas com um material absorvente entre os 2, para evitar que um feixe de um LIDAR incida diretamente no outro.
+	
+--- Reunião 2 de Maio ---
+	- Recolha de dados "em tempo real" (streaming) concluida para câmara(s) e praticamente concluida para o LIDAR do dataset da Udacity
+		- Sensores (camaras, LIDAR, etc.) -> .bag -> split
+			- camara 1
+				-> nó ROS para devolver frame "raw" -> split -> parâmetros + dados (1 frame de cada vez)
+			- camara 2
+			- LIDAR
+			- ...
+	- Quando isto estiver acabado pode-se implementar a fusão, que será numa primeira fase a cópia do Brabec
+	- Next: calibração -> fusão e visualização
+	- Fusão deve ser o menos sofisticada possivel
+	
+--- Reunião 16 de Maio --- 
+	- Atingiu-se o ponto em que se tem acesso aos dados raw tanto de camara como de LIDAR, frame a frame.
+		- Houve vários obstáculos em chegar a este ponto, mas olhando para trás era apenas uma questão de esforço.
+	- Obstáculo: o dataset da Udacity não disponibiliza os parâmetros de calibração intrinseca das câmaras, uma vez que o cálculo destes são parte do curso de onde o dataset se insere
+		- Solução 1: Arranjar imagens das mesmas câmaras para calibração. Foram encontradas, mas não são oficiais (pertencem a alguém que fez o curso e que as disponibilizou).
+		- Solução 2: Fazer calibração manual da câmara "picando" vários pontos. Problema: sai muito fora do âmbito da tese e não é realistico (as câmaras num carro serão sempre calibradas por padrões)
+		- Solução 3: Mudar de dataset
+	- Tomou-se a solução 3, e mudou-se para o dataset do KITTI
+		- Prós: Disponibiliza todas as calibrações (matrizes), e os métodos para lá chegar (papers)
+		- Contra: não é compatível com ROS; não disponibiliza o código
+		- A incompatibilidade com ROS foi resolvida com base num código obtido na net para converter o dataset para um .bag
+	- Dito isto, a colorização da point cloud está agora à vista
+	- Estando esta parte fechada, parte-se para a próxima etapa: caracterização da interferência
+		- É preciso um novo dataset (câmara + LIDAR + LIDAR interferente), e com calibrações disponiveis: é boa ideia ser o Pedro a obtê-lo
+		- A interferência resulta em outliers, "ruído" ou é altamente localizada?
+		- A interferência anula por completo o reconhecimento (visual) de um objeto?
+		- Entretanto vai-se analisar melhor os dados tirados pelo André
+			
+--- Reunião 24 de Maio de 2019 ---
+	- Status: O Pedro está quase a acabar de colorir a point cloud a partir do dataset do KITTI
+	- O António Neves estará ausente do país até 1 de Setembro	
+	- Plano
+		- Até 15 de Junho: Colorir point cloud a partir do dataset do KITTI
+		- Até 1 de Julho: 
+			- Utilizar bibliotecas de identificação de objectos (ex. YOLO) para criar bounding boxes na imagem da câmara identificando pessoas, carros, etc.
+			- Isolar pontos da point cloud correspondentes aos pixels de uma dada bounding box
+			- (Modelação de interferência: introduzir ruido na profundidade dos pontos da point cloud)
+			- Filtrar point cloud por plano: pontos fora do plano causados por exemplo por interferência são simplesmente descartados
+			- Mostrar: imagem da bounding box, point cloud não filtrada, point cloud filtrada, point cloud filtrada colorida
+		- Julho: Testes experimentais com 1 LIDAR + 1 câmara + 1 LIDAR interferente
+			- Inclui calibração do setup câmara + LIDAR; tirar vários resultados com e sem interferência com o principal objetivo de caracterizar a interferência
+		- Pós-férias: escrita da tese
+			
+--- Reunião 30 de Maio de 2019 ---
+	- Plano
+		- Até 15 de Junho: Colorir point cloud a partir do dataset do KITTI
+			- Praticamente concluido. Transformação entre câmara e LIDAR aplicada com sucesso. Se tudo estiver bem, basta apenas colorir a point cloud
+			- Pode haver eventualmente algum problema de sincronismo temporal, mas provavelmente não.
+			- Fez documentação do código
+		- Até 1 de Julho: 
+			- Utilizar bibliotecas de identificação de objectos (ex. YOLO) para criar bounding boxes na imagem da câmara identificando pessoas, carros, etc.
+			- Isolar pontos da point cloud correspondentes aos pixels de uma dada bounding box
+			- (Modelação de interferência: introduzir ruido na profundidade dos pontos da point cloud)
+			- Filtrar point cloud por plano: pontos fora do plano causados por exemplo por interferência são simplesmente descartados
+			- Mostrar: imagem da bounding box, point cloud não filtrada, point cloud filtrada, point cloud filtrada colorida
+		- Julho: Testes experimentais com 1 LIDAR + 1 câmara + 1 LIDAR interferente
+			- Inclui calibração do setup câmara + LIDAR; tirar vários resultados com e sem interferência com o principal objetivo de caracterizar a interferência
+				- André confirmou empréstimo dos LiDAR VLP 16 e Hesai 40 durante o mês de julho, da câmara, https://www.alliedvision.com/en/products/cameras/detail/Manta/G-504.html e do hub.
+				- Objetivas são também do IT
+				- É preciso ver se é possivel emprestar também os suportes "nativos" da câmara e LIDARs, para melhor os fixar a uma breadboard
+		- Pós-férias: escrita da tese
+		
+--- Reunião 13 de Junho ---
+	- Plano está on track, i.e., point cloud está colorida em real-time
+	- Agora é executar a segunda parte do plano ("Até 1 de Julho" acima)
+	- Algumas questões de arrumação de partes comuns do código a serem discutidas em breve com o António Neves
+	- Miguel irá à Bosch algures entre 1 a 5 de Julho, pelo que por essa altura pode trazer o material para o Pedro
+	
+--- Reunião 27 de Junho de 2019 --- 
+	- Utilização de YOLO (2D) finalizada e a funcionar a 1 fps com rede mais complexa, e a 10 fps com rede mais simples
+	- Alguma derrapagem na recolha dos pontos da point cloud dentro da bounding box (linha 316), pois a comunidade (papers) tende a usar uma rede neuronal para mapear a bounding box 2D numa bounding box 3D
+		- Acordámos que não é necessário tanta sofisticação, pelo que uma simples procura dos pontos da point cloud correspondentes aos pixels dentro da 2D bounding box é suficiente
+		- Mapear point cloud (colorida) em 2D, procurar "pixels" da point cloud (colorida) dentro da bounding box
+	- Equipamento emprestado pela Bosch chega amanhã (LIDARs + color camera)
+	
+--- Reunião 25 de Julho de 2019 --- 
+	- Deadline 15 de Junho: calibração acabada
+		- Baseada apenas em "picar" pontos manualmente, 6 pontos parecem chegar
+		- Com base nos pontos, o algoritmo solvePnP devolve o mapeamento câmara para LIDAR -> 1 pixel transforma-se num raio (ray)
+		- Com um método de inversão, obtém-se o mapeamento de LIDAR para câmara (1 ponto da point cloud é mapeado para um pixel)
+		- Pode-se agora colorir o ponto da point cloud
+		- Falta eventualmente acrescentar RANSAC, para aumentar resiliência contra matches mal feitos
+		- Falta documentar código
+	- Deadline 1 de Julho
+		- YOLO implementado
+		- Falta: 
+			- Isolar pontos da point cloud correspondentes aos pixels de uma dada bounding box
+			- (Modelação de interferência: introduzir ruido na profundidade dos pontos da point cloud)
+			- Filtrar point cloud por plano: pontos fora do plano causados por exemplo por interferência são simplesmente descartados
+			- Mostrar: imagem da bounding box, point cloud não filtrada, point cloud filtrada, point cloud filtrada colorida
+		- Isto será feito depois de se tirarem todos os dados, pois é preciso aproveitar enquanto o equipamente está cá
+	- Julho: testes experimentais
+		- Ongoing
+		- Equipamento fica no mês de Agosto para realizar um bom conjunto de testes
+	- Derrapagem total estimada de 15 dias (uma vez que em Agosto também se trabalha...)
+		- Até de 15 de Setembro tirar todos os resultados, e fazer os pontos que faltam para "deadline 1 de Julho"
+		
+--- Reunião 6 de Setembro de 2019 --- 	
+	- Todos os resultados tirados, à espera de feedback do André para devolver equipamento
+	- De todas as tasks falta apenas:
+		- Filtrar point cloud por plano: pontos fora do plano causados por exemplo por interferência são simplesmente descartados
+		- Mostrar: imagem da bounding box, point cloud não filtrada, point cloud filtrada, point cloud filtrada colorida
+	- Resultados preliminares (e surpreendentes): praticamente não há interferência.
+		- Quando o LIDAR interferente está ligado, há 2 efeitos
+			- 1 em cada 10.000 pontos torna-se um outliers
+			- o erro dos pontos restantes parece aumentar (há uma maior "agitação" quando se vê o video da point cloud recebida)
+			- Falta confirmar isto, e quantificar esta agitação
+				- Subtração de 2 point clouds (ground truth - com interferência) pode ser feita diretamente pois sabe-se (existe a label) a que laser e a que ângulo cada ponto pertence
+		- Falta também ver efeito da interferência na intensidade dos pontos da point cloud, e se há mais pontos a serem descartados
+	- Paper RECPAD
+		- September 18 - Submission Deadline
+		- Fazer paper em torno de análise de interferência (depois vê-se se potencialmente há IP, mas neste momento parece-me que não, pois quase não há interferência)
+		- Enviar paper aos orientadores até dia 13 (6a feira), também para aprovação da Bosch
+	- Tese
+		- Fazer indice, tendo em conta que é preciso descrever uma narrativa fluida
+	- Reunão a ser marcada depois de dia 18
