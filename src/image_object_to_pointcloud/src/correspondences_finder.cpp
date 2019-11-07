@@ -146,6 +146,7 @@ Eigen::Matrix4f getLiDARRotation(image_geometry::PinholeCameraModel cam_model_,
   Eigen::Vector3d center_ray_eigen(center_ray.x, center_ray.y, center_ray.z);
 
   Eigen::Quaterniond fov_lidar_quaternion = Eigen::Quaterniond().setFromTwoVectors(bbox_ray_eigen, center_ray_eigen);
+  fov_lidar_quaternion.normalize();
 
   Eigen::Matrix4f fov_lidar_rotation = Eigen::Matrix4f::Identity();
   fov_lidar_rotation.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
@@ -494,7 +495,7 @@ int main(int argc, char** argv)
                                                             bounding_boxes_sub, cam_info_sub, point_cloud_sub);
 
   // Bind Callback to function to each of the subscribers
-  sync.registerCallback(boost::bind(&callback2, _1, _2, _3, _4));
+  sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
 
   ros::Rate r(100);  // 100 hz
   while (ros::ok())
