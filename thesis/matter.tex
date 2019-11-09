@@ -203,10 +203,11 @@
 
 % Custom macros
 \def\etal{~\emph{et al}~}
-\newcommand{\E}{\mathrm{e}} \newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+\newcommand{\E}{\mathrm{e}} 
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
 \def\citeneeded{\textsuperscript{\textit{\textcolor{blue}{citation needed}}}}
-\def\todo{\textsuperscript{\textit{\textcolor{red}{TODO}}}} 
-\def\cp{\textsuperscript{\textcopyright}}
+\def\todo{\textsuperscript{\textit{\textcolor{red}{TODO}}}}
+\def\cp{\textsuperscript{\textcopyright}} 
 
 \newcommand{\executeiffilenewer}[3]{%
 	\ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
@@ -220,6 +221,12 @@
 	\input{#1.pdf_tex}%
 }
 
+% Custom SI
+\DeclareSIUnit{\bytes}{bytes}
+\DeclareSIUnit{\flop}{FLOP}
+\DeclareSIUnit{\flops}{FLOPS}
+
+% Begin document
 \begin{document}
 \ifthenelse{\equal{\useoverleaf}{0}}{}{\makecoverfile{}}%
 \includepdf[pages=-]{cover.pdf}
