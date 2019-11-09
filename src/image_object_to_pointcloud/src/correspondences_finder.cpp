@@ -270,9 +270,14 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     // std::cout << "Camera Pose: " << camera_pose.IsRowMajor << std::endl;
 
     frustrum_filter_pose =
+        // camera_transform * camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
         // camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
-        lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * lidar_rotation;
+        // lidar_pose_to_frustum_pose * lidar_rotation * camera_to_lidar_6DOF;
+        // lidar_pose_to_frustum_pose *
+        camera_to_lidar_6DOF * lidar_rotation;
     // lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * camera_transform;
+    // lidar_rotation * camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
+
     std::cout << "Fustrum Filter Pose: " << frustrum_filter_pose.IsRowMajor << std::endl;
 
     // Print Stuff
@@ -281,14 +286,14 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     float fov_Y =
         atan((b_boxes->bounding_boxes[i].ymax - b_boxes->bounding_boxes[i].ymin) / (cam_model_.fy())) * 180.0f / M_PI;
 
-    std::cout << "(" << b_boxes->bounding_boxes[i].xmin << ", " << b_boxes->bounding_boxes[i].xmax << ") e ("
-              << b_boxes->bounding_boxes[i].ymin << ", " << b_boxes->bounding_boxes[i].ymax << ") " << std::endl;
-    std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << " (" << fov_X
-              << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
+    // std::cout << "(" << b_boxes->bounding_boxes[i].xmin << ", " << b_boxes->bounding_boxes[i].xmax << ") e ("
+    //          << b_boxes->bounding_boxes[i].ymin << ", " << b_boxes->bounding_boxes[i].ymax << ") " << std::endl;
+    // std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << " (" << fov_X
+    //          << " ," << fov_Y << ") with Principial Point: " << principal_point << std::endl;
     std::cout << b_boxes->bounding_boxes[i].Class << ": " << b_boxes->bounding_boxes[i].probability << " ("
               << bounding_box_fov.x << " ," << bounding_box_fov.y << ") with Principial Point: " << principal_point
               << std::endl;
-    std::cout << "Rotation: " << camera_rotation << std::endl;
+    // std::cout << "Rotation: " << camera_rotation << std::endl;
 
     pcl::FrustumCulling<PointType> fc;
     fc.setInputCloud(point_cloud_ptr);
@@ -315,6 +320,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   std::cout << "Atributed" << std::endl;
   // pcl::toROSMsg(target, *out_cloud);
   std::cout << "toROSMsg Done" << std::endl;
+  final_point_cloud_ptr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub.publish(final_point_cloud_ptr);  // PointCloud Object is automacally serialized by ROS and there is no need to
                                        // call toROSMsg
   std::cout << "Published" << std::endl;
@@ -452,7 +458,7 @@ int main(int argc, char** argv)
    * Another perspective is: we want to transform from <target_frame> from this <source_frame> frame
    */
 
-  transformStamped = tfBuffer.lookupTransform(CAMERA_TF2_REFERENCE_FRAME, LIDAR_TF2_REFERENCE_FRAME, ros::Time(0),
+  transformStamped = tfBuffer.lookupTransform(LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0),
                                               ros::Duration(20.0));
 
   // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
