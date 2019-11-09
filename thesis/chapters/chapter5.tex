@@ -1,18 +1,61 @@
 \chapter{Object Detection}
-\label{chapter:object_detection}
+\label{chapter:object-detection}
 
+Object Detection is a field of \acf{cv} whose objectives are to classify and locate objects on an image. Contrary to Object Recognition, whose sole goal is to identify which objects are present on a given image, object detection not only classifies the objects in an image, but also outputs a bounding box and its position on the image. 
 
-Object Detection is a field of \ac{cv} whose objectives are to classify and locate an object on an image. Contrary to Object Detection, whose goal is to identify which objects are present on a image, object detection only intends to classify the objects on an image, without giving any notions of its location. 
+Using previous calibration and sensor fusion methods, detailed in chapter~\ref{chapter:calibration} and~\ref{chapter:sensor-fusion}, respectively, this chapter intends to add to the previous work, allowing the segmentation of \acf{roi} on the point cloud that correspond to objects detected on the camera. Such segmentation uses the camera as the input and not the \ac{lidar}, since the point cloud obtained is expected to be interfered by other \acp{lidar}.
 
-
-On this chapter, Object Detection algorithms are applied to an image, under \ac{ros} network
+To succesfully detect \acp{roi} in a given image and estimate the corresponding point-cloud for that region, three tasks are required: first, object detection must be performed on the camera, computing bounding boxes that delimite the \acp{roi}; secondly, the objects' of interest bounding boxes must be selected from the pool of detected objects; and finally, the image bounding boxes are used to define a filter to segment the point cloud into the objects respective \acp{roi}.
 
 \section{Object Detection on Image}
-Object Detection is a task mainly performed with \acfp{cnn}, as detailed in Section~\ref{sec:sota:object-detection}. From the available solutions, one implementation, \ac{yolo} is choosen and used to perform object detection on image. This \ac{cnn} runs under a Darkent framework.
+Object Detection is a task mainly performed with \acfp{cnn}, as detailed in Section~\ref{sec:sota:object-detection}, using deep learning tecnhiques. From the available solutions, \ac{yolo} is choosen and used to perform object detection on images, due to it's accuracy and speed~\cite{Redmon2016, Redmon2017}. 
+
+\ac{yolo} runs under Darknet, an Open-Source \acf{nn} framework developed by the same author~\cite{Redmon2013}. Darknet is able to run on \ac{cpu} or \ac{gpu} and pre-trained weigths for several datasets are available online~\cite{Redmon2013}. Darknet also integrates with \ac{ros}, using an Open-Source package developed by Marko Bjelonic~\cite{MarkoBjelonic}, \texttt{darknet-ros}, that wraps the input and output to \ac{yolo} under a \ac{ros} node, a service server and topic messages.
+
+To operate \texttt{darknet-ros}, a \ac{ros} launch file is used. This launch file specifies the network model, configuration, weights and the \ac{ros} parameters, and is adapted from \texttt{darknet-ros}  package launch file~\cite{MarkoBjelonic}.
+
+\subsection{Qualitative comparison over \ac{yolo} models and training dataset}
+Darknet can be configured to a wide variety of different \acp{nn}: AlexNet, DenseNet, ResNet, \ac{rnn} and \ac{yolo}, among others. Regarding \ac{yolo}, 3 models are possible: v1, v2 and v3; all three also have a ``tiny'' version: a smaller network for faster classification with lower accuracy. 
+
+Pre-trained models are available for the \ac{pascal-voc} dataset and \ac{coco} for \ac{yolo}v2 and \ac{yolo}v3. As detailed in Section~\ref{sec:sota:object-detection} and on~\cite{Redmon2018}, \ac{yolo}v3 surpasses its prior versions, therefore those will not be considered.
+
+Since \ac{pascal-voc} only has 20 object classes, being unable to detect a ball, truck and road sign, \ac{coco} dataset is preferred for the model weigths. \ac{coco} dataset has 80 object classes, incorporating common road objects available on Kitti and other objects used on this research.
+
+\begin{table}[H]
+	\renewcommand{\arraystretch}{1.2}
+	\centering
+	\begin{tabular}{@{}lp{7cm}l@{}}
+		\toprule
+		\multicolumn{2}{l}{Specification} & Value \\ \midrule
+		\multicolumn{2}{l}{\emph{Graphic Card}} & \\
+		\phantom{a} & Model   & Nvidia GeForce GT 740M \\
+								& Maximum \ac{gpu} clock frequency & \SI{1058}{\mega\hertz} \\
+								&	Maximym memory transfer rate & \SI{1840}{\mega\hertz} \\
+								&	Nvidia\texttrademark driver & 418 \\
+								& Total memory size & \SI{2048}{\mega\byte} \ac{ddr3} \\
+								& Bus width & \SI{64}{\bytes} \\
+								& Theorerical Floating Point Operations & \SI{250.9}{\giga\flops} \\
+		\midrule 
+		\multicolumn{2}{l}{\emph{\ac{cuda}\texttrademark}} \\
+								&	\ac{cuda} version & 10.1 \\
+								&	Dedicated memory size available & \SI{2004}{\mega\byte} \\
+								& Available \ac{cuda} cores & 384 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Relevant specifications for graphic card, \ac{cuda} and Nvidia\texttrademark drivers specifications.}
+	\label{tab:graphic-card-specs}
+\end{table}
+
+
+\subsection{Results}
+
+\subsubsection{Udacity Dataset}
+
+\subsubsection{\ac{kitti} Dataset}
+
+\subsubsection{Experimental Data acquired}
 
 \subsection{darknet-ros Package}
-\verb`darknet-ros` is a \ac{ros} package that encapsulates this \ac{cnn}, Darknet, so that it can be used under a \ac{ros} network, and connected with other nodes. Under this package, \ac{yolo} is loaded.
-
 Darknet-ros is an Open-Source project developed by . However, since the code lacked  functionalities use to this thesis, such as an easy synchronozation between the number of objects found and their classes, boudning boxes and probability. Ti improve that synchronization, some changes were maded to the original darknet-ros soruvce code, that were later made public. This changes are public and consitute one of the Open-Source contributions of this thesis
 
 
