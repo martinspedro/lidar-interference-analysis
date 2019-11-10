@@ -150,7 +150,14 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(correspondences_finder_node
 src/correspondences_finder.cpp
+src/image_object_to_pointcloud.cpp
+)
+
+add_executable(image_bbox_to_point_cloud_node
+src/image_bbox_to_point_cloud.cpp
 src/pinhole_camera_model_utilities.cpp
+src/image_object_to_pointcloud.cpp
+src/FOV.cpp
 )
 
 ## Rename C++ executable without prefix
@@ -164,6 +171,12 @@ src/pinhole_camera_model_utilities.cpp
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
+target_link_libraries(image_bbox_to_point_cloud_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PCL_LIBRARIES}
+)
+
 target_link_libraries(correspondences_finder_node
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
