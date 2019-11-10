@@ -86,6 +86,7 @@
 
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Transform.h>
+#include <geometry_msgs/PoseArray.h>
 
 #include "tf2/LinearMath/Matrix3x3.h"
 #include <geometry_msgs/TransformStamped.h>
@@ -103,7 +104,7 @@ const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyFor
 const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 
-ros::Publisher pub, pub_camera, pub_camera_lidar, pub_lidar, pub_final;  //!< ROS Publisher
+ros::Publisher pub, pub_poses, pub_camera, pub_camera_lidar, pub_final;  //!< ROS Publisher
 
 Eigen::Matrix4f g_camera_to_lidar_6DOF;
 
@@ -128,14 +129,17 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   // std::cout << "Instrinsic Calibration Matrix: \n" << cam_model_.fullIntrinsicMatrix() << std::endl;
   // FOV image_fov = pinhole_camera::getImageFOV(cam_model_);
 
-  Eigen::Matrix4f camera_transform, lidar_pose, frustrum_filter_pose, lidar_rotation;
+  Eigen::Matrix4f camera_transform, frustrum_filter_pose, camera_rotation, lidar_pose;
+  geometry_msgs::PoseArray frustum_poses;
 
   for (int i = 0; i < object_count->count; ++i)
   {
     FOV bounding_box_fov;
-    Eigen::Vector3f camera_rotation;
-    pinhole_camera::computeBoundingBoxFOV(cam_model_, b_boxes->bounding_boxes[i], &bounding_box_fov, camera_rotation);
-    camera_transform = angleAxisVecToTransform(camera_rotation);
+    Eigen::Vector3f camera_rotation_vec;
+    pinhole_camera::computeBoundingBoxFOV(cam_model_, b_boxes->bounding_boxes[i], &bounding_box_fov,
+                                          camera_rotation_vec);
+    camera_transform = angleAxisVecToTransform(camera_rotation_vec);
+    // std::cout << "Camera Transform: \n " << camera_transform << std::endl;
 
     // Print Stuff
     float fov_X =
@@ -151,8 +155,8 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               << bounding_box_fov.x << " ," << bounding_box_fov.y << ") " << std::endl;
 
     // Get Initial LiDAR Pose & Rotation
-    getLiDARPose(point_cloud_ptr, lidar_pose);
-    getLiDARRotation(cam_model_, b_boxes->bounding_boxes[i], lidar_rotation);
+    getCameraRotation(cam_model_, b_boxes->bounding_boxes[i], camera_rotation);
+    // std::cout << "LiDAR Transform: \n " << camera_rotation << std::endl;
 
     /* Order is computed on the inverse order!
      * The first matrix/transform in the multiplication chain is the first you want to apply to the "object matrix"
@@ -181,16 +185,17 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
      * -
      https://stackoverflow.com/questions/18785938/combining-multiple-transformations-in-eigen-into-one-transformation-matrix
      */
-
-    frustrum_filter_pose =
-        // camera_transform * g_camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
-        // camera_transform * g_camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
-        // lidar_pose_to_frustum_pose * lidar_rotation * g_camera_to_lidar_6DOF;
-        // lidar_pose_to_frustum_pose *
-        // LIDAR_POSE_TO_FRUSTRUM_POSE * g_camera_to_lidar_6DOF * lidar_rotation;
-        LIDAR_POSE_TO_FRUSTRUM_POSE * lidar_rotation * g_camera_to_lidar_6DOF;
+    lidar_pose = g_camera_to_lidar_6DOF * camera_rotation;
+    frustrum_filter_pose = lidar_pose * LIDAR_POSE_TO_FRUSTRUM_POSE;
+    // camera_transform * g_camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
+    // camera_transform * g_camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
+    // lidar_pose_to_frustum_pose * camera_rotation * g_camera_to_lidar_6DOF;
+    // lidar_pose_to_frustum_pose *
     // lidar_pose_to_frustum_pose * g_camera_to_lidar_6DOF * camera_transform;
-    // lidar_rotation * g_camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
+    // camera_rotation * g_camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
+    // LIDAR_POSE_TO_FRUSTRUM_POSE * g_camera_to_lidar_6DOF * camera_rotation;
+    // LIDAR_POSE_TO_FRUSTRUM_POSE * camera_rotation * g_camera_to_lidar_6DOF;
+    // LIDAR_POSE_TO_FRUSTRUM_POSE * g_camera_to_lidar_6DOF * camera_transform;
 
     // Apply filter to select points that correspond to a bounding box
     pcl::FrustumCulling<PointType> fc;
@@ -208,48 +213,49 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     ROS_INFO_STREAM("Filtered Point Cloud size = " << target.size());
     *final_point_cloud_ptr += target;
+
+    Eigen::Affine3d eigen_temp_pose;
+    eigen_temp_pose.matrix() = frustrum_filter_pose.cast<double>();
+    geometry_msgs::Pose temp_pose = Eigen::toMsg(eigen_temp_pose);
+    frustum_poses.poses.push_back(temp_pose);
   }
 
-  //*point_cloud_ptr = target;
   ROS_INFO_STREAM("Filtered Final Point Cloud size = " << final_point_cloud_ptr->size());
 
   final_point_cloud_ptr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;  // Add coordinate frame id
   pub.publish(final_point_cloud_ptr);  // PointCloud Object is automatically serialized by ROS. No need for toROSMsg
 
+  frustum_poses.header.stamp = ros::Time::now();
+  frustum_poses.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+  pub_poses.publish(frustum_poses);
+
   // POSE Publishing
-  geometry_msgs::Pose pose_camera, pose_lidar_camera, pose_lidar, pose_final;
-  geometry_msgs::PoseStamped pose_camera_s, pose_lidar_s, pose_lidar_camera_s, pose_final_s;
-  Eigen::Affine3d camera_affine_transform, lidar_camera_affine_transform, lidar_affine_transform,
-      final_affine_transform;
+  geometry_msgs::Pose pose_camera, pose_lidar_camera, pose_final;
+  geometry_msgs::PoseStamped pose_camera_s, pose_lidar_camera_s, pose_final_s;
+  Eigen::Affine3d camera_affine_transform, lidar_camera_affine_transform, final_affine_transform;
 
   camera_affine_transform.matrix() = camera_transform.cast<double>();
-  lidar_affine_transform.matrix() = lidar_pose.cast<double>();
   lidar_camera_affine_transform.matrix() = g_camera_to_lidar_6DOF.cast<double>();
-  final_affine_transform.matrix() = frustrum_filter_pose.cast<double>();
+  final_affine_transform.matrix() = lidar_pose.cast<double>();
 
   pose_camera = Eigen::toMsg(camera_affine_transform);
-  pose_lidar = Eigen::toMsg(lidar_affine_transform);
   pose_lidar_camera = Eigen::toMsg(lidar_camera_affine_transform);
   pose_final = Eigen::toMsg(final_affine_transform);
 
   pose_camera_s.header.stamp = ros::Time::now();
-  pose_lidar_s.header.stamp = ros::Time::now();
   pose_lidar_camera_s.header.stamp = ros::Time::now();
   pose_final_s.header.stamp = ros::Time::now();
 
   pose_camera_s.header.frame_id = "camera_color_left";
-  pose_lidar_s.header.frame_id = "velo_link";
   pose_lidar_camera_s.header.frame_id = "camera_color_left";
   pose_final_s.header.frame_id = "velo_link";
 
   pose_camera_s.pose = pose_camera;
-  pose_lidar_s.pose = pose_lidar;
   pose_lidar_camera_s.pose = pose_lidar_camera;
   pose_final_s.pose = pose_final;
   // msg.header.frame_id = "detection";
 
   pub_camera.publish(pose_camera_s);
-  pub_lidar.publish(pose_lidar_s);
   pub_camera_lidar.publish(pose_lidar_camera_s);
   pub_final.publish(pose_final_s);
 }
@@ -282,7 +288,7 @@ int main(int argc, char** argv)
    */
 
   geometry_msgs::TransformStamped transformStamped = tfBuffer.lookupTransform(
-      CAMERA_TF2_REFERENCE_FRAME, LIDAR_TF2_REFERENCE_FRAME, ros::Time(0), ros::Duration(20.0));
+      LIDAR_TF2_REFERENCE_FRAME, CAMERA_TF2_REFERENCE_FRAME, ros::Time(0), ros::Duration(20.0));
 
   // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
   Eigen::Affine3d transform_eigen = tf2::transformToEigen(transformStamped);
@@ -292,9 +298,9 @@ int main(int argc, char** argv)
                                                << "Affine Transform (Eigen): " << g_camera_to_lidar_6DOF.matrix());
 
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
+  pub_poses = nh.advertise<geometry_msgs::PoseArray>("/poses", 1);
   pub_camera = nh.advertise<geometry_msgs::PoseStamped>("/rotated_camera_pose", 1);
   pub_camera_lidar = nh.advertise<geometry_msgs::PoseStamped>("/camera_pose_in_lidar", 1);
-  pub_lidar = nh.advertise<geometry_msgs::PoseStamped>("/lidar_pose", 1);
   pub_final = nh.advertise<geometry_msgs::PoseStamped>("/final_pose", 1);
 
   // Subscribers list to be synchronized
