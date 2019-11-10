@@ -7,6 +7,7 @@
 
 #define PCL_NO_PRECOMPILE        // must be included before any PCL include on this CPP file or HPP included before
 #define EIGEN_RUNTIME_NO_MALLOC  // Define this symbol to enable runtime tests for allocations
+
 #include <ros/ros.h>
 
 #include <cv_bridge/cv_bridge.h>
@@ -15,7 +16,11 @@
 
 #include <iostream>
 
-#include <Eigen/Core>  // Needs to be included before the opencv eigen interface!
+#include "image_object_to_pointcloud/image_object_to_pointcloud.hpp"
+#include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
+#include "image_object_to_pointcloud/FOV.hpp"
+
+//#include <Eigen/Core>  // Needs to be included before the opencv eigen interface!
 #include <Eigen/Geometry>
 #include <opencv2/core/eigen.hpp>  // Needs to be included before other opencv headers!
 // OPENCV
@@ -32,7 +37,6 @@
 #include <pcl/filters/extract_indices.h>
 //#include <pcl/registration/icp.h>
 #include <pcl_ros/point_cloud.h>
-#include <sensor_msgs/PointCloud2.h>
 //#include <pcl/visualization/cloud_viewer.h>
 //#include <pcl/visualization/pcl_visualizer.h>
 
@@ -75,8 +79,6 @@
 #include <point_cloud_statistics/velodyne_point_type.h>
 #include "point_cloud_statistics/point_cloud_statistics.hpp"
 
-#include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
-
 #include <geometry_msgs/TransformStamped.h>
 
 #include <cmath>
@@ -92,18 +94,10 @@
 
 const float NEAR_PLANE_DISTANCE = 1.0f;
 const float FAR_PLANE_DISTANCE = 30.0f;
+
 const double PIXEL_SIZE = 3.45e-6;
 
-// Define types to be used depending on the dataset
-#define USE_WITH_KITTI
-
-#ifdef USE_WITH_KITTI
-typedef point_cloud::PointCloudXYZ PointCloudType;
-typedef pcl::PointXYZ PointType;
-#else
-typedef velodyne::VelodynePointCloud PointCloudType;
-typedef velodyne::PointXYZIR PointType;
-#endif
+const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyForCallback;
 
 const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
@@ -116,69 +110,25 @@ Eigen::Affine3d transform_eigen;
 
 ros::Publisher pub, pub_camera, pub_camera_lidar, pub_lidar, pub_final;  //!< ROS Publisher
 
-Eigen::Matrix4f getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr)
-{
-  Eigen::Matrix4f lidar_pose_ = Eigen::Matrix4f::Identity();
-
-  lidar_pose_.block<3, 3>(0, 0) = point_cloud_ptr->sensor_orientation_.matrix();  // Quaternion to Rot Matrix
-  lidar_pose_.block<4, 1>(0, 3) = point_cloud_ptr->sensor_origin_;                // Vector 4f
-
-  return lidar_pose_;
-}
-
-Eigen::Matrix4f getLiDARRotation(image_geometry::PinholeCameraModel cam_model_,
-                                 darknet_ros_msgs::BoundingBox bounding_box)
-{
-  // Get middle point of the bounding box
-  cv::Point2d bounding_box_center;
-  bounding_box_center.x = (bounding_box.xmin + bounding_box.xmax) / 2.0f;
-  bounding_box_center.y = (bounding_box.ymin + bounding_box.ymax) / 2.0f;
-
-  cv::Point3d bbox_ray = cam_model_.projectPixelTo3dRay(bounding_box_center);
-
-  cv::Size im_dimensions = cam_model_.fullResolution();
-  cv::Point2d image_center = getImageCenterPoint(im_dimensions);
-
-  cv::Point3d center_ray = cam_model_.projectPixelTo3dRay(image_center);
-
-  // Convert to Eigen
-  Eigen::Vector3d bbox_ray_eigen(bbox_ray.x, bbox_ray.y, bbox_ray.z);
-  Eigen::Vector3d center_ray_eigen(center_ray.x, center_ray.y, center_ray.z);
-
-  Eigen::Quaterniond fov_lidar_quaternion = Eigen::Quaterniond().setFromTwoVectors(bbox_ray_eigen, center_ray_eigen);
-  fov_lidar_quaternion.normalize();
-
-  Eigen::Matrix4f fov_lidar_rotation = Eigen::Matrix4f::Identity();
-  fov_lidar_rotation.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
-
-  return fov_lidar_rotation;
-}
-
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
-  std::cout << "Callback" << std::endl;
-
   // Create Datatype dependent if operating with KITTI datasets or Experimental Dataype
   PointCloudType point_cloud, target, final_point_cloud;
   PointCloudType::Ptr cloudPtr, point_cloud_ptr(new PointCloudType), final_point_cloud_ptr(new PointCloudType);
-  std::cout << "Init" << std::endl;
 
   fromROSMsg(*point_cloud_msg, point_cloud);
   *point_cloud_ptr = point_cloud;
   *final_point_cloud_ptr = final_point_cloud;
 
-  std::cout << "Message" << std::endl;
-
   // Get Camera Information from msg
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(cam_info);
-  std::cout << "Camera Model" << std::endl;
 
   cv::Size image_resolution = cam_model_.fullResolution();
   FOV image_fov = getImageFOV(cam_model_);
-  std::cout << "FOV" << std::endl;
+  std::cout << "FOV: " << image_fov << std::endl;
 
   double aperture_width = image_resolution.width * PIXEL_SIZE;
   double aperture_height = image_resolution.height * PIXEL_SIZE;
@@ -187,6 +137,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   cv::Point2d principal_point;
   cv::calibrationMatrixValues(cam_model_.fullIntrinsicMatrix(), image_resolution, aperture_width, aperture_height,
                               fov_x, fov_y, focal_length, principal_point, aspect_ratio);
+  std::cout << "(" << fov_x << ", " << fov_y << ")" << std::endl;
   std::cout << "OpenCV" << std::endl;
 
   Eigen::Matrix4f camera_transform;
@@ -254,14 +205,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
      */
 
     Eigen::Matrix4f camera_pose = Eigen::Matrix4f::Identity();
-    Eigen::Matrix4f lidar_pose_to_frustum_pose;
-    // clang-format off
-  lidar_pose_to_frustum_pose << 1, 0, 0, 0,
-                                0, 0, 1, 0,
-                                0,-1, 0, 0,
-                                0, 0, 0, 1;
-    // clang-format on
-
+    std::cout << "Frustum" << LIDAR_POSE_TO_FRUSTRUM_POSE << std::endl;
     Eigen::Matrix4f lidar_rotation = getLiDARRotation(cam_model_, b_boxes->bounding_boxes[i]);
 
     // std::cout << "Camera Transform: " << camera_transform.IsRowMajor << std::endl;
@@ -274,7 +218,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
         // camera_transform * camera_to_lidar_6DOF * lidar_pose * lidar_pose_to_frustum_pose * camera_pose;
         // lidar_pose_to_frustum_pose * lidar_rotation * camera_to_lidar_6DOF;
         // lidar_pose_to_frustum_pose *
-        camera_to_lidar_6DOF * lidar_rotation;
+        camera_to_lidar_6DOF * LIDAR_POSE_TO_FRUSTRUM_POSE * lidar_rotation;
     // lidar_pose_to_frustum_pose * camera_to_lidar_6DOF * camera_transform;
     // lidar_rotation * camera_to_lidar_6DOF * lidar_pose_to_frustum_pose;
 
@@ -363,74 +307,6 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   pub_final.publish(pose_final_s);
 }
 
-void callback2(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
-               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
-               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
-{
-  PointCloudType point_cloud_camera, point_cloud;
-  PointCloudType::Ptr cloudCameraPtr(new PointCloudType);
-  PointCloudType::Ptr cloudPtr(new PointCloudType);
-  PointCloudType::Ptr cloudFilteredPtr(new PointCloudType);
-
-  static bool first_callback = true;
-
-  sensor_msgs::PointCloud2 point_cloud_camera_msg;
-
-  try
-  {
-    tf2::doTransform(*point_cloud_msg, point_cloud_camera_msg, transformStamped);
-  }
-  catch (tf2::TransformException& ex)
-  {
-    ROS_WARN("%s", ex.what());
-  }
-  // Convert ROS msg to Point Cloud
-  fromROSMsg(point_cloud_camera_msg, point_cloud_camera);
-  fromROSMsg(*point_cloud_msg, point_cloud);
-
-  // Initialize pointer to point cloud data
-  *cloudCameraPtr = point_cloud_camera;
-  *cloudPtr = point_cloud;
-
-  image_geometry::PinholeCameraModel cam_model_;
-  cam_model_.fromCameraInfo(cam_info);
-
-  cv::Size im_dimensions = cam_model_.fullResolution();
-  std::cout << im_dimensions << std::endl;
-
-  std::vector<int> indices_in;
-  boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
-
-  for (int i = 0; i < cloudCameraPtr->points.size(); i++)
-  {
-    cv::Point2d uv = cam_model_.project3dToPixel(
-        cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z));
-
-    // Note that Kitti width and height are swapped so we swap them here also
-    if (((int)(uv.x) >= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= im_dimensions.height) &&
-        ((int)uv.y <= im_dimensions.width) && (cloudCameraPtr->points[i].z >= 0))
-    {
-      for (int j = 0; j < object_count->count; ++j)
-      {
-        if (((int)(uv.x) >= b_boxes->bounding_boxes[j].xmin) && ((int)uv.y >= b_boxes->bounding_boxes[j].ymin) &&
-            ((int)(uv.x) <= b_boxes->bounding_boxes[j].xmax) && ((int)uv.y <= b_boxes->bounding_boxes[j].ymax))
-        {
-          index_ptr->push_back(i);
-        }
-      }
-    }
-  }
-
-  pcl::ExtractIndices<PointType> eifilter(true);  // Initializing with true will allow us to extract the removed indices
-  eifilter.setInputCloud(cloudPtr);
-  eifilter.setIndices(index_ptr);
-  eifilter.filter(*cloudFilteredPtr);
-
-  std::cout << index_ptr->size() << std::endl;
-  cloudFilteredPtr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
-  pub.publish(cloudFilteredPtr);
-}
-
 int main(int argc, char** argv)
 {
   // Initialize ROS
@@ -463,19 +339,7 @@ int main(int argc, char** argv)
 
   // get Affine3d matrix that defines the 6DOF transformation between LiDAR and Camera
   transform_eigen = tf2::transformToEigen(transformStamped);
-  // transform_eigen(3, 0) = -transform_eigen(3, 0);
   std::cout << transform_eigen.matrix() << std::endl;
-
-  // geometry_msgs::Vector3 translation = transformStamped.transform.translation;
-  // geometry_msgs::Quaternion rotation_q = transformStamped.transform.rotation;
-
-  // tf2::convert<geometry_msgs::Quaternion, Eigen::Quaterniond>(rotation_q, tf_quaternion);
-  // Eigen::fromMsg(rotation_q, tf_quaternion);
-  // tf2::convert<geometry_msgs::Vector3, Eigen::Vector3d>(translation, tf_translation);
-  // CHECK AFFINE 3D
-
-  // tf::quaternionMsgToEigen(rotation_q, tf_quaternion);
-  // tf::vectorMsgToEigen(translation, tf_translation);
 
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
   pub_camera = nh.advertise<geometry_msgs::PoseStamped>("/rotated_camera_pose", 1);
@@ -493,12 +357,10 @@ int main(int argc, char** argv)
       darknet_ros_msgs::ObjectCount, darknet_ros_msgs::BoundingBoxes, sensor_msgs::CameraInfo, sensor_msgs::PointCloud2>
       syncPolicyForCallback;
 
-  // queue size for syncPolicyForCallback;
-  unsigned int queue_size = 20;
-
   // ApproximateTime takes a queue size as its constructor argument, hence SyncPolicy(20)
-  message_filters::Synchronizer<syncPolicyForCallback> sync(syncPolicyForCallback(queue_size), object_count_sub,
-                                                            bounding_boxes_sub, cam_info_sub, point_cloud_sub);
+  message_filters::Synchronizer<syncPolicyForCallback> sync(syncPolicyForCallback(SYNC_POLICY_QUEUE_SIZE),
+                                                            object_count_sub, bounding_boxes_sub, cam_info_sub,
+                                                            point_cloud_sub);
 
   // Bind Callback to function to each of the subscribers
   sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
