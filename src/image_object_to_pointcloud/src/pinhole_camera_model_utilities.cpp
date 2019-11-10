@@ -1,8 +1,11 @@
 
 #include <cmath>
+#include <ros/ros.h>
 
 #include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
 
+namespace pinhole_camera
+{
 /**
  *   \remark ROS image_geometry package compatible
  */
@@ -43,21 +46,20 @@ void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet
                            FOV* bounding_box_fov, Eigen::Vector3f& camera_rotation)
 {
   cv::Size im_dimensions = cam_model.fullResolution();
-  std::cout << "Camera" << std::endl;
 
   float x_min_fov = getFovDegree(bounding_box.xmin, (float)(cam_model.fx()));
   float x_max_fov = getFovDegree(bounding_box.xmax, (float)(cam_model.fx()));
 
   float y_min_fov = getFovDegree(bounding_box.ymin, (float)(cam_model.fy()));
   float y_max_fov = getFovDegree(bounding_box.ymax, (float)(cam_model.fy()));
-  std::cout << "FOV Degree" << std::endl;
 
-  bounding_box_fov->x = x_min_fov - x_max_fov;
-  bounding_box_fov->y = y_min_fov - y_max_fov;
-  std::cout << "FOV access" << std::endl;
+  bounding_box_fov->x = x_max_fov - x_min_fov;
+  bounding_box_fov->y = y_max_fov - y_min_fov;
 
-  cv::Point2f image_center = getImageCenterPoint(im_dimensions);
-  std::cout << "Center Point" << std::endl;
+  ROS_ASSERT_MSG(bounding_box_fov->x > 0, "FOV in width must be bigger than 0!");
+  ROS_ASSERT_MSG(bounding_box_fov->y > 0, "FOV in height must be bigger than 0!");
+
+  cv::Point2f image_center = getImageCenterPoint(cam_model.fullIntrinsicMatrix());
 
   // Get middle point of the bounding box
   cv::Point2f bounding_box_center;
@@ -69,11 +71,10 @@ void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet
    * clockwise direction, with the left hand rule applied on the fixed rotation axis
    *
    * If the bounding box center is further away from the matrix coordinates (0,0) in the (u, v) frame than the image
-   * center (on the same referential - (u, v)), then the rotation is positive on that axis. This is mapped in a negative
-   * offset distance
-   * On the x axis this results on a positive rotation if the the x coordinate of the bounding box center is further
-   * away from origin that the image center, but on the y axis (due to its inverted notation), the positive rotation
-   * occurs to values closer to matrix origina than the image center
+   * center (on the same referential - (u, v)), then the rotation is positive on that axis. This is mapped in a
+   * negative offset distance On the x axis this results on a positive rotation if the the x coordinate of the
+   * bounding box center is further away from origin that the image center, but on the y axis (due to its inverted
+   * notation), the positive rotation occurs to values closer to matrix origina than the image center
    */
 
   const float XX_ROTATION_FACTOR = 1.0f;
@@ -93,7 +94,6 @@ void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet
    *
    * Therefore, the angles of rotation muste be inverted
    */
-  std::cout << "Before Eigen" << std::endl;
   camera_rotation[0] = YY_ROTATION_FACTOR * asin(dy / hyp_y) * 180.0f / M_PI;
   camera_rotation[1] = XX_ROTATION_FACTOR * asin(dx / hyp_x) * 180.0f / M_PI;
   camera_rotation[2] = 0.0f;
@@ -118,3 +118,5 @@ void computeBoundingBoxFOV(image_geometry::PinholeCameraModel cam_model, darknet
   camera_rotation[2] = 0.0f;
   */
 }
+
+}  // namespace pinhole_camera
