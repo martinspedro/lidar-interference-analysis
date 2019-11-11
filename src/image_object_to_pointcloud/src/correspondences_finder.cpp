@@ -32,6 +32,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 // PCL
+#include <pcl/features/moment_of_inertia_estimation.h>
 #include <pcl/common/common.h>
 #include <pcl/common/pca.h>
 #include <pcl/point_cloud.h>
@@ -189,8 +190,40 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               << std::endl;
     final_cloud += *cloud_cluster;
 
+    pcl::MomentOfInertiaEstimation<PointType> feature_extractor;
+    feature_extractor.setInputCloud(cloud_cluster);
+    feature_extractor.compute();
+    std::vector<float> moment_of_inertia;
+    std::vector<float> eccentricity;
+    pcl::PointXYZ min_point_AABB;
+    pcl::PointXYZ max_point_AABB;
+    pcl::PointXYZ min_point_OBB;
+    pcl::PointXYZ max_point_OBB;
+    pcl::PointXYZ position_OBB;
+    Eigen::Matrix3f rotational_matrix_OBB;
+    float major_value, middle_value, minor_value;
+    Eigen::Vector3f major_vector, middle_vector, minor_vector;
+    Eigen::Vector3f mass_center;
+
+    feature_extractor.getMomentOfInertia(moment_of_inertia);
+    feature_extractor.getEccentricity(eccentricity);
+    feature_extractor.getAABB(min_point_AABB, max_point_AABB);
+    feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+    feature_extractor.getEigenValues(major_value, middle_value, minor_value);
+    feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
+    feature_extractor.getMassCenter(mass_center);
+
+    Eigen::Vector3f position(position_OBB.x, position_OBB.y, position_OBB.z);
+    rotational_matrix_OBB.row(2) << 0, 0, 1;
+    rotational_matrix_OBB.col(2) << 0, 0, 1;
+    Eigen::Quaternionf quat(rotational_matrix_OBB);
+
+    // PCA
     pcl::PCA<PointType> pca;
     pca.setInputCloud(cloud_cluster);
+    Eigen::Matrix3f eigen_vector =
+        pca.getEigenVectors();  // returns a matrix where the columns are the axis of your bounding box
+    Eigen::Vector3f direction = eigen_vector.col(0);
 
     // Rotation of PCA
     Eigen::Matrix3f rot_mat = pca.getEigenVectors();
@@ -206,12 +239,25 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     // Reordering of principal components
     Eigen::Matrix3f affine_trans;
-    affine_trans.col(0) << (rot_mat.col(0).cross(rot_mat.col(1))).normalized();
-    affine_trans.col(1) << rot_mat.col(0);
-    affine_trans.col(2) << rot_mat.col(1);
+    affine_trans.col(0) << rot_mat.col(0).head(2),
+        0;  // (rot_mat.col(0).cross(rot_mat.col(1))).normalized().head(2), 0;
+    affine_trans.col(1) << rot_mat.col(1).head(2), 0;
+    affine_trans.col(2) << 0, 0, 1;  //(rot_mat.col(0).cross(rot_mat.col(1))).normalized();
 
     rot_quat = Eigen::Quaterniond(affine_trans.cast<double>());
     temp_quat = Eigen::toMsg(rot_quat);
+    std::cout << "Rotation Matrix: \n" << affine_trans << "\nQuaternion: \n" << temp_quat << std::endl;
+    std::cout << "Rotation Matrix: \n" << rotational_matrix_OBB << /*"\nQuaternion: \n" << quat <<*/ std::endl;
+
+    // New method
+    // temp_quat = Eigen::toMsg(quat.cast<double>());
+    temp_vec.x = (double)(position_OBB.x);
+    temp_vec.y = (double)(position_OBB.y);
+    temp_vec.z = (double)(position_OBB.z);
+
+    // temp_vec.x = (double)(direction.x());
+    // temp_vec.y = (double)(direction.y());
+    // temp_vec.z = (double)(direction.z());
 
     PointType min_pt, max_pt;
     pcl::getMinMax3D(*cloud_cluster, min_pt, max_pt);
@@ -221,13 +267,26 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     mid_pt.y = (max_pt.y + min_pt.y) / 2;
     mid_pt.z = (max_pt.z + min_pt.z) / 2;
 
+    Eigen::Vector3d origin_vec(1.0d, 0.0d, 0.0d);
+    Eigen::Vector3d center_ray_eigen(mid_pt.x, mid_pt.y, mid_pt.z);
+    Eigen::Quaterniond new_quat = Eigen::Quaterniond().setFromTwoVectors(center_ray_eigen, origin_vec);
+    new_quat.normalize();
+    Eigen::Matrix3d new_quat_mat = new_quat.matrix();
+    new_quat_mat.row(2) << 0, 0, 1;
+    new_quat_mat.col(2) << 0, 0, 1;
+    rot_quat = Eigen::Quaterniond(new_quat_mat);
+    rot_quat.normalize();
+    temp_quat = Eigen::toMsg(rot_quat);
+
+    std::cout << "Rotation Matrix: \n" << new_quat_mat << "\nQuaternion: \n" << temp_quat << std::endl;
+
     geometry_msgs::Quaternion pose_orientation;
     pose_orientation.w = 1;
 
     jsk_recognition_msgs::BoundingBox temp_bbox;
     geometry_msgs::Pose temp_cluster_pose;
-    temp_cluster_pose.position = mid_pt;
-    temp_cluster_pose.orientation = pose_orientation;
+    temp_cluster_pose.position = temp_vec;
+    temp_cluster_pose.orientation = temp_quat;
     temp_bbox.pose = temp_cluster_pose;
 
     geometry_msgs::Vector3 bbox_dimensions;
@@ -246,6 +305,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     // copy coordinates of mid_point and replace it with the leading dimension. The if cascade prioretizes x, y and z
     // dimensions, on this order
     geometry_msgs::Pose bboxes_pose_arrow = temp_cluster_pose;
+    /*
     if (bbox_dimensions.x >= bbox_dimensions.y)
     {
       bboxes_pose_arrow.position.x = max_pt.x;
@@ -268,7 +328,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
       bboxes_pose_arrow.orientation = zz_rotation;
     }
-
+*/
     bboxes_poses.poses.push_back(bboxes_pose_arrow);
 
     j++;
