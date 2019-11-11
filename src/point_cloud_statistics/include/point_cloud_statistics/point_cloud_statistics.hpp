@@ -17,6 +17,7 @@
 namespace point_cloud
 {
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloudXYZ;
+typedef pcl::PointCloud<pcl::PointXYZI> PointCloudXYZI;
 
 namespace statistics
 {
