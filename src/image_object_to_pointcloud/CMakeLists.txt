@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   camera_info_manager
   point_cloud_statistics
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
