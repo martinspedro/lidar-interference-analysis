@@ -25,8 +25,15 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/core.hpp"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include "tf2/transform_datatypes.h"
+#include "tf2_eigen/tf2_eigen.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+
 // PCL
 #include <pcl/common/common.h>
+#include <pcl/common/pca.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/extract_indices.h>
@@ -36,6 +43,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/PoseArray.h>
 
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 #include <tf2_ros/transform_listener.h>
@@ -72,7 +80,7 @@ const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 
 geometry_msgs::TransformStamped transformStamped;
 
-ros::Publisher pub, pub_voxelized, pub_bboxes;  //!< ROS Publisher
+ros::Publisher pub, pub_voxelized, pub_bboxes, pub_bboxes_poses;  //!< ROS Publisher
 
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
@@ -108,6 +116,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   std::vector<int> indices_in;
   boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
+  geometry_msgs::PoseArray bboxes_poses;
 
   for (int i = 0; i < cloudCameraPtr->points.size(); i++)
   {
@@ -179,6 +188,31 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     std::cout << "PointCloud representing the Cluster " << j << ": " << cloud_cluster->points.size() << " data points."
               << std::endl;
     final_cloud += *cloud_cluster;
+
+    pcl::PCA<PointType> pca;
+    pca.setInputCloud(cloud_cluster);
+
+    // Rotation of PCA
+    Eigen::Matrix3f rot_mat = pca.getEigenVectors();
+    Eigen::Quaterniond rot_quat(rot_mat.cast<double>());
+    geometry_msgs::Quaternion temp_quat = Eigen::toMsg(rot_quat);
+
+    // translation of PCA
+    Eigen::Vector3f cl_translation = pca.getMean().head(3);
+    geometry_msgs::Point temp_vec;
+    temp_vec.x = (double)(cl_translation.x());
+    temp_vec.y = (double)(cl_translation.y());
+    temp_vec.z = (double)(cl_translation.z());
+
+    // Reordering of principal components
+    Eigen::Matrix3f affine_trans;
+    affine_trans.col(0) << (rot_mat.col(0).cross(rot_mat.col(1))).normalized();
+    affine_trans.col(1) << rot_mat.col(0);
+    affine_trans.col(2) << rot_mat.col(1);
+
+    rot_quat = Eigen::Quaterniond(affine_trans.cast<double>());
+    temp_quat = Eigen::toMsg(rot_quat);
+
     PointType min_pt, max_pt;
     pcl::getMinMax3D(*cloud_cluster, min_pt, max_pt);
 
@@ -208,17 +242,13 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     temp_bbox.label = 0;
 
     rviz_bboxes.boxes.push_back(temp_bbox);
-    /*
-    temp_bbox.geometry_msgs::Point32 p1, p2, p3, p4, p5, p6, p7, p8;
-    p1 = geometry_msgs::Point32(min_pt.x, min_pt.y, min_pt.z);
-    p2 = geometry_msgs::Point32(min_pt.x, max_pt.y, min_pt.z);
-    p3 = geometry_msgs::Point32(min_pt.x, min_pt.y, max_pt.z);
-    p4 = geometry_msgs::Point32(min_pt.x, max_pt.y, max_pt.z);
-    p5 = geometry_msgs::Point32(max_pt.x, min_pt.y, min_pt.z);
-    p6 = geometry_msgs::Point32(max_pt.x, max_pt.y, min_pt.z);
-    p7 = geometry_msgs::Point32(max_pt.x, min_pt.y, max_pt.z);
-    p8 = geometry_msgs::Point32(max_pt.x, max_pt.y, max_pt.z);
-    */
+
+    // copy coordinates of mid_point and replace it with xmax
+    geometry_msgs::Pose bboxes_pose_arrow = temp_cluster_pose;
+    bboxes_pose_arrow.position.x = max_pt.x;
+
+    bboxes_poses.poses.push_back(bboxes_pose_arrow);
+
     j++;
   }
 
@@ -228,6 +258,10 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   rviz_bboxes.header.stamp = ros::Time::now();
   rviz_bboxes.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub_bboxes.publish(rviz_bboxes);
+
+  bboxes_poses.header.stamp = ros::Time::now();
+  bboxes_poses.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+  pub_bboxes_poses.publish(bboxes_poses);
 }
 
 int main(int argc, char** argv)
@@ -264,6 +298,7 @@ int main(int argc, char** argv)
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
   pub_voxelized = nh.advertise<sensor_msgs::PointCloud2>("voxelized_point_cloud", 1);
   pub_bboxes = nh.advertise<jsk_recognition_msgs::BoundingBoxArray>("bboxes", 1);
+  pub_bboxes_poses = nh.advertise<geometry_msgs::PoseArray>("bboxes_poses", 1);
 
   // Subscribers list to be synchronized
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
