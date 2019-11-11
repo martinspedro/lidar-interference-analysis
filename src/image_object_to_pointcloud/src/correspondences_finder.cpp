@@ -4,23 +4,38 @@
  *
  * @author Pedro Martins
  */
+#define PCL_NO_PRECOMPILE  // must be included before any PCL include on this CPP file or HPP included before
 
 #include <ros/ros.h>
 
 #include <iostream>
 #include <string>
 
+/* The next two headers MUST BE INCLUDED BEFORE OPENCV headers.
+ * OpenCv leaks a macro #define USE_UNORDERED_MAP that is picked up by FLANN library (included by KDTree from PCL)
+ * This causes FLANN to not define a couple of stuff that causes KDTree to not compile
+ *
+ * See the following links:
+ * https://stackoverflow.com/questions/42504592/flann-util-serialization-h-class-stdunordered-mapunsigned-int-stdvectorun
+ * https://github.com/mariusmuja/flann/issues/214
+ */
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/segmentation/extract_clusters.h>
 // OPENCV
 #include <opencv2/opencv.hpp>
 #include "opencv2/core.hpp"
 
 // PCL
+#include <pcl/common/common.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl_ros/point_cloud.h>
 
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Vector3.h>
 
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 #include <tf2_ros/transform_listener.h>
@@ -40,9 +55,14 @@
 #include <darknet_ros_msgs/ObjectCount.h>
 
 #include "image_object_to_pointcloud/image_object_to_pointcloud.hpp"
+#include "jsk_recognition_msgs/BoundingBox.h"
+#include "jsk_recognition_msgs/BoundingBoxArray.h"
+
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/voxel_grid.h>
 
 const float NEAR_PLANE_DISTANCE = 1.0f;
-const float FAR_PLANE_DISTANCE = 30.0f;
+const float FAR_PLANE_DISTANCE = 40.0f;
 const double PIXEL_SIZE = 3.45e-6;
 
 const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyForCallback;
@@ -52,7 +72,7 @@ const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 
 geometry_msgs::TransformStamped transformStamped;
 
-ros::Publisher pub;  //!< ROS Publisher
+ros::Publisher pub, pub_voxelized, pub_bboxes;  //!< ROS Publisher
 
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
@@ -96,7 +116,8 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     // Note that Kitti width and height are swapped so we swap them here also
     if (((int)(uv.x) >= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= im_dimensions.height) &&
-        ((int)uv.y <= im_dimensions.width) && (cloudCameraPtr->points[i].z >= 0))
+        ((int)uv.y <= im_dimensions.width) && (cloudCameraPtr->points[i].z >= NEAR_PLANE_DISTANCE) &&
+        (cloudCameraPtr->points[i].z <= FAR_PLANE_DISTANCE))
     {
       for (int j = 0; j < object_count->count; ++j)
       {
@@ -119,6 +140,94 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   cloudFilteredPtr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub.publish(cloudFilteredPtr);
+
+  pcl::VoxelGrid<PointType> vg;
+  PointCloudType::Ptr cloud_filtered(new PointCloudType);
+  vg.setInputCloud(cloudFilteredPtr);
+  vg.setLeafSize(0.04f, 0.04f, 0.04f);
+  vg.filter(*cloud_filtered);
+  std::cout << "PointCloud after filtering has: " << cloud_filtered->points.size() << " data points." << std::endl;
+
+  // Creating the KdTree object for the search method of the extraction
+  pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
+  tree->setInputCloud(cloud_filtered);
+
+  std::vector<pcl::PointIndices> cluster_indices;
+  pcl::EuclideanClusterExtraction<PointType> ec;
+  ec.setClusterTolerance(0.25);  // L2 Euclidean Norm distance in meters
+  ec.setMinClusterSize(300);
+  ec.setMaxClusterSize(25000);
+  ec.setSearchMethod(tree);
+  ec.setInputCloud(cloud_filtered);
+  ec.extract(cluster_indices);
+
+  int j = 0;
+  PointCloudType final_cloud;
+  jsk_recognition_msgs::BoundingBoxArray rviz_bboxes;
+  for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+  {
+    PointCloudType::Ptr cloud_cluster(new PointCloudType);
+
+    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+    {
+      cloud_cluster->points.push_back(cloud_filtered->points[*pit]);
+    }
+    cloud_cluster->width = cloud_cluster->points.size();
+    cloud_cluster->height = 1;
+    cloud_cluster->is_dense = true;
+
+    std::cout << "PointCloud representing the Cluster " << j << ": " << cloud_cluster->points.size() << " data points."
+              << std::endl;
+    final_cloud += *cloud_cluster;
+    PointType min_pt, max_pt;
+    pcl::getMinMax3D(*cloud_cluster, min_pt, max_pt);
+
+    geometry_msgs::Point mid_pt;
+    mid_pt.x = (max_pt.x + min_pt.x) / 2;
+    mid_pt.y = (max_pt.y + min_pt.y) / 2;
+    mid_pt.z = (max_pt.z + min_pt.z) / 2;
+
+    geometry_msgs::Quaternion pose_orientation;
+    pose_orientation.w = 1;
+
+    jsk_recognition_msgs::BoundingBox temp_bbox;
+    geometry_msgs::Pose temp_cluster_pose;
+    temp_cluster_pose.position = mid_pt;
+    temp_cluster_pose.orientation = pose_orientation;
+    temp_bbox.pose = temp_cluster_pose;
+
+    geometry_msgs::Vector3 bbox_dimensions;
+    bbox_dimensions.x = max_pt.x - min_pt.x;
+    bbox_dimensions.y = max_pt.y - min_pt.y;
+    bbox_dimensions.z = max_pt.z - min_pt.z;
+    temp_bbox.dimensions = bbox_dimensions;
+
+    temp_bbox.header.stamp = ros::Time::now();
+    temp_bbox.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+    temp_bbox.value = 0.0f;
+    temp_bbox.label = 0;
+
+    rviz_bboxes.boxes.push_back(temp_bbox);
+    /*
+    temp_bbox.geometry_msgs::Point32 p1, p2, p3, p4, p5, p6, p7, p8;
+    p1 = geometry_msgs::Point32(min_pt.x, min_pt.y, min_pt.z);
+    p2 = geometry_msgs::Point32(min_pt.x, max_pt.y, min_pt.z);
+    p3 = geometry_msgs::Point32(min_pt.x, min_pt.y, max_pt.z);
+    p4 = geometry_msgs::Point32(min_pt.x, max_pt.y, max_pt.z);
+    p5 = geometry_msgs::Point32(max_pt.x, min_pt.y, min_pt.z);
+    p6 = geometry_msgs::Point32(max_pt.x, max_pt.y, min_pt.z);
+    p7 = geometry_msgs::Point32(max_pt.x, min_pt.y, max_pt.z);
+    p8 = geometry_msgs::Point32(max_pt.x, max_pt.y, max_pt.z);
+    */
+    j++;
+  }
+
+  final_cloud.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+  pub_voxelized.publish(final_cloud);
+
+  rviz_bboxes.header.stamp = ros::Time::now();
+  rviz_bboxes.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+  pub_bboxes.publish(rviz_bboxes);
 }
 
 int main(int argc, char** argv)
@@ -153,6 +262,8 @@ int main(int argc, char** argv)
 
   // Publish filtered point cloud
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
+  pub_voxelized = nh.advertise<sensor_msgs::PointCloud2>("voxelized_point_cloud", 1);
+  pub_bboxes = nh.advertise<jsk_recognition_msgs::BoundingBoxArray>("bboxes", 1);
 
   // Subscribers list to be synchronized
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
