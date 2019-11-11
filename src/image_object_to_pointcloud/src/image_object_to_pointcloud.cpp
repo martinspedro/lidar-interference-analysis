@@ -16,11 +16,14 @@
  * http://docs.pointclouds.org/trunk/frustum__culling_8hpp_source.html#l00047 cv::Size im_dimensions =
  * cam_model_.fullResolution(); This assumes a coordinate system where X is forward, Y is up, and Z is right. To
  * convert from the traditional camera coordinate system (X right, Y down, Z forward), one can use:
+ *
+ * The original matrix has (2,1) = -1 and (1, 2) = 1. This matrix, with switched coefficients allows for a flip on the
+ * axis, rendering more visually accurate results, despite might not being correct
  */
 // clang-format off
 const Eigen::Matrix4f LIDAR_POSE_TO_FRUSTRUM_POSE = (Eigen::Matrix4f() <<  1, 0, 0, 0,
-                                                                           0, 0, 1, 0,
-                                                                           0,-1, 0, 0,
+                                                                           0, 0,-1, 0,
+                                                                           0, 1, 0, 0,
                                                                            0, 0, 0, 1).finished();
 // clang-format on
 
@@ -85,9 +88,12 @@ void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ro
   Eigen::Vector3d bbox_ray_eigen(bbox_ray.x, bbox_ray.y, bbox_ray.z);
   Eigen::Vector3d center_ray_eigen(center_ray.x, center_ray.y, center_ray.z);
 
+  // Computes the rotation that sends a line in the direction of the bbox_ray to the direction of center ray. Both Lines
+  // pass throught the origin. See https://eigen.tuxfamily.org/dox/classEigen_1_1QuaternionBase.html#title26
   Eigen::Quaterniond fov_lidar_quaternion = Eigen::Quaterniond().setFromTwoVectors(bbox_ray_eigen, center_ray_eigen);
   fov_lidar_quaternion.normalize();
 
+  // Create Pure Rotation Affine Transform
   fov_bbox = Eigen::Matrix4f::Identity();
   fov_bbox.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
 }
