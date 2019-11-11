@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+Description: TODO
+-->
+
+<launch>
+   <!-- PARAMETERS -->
+   <param name="use_sim_time" value="true" />
+
+   <!-- ARGUMENTS -->
+   <!-- Kitti datasets -->
+   <arg name="kitti_bags_folder_path"
+        value="/media/martinspedro/Elements/Kitti/rosbag/" />
+   <arg name="kitti_bag"              default="2011_09_26/kitti_2011_09_26_drive_0009_synced.bag" />
+
+
+
+   <!-- Camera related -->
+   <arg name="left_camera_raw_image"          default="/kitti/camera_color_left/image_raw" />
+   <arg name="left_camera_image_info"         default="/kitti/camera_color_left/camera_info" />
+
+   <arg name="right_camera_raw_image"         default="/kitti/camera_color_right/image_raw" />
+   <arg name="right_camera_image_info"        default="/kitti/camera_color_right/image_info" />
+
+   <arg name="darknet_node_raw_image"         default="/camera/rgb/image_raw" />
+   <arg name="default_camera_info"            default="/camera/camera_info" />
+
+   <!-- NODES -->
+   <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
+   <node pkg="rosbag" type="play" name="KITTI_dataset"
+         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock -l -r 0.05">
+         <remap from="$(arg left_camera_raw_image)" to="$(arg darknet_node_raw_image)" />
+         <remap from="$(arg left_camera_image_info)" to="$(arg default_camera_info)" />
+         <remap from="/kitti/velo/pointcloud" to="/velodyne_points" />
+   </node>
+
+  <!-- Console launch prefix -->
+    <arg name="launch_prefix" default=""/>
+
+    <!-- Config and weights folder. -->
+    <arg name="yolo_weights_path"          default="$(find darknet_ros)/yolo_network_config/weights"/>
+    <arg name="yolo_config_path"           default="$(find darknet_ros)/yolo_network_config/cfg"/>
+
+    <!-- ROS and network parameter files -->
+    <arg name="ros_param_file"             default="$(find darknet_ros)/config/ros.yaml"/>
+    <arg name="network_param_file"         default="$(find darknet_ros)/config/yolov3.yaml"/>
+
+    <!-- Load parameters -->
+    <rosparam command="load" ns="darknet_ros" file="$(arg ros_param_file)"/>
+    <rosparam command="load" ns="darknet_ros" file="$(arg network_param_file)"/>
+
+    <!-- Start darknet and ros wrapper -->
+    <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen" launch-prefix="$(arg launch_prefix)">
+      <param name="weights_path"          value="$(arg yolo_weights_path)" />
+      <param name="config_path"           value="$(arg yolo_config_path)" />
+    </node>
+
+<!--
+    <node pkg="image_object_to_pointcloud" type="correspondences_finder_node" name="correspondences_finder" output="screen"/>
+ -->
+</launch>
