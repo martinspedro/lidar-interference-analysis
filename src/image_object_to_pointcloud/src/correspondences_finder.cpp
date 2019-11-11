@@ -243,9 +243,31 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     rviz_bboxes.boxes.push_back(temp_bbox);
 
-    // copy coordinates of mid_point and replace it with xmax
+    // copy coordinates of mid_point and replace it with the leading dimension. The if cascade prioretizes x, y and z
+    // dimensions, on this order
     geometry_msgs::Pose bboxes_pose_arrow = temp_cluster_pose;
-    bboxes_pose_arrow.position.x = max_pt.x;
+    if (bbox_dimensions.x >= bbox_dimensions.y)
+    {
+      bboxes_pose_arrow.position.x = max_pt.x;
+    }
+    else if (bbox_dimensions.y >= bbox_dimensions.z)
+    {
+      bboxes_pose_arrow.position.y = max_pt.y;
+      geometry_msgs::Quaternion yy_rotation;
+      yy_rotation.z = 0.7071068;
+      yy_rotation.w = 0.7071068;
+
+      bboxes_pose_arrow.orientation = yy_rotation;
+    }
+    else
+    {
+      bboxes_pose_arrow.position.z = max_pt.z;
+      geometry_msgs::Quaternion zz_rotation;
+      zz_rotation.y = -0.7071068;
+      zz_rotation.w = 0.7071068;
+
+      bboxes_pose_arrow.orientation = zz_rotation;
+    }
 
     bboxes_poses.poses.push_back(bboxes_pose_arrow);
 
