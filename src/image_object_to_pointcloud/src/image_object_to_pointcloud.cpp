@@ -7,7 +7,13 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/core.hpp"
 #include <pcl/common/common.h>
+#include <pcl/common/pca.h>
+#include <pcl/features/moment_of_inertia_estimation.h>
 #include "image_object_to_pointcloud/image_object_to_pointcloud.hpp"
+
+#include "tf2/transform_datatypes.h"
+#include "tf2_eigen/tf2_eigen.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Quaternion.h>
@@ -30,11 +36,6 @@ const Eigen::Matrix4f LIDAR_POSE_TO_FRUSTRUM_POSE = (Eigen::Matrix4f() <<  1, 0,
                                                                            0, 0, 0, 1).finished();
 // clang-format on
 
-/**
- * \brief Compute Camera Affine Transform from Angle Axis vector
- *
- * \remark Conversions and transforms verified using https://www.andre-gaschler.com/rotationconverter/
- */
 Eigen::Matrix4f angleAxisVecToTransform(const Eigen::Vector3f angle_axis_rotation)
 {
   cv::Matx33f cv_rotation_matrix = cv::Matx33f(3, 3, CV_32FC1);
@@ -101,6 +102,24 @@ void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ro
   fov_bbox.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
 }
 
+Eigen::Matrix3d degenerateRotationMatrixToZ(Eigen::Matrix3d original_rotation_matrix)
+{
+  Eigen::Matrix3d temp_matrix;
+  temp_matrix.col(0) << original_rotation_matrix.col(0).head(2), 0;
+  temp_matrix.col(1) << original_rotation_matrix.col(1).head(2), 0;
+  temp_matrix.col(2) << 0, 0, 1;
+
+  return temp_matrix;
+}
+
+Eigen::Matrix3d computeRotationMatrixFromEigenVectors(const Eigen::Matrix3d eigen_vectors)
+{
+  Eigen::Matrix3d rotation_matrix = eigen_vectors;
+  rotation_matrix.col(2) << (rotation_matrix.col(0).cross(rotation_matrix.col(1))).normalized();
+
+  return rotation_matrix;
+}
+
 void computeClusterBoundingBox(const PointCloudType::ConstPtr point_cloud_cluster,
                                jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr)
 {
@@ -111,6 +130,9 @@ void computeClusterBoundingBox(const PointCloudType::ConstPtr point_cloud_cluste
   bbox_center_point.x = (max_pt.x + min_pt.x) / 2;
   bbox_center_point.y = (max_pt.y + min_pt.y) / 2;
   bbox_center_point.z = (max_pt.z + min_pt.z) / 2;
+
+  ROS_DEBUG_STREAM("MinMax3D: [ " << min_pt << ", " << max_pt << "] with Centroid: (" << bbox_center_point.x << ", "
+                                  << bbox_center_point.y << "," << bbox_center_point.z << ")");
 
   geometry_msgs::Quaternion pose_orientation;  // Quaternion that looks forward on the coordinate frame axis
   pose_orientation.w = 1;
@@ -158,4 +180,107 @@ void computeClusterBoundingBoxPose(jsk_recognition_msgs::BoundingBox::Ptr& rviz_
     bounding_box_pose->position.z += rviz_bbox_ptr->dimensions.z / 2;
     bounding_box_pose->orientation = zz_rotation;
   }
+}
+
+void computeBoundingBoxPosePCA(const PointCloudType::ConstPtr point_cloud_cluster_ptr, bool lockRotationToZAxis,
+                               geometry_msgs::Pose::Ptr& bounding_box_pose)
+{
+  pcl::PCA<PointType> pca;
+  pca.setInputCloud(point_cloud_cluster_ptr);
+
+  /* Get the Eigen Vectors and Eigen values of the Cluster.
+   * The Eigen Vectors define the object principal components: the linearly uncorrelated axis along the dimensions with
+   higher variance. Can be used to define the new coordinate system
+   * The Eigen Values correspond to the centroid of the cluster
+   */
+  Eigen::Matrix3f eigen_vectors = pca.getEigenVectors();  // Columns represent the axis [X, Y, Z]
+  Eigen::Vector3f eigen_values = pca.getMean().head(3);   // Get only the first 3 eigen values
+
+  Eigen::Matrix3d rotation_matrix = computeRotationMatrixFromEigenVectors(eigen_vectors.cast<double>());
+  if (lockRotationToZAxis)
+  {
+    rotation_matrix = degenerateRotationMatrixToZ(rotation_matrix);
+  }
+
+  Eigen::Quaterniond principal_axis_eigen_quat(rotation_matrix);
+  principal_axis_eigen_quat.normalize();
+  geometry_msgs::Quaternion principal_axis_quat = Eigen::toMsg(principal_axis_eigen_quat);
+  geometry_msgs::Point centroid_coordinates = eigenVectorToGeometryMsgsPoint(eigen_values);
+
+  bounding_box_pose->position = centroid_coordinates;
+  bounding_box_pose->orientation = principal_axis_quat;
+}
+
+void computeOBB(const PointCloudType::ConstPtr point_cloud_cluster_ptr,
+                jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr)
+{
+  pcl::MomentOfInertiaEstimation<PointType> feature_extractor;
+  feature_extractor.setInputCloud(point_cloud_cluster_ptr);
+  feature_extractor.compute();
+
+  pcl::PointXYZ min_point_OBB, max_point_OBB, position_OBB;
+  Eigen::Matrix3f rotational_matrix_OBB;
+  feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+
+  ROS_DEBUG_STREAM("OBB: [" << min_point_OBB << " , " << max_point_OBB << "] with Centroid: " << position_OBB);
+
+  // Convert OBB Position to ROS geometry messages
+  rviz_bbox_ptr->pose.position = PCLPointXYZToGeometryMsgsPoint(position_OBB);
+
+  // Convert OBB Rotation Matrix to a Eigen Quaternion and the convert Eigen quaternion to ROS geometry messages
+  Eigen::Quaterniond pose_orientation_eigen_quat(rotational_matrix_OBB.cast<double>());
+  pose_orientation_eigen_quat.normalize();
+  rviz_bbox_ptr->pose.orientation = Eigen::toMsg(pose_orientation_eigen_quat);
+
+  // Compute OBB dimensions using the min and max coordinates of every axis
+  geometry_msgs::Vector3 bbox_dimensions;
+  bbox_dimensions.x = max_point_OBB.x - min_point_OBB.x;
+  bbox_dimensions.y = max_point_OBB.y - min_point_OBB.y;
+  bbox_dimensions.z = max_point_OBB.z - min_point_OBB.z;
+  rviz_bbox_ptr->dimensions = bbox_dimensions;
+
+  // Fill the remaining fields
+  rviz_bbox_ptr->header.stamp = ros::Time::now();
+  rviz_bbox_ptr->header.frame_id =
+      point_cloud_cluster_ptr->header.frame_id;  // Use the same frame as the input point cloud
+  rviz_bbox_ptr->value = 0.0f;
+  rviz_bbox_ptr->label = 0;
+}
+
+void computeAABB(const PointCloudType::ConstPtr point_cloud_cluster_ptr,
+                 jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr)
+{
+  pcl::MomentOfInertiaEstimation<PointType> feature_extractor;
+  feature_extractor.setInputCloud(point_cloud_cluster_ptr);
+  feature_extractor.compute();
+
+  pcl::PointXYZ min_point_AABB;
+  pcl::PointXYZ max_point_AABB;
+  feature_extractor.getAABB(min_point_AABB, max_point_AABB);
+
+  geometry_msgs::Point AABB_centroid;  // Bounding Box middle Point
+  AABB_centroid.x = (max_point_AABB.x + min_point_AABB.x) / 2.0d;
+  AABB_centroid.y = (max_point_AABB.y + min_point_AABB.y) / 2.0d;
+  AABB_centroid.z = (max_point_AABB.z + min_point_AABB.z) / 2.0d;
+
+  ROS_DEBUG_STREAM("AABB: [" << min_point_AABB << " , " << max_point_AABB << "] with Centroid: (" << AABB_centroid.x
+                             << ", " << AABB_centroid.y << "," << AABB_centroid.z << ")");
+
+  geometry_msgs::Quaternion pose_orientation;  // Quaternion that looks forward on the coordinate frame axis
+  pose_orientation.w = 1;
+
+  geometry_msgs::Vector3 AABB_dimensions;  // Bouding Box dimensions using the min and max coordinates of every axis
+  AABB_dimensions.x = max_point_AABB.x - min_point_AABB.x;
+  AABB_dimensions.y = max_point_AABB.y - min_point_AABB.y;
+  AABB_dimensions.z = max_point_AABB.z - min_point_AABB.z;
+
+  // Fill the  a bounding box object
+  rviz_bbox_ptr->pose.position = AABB_centroid;
+  rviz_bbox_ptr->pose.orientation = pose_orientation;
+  rviz_bbox_ptr->dimensions = AABB_dimensions;
+  rviz_bbox_ptr->header.stamp = ros::Time::now();
+  rviz_bbox_ptr->header.frame_id =
+      point_cloud_cluster_ptr->header.frame_id;  // Use the same frame as the input point cloud
+  rviz_bbox_ptr->value = 0.0f;
+  rviz_bbox_ptr->label = 0;
 }

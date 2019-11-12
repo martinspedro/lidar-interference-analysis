@@ -44,6 +44,41 @@ inline cv::Point3d PCLToOpenCvPoint(pcl::PointXYZ pcl_point)
   return cv::Point3d(pcl_point.x, pcl_point.y, pcl_point.z);
 }
 
+inline Eigen::Vector3f PCLPointXYZToEigenVector3f(pcl::PointXYZ pcl_point)
+{
+  Eigen::Vector3f temp_vec;
+  temp_vec.x() = pcl_point.x;
+  temp_vec.y() = pcl_point.y;
+  temp_vec.z() = pcl_point.z;
+  return temp_vec;
+}
+
+inline geometry_msgs::Vector3 PCLPointXYZToGeometryMsgsVector(pcl::PointXYZ pcl_point)
+{
+  geometry_msgs::Vector3 temp_vec;
+  temp_vec.x = (double)(pcl_point.x);
+  temp_vec.y = (double)(pcl_point.y);
+  temp_vec.z = (double)(pcl_point.z);
+  return temp_vec;
+}
+
+inline geometry_msgs::Point PCLPointXYZToGeometryMsgsPoint(pcl::PointXYZ pcl_point)
+{
+  geometry_msgs::Point temp_point;
+  temp_point.x = (double)(pcl_point.x);
+  temp_point.y = (double)(pcl_point.y);
+  temp_point.z = (double)(pcl_point.z);
+  return temp_point;
+}
+
+inline geometry_msgs::Point eigenVectorToGeometryMsgsPoint(Eigen::Vector3f vector_eigen)
+{
+  geometry_msgs::Point temp_point;
+  temp_point.x = (double)(vector_eigen.x());
+  temp_point.y = (double)(vector_eigen.y());
+  temp_point.z = (double)(vector_eigen.z());
+  return temp_point;
+}
 /**
  * \param[in] camera_point_cloud_ptr Point Cloud in the camera coordinate frame
  *
@@ -77,6 +112,17 @@ inline void filterPointCloudFromCameraROIs(const unsigned int& b_boxes_object_co
   }
 }
 
+Eigen::Matrix3d degenerateRotationMatrixToZ(Eigen::Matrix3d original_rotation_matrix);
+Eigen::Matrix3d computeRotationMatrixFromEigenVectors(const Eigen::Matrix3d eigen_vectors);
+void computeBoundingBoxPosePCA(const PointCloudType::ConstPtr point_cloud_cluster_ptr, bool lockRotationToZAxis,
+                               geometry_msgs::Pose::Ptr& bounding_box_pose);
+/**
+ * \brief Compute Camera Affine Transform from Angle Axis vector
+ * \param[in] angle_axis_rotation Angle Axis Vector in order [X, Y, Z]
+ * \return Rotation Matrix in an Affine Transform Matrix, so dimensions are [4 x 4]
+ *
+ * \remark Conversions and transforms verified using https://www.andre-gaschler.com/rotationconverter/
+ */
 Eigen::Matrix4f angleAxisVecToTransform(const Eigen::Vector3f angle_axis_rotation);
 void getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr, Eigen::Matrix4f& lidar_pose);
 void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ros_msgs::BoundingBox bounding_box,
@@ -84,7 +130,10 @@ void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ro
 
 void computeClusterBoundingBox(const PointCloudType::ConstPtr point_cloud_cluster,
                                jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr);
-
 void computeClusterBoundingBoxPose(jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr,
                                    geometry_msgs::Pose::Ptr& bounding_box_pose);
+void computeOBB(const PointCloudType::ConstPtr point_cloud_cluster_ptr,
+                jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr);
+void computeAABB(const PointCloudType::ConstPtr point_cloud_cluster_ptr,
+                 jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr);
 #endif  // IMAGE_OBJECT_TO_POINT_CLOUD_H
