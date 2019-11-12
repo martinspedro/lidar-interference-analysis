@@ -14,22 +14,23 @@ Description: TODO
         value="/media/martinspedro/Elements/Kitti/rosbag/" />
    <arg name="kitti_bag"              default="2011_09_26/kitti_2011_09_26_drive_0009_synced.bag" />
 
+    <arg name="mine_bags_folder_path"
+         value="/media/martinspedro/Elements/mine/CAMBADA/2019-08-28\ \(Setup\ A\)/Multiple\ LiDAR\ Interference/Distance/4\ m/" />
+    <arg name="ground_truth_bag"              default="ground_truth.bag" />
+
 
 
    <!-- Camera related -->
-   <arg name="left_camera_raw_image"          default="/kitti/camera_color_left/image_raw" />
-   <arg name="left_camera_image_info"         default="/kitti/camera_color_left/image_info" />
-
-   <arg name="right_camera_raw_image"         default="/kitti/camera_color_right/image_raw" />
-   <arg name="right_camera_image_info"        default="/kitti/camera_color_right/image_info" />
+   <arg name="camera_raw_image"          default="/camera/image_raw" />
+   <arg name="camera_image_info"         default="/camera/image_info" />/>
 
    <arg name="darknet_node_raw_image"         default="/camera/rgb/image_raw" />
 
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
    <node pkg="rosbag" type="play" name="KITTI_dataset"
-         args="$(arg kitti_bags_folder_path)$(arg kitti_bag) --clock -l">
-         <remap from="$(arg left_camera_raw_image)" to="$(arg darknet_node_raw_image)" />
+         args="$(arg mine_bags_folder_path)$(arg ground_truth_bag) --clock -l -r 0.1">
+         <remap from="$(arg camera_raw_image)" to="$(arg darknet_node_raw_image)" />
    </node>
 
   <!-- Console launch prefix -->
@@ -53,5 +54,7 @@ Description: TODO
       <param name="config_path"           value="$(arg yolo_config_path)" />
     </node>
 
-
+<!--
+    <node pkg="image_object_to_pointcloud" type="correspondences_finder_node" name="correspondences_finder" output="screen"/>
+ -->
 </launch>
