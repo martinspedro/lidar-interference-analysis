@@ -91,6 +91,10 @@ geometry_msgs::TransformStamped transformStamped;
 
 ros::Publisher pub, pub_voxelized, pub_bboxes, pub_bboxes_poses;  //!< ROS Publisher
 
+ros::WallTime start_, end_;
+double execution_time = 0.0d;
+int num_executions = 0;
+
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
@@ -189,96 +193,27 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     // Store all the individual clusters into a point cloud object
     point_cloud_all_clusters += *point_cloud_current_cluster;
-    /*
-    pcl::MomentOfInertiaEstimation<PointType> feature_extractor;
-    feature_extractor.setInputCloud(point_cloud_current_cluster);
-    feature_extractor.compute();
-    std::vector<float> moment_of_inertia;
-    std::vector<float> eccentricity;
-    pcl::PointXYZ min_point_AABB;
-    pcl::PointXYZ max_point_AABB;
-    pcl::PointXYZ min_point_OBB;
-    pcl::PointXYZ max_point_OBB;
-    pcl::PointXYZ position_OBB;
-    Eigen::Matrix3f rotational_matrix_OBB;
-    float major_value, middle_value, minor_value;
-    Eigen::Vector3f major_vector, middle_vector, minor_vector;
-    Eigen::Vector3f mass_center;
-
-    feature_extractor.getMomentOfInertia(moment_of_inertia);
-    feature_extractor.getEccentricity(eccentricity);
-    feature_extractor.getAABB(min_point_AABB, max_point_AABB);
-    feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
-    feature_extractor.getEigenValues(major_value, middle_value, minor_value);
-    feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
-    feature_extractor.getMassCenter(mass_center);
-
-    Eigen::Vector3f position(position_OBB.x, position_OBB.y, position_OBB.z);
-    rotational_matrix_OBB.row(2) << 0, 0, 1;
-    rotational_matrix_OBB.col(2) << 0, 0, 1;
-    Eigen::Quaternionf quat(rotational_matrix_OBB);
-
-    // PCA
-    pcl::PCA<PointType> pca;
-    pca.setInputCloud(point_cloud_current_cluster);
-    Eigen::Matrix3f eigen_vector =
-        pca.getEigenVectors();  // returns a matrix where the columns are the axis of your bounding box
-    Eigen::Vector3f direction = eigen_vector.col(0);
-
-    // Rotation of PCA
-    Eigen::Matrix3f rot_mat = pca.getEigenVectors();
-    Eigen::Quaterniond rot_quat(rot_mat.cast<double>());
-    geometry_msgs::Quaternion temp_quat = Eigen::toMsg(rot_quat);
-
-    // translation of PCA
-    Eigen::Vector3f cl_translation = pca.getMean().head(3);
-    geometry_msgs::Point temp_vec;
-    temp_vec.x = (double)(cl_translation.x());
-    temp_vec.y = (double)(cl_translation.y());
-    temp_vec.z = (double)(cl_translation.z());
-
-    // Reordering of principal components
-    Eigen::Matrix3f affine_trans;
-    affine_trans.col(0) << rot_mat.col(0).head(2),
-        0;  // (rot_mat.col(0).cross(rot_mat.col(1))).normalized().head(2), 0;
-    affine_trans.col(1) << rot_mat.col(1).head(2), 0;
-    affine_trans.col(2) << 0, 0, 1;  //(rot_mat.col(0).cross(rot_mat.col(1))).normalized();
-
-    rot_quat = Eigen::Quaterniond(affine_trans.cast<double>());
-    temp_quat = Eigen::toMsg(rot_quat);
-    std::cout << "Rotation Matrix: \n" << affine_trans << "\nQuaternion: \n" << temp_quat << std::endl;
-    std::cout << "Rotation Matrix: \n" << rotational_matrix_OBB << /*"\nQuaternion: \n" << quat <<
-    std::endl;
-
-    // New method
-    // temp_quat = Eigen::toMsg(quat.cast<double>());
-    temp_vec.x = (double)(position_OBB.x);
-    temp_vec.y = (double)(position_OBB.y);
-    temp_vec.z = (double)(position_OBB.z);
-
-    // temp_vec.x = (double)(direction.x());
-    // temp_vec.y = (double)(direction.y());
-    // temp_vec.z = (double)(direction.z());
-    */
-
-    /*
-        Eigen::Vector3d origin_vec(1.0d, 0.0d, 0.0d);
-        Eigen::Vector3d center_ray_eigen(bbox_center_point.x, bbox_center_point.y, bbox_center_point.z);
-        Eigen::Quaterniond new_quat = Eigen::Quaterniond().setFromTwoVectors(center_ray_eigen, origin_vec);
-        new_quat.normalize();
-        Eigen::Matrix3d new_quat_mat = new_quat.matrix();
-        new_quat_mat.row(2) << 0, 0, 1;
-        new_quat_mat.col(2) << 0, 0, 1;
-        rot_quat = Eigen::Quaterniond(new_quat_mat);
-        rot_quat.normalize();
-        // temp_quat = Eigen::toMsg(rot_quat);
-
-        std::cout << "Rotation Matrix: \n" << new_quat_mat << "\nQuaternion: \n" << temp_quat << std::endl;
-    */
 
     // Compute Bounding Box for current cluster and add it to the vector of  bounding boxes detected on this frame
     jsk_recognition_msgs::BoundingBox::Ptr rviz_bbox_ptr(new jsk_recognition_msgs::BoundingBox);
+    start_ = ros::WallTime::now();
     computeClusterBoundingBox(point_cloud_current_cluster, rviz_bbox_ptr);
+    // computeAABB(point_cloud_current_cluster, rviz_bbox_ptr);
+    // computeOBB(point_cloud_current_cluster, rviz_bbox_ptr);
+    end_ = ros::WallTime::now();
+    ++num_executions;
+    if (num_executions <= 100)
+    {
+      execution_time += (end_ - start_).toNSec();
+    }
+    else
+    {
+      double average_execution_time = (execution_time / 100.0d);
+      ROS_INFO_STREAM("Average Execution time (ms): " << average_execution_time * 1e-6);
+      ROS_INFO_STREAM("Number of executions: " << num_executions);
+      ROS_WARN("Already reached 1000 executions");
+    }
+
     rviz_bboxes.boxes.push_back(*rviz_bbox_ptr);
 
     // Compute the Bounding Box Pose for the current cluster bounding boxes and add it to the vector of bounding boxes
