@@ -101,7 +101,7 @@ const float VOXEL_GRID_LEAF_SIZE = 0.04f;  //!< Voxel length used for the Voxel 
 
 geometry_msgs::TransformStamped transformStamped;
 
-ros::Publisher pub, pub_voxelized, pub_bboxes;  //!< ROS Publisher
+ros::Publisher pub, pub_point_cloud_clusters, pub_bboxes;  //!< ROS Publisher
 
 #ifdef PUBLISH_BBOX_POSES
 ros::Publisher pub_bboxes_poses;
@@ -229,7 +229,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   // Published Cloud with the Clusters for the Points Corresponding to Image Bouding Boxes
   point_cloud_all_clusters.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
-  pub_voxelized.publish(point_cloud_all_clusters);
+  pub_point_cloud_clusters.publish(point_cloud_all_clusters);
 
   // Publish BoundingBoxes and respective Poses
   rviz_bboxes.header.stamp = ros::Time::now();
@@ -285,7 +285,7 @@ int main(int argc, char** argv)
 
   // Publish filtered point cloud
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 5);
-  pub_voxelized = nh.advertise<sensor_msgs::PointCloud2>("voxelized_point_cloud", 5);
+  pub_point_cloud_clusters = nh.advertise<sensor_msgs::PointCloud2>("point_cloud_clusters", 5);
   pub_bboxes = nh.advertise<jsk_recognition_msgs::BoundingBoxArray>("bboxes", 5);
 
 #ifdef PUBLISH_BBOX_POSES
