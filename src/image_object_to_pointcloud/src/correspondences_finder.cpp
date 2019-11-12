@@ -70,6 +70,9 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/voxel_grid.h>
 
+#include <dynamic_reconfigure/server.h>
+#include "image_object_to_pointcloud/euclidian_cluster_filterConfig.h"
+
 // If defined, the node will publish a PoseArray containing the BBox major direction
 // #define PUBLISH_BBOX_POSES
 
@@ -86,9 +89,13 @@ const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 const bool EXTRACT_INDEX_FROM_POINT_CLOUD = true;
 const bool REMOVE_INDEX_FROM_POINT_CLOUD = false;
 
-const float CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.20;  // in meters
-const unsigned int MIN_CLUSTER_SIZE = 200;
+const float CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.10;  // in meters
+const unsigned int MIN_CLUSTER_SIZE = 100;
 const unsigned int MAX_CLUSTER_SIZE = 25000;
+
+float dyn_rec_cluster_tolerance;        // = CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE;
+unsigned int dyn_rec_min_cluster_size;  // = MIN_CLUSTER_SIZE;
+unsigned int dyn_rec_max_cluster_size;  // = MAX_CLUSTER_SIZE;
 
 const float VOXEL_GRID_LEAF_SIZE = 0.04f;  //!< Voxel length used for the Voxel Grid filter
 
@@ -171,9 +178,9 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<PointType> euclidian_cluster_extraction_filter;
-  euclidian_cluster_extraction_filter.setClusterTolerance(CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE);
-  euclidian_cluster_extraction_filter.setMinClusterSize(MIN_CLUSTER_SIZE);
-  euclidian_cluster_extraction_filter.setMaxClusterSize(MAX_CLUSTER_SIZE);
+  euclidian_cluster_extraction_filter.setClusterTolerance(dyn_rec_cluster_tolerance);
+  euclidian_cluster_extraction_filter.setMinClusterSize(dyn_rec_min_cluster_size);
+  euclidian_cluster_extraction_filter.setMaxClusterSize(dyn_rec_max_cluster_size);
   euclidian_cluster_extraction_filter.setSearchMethod(kd_tree);
   euclidian_cluster_extraction_filter.setInputCloud(point_cloud_voxelized);
   euclidian_cluster_extraction_filter.extract(cluster_indices);
@@ -236,6 +243,16 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 #endif
 }
 
+void euclidianClusterFilterReconfigureCallback(image_object_to_pointcloud::euclidian_cluster_filterConfig& config,
+                                               uint32_t level)
+{
+  ROS_INFO("Reconfigure Request: %f %f %f", config.L2_norm_tolerance, config.min_cluster_size, config.max_cluster_size);
+
+  dyn_rec_cluster_tolerance = config.L2_norm_tolerance;
+  dyn_rec_min_cluster_size = config.min_cluster_size;
+  dyn_rec_max_cluster_size = config.max_cluster_size;
+}
+
 int main(int argc, char** argv)
 {
   // Initialize ROS
@@ -267,12 +284,12 @@ int main(int argc, char** argv)
                                               ros::Duration(20.0));
 
   // Publish filtered point cloud
-  pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
-  pub_voxelized = nh.advertise<sensor_msgs::PointCloud2>("voxelized_point_cloud", 1);
-  pub_bboxes = nh.advertise<jsk_recognition_msgs::BoundingBoxArray>("bboxes", 1);
+  pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 5);
+  pub_voxelized = nh.advertise<sensor_msgs::PointCloud2>("voxelized_point_cloud", 5);
+  pub_bboxes = nh.advertise<jsk_recognition_msgs::BoundingBoxArray>("bboxes", 5);
 
 #ifdef PUBLISH_BBOX_POSES
-  pub_bboxes_poses = nh.advertise<geometry_msgs::PoseArray>("bboxes_poses", 1);
+  pub_bboxes_poses = nh.advertise<geometry_msgs::PoseArray>("bboxes_poses", 5);
 #endif
   // Subscribers list to be synchronized
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
@@ -291,6 +308,15 @@ int main(int argc, char** argv)
 
   // Bind Callback to function to each of the subscribers
   sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4));
+
+  // Dynamic Reconfigure
+  dynamic_reconfigure::Server<image_object_to_pointcloud::euclidian_cluster_filterConfig> server;
+  dynamic_reconfigure::Server<image_object_to_pointcloud::euclidian_cluster_filterConfig>::CallbackType
+      reconfigure_callback_function;
+
+  // Bind Callback to function
+  reconfigure_callback_function = boost::bind(&euclidianClusterFilterReconfigureCallback, _1, _2);
+  server.setCallback(reconfigure_callback_function);
 
   ros::Rate r(100);  // 100 hz
   while (ros::ok())
