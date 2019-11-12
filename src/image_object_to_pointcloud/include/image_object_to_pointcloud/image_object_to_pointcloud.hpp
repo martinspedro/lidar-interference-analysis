@@ -18,6 +18,7 @@
 #include "point_cloud_statistics/point_cloud_statistics.hpp"
 #include "image_object_to_pointcloud/FOV.hpp"
 #include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
+#include "jsk_recognition_msgs/BoundingBox.h"
 
 // Define types to be used depending on the dataset
 #define USE_WITH_KITTI
@@ -80,4 +81,10 @@ Eigen::Matrix4f angleAxisVecToTransform(const Eigen::Vector3f angle_axis_rotatio
 void getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr, Eigen::Matrix4f& lidar_pose);
 void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ros_msgs::BoundingBox bounding_box,
                        Eigen::Matrix4f& fov_bbox);
+
+void computeClusterBoundingBox(const PointCloudType::ConstPtr point_cloud_cluster,
+                               jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr);
+
+void computeClusterBoundingBoxPose(jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr,
+                                   geometry_msgs::Pose::Ptr& bounding_box_pose);
 #endif  // IMAGE_OBJECT_TO_POINT_CLOUD_H

@@ -82,9 +82,9 @@ const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 const bool EXTRACT_INDEX_FROM_POINT_CLOUD = true;
 const bool REMOVE_INDEX_FROM_POINT_CLOUD = false;
 
-const unsigned int CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.20;  // in meters
+const float CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.20;  // in meters
 const unsigned int MIN_CLUSTER_SIZE = 200;
-const unsigned int MAX_CLUSTER_SIZE = 10000;
+const unsigned int MAX_CLUSTER_SIZE = 25000;
 const float VOXEL_GRID_LEAF_SIZE = 0.04f;  //!< Voxel length used for the Voxel Grid filter
 
 geometry_msgs::TransformStamped transformStamped;
@@ -143,15 +143,15 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   point_cloud_idx_filter.setIndices(index_ptr);
   point_cloud_idx_filter.filter(*point_cloud_b_boxes_ptr);
 
-  ROS_INFO_STREAM("Correspondences between Image bounding boxes and Point Cloud: " << index_ptr->size());
+  ROS_INFO_STREAM("Image bounding boxes correspondent Point Cloud points number: " << index_ptr->size());
 
   // Reduce number of points in point cloud
   pcl::VoxelGrid<PointType> voxel_grid_xyz_filter;
   voxel_grid_xyz_filter.setInputCloud(point_cloud_b_boxes_ptr);
   voxel_grid_xyz_filter.setLeafSize(VOXEL_GRID_LEAF_SIZE, VOXEL_GRID_LEAF_SIZE, VOXEL_GRID_LEAF_SIZE);
   voxel_grid_xyz_filter.filter(*point_cloud_voxelized);
-  ROS_INFO_STREAM("Points in Voxelized Cloud with a voxel leaf of " << point_cloud_b_boxes_ptr << ": "
-                                                                    << point_cloud_voxelized->points.size());
+  ROS_INFO_STREAM("Voxelized Cloud with a voxel leaf of " << VOXEL_GRID_LEAF_SIZE
+                                                          << " points: " << point_cloud_voxelized->points.size());
 
   // Creating the KdTree object for the search method of the extraction
   pcl::search::KdTree<PointType>::Ptr kd_tree(new pcl::search::KdTree<PointType>);
@@ -180,6 +180,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
       point_cloud_current_cluster->points.push_back(point_cloud_voxelized->points[*pit]);
     }
 
+    point_cloud_current_cluster->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
     point_cloud_current_cluster->width = point_cloud_current_cluster->points.size();
     point_cloud_current_cluster->height = 1;
     point_cloud_current_cluster->is_dense = true;
@@ -188,7 +189,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     // Store all the individual clusters into a point cloud object
     point_cloud_all_clusters += *point_cloud_current_cluster;
-
+    /*
     pcl::MomentOfInertiaEstimation<PointType> feature_extractor;
     feature_extractor.setInputCloud(point_cloud_current_cluster);
     feature_extractor.compute();
@@ -246,7 +247,8 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     rot_quat = Eigen::Quaterniond(affine_trans.cast<double>());
     temp_quat = Eigen::toMsg(rot_quat);
     std::cout << "Rotation Matrix: \n" << affine_trans << "\nQuaternion: \n" << temp_quat << std::endl;
-    std::cout << "Rotation Matrix: \n" << rotational_matrix_OBB << /*"\nQuaternion: \n" << quat <<*/ std::endl;
+    std::cout << "Rotation Matrix: \n" << rotational_matrix_OBB << /*"\nQuaternion: \n" << quat <<
+    std::endl;
 
     // New method
     // temp_quat = Eigen::toMsg(quat.cast<double>());
@@ -257,80 +259,35 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     // temp_vec.x = (double)(direction.x());
     // temp_vec.y = (double)(direction.y());
     // temp_vec.z = (double)(direction.z());
+    */
 
-    PointType min_pt, max_pt;
-    pcl::getMinMax3D(*point_cloud_current_cluster, min_pt, max_pt);
-
-    geometry_msgs::Point mid_pt;
-    mid_pt.x = (max_pt.x + min_pt.x) / 2;
-    mid_pt.y = (max_pt.y + min_pt.y) / 2;
-    mid_pt.z = (max_pt.z + min_pt.z) / 2;
-
-    Eigen::Vector3d origin_vec(1.0d, 0.0d, 0.0d);
-    Eigen::Vector3d center_ray_eigen(mid_pt.x, mid_pt.y, mid_pt.z);
-    Eigen::Quaterniond new_quat = Eigen::Quaterniond().setFromTwoVectors(center_ray_eigen, origin_vec);
-    new_quat.normalize();
-    Eigen::Matrix3d new_quat_mat = new_quat.matrix();
-    new_quat_mat.row(2) << 0, 0, 1;
-    new_quat_mat.col(2) << 0, 0, 1;
-    rot_quat = Eigen::Quaterniond(new_quat_mat);
-    rot_quat.normalize();
-    // temp_quat = Eigen::toMsg(rot_quat);
-
-    std::cout << "Rotation Matrix: \n" << new_quat_mat << "\nQuaternion: \n" << temp_quat << std::endl;
-
-    geometry_msgs::Quaternion pose_orientation;
-    pose_orientation.w = 1;
-
-    jsk_recognition_msgs::BoundingBox temp_bbox;
-    geometry_msgs::Pose temp_cluster_pose;
-    temp_cluster_pose.position = mid_pt;
-    temp_cluster_pose.orientation = temp_quat;
-    temp_bbox.pose = temp_cluster_pose;
-
-    geometry_msgs::Vector3 bbox_dimensions;
-    bbox_dimensions.x = max_pt.x - min_pt.x;
-    bbox_dimensions.y = max_pt.y - min_pt.y;
-    bbox_dimensions.z = max_pt.z - min_pt.z;
-    temp_bbox.dimensions = bbox_dimensions;
-
-    temp_bbox.header.stamp = ros::Time::now();
-    temp_bbox.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
-    temp_bbox.value = 0.0f;
-    temp_bbox.label = 0;
-
-    rviz_bboxes.boxes.push_back(temp_bbox);
-
-    // copy coordinates of mid_point and replace it with the leading dimension. The if cascade prioretizes x, y and z
-    // dimensions, on this order
-    geometry_msgs::Pose bboxes_pose_arrow = temp_cluster_pose;
     /*
-    if (bbox_dimensions.x >= bbox_dimensions.y)
-    {
-      bboxes_pose_arrow.position.x = max_pt.x;
-    }
-    else if (bbox_dimensions.y >= bbox_dimensions.z)
-    {
-      bboxes_pose_arrow.position.y = max_pt.y;
-      geometry_msgs::Quaternion yy_rotation;
-      yy_rotation.z = 0.7071068;
-      yy_rotation.w = 0.7071068;
+        Eigen::Vector3d origin_vec(1.0d, 0.0d, 0.0d);
+        Eigen::Vector3d center_ray_eigen(bbox_center_point.x, bbox_center_point.y, bbox_center_point.z);
+        Eigen::Quaterniond new_quat = Eigen::Quaterniond().setFromTwoVectors(center_ray_eigen, origin_vec);
+        new_quat.normalize();
+        Eigen::Matrix3d new_quat_mat = new_quat.matrix();
+        new_quat_mat.row(2) << 0, 0, 1;
+        new_quat_mat.col(2) << 0, 0, 1;
+        rot_quat = Eigen::Quaterniond(new_quat_mat);
+        rot_quat.normalize();
+        // temp_quat = Eigen::toMsg(rot_quat);
 
-      bboxes_pose_arrow.orientation = yy_rotation;
-    }
-    else
-    {
-      bboxes_pose_arrow.position.z = max_pt.z;
-      geometry_msgs::Quaternion zz_rotation;
-      zz_rotation.y = -0.7071068;
-      zz_rotation.w = 0.7071068;
+        std::cout << "Rotation Matrix: \n" << new_quat_mat << "\nQuaternion: \n" << temp_quat << std::endl;
+    */
 
-      bboxes_pose_arrow.orientation = zz_rotation;
-    }
-*/
-    bboxes_poses.poses.push_back(bboxes_pose_arrow);
+    // Compute Bounding Box for current cluster and add it to the vector of  bounding boxes detected on this frame
+    jsk_recognition_msgs::BoundingBox::Ptr rviz_bbox_ptr(new jsk_recognition_msgs::BoundingBox);
+    computeClusterBoundingBox(point_cloud_current_cluster, rviz_bbox_ptr);
+    rviz_bboxes.boxes.push_back(*rviz_bbox_ptr);
 
-    j++;
+    // Compute the Bounding Box Pose for the current cluster bounding boxes and add it to the vector of bounding boxes
+    // poses for the current LiDAR frame
+    geometry_msgs::Pose::Ptr bboxes_pose_ptr(new geometry_msgs::Pose);
+    computeClusterBoundingBoxPose(rviz_bbox_ptr, bboxes_pose_ptr);
+    bboxes_poses.poses.push_back(*bboxes_pose_ptr);
+
+    j++;  // increment bounding box counter
   }
 
   // Published Cloud with Points Corresponding to Image Bouding Boxes

@@ -6,8 +6,12 @@
 #include <opencv2/core/eigen.hpp>  // Needs to be included before other opencv headers!
 #include <opencv2/opencv.hpp>
 #include "opencv2/core.hpp"
-
+#include <pcl/common/common.h>
 #include "image_object_to_pointcloud/image_object_to_pointcloud.hpp"
+
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Vector3.h>
 
 #include <ros/ros.h>
 
@@ -95,4 +99,63 @@ void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ro
   // Create Pure Rotation Affine Transform
   fov_bbox = Eigen::Matrix4f::Identity();
   fov_bbox.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
+}
+
+void computeClusterBoundingBox(const PointCloudType::ConstPtr point_cloud_cluster,
+                               jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr)
+{
+  PointType min_pt, max_pt;
+  pcl::getMinMax3D(*point_cloud_cluster, min_pt, max_pt);  // XYZ limits of the cluster
+
+  geometry_msgs::Point bbox_center_point;  // Bounding Box middle Point
+  bbox_center_point.x = (max_pt.x + min_pt.x) / 2;
+  bbox_center_point.y = (max_pt.y + min_pt.y) / 2;
+  bbox_center_point.z = (max_pt.z + min_pt.z) / 2;
+
+  geometry_msgs::Quaternion pose_orientation;  // Quaternion that looks forward on the coordinate frame axis
+  pose_orientation.w = 1;
+
+  geometry_msgs::Vector3 bbox_dimensions;  // Bouding Box dimensions using the min and max coordinates of every axis
+  bbox_dimensions.x = max_pt.x - min_pt.x;
+  bbox_dimensions.y = max_pt.y - min_pt.y;
+  bbox_dimensions.z = max_pt.z - min_pt.z;
+
+  // Fill the  a bounding box object
+  rviz_bbox_ptr->pose.position = bbox_center_point;
+  rviz_bbox_ptr->pose.orientation = pose_orientation;
+  rviz_bbox_ptr->dimensions = bbox_dimensions;
+  rviz_bbox_ptr->header.stamp = ros::Time::now();
+  rviz_bbox_ptr->header.frame_id = point_cloud_cluster->header.frame_id;  // Use the same frame as the input point cloud
+  rviz_bbox_ptr->value = 0.0f;
+  rviz_bbox_ptr->label = 0;
+}
+
+void computeClusterBoundingBoxPose(jsk_recognition_msgs::BoundingBox::Ptr& rviz_bbox_ptr,
+                                   geometry_msgs::Pose::Ptr& bounding_box_pose)
+{
+  *bounding_box_pose = rviz_bbox_ptr->pose;  // copy Pose from bounding box
+
+  // Replace orientation with the leading dimension. The if cascade prioritizes x, y and z dimensions, on this order
+  if (rviz_bbox_ptr->dimensions.x >= rviz_bbox_ptr->dimensions.y)
+  {
+    bounding_box_pose->position.x += rviz_bbox_ptr->dimensions.x / 2;
+  }
+  else if (rviz_bbox_ptr->dimensions.y >= rviz_bbox_ptr->dimensions.z)
+  {
+    geometry_msgs::Quaternion yy_rotation;
+    yy_rotation.z = 0.7071068;
+    yy_rotation.w = 0.7071068;
+
+    bounding_box_pose->position.y += rviz_bbox_ptr->dimensions.y / 2;
+    bounding_box_pose->orientation = yy_rotation;
+  }
+  else
+  {
+    geometry_msgs::Quaternion zz_rotation;
+    zz_rotation.y = -0.7071068;
+    zz_rotation.w = 0.7071068;
+
+    bounding_box_pose->position.z += rviz_bbox_ptr->dimensions.z / 2;
+    bounding_box_pose->orientation = zz_rotation;
+  }
 }
