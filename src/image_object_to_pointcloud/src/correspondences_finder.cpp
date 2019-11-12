@@ -88,7 +88,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
   PointCloudType point_cloud_camera, point_cloud;
-  PointCloudType::Ptr cloudCameraPtr(new PointCloudType);
+  PointCloudType::Ptr cloud_camera_ptr(new PointCloudType);
   PointCloudType::Ptr cloudPtr(new PointCloudType);
   PointCloudType::Ptr cloudFilteredPtr(new PointCloudType);
 
@@ -108,37 +108,23 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   fromROSMsg(*point_cloud_msg, point_cloud);
 
   // Initialize pointer to point cloud data
-  *cloudCameraPtr = point_cloud_camera;
+  *cloud_camera_ptr = point_cloud_camera;
   *cloudPtr = point_cloud;
 
+  // Camera Information from Message and get image dimensions
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(cam_info);
   cv::Size im_dimensions = cam_model_.fullResolution();
 
+  // vector and shared pointer to store the point cloud points corresponding to the image bounding boxes
   std::vector<int> indices_in;
   boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
   geometry_msgs::PoseArray bboxes_poses;
 
-  for (int i = 0; i < cloudCameraPtr->points.size(); i++)
-  {
-    cv::Point2d uv = cam_model_.project3dToPixel(
-        cv::Point3d(cloudCameraPtr->points[i].x, cloudCameraPtr->points[i].y, cloudCameraPtr->points[i].z));
-
-    // Note that Kitti width and height are swapped so we swap them here also
-    if (((int)(uv.x) >= 0) && ((int)uv.y >= 0) && ((int)(uv.x) <= im_dimensions.height) &&
-        ((int)uv.y <= im_dimensions.width) && (cloudCameraPtr->points[i].z >= NEAR_PLANE_DISTANCE) &&
-        (cloudCameraPtr->points[i].z <= FAR_PLANE_DISTANCE))
-    {
-      for (int j = 0; j < object_count->count; ++j)
-      {
-        if (((int)(uv.x) >= b_boxes->bounding_boxes[j].xmin) && ((int)uv.y >= b_boxes->bounding_boxes[j].ymin) &&
-            ((int)(uv.x) <= b_boxes->bounding_boxes[j].xmax) && ((int)uv.y <= b_boxes->bounding_boxes[j].ymax))
-        {
-          index_ptr->push_back(i);
-        }
-      }
-    }
-  }
+  // Note that Kitti inverts the image dimensions, therefore we invert them when creating a new cv::Size object
+  filterPointCloudFromCameraROIs(object_count->count, b_boxes, cloud_camera_ptr, cam_model_,
+                                 cv::Size(im_dimensions.height, im_dimensions.height), NEAR_PLANE_DISTANCE,
+                                 FAR_PLANE_DISTANCE, index_ptr);
 
   pcl::ExtractIndices<PointType> point_cloud_idx_filter(true);  // Initializing with true will allow us to extract the
                                                                 // removed indices
@@ -164,8 +150,8 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<PointType> ec;
-  ec.setClusterTolerance(0.25);  // L2 Euclidean Norm distance in meters
-  ec.setMinClusterSize(300);
+  ec.setClusterTolerance(0.20);  // L2 Euclidean Norm distance in meters
+  ec.setMinClusterSize(200);
   ec.setMaxClusterSize(25000);
   ec.setSearchMethod(tree);
   ec.setInputCloud(cloud_filtered);
@@ -276,7 +262,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     new_quat_mat.col(2) << 0, 0, 1;
     rot_quat = Eigen::Quaterniond(new_quat_mat);
     rot_quat.normalize();
-    temp_quat = Eigen::toMsg(rot_quat);
+    // temp_quat = Eigen::toMsg(rot_quat);
 
     std::cout << "Rotation Matrix: \n" << new_quat_mat << "\nQuaternion: \n" << temp_quat << std::endl;
 
@@ -285,7 +271,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     jsk_recognition_msgs::BoundingBox temp_bbox;
     geometry_msgs::Pose temp_cluster_pose;
-    temp_cluster_pose.position = temp_vec;
+    temp_cluster_pose.position = mid_pt;
     temp_cluster_pose.orientation = temp_quat;
     temp_bbox.pose = temp_cluster_pose;
 

@@ -152,6 +152,9 @@ include_directories(
 add_executable(correspondences_finder_node
 src/correspondences_finder.cpp
 src/image_object_to_pointcloud.cpp
+src/pinhole_camera_model_utilities.cpp
+src/image_object_to_pointcloud.cpp
+src/FOV.cpp
 )
 
 add_executable(image_bbox_to_point_cloud_node
