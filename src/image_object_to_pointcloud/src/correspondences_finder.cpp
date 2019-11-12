@@ -70,8 +70,12 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/voxel_grid.h>
 
+// If defined, the node will publish a PoseArray containing the BBox major direction
+// #define PUBLISH_BBOX_POSES
+
 const float NEAR_PLANE_DISTANCE = 1.0f;
 const float FAR_PLANE_DISTANCE = 40.0f;
+
 const double PIXEL_SIZE = 3.45e-6;
 
 const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyForCallback;
@@ -85,15 +89,16 @@ const bool REMOVE_INDEX_FROM_POINT_CLOUD = false;
 const float CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.20;  // in meters
 const unsigned int MIN_CLUSTER_SIZE = 200;
 const unsigned int MAX_CLUSTER_SIZE = 25000;
+
 const float VOXEL_GRID_LEAF_SIZE = 0.04f;  //!< Voxel length used for the Voxel Grid filter
 
 geometry_msgs::TransformStamped transformStamped;
 
-ros::Publisher pub, pub_voxelized, pub_bboxes, pub_bboxes_poses;  //!< ROS Publisher
+ros::Publisher pub, pub_voxelized, pub_bboxes;  //!< ROS Publisher
 
-ros::WallTime start_, end_;
-double execution_time = 0.0d;
-int num_executions = 0;
+#ifdef PUBLISH_BBOX_POSES
+ros::Publisher pub_bboxes_poses;
+#endif
 
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
@@ -134,7 +139,10 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   // vector and shared pointer to store the point cloud points corresponding to the image bounding boxes
   std::vector<int> indices_in;
   boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(indices_in);
+
+#ifdef PUBLISH_BBOX_POSES
   geometry_msgs::PoseArray bboxes_poses;
+#endif
 
   // Note that Kitti inverts the image dimensions, therefore we invert them when creating a new cv::Size object
   filterPointCloudFromCameraROIs(object_count->count, b_boxes, point_cloud_camera_ptr, cam_model_,
@@ -154,8 +162,8 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   voxel_grid_xyz_filter.setInputCloud(point_cloud_b_boxes_ptr);
   voxel_grid_xyz_filter.setLeafSize(VOXEL_GRID_LEAF_SIZE, VOXEL_GRID_LEAF_SIZE, VOXEL_GRID_LEAF_SIZE);
   voxel_grid_xyz_filter.filter(*point_cloud_voxelized);
-  ROS_INFO_STREAM("Voxelized Cloud with a voxel leaf of " << VOXEL_GRID_LEAF_SIZE
-                                                          << " points: " << point_cloud_voxelized->points.size());
+  ROS_INFO_STREAM("Voxelized Cloud Point: " << point_cloud_voxelized->points.size() << " @" << VOXEL_GRID_LEAF_SIZE
+                                            << "m");
 
   // Creating the KdTree object for the search method of the extraction
   pcl::search::KdTree<PointType>::Ptr kd_tree(new pcl::search::KdTree<PointType>);
@@ -170,8 +178,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   euclidian_cluster_extraction_filter.setInputCloud(point_cloud_voxelized);
   euclidian_cluster_extraction_filter.extract(cluster_indices);
 
-  int j = 0;
-
+  int j = 0;  // Cluster counter ID
   jsk_recognition_msgs::BoundingBoxArray rviz_bboxes;
 
   // Adapted from http://pointclouds.org/documentation/tutorials/cluster_extraction.php
@@ -196,32 +203,16 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     // Compute Bounding Box for current cluster and add it to the vector of  bounding boxes detected on this frame
     jsk_recognition_msgs::BoundingBox::Ptr rviz_bbox_ptr(new jsk_recognition_msgs::BoundingBox);
-    start_ = ros::WallTime::now();
     computeClusterBoundingBox(point_cloud_current_cluster, rviz_bbox_ptr);
-    // computeAABB(point_cloud_current_cluster, rviz_bbox_ptr);
-    // computeOBB(point_cloud_current_cluster, rviz_bbox_ptr);
-    end_ = ros::WallTime::now();
-    ++num_executions;
-    if (num_executions <= 100)
-    {
-      execution_time += (end_ - start_).toNSec();
-    }
-    else
-    {
-      double average_execution_time = (execution_time / 100.0d);
-      ROS_INFO_STREAM("Average Execution time (ms): " << average_execution_time * 1e-6);
-      ROS_INFO_STREAM("Number of executions: " << num_executions);
-      ROS_WARN("Already reached 1000 executions");
-    }
-
     rviz_bboxes.boxes.push_back(*rviz_bbox_ptr);
 
+#ifdef PUBLISH_BBOX_POSES
     // Compute the Bounding Box Pose for the current cluster bounding boxes and add it to the vector of bounding boxes
     // poses for the current LiDAR frame
     geometry_msgs::Pose::Ptr bboxes_pose_ptr(new geometry_msgs::Pose);
     computeClusterBoundingBoxPose(rviz_bbox_ptr, bboxes_pose_ptr);
     bboxes_poses.poses.push_back(*bboxes_pose_ptr);
-
+#endif
     j++;  // increment bounding box counter
   }
 
@@ -238,9 +229,11 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   rviz_bboxes.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub_bboxes.publish(rviz_bboxes);
 
+#ifdef PUBLISH_BBOX_POSES
   bboxes_poses.header.stamp = ros::Time::now();
   bboxes_poses.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub_bboxes_poses.publish(bboxes_poses);
+#endif
 }
 
 int main(int argc, char** argv)
@@ -277,8 +270,10 @@ int main(int argc, char** argv)
   pub = nh.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud", 1);
   pub_voxelized = nh.advertise<sensor_msgs::PointCloud2>("voxelized_point_cloud", 1);
   pub_bboxes = nh.advertise<jsk_recognition_msgs::BoundingBoxArray>("bboxes", 1);
-  pub_bboxes_poses = nh.advertise<geometry_msgs::PoseArray>("bboxes_poses", 1);
 
+#ifdef PUBLISH_BBOX_POSES
+  pub_bboxes_poses = nh.advertise<geometry_msgs::PoseArray>("bboxes_poses", 1);
+#endif
   // Subscribers list to be synchronized
   message_filters::Subscriber<darknet_ros_msgs::ObjectCount> object_count_sub(nh, "/darknet_ros/found_object", 2);
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bounding_boxes_sub(nh, "/darknet_ros/bounding_boxes", 2);
