@@ -8,7 +8,6 @@
 #include "opencv2/core.hpp"
 
 #include "image_object_to_pointcloud/image_object_to_pointcloud.hpp"
-#include "image_object_to_pointcloud/pinhole_camera_model_utilities.hpp"
 
 #include <ros/ros.h>
 

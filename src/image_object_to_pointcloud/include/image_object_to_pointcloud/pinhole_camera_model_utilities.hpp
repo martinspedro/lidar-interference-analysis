@@ -19,6 +19,11 @@
 
 namespace pinhole_camera
 {
+inline bool pixelInsideImageDimensions(cv::Point2i pixel, cv::Size image_dimensions)
+{
+  return (pixel.x >= 0) && (pixel.y >= 0) && (pixel.x <= image_dimensions.width) &&
+         (pixel.y <= image_dimensions.height);
+}
 inline cv::Point2f getImageCenterPoint(cv::Size dimensions)
 {
   // image is indexed (x, y) despite matrices/Mat being indexed (y, x)
