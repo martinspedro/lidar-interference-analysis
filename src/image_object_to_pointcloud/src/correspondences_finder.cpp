@@ -79,6 +79,14 @@ const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyFor
 const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 
+const bool EXTRACT_INDEX_FROM_POINT_CLOUD = true;
+const bool REMOVE_INDEX_FROM_POINT_CLOUD = false;
+
+const unsigned int CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.20;  // in meters
+const unsigned int MIN_CLUSTER_SIZE = 200;
+const unsigned int MAX_CLUSTER_SIZE = 10000;
+const float VOXEL_GRID_LEAF_SIZE = 0.04f;  //!< Voxel length used for the Voxel Grid filter
+
 geometry_msgs::TransformStamped transformStamped;
 
 ros::Publisher pub, pub_voxelized, pub_bboxes, pub_bboxes_poses;  //!< ROS Publisher
@@ -88,11 +96,14 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
   PointCloudType point_cloud_camera, point_cloud;
-  PointCloudType::Ptr cloud_camera_ptr(new PointCloudType);
-  PointCloudType::Ptr cloudPtr(new PointCloudType);
-  PointCloudType::Ptr cloudFilteredPtr(new PointCloudType);
+  PointCloudType::Ptr point_cloud_camera_ptr(new PointCloudType);
+  PointCloudType::Ptr point_cloud_ptr(new PointCloudType);
+  PointCloudType::Ptr point_cloud_b_boxes_ptr(new PointCloudType);
+  PointCloudType::Ptr point_cloud_voxelized(new PointCloudType);
 
-  sensor_msgs::PointCloud2 point_cloud_camera_msg;
+  PointCloudType point_cloud_all_clusters;
+
+  sensor_msgs::PointCloud2 point_cloud_camera_msg;  // LiDAR Point cloud message in camera coordinate frame
 
   try
   {
@@ -108,8 +119,8 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   fromROSMsg(*point_cloud_msg, point_cloud);
 
   // Initialize pointer to point cloud data
-  *cloud_camera_ptr = point_cloud_camera;
-  *cloudPtr = point_cloud;
+  *point_cloud_camera_ptr = point_cloud_camera;
+  *point_cloud_ptr = point_cloud;
 
   // Camera Information from Message and get image dimensions
   image_geometry::PinholeCameraModel cam_model_;
@@ -122,62 +133,64 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
   geometry_msgs::PoseArray bboxes_poses;
 
   // Note that Kitti inverts the image dimensions, therefore we invert them when creating a new cv::Size object
-  filterPointCloudFromCameraROIs(object_count->count, b_boxes, cloud_camera_ptr, cam_model_,
+  filterPointCloudFromCameraROIs(object_count->count, b_boxes, point_cloud_camera_ptr, cam_model_,
                                  cv::Size(im_dimensions.height, im_dimensions.height), NEAR_PLANE_DISTANCE,
                                  FAR_PLANE_DISTANCE, index_ptr);
 
-  pcl::ExtractIndices<PointType> point_cloud_idx_filter(true);  // Initializing with true will allow us to extract the
-                                                                // removed indices
-  point_cloud_idx_filter.setInputCloud(cloudPtr);
+  // EXTRACT_INDEX_FROM_POINT_CLOUD sets the filter to output a point cloud with the points of the given indexes
+  pcl::ExtractIndices<PointType> point_cloud_idx_filter(EXTRACT_INDEX_FROM_POINT_CLOUD);
+  point_cloud_idx_filter.setInputCloud(point_cloud_ptr);
   point_cloud_idx_filter.setIndices(index_ptr);
-  point_cloud_idx_filter.filter(*cloudFilteredPtr);
+  point_cloud_idx_filter.filter(*point_cloud_b_boxes_ptr);
 
-  ROS_INFO_STREAM("Numbered of points in filtered cloud: " << index_ptr->size());
+  ROS_INFO_STREAM("Correspondences between Image bounding boxes and Point Cloud: " << index_ptr->size());
 
-  cloudFilteredPtr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
-  pub.publish(cloudFilteredPtr);
-
-  pcl::VoxelGrid<PointType> vg;
-  PointCloudType::Ptr cloud_filtered(new PointCloudType);
-  vg.setInputCloud(cloudFilteredPtr);
-  vg.setLeafSize(0.04f, 0.04f, 0.04f);
-  vg.filter(*cloud_filtered);
-  std::cout << "PointCloud after filtering has: " << cloud_filtered->points.size() << " data points." << std::endl;
+  // Reduce number of points in point cloud
+  pcl::VoxelGrid<PointType> voxel_grid_xyz_filter;
+  voxel_grid_xyz_filter.setInputCloud(point_cloud_b_boxes_ptr);
+  voxel_grid_xyz_filter.setLeafSize(VOXEL_GRID_LEAF_SIZE, VOXEL_GRID_LEAF_SIZE, VOXEL_GRID_LEAF_SIZE);
+  voxel_grid_xyz_filter.filter(*point_cloud_voxelized);
+  ROS_INFO_STREAM("Points in Voxelized Cloud with a voxel leaf of " << point_cloud_b_boxes_ptr << ": "
+                                                                    << point_cloud_voxelized->points.size());
 
   // Creating the KdTree object for the search method of the extraction
-  pcl::search::KdTree<PointType>::Ptr tree(new pcl::search::KdTree<PointType>);
-  tree->setInputCloud(cloud_filtered);
+  pcl::search::KdTree<PointType>::Ptr kd_tree(new pcl::search::KdTree<PointType>);
+  kd_tree->setInputCloud(point_cloud_voxelized);
 
   std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<PointType> ec;
-  ec.setClusterTolerance(0.20);  // L2 Euclidean Norm distance in meters
-  ec.setMinClusterSize(200);
-  ec.setMaxClusterSize(25000);
-  ec.setSearchMethod(tree);
-  ec.setInputCloud(cloud_filtered);
-  ec.extract(cluster_indices);
+  pcl::EuclideanClusterExtraction<PointType> euclidian_cluster_extraction_filter;
+  euclidian_cluster_extraction_filter.setClusterTolerance(CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE);
+  euclidian_cluster_extraction_filter.setMinClusterSize(MIN_CLUSTER_SIZE);
+  euclidian_cluster_extraction_filter.setMaxClusterSize(MAX_CLUSTER_SIZE);
+  euclidian_cluster_extraction_filter.setSearchMethod(kd_tree);
+  euclidian_cluster_extraction_filter.setInputCloud(point_cloud_voxelized);
+  euclidian_cluster_extraction_filter.extract(cluster_indices);
 
   int j = 0;
-  PointCloudType final_cloud;
+
   jsk_recognition_msgs::BoundingBoxArray rviz_bboxes;
+
+  // Adapted from http://pointclouds.org/documentation/tutorials/cluster_extraction.php
   for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
   {
-    PointCloudType::Ptr cloud_cluster(new PointCloudType);
+    PointCloudType::Ptr point_cloud_current_cluster(new PointCloudType);
 
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
     {
-      cloud_cluster->points.push_back(cloud_filtered->points[*pit]);
+      point_cloud_current_cluster->points.push_back(point_cloud_voxelized->points[*pit]);
     }
-    cloud_cluster->width = cloud_cluster->points.size();
-    cloud_cluster->height = 1;
-    cloud_cluster->is_dense = true;
 
-    std::cout << "PointCloud representing the Cluster " << j << ": " << cloud_cluster->points.size() << " data points."
-              << std::endl;
-    final_cloud += *cloud_cluster;
+    point_cloud_current_cluster->width = point_cloud_current_cluster->points.size();
+    point_cloud_current_cluster->height = 1;
+    point_cloud_current_cluster->is_dense = true;
+
+    ROS_INFO_STREAM("Cluster #" << j << " point cloud size: " << point_cloud_current_cluster->points.size());
+
+    // Store all the individual clusters into a point cloud object
+    point_cloud_all_clusters += *point_cloud_current_cluster;
 
     pcl::MomentOfInertiaEstimation<PointType> feature_extractor;
-    feature_extractor.setInputCloud(cloud_cluster);
+    feature_extractor.setInputCloud(point_cloud_current_cluster);
     feature_extractor.compute();
     std::vector<float> moment_of_inertia;
     std::vector<float> eccentricity;
@@ -206,7 +219,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
     // PCA
     pcl::PCA<PointType> pca;
-    pca.setInputCloud(cloud_cluster);
+    pca.setInputCloud(point_cloud_current_cluster);
     Eigen::Matrix3f eigen_vector =
         pca.getEigenVectors();  // returns a matrix where the columns are the axis of your bounding box
     Eigen::Vector3f direction = eigen_vector.col(0);
@@ -246,7 +259,7 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     // temp_vec.z = (double)(direction.z());
 
     PointType min_pt, max_pt;
-    pcl::getMinMax3D(*cloud_cluster, min_pt, max_pt);
+    pcl::getMinMax3D(*point_cloud_current_cluster, min_pt, max_pt);
 
     geometry_msgs::Point mid_pt;
     mid_pt.x = (max_pt.x + min_pt.x) / 2;
@@ -320,9 +333,15 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
     j++;
   }
 
-  final_cloud.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
-  pub_voxelized.publish(final_cloud);
+  // Published Cloud with Points Corresponding to Image Bouding Boxes
+  point_cloud_b_boxes_ptr->header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+  pub.publish(point_cloud_b_boxes_ptr);
 
+  // Published Cloud with the Clusters for the Points Corresponding to Image Bouding Boxes
+  point_cloud_all_clusters.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
+  pub_voxelized.publish(point_cloud_all_clusters);
+
+  // Publish BoundingBoxes and respective Poses
   rviz_bboxes.header.stamp = ros::Time::now();
   rviz_bboxes.header.frame_id = LIDAR_TF2_REFERENCE_FRAME;
   pub_bboxes.publish(rviz_bboxes);
