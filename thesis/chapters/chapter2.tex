@@ -446,12 +446,22 @@ The second solution is normally implemented with a Region Proposal \acf{cnn}, de
 
 On 2016, Shaoqing Ren \etal proposes a newer architecture that does not use a selective search for the region proposal algorithm, but instead has a Region Proposal Network to generate \ac{roi} for the proposal classification stage, called Faster \ac{rcnn}~\cite{Ren2017}. Such architecture achieves state-of-the-art object detection at a frame-rate of 5 \ac{fps}. Alternative networks, such as \ac{spp} Deep \acl{cnn}~\cite{He2015}, will not be discussed here.
 
-While the previous \ac{nn} use separated networks for region proposal of a possible object on an image and region classification to locate a possible object on an image, \ac{yolo}, developed by Joseph Redmon, is an alternative solution that analyzes the image only once, therefore keeping global context of the image while dividing it into regions and predicting bounding boxes. Those bounding boxes are weighted by the computed probabilities of each region and thresholding by the user~\cite{Redmon2016}. \ac{yolo}v2, released in 2017, at best can achieve, at best, 78.6 \ac{map} on the PASCAl VOC 2007 dataset at 40 \ac{fps} (see more details~\cite{Redmon2017}). \ac{yolo}v3, released in 2018, achieves at best, 57.9 \ac{map}-50 on COCOs dataset, at almost 20 \ac{fps} (3x faster than other networks with the same \ac{map}-50)~\cite{Redmon2018}.
+While the previous \ac{nn} use separated networks for region proposal of a possible object on an image and region classification to locate a possible object on an image, \acf{yolo}, developed by Joseph Redmon, is an alternative solution that analyzes the image only once, therefore keeping global context of the image while dividing it into regions and predicting bounding boxes. Those bounding boxes are weighted by the computed probabilities of each region and thresholding by the user~\cite{Redmon2016}. 
 
-\ac{yolo} runs on Darknet, an open source neural network framework written in C and \ac{cuda} of the same author~\cite{Redmon2013}.
+To train deep learning image object detection \acp{nn}, several image datasets are available online. Two of the most relevant, considering number of labeled objects and number of images are:
 
+\begin{itemize}
+	\item \ac{pascal-voc} dataset;
+	\item \ac{coco} dataset.
+\end{itemize}
 
-\subsection{Platforms}
+\ac{coco}'s dataset has 80 object classes, containing common road objects also present on the \ac{kitti} dataset and other objects used on this research\citeneeded. Since \ac{pascal-voc} only has 20 object classes\citeneeded, being unable to detect a ball, truck and road signs, \ac{coco}'s dataset is preferred to train the image object detection \acp{cnn} weigths.
+
+\ac{yolo}v2, released in 2017, at best can achieve, at best, 78.6 \ac{map} on the \ac{pascal-voc} 2007 dataset at 40 \ac{fps} (see more details in~\cite{Redmon2017}). \ac{yolo}v3, released in 2018, achieves at best, 57.9 \ac{map}-50 on \ac{coco}'s dataset, at almost 20 \ac{fps} (3x faster than other networks with the same \ac{map}-50)~\cite{Redmon2018}.
+
+\ac{yolo} runs on Darknet, an Open Source \ac{nn} framework written in C and \ac{cuda} by the same author~\cite{Redmon2013}. Darknet is configurable, supporting several network models without needed to be recompiled, such as AlexNet\citeneeded, DenseNet\citeneeded, ResNet\citeneeded, \acp{rnn}\citeneeded and \ac{yolo}\cite{Redmon2016}. It supports \ac{gpu} acceleration, if compiled together with NVidia\cp~\ac{cuda}\texttrademark~library. Pre-trained weigths for several image datasets and network models are available online on~\cite{Redmon2013}. 
+
+\subsection{Cloud Based Platforms}
 Several paid and cloud based alternatives exist, such as Amazon Rekognition~\cite{awsRekognition}, Google Could Vision \ac{api}~\cite{googlevision}, IBM Watson Visual Recognition~\cite{watson} and Microsoft Computer Vision software~\cite{azurecv}. 
 
 Since those platforms are paid and required connection to the Internet, they are not good candidates to the solution we are trying to develop. Therefore, they are discarded.
