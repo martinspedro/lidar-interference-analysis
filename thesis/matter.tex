@@ -200,6 +200,13 @@
 \usepackage{enumitem} 
 \usepackage{indentfirst}
 \usepackage{multirow}
+\usepackage[inkscape=onlynewer, inkscapelatex=true]{svg}
+
+\svgsetup{%
+convertdpi={png=600},%
+convertdpi={jpg=150},%
+convertdpi=300%
+}%
 
 % Custom macros
 \def\etal{~\emph{et al}~}
@@ -215,11 +222,13 @@
 	{\immediate\write18{#3}}\fi%
 }
 
-\newcommand{\includesvg}[1]{%
-	\executeiffilenewer{#1.svg}{#1.pdf}%
-	{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-latex}%
-	\input{#1.pdf_tex}%
-}
+%\newcommand{\includesvg}[1]{%
+%	\executeiffilenewer{#1.svg}{#1.pdf}%
+%	{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-latex}%
+%	\fontsize{8}{10}\selectfont
+%	\input{#1.pdf_tex}%
+%}
+
 
 % Custom SI
 \DeclareSIUnit{\bytes}{bytes}
