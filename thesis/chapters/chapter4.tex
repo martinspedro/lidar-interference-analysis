@@ -32,6 +32,7 @@ The major drawback of this method is that for high definition images, the consid
 
 
 \subsection{\ac{lidar} $\rightarrow$ Camera}
+\label{subsec:sensor-fusion-lidar-to-camera}
 Projecting \ac{lidar} data to the image can be performed by re-purposing equation~\ref{eq camera_transform_full}: the object points are considered to be \ac{lidar} 3D point coordinates and the joint rotation and translation matrix is replaced by the extrinsic transform between the \ac{lidar} and the camera coordinate frame, which is the inverse transform of the one determined in chapter~\ref{chapter:calibration}.
 
 Projecting \ac{lidar} data to the camera coordinate frame results on a 2D point that can be used to index the image pixel matrix. However, since the \ac{lidar} \ac{fov} is wider than the camera's, it is necessary to verify if the representation of the \ac{lidar} point on the camera referential corresponds to a valid image pixel. The camera orientation should also be considered, since the \ac{lidar} points on its negative z-axis mirrored the points of it positive z-axis, corresponding to the same pixel.
