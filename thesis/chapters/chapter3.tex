@@ -5,6 +5,7 @@ The focus of this chapter is to detail the considerations and procedures used on
 
 
 \section{Experimental Setup}
+\label{sec:calibration:experimental-setup}
 The experimental setup is shown on figure~\ref{fig:experimental-setup}. It consists of an industrial camera and C-mount lens, \ac{tof} \ac{lidar}, Ethernet switch and power source (not shown on the figure). The setup is constructed using Thorlabs\cp~Optomechanic material to mount the camera and \ac{lidar}.
 
 \begin{figure}[H]
@@ -232,6 +233,7 @@ However, decreasing the F-number reduces the Hyperfocal distance (see equation~\
 The F-number needs to be adjusted not only to ensure the requirements of the exposure time are met and to maximize \acl{dof}, but also to ensure that exposure can be increased or decrease to accommodate the daylight intensity variations. Such constrains result on a F-number of $f/4.0$ and an exposure time variation between $80ms$ to $100ms$ during daylight.
 
 \subsubsection{\acl{dof} and calibration object}
+\label{subsec:calibration:dof-and-calibration-object}
 Solving equation~\ref{eq:hyperfocal_distance} and replacing its result on equation~\ref{eq:dof-subject-distance}, we can obtain $d$, the object distance at each the camera must be focused. The object to be focused is the calibrating pattern and the $DoF_{near}$ limit is select to be the distance at which the calibration pattern fills the camera~\ac{fov}. The calculations can be seen on equation~\ref{eq:hyperfocal-and-dof-values}.
 
 \begin{subequations}
@@ -331,6 +333,7 @@ On this thesis, the preferred notation is a quaternion, which is also adopted by
 \end{equation}
 
 \subsection{Calibration Method}
+\label{subsec:calibration:calibration-method}
 Given the nature of the sensors: a camera image is two-dimensional and the \ac{lidar} data is tridimensional; the extrinsic calibration needs to consider the projective geometry and its transformations on the camera. Revisiting equation~\ref{eq:jointRotationTranslationTransform}, our goal is to determine the joint rotation and translation matrix that allows the conversion of coordinates from the \ac{lidar} to the camera frame. To account for projective geometry, equation~\ref{eq:camera_transform_full} must be considered when establishing 3D points to image pixels correspondences.
 
 The method implemented to calibrate the camera and \ac{lidar} is inspired by Scaramuzza~\etal~\cite{Scaramuzza} and Brabec's~\cite{brabec2014} work. The method proposed consists on manually selecting the correspondences between the image pixels and the 3D points on the \ac{lidar} point cloud. If a single synchronized frame from the camera and \ac{lidar} is used, one can consider the scene as static, and therefore, the joint rotation and translation matrix present in equation~\ref{eq:camera_transform_full} is actually the same as the matrix present on~\ref{eq:jointRotationTranslationTransform}. 
@@ -411,8 +414,30 @@ Extrinsic camera and \ac{lidar} calibration was performed everyday  experimental
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.6\textwidth]{img/calibration/extrinsic-calibration-frames.png}
+	\includegraphics[width=0.5\textwidth]{img/calibration/extrinsic-calibration-frames.png}
 	\caption{TF visualization of the relation between the experimental setup coordinate frames. \emph{velo\_link} and \emph{camera\_link} represent the coordinate frames of the Velodyne VLP-16 \ac{lidar} and the Manta \ac{avt} G-504C, respectively. The \emph{world} coordinate frame represents the positioning of the \ac{lidar} in the world, which in this case is an offset to the vertical positioning of the \ac{lidar}.}
 	\label{fig:extrinsic-calibration-frames}
 \end{figure}
 
+\subsection{Comparison with \ac{kitti}}
+\label{subsec:calibration:kitii-comparision}
+
+On \ac{kitti}, the number of coordinate frames is greater and have more complex interations. While on the experimental setup the coordinates frames are all fixed, on \ac{kitti}, there is only one fixed frame, \texttt{world}. The car coordinate frame is named \texttt{base\_link} and the transformation between the \texttt{base\_link} and the camera are time-dependent.
+
+On the car, every sensor has a coordinate frame, that is refered to the \texttt{base\_link} referential. From all the coordinate frames, that can be seen on~\cite{Geiger2013a}, the required during this research are:
+
+\begin{itemize}
+	\item \texttt{velo\_link}: Velodyne HDL-64E \ac{lidar} coordinate frame;
+	\item \texttt{camera\_color\_left}: The coordinate frame of the RGB camera selected for this research;
+	\item \texttt{imu\_link}: The \ac{imu} coordinate frame;
+	\item \texttt{base\_link}: car coordinate frame.
+\end{itemize}
+
+Comparing with our experimental setup, the \ac{lidar} frame is similar and the camera frame only differs in name (the coordinate axis orientation is similar). The experimental setups does not contain a \ac{imu}, therefore there is no need for a \texttt{imu\_link}. Due to the nature of the experimental setup, the \ac{lidar} and its \texttt{velo\_link} frame is referred directly to the \texttt{world} frame with static transforms, having no need for a \texttt{base\_link} frame. On figure~\ref{fig:kitti-tf-frames}, a subset of \ac{kitti}'s coordinate frames is presented, without the \texttt{world} coordinate frame is not present. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/KITTI/tf.png}
+	\caption{TF visualization of the relation between a subset of \ac{kitti}'s setup coordinate frames. \texttt{velo\_link} and \texttt{camera\_color\_left} represent the coordinate frames of the Velodyne HDL-64E \ac{lidar} and the RGB left camera, respectively.}
+	\label{fig:kitti-tf-frames}
+\end{figure}
