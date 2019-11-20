@@ -2,7 +2,7 @@
 \label{chapter:sota}
 
 \section{Datasets}
-\label{section:sota:datasets}
+\label{sec:sota:datasets}
 
 Training an autonomous vehicle to be capable of driving itself is a complex challenge with multiple parts and problems to solve: recognizing other road users (people, vehicles, cyclists); understanding traffic signs; track and estimate the movement of the road users; plan the path; accurate modelling of the environment; among many others. To both train neural networks and other genetic algorithms, but also to test systems and other software, huge amounts of data are required.
 
@@ -101,12 +101,14 @@ Since Udacity dataset integrates more easily with \ac{ros} than \ac{kitti}, prov
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CAMERA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Camera as a sensor on \acl{cv} applications}
+\label{sec:sota:camera}
 Vision is the human sense most relevant to how we perceive the world and how we navigate it~\cite{Ekstrom2015, Beck1983}. Replicating this ability on machines, through the usage of cameras, is a widely researched topic on computer vision and instrumentation~\cite{Beck1983}. The most common cameras, as our eyes, take advantage of the pinhole effect: a small hole (or pin), that is used to spatially filter the non-focused light beams through an aperture or lens~\cite{Beck1983, camera_models, Sturm2010}, producing a mirrored, but focused image.
 
 On the following sub sections, basic notions of the current status of camera models and camera calibration are given. Since this research is focused strictly the application a camera as sensor on computer vision, the overview provided abstains from describing extensive research on camera technologies and camera models for the field of computer vision. From a purely working principle and technologies, several camera types can be named, such as catadioptric, plenoptic, biprism, among others~\cite{Sturm2010}. Considering consumer market, denominations such as Compact Cameras, \ac{dslr} cameras, Mirrorless (or \ac{evil} cameras) can also be used~\cite{comercial_cameras}. For further research, the reader might be interested on~\cite{comercial_cameras, Sturm2010, camera_models, Merklinger1993, Photopillers}.
 
 
 \subsection{Camera Geometry}
+\label{subsec:sota:camera-geometry}
 A world point in a 3-dimensional Euclidean space can be represented by a vector with 3 real coordinates: $(X, Y, Z)$ and an image pixel of a digital image is typically represented as an element of a 2D matrix with integer coordinates $(u, v)$~\cite{mvg_book}. From a mathematical standpoint, a camera can be considered as a mapping tool between the world objects in three dimensions into a 2D image plan, such as depicted by equation~\ref{eq:camera_transform}, which as different resolutions depending on the mathematical model used to describe the camera~\cite{mvg_book, Sturm2010}.
 
 \begin{equation}
