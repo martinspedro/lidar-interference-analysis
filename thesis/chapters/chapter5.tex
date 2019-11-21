@@ -3,7 +3,7 @@
 
 Object Detection is a field of \acf{cv} whose objectives are to classify and locate objects on an image. Contrary to Object Recognition, whose sole goal is to identify which objects are present on a given image, object detection not only classifies the objects, but also outputs a bounding box and its position on the image. 
 
-Using previous calibration and sensor fusion methods, detailed in Chapter~\ref{chapter:calibration} and~\ref{chapter:sensor-fusion}, respectively, this chapter intends to add to the previous work, allowing the segmentation of \acfp{roi} on the point cloud. Those \acp{roi} correspond to objects detected on the image, using image object detection methods on the camera feed and not the \ac{lidar} data, since the point cloud obtained is expected to be interfered by other \acp{lidar}.
+Using previous calibration and sensor fusion methods, detailed in Chapter~\ref{chapter:calibration} and~\ref{chapter:sensor-fusion}, respectively, this chapter intends to add to the previous work, allowing the segmentation of \acfp{roi} on the point cloud. Those \acp{roi} correspond to objects detected on the image, using image object detection methods on the camera feed and not the \ac{lidar} data, since the point cloud obtained is expect to be interfered by other \acp{lidar}.
 
 To successfully detect \acp{roi} in a given image and estimate the corresponding point-cloud section, three tasks are required: 
 \begin{enumerate}
@@ -15,16 +15,16 @@ To successfully detect \acp{roi} in a given image and estimate the corresponding
 \section{Object Detection on Image}
 \label{sec:object-detection:image}
 
-Object Detection on image is normally achieved with \acfp{cnn}, as detailed in Section~\ref{sec:sota:object-detection}, using deep learning techniques to train the \acl{nn}. From the available \acp{cnn} frameworks and \acl{sota} solutions, the author choose \ac{yolo}, due to its accuracy, real-time object detection capabilities and low resource usage\footnote{On this context, low resource usage is considered in comparison with other available solutions with similar detection accuracy. See a detailed comparison on~\cite{Redmon2018}.}~\cite{Redmon2016, Redmon2017}
+Object Detection on image is normally achieved with \acfp{cnn}, as detailed in Section~\ref{sec:sota:object-detection}, using deep learning techniques to train the \acl{nn}. From the available \acp{cnn} frameworks and \acl{sota} solutions, we choose \ac{yolo}, due to its accuracy, real-time object detection capabilities and low resource usage\footnote{On this context, low resource usage is considered in comparison with other available solutions with similar detection accuracy. See a detailed comparison on~\cite{Redmon2018}.}~\cite{Redmon2016, Redmon2017}
 
 Pre-trained models are available for \ac{yolo}v2 and \ac{yolo}v3, using the \ac{pascal-voc} and \ac{coco}'s dataset. As detailed in Section~\ref{sec:sota:object-detection} and on~\cite{Redmon2018}, \ac{yolo}v3 surpasses its prior versions, therefore only the latter version will be used. 
 
-For all 3 versions of \ac{yolo}, a ``tiny'' counterpart is also available. The ``tiny'' \ac{yolo} versions consist of a smaller network that can perform faster classification at the expense of detection accuracy (bounding box position, dimensions and object class). On the context of this research, we are interested on having a precise estimation of the bounding boxes dimensions and position, since those will be used to detect the corresponding \acp{roi} on the point cloud. 
+For all 3 versions of \ac{yolo}, a ``tiny'' counterpart is also available. The ``tiny'' \ac{yolo} versions consist of a smaller network that does faster classification at the expense of detection accuracy (bounding box position, dimensions and object class). On the context of this research, we are interested on having a precise estimation of the bounding boxes dimensions and position, since those will be used to detect the corresponding \acp{roi} on the point cloud. 
 
 \subsection{Setup Specifications}
-To summarize the decisions previously explained, our image object detection methodology uses the \ac{yolo}v3 \ac{cnn}, with pre-trained weights for the \ac{coco} image dataset, running on the Redmon's \texttt{Darknet} framework wrapped in a multi-threaded \ac{ros} node. Darknet is compiled with \ac{cuda} and \ac{opencv} enabled, for \ac{gpu} acceleration and native visualization of the classified images with bounding boxes.
+To summary the decisions previously explained, our image object detection methodology uses the \ac{yolo}v3 \ac{cnn}, with pre-trained weights for the \ac{coco} image dataset, running on the Redmon's \texttt{Darknet} framework wrapped in a multi-threaded \ac{ros} node. Darknet is compiled with \ac{cuda} and \ac{opencv} enabled, for \ac{gpu} acceleration and native visualization of the classified images with bounding boxes.
 
-The image objection detection is performed on a standard laptop with an Intel\cp~i7 \ac{cpu} and a Nvidia\cp~GeForce GT 740M. Their relevant specifications are given on table~\ref{tab:computer-specs}, along with information about the graphics card driver and \ac{cuda} version used.
+The image objection detection is done on a standard laptop with an Intel\cp~i7 \ac{cpu} and a Nvidia\cp~GeForce GT 740M. Their relevant specifications are given on table~\ref{tab:computer-specs}, along with information about the graphics card driver and \ac{cuda} version used.
 
 \begin{table}[H]
 	\renewcommand{\arraystretch}{1.2}
@@ -62,25 +62,25 @@ The image objection detection is performed on a standard laptop with an Intel\cp
 
 To operate \texttt{darknet-ros}, a \ac{ros} launch file is used. This launch file specifies the network model, configuration, weights and other \ac{ros} parameters, and is adapted from \texttt{darknet-ros} package launch file~\cite{MarkoBjelonic}. 
 
-For image object detection, \texttt{darknet-ros} is used as a standalone node, with its input images being provided by a \texttt{rosbag} player, playing either the \ac{kitti} dataset data or the experimental setup. An \ac{opencv} image visualization window is embedded natively in \texttt{Darknet}, if it is compiled with \ac{opencv} enabled, and is used to visualize the classified images with bounding boxes.
+For image object detection, \texttt{darknet-ros} is used as a standalone node, with its input images being provided by a \texttt{rosbag} player, playing either the \ac{kitti} dataset data or the experimental setup. An \ac{opencv} image visualization window is embedded natively in \texttt{Darknet}, if it is compiled with \ac{opencv} enabled, and is used to view the classified images with bounding boxes.
 
 
 \subsection{Results}
 \label{subsec:object-detection:image-results}
-It is out the scope of this thesis to analyze or develop image object detection methods. Image object detection is used on this thesis as ``means to an end'': detecting \acp{roi} on image to compute their corresponding \acp{roi} on the point cloud. Therefore, exhaustive tests comparing the \ac{yolo} performance under different thresholds, lightning conditions and images were not carried. Instead, qualitative assessments were performed to estimate a good threshold for confidence detection that maximizes the number of detected objects.
+It is out the scope of this thesis to analyze or develop image object detection methods. Image object detection is used on this thesis as ``means to an end'': detecting \acp{roi} on image to compute their corresponding \acp{roi} on the point cloud. Therefore, exhaustive tests to compare the \ac{yolo} performance under different thresholds, lightning conditions and images were not carried. Instead, qualitative assessments were done to estimate a good threshold for confidence detection that maximise the number of detected objects.
 
-\texttt{Darknet} is set with a default confidence threshold of 25\%~\cite{Redmon2016}. However, from our findings, a threshold of 30\% improves the bounding box accuracy detection without drastically reducing the number of objects detected, by the confidence threshold chosen for all tests.
+\texttt{Darknet} is set with a default confidence threshold of 25\%~\cite{Redmon2016}. Nevertheless, from our findings, a threshold of 30\% improves the bounding box accuracy detection without drastically reducing the number of objects detected, by the confidence threshold chosen for all tests.
 
 With the relevant computer specifications present on table~\ref{tab:computer-specs}, the previous described method is able to classify images with 1.1 to 1.8 \ac{fps}\footnote{The reduced number of \ac{fps} is due to the image detection algorithms being run on a personal laptop without appropriated hardware for a real-time object detection.}, depending on the dataset used. To ensure that the classification process does not create a bottleneck on the system and messages are dropped by \texttt{darknet-ros} node, the \texttt{rosbag} player is throttled.
 
-Images are published at $\approx\SI{10}{\hertz}$ on the \ac{kitti} dataset and at \SIrange[range-units=single]{4}{8}{\hertz}. Therefore, if we throttle the rate of \ac{ros} messages publishing to $10\%$ of the original rate, messages are published at a maximum of \SI{1}{\hertz}, which ensures that no image frame dropping happens on \texttt{darknet-ros} node, but increases the duration of the file 10 times.
+Images are published at $\approx\SI{10}{\hertz}$ on the \ac{kitti} dataset and at \SIrange[range-units=single]{4}{8}{\hertz}. Therefore, if we throttle the rate of \ac{ros} messages publishing to $10\%$ of the original rate, messages are published at a maximum of \SI{1}{\hertz}, ensuring that no image frame dropping happens on \texttt{darknet-ros} node, but increases the duration of the file 10 times.
 
 Exemplary results are presented on the next below, either for the \ac{kitti} dataset and experimental data recorded with the setup described on Section~\ref{sec:calibration:experimental-setup}.
 	
 \subsubsection{\ac{kitti} Dataset}
 With the relevant computer specifications present on table~\ref{tab:computer-specs}, the previous described method is able to classify images at 1.3 to 1.8 \ac{fps}. \ac{kitti} dataset majorly contains road scenarios, since the sensors are placed on a car and the setup is intended for self-driving vehicles (see Section~\ref{sec:sota:datasets}).
 
-On figure~\ref{fig:kitti-object-detection}, two exemplary results of the image detection algorithm used on the \ac{kitti} dataset are presented. On the top sub-figure,~\ref{fig:kitti-yolo-2}, a road intersection with several cars is presented. Despite the car's orientation, color and size, they are detected correctly. In the middle of the sub-figure, two errors occur. A car bounding box dimensions is wrong, containing two cars. This bounding box is near the undetected truck, occluded by a tree, on the factory that extends from the middle to the right side of the image. A tree top is mistakenly labelled as a traffic sign.
+On figure~\ref{fig:kitti-object-detection}, two exemplary results of the image detection algorithm used on the \ac{kitti} dataset are presented. On the top sub-figure,~\ref{fig:kitti-yolo-2}, a road intersection with several cars is presented. Despite the car's orientation, color and size, every car is detected correctly. In the middle of the sub-figure, two errors occur. A car bounding box dimensions is wrong, containing two cars. This bounding box is near the undetected truck, occluded by a tree, on the factory that extends from the middle to the right side of the image. A tree top is mistakenly labelled as a traffic sign.
 
 On the bottom sub-figure,~\ref{fig:kitti-yolo-2}, taken on the Karlsruhe Institute of Technology \textit{campus}, two errors are also present. In the center, a bounding box labelled as a person is actually a car and two road poles on a shadow area; and on the right, two persons are grouped together in one bounding box.
 	
@@ -105,16 +105,16 @@ On the bottom sub-figure,~\ref{fig:kitti-yolo-2}, taken on the Karlsruhe Institu
 \subsubsection{Experimental Data acquired}
 Exemplary results of the object detection method applied to the experimental data gathered on a \ac{msl} robotic football field, at \acf{irislab}, are presented on figure~\ref{fig:experimental-object-detection}. The confidence threshold of \ac{yolo} is set to 30\% and with the specifications present on table~\ref{tab:computer-specs}, a 1.1 to 1.4 \ac{fps} were registered when classifying the images.
 
-Since experimental data was stored on raw format, as detailed on Section~\ref{sec:calibration:extrinsic}, de-Bayering\footnote{Converting the raw data, stored on a Bayer Filter raw format, to  a RGB image} and rectification of the raw image must be performed using the \texttt{image\_proc} package before sending the data to the \texttt{Darknet} framework.
+Since experimental data was stored on raw format, as detailed on Section~\ref{sec:calibration:extrinsic}, de-Bayering\footnote{Converting the raw data, stored on a Bayer Filter raw format, to a RGB image} and rectification of the raw image must be done, using the \texttt{image\_proc} package, before sending the data to the \texttt{Darknet} framework.
 
-On the left sub-figure,~\ref{fig:experimental-yolo-2}, image object detection is performed on ground-truth camera data. Objects on the background are detected, even if away from the camera ($\approx\SI{14}{\meter}$) and out of focus (see Sub-section~\ref{subsec:calibration:dof-and-calibration-object}). A human dummy is classified as a person and a knob is mistakenly as a sports ball. The chair and the television monitor are correctly classified, but their bounding boxes dimension are smaller than they should be, due to partial occlusion.
+On the left sub-figure,~\ref{fig:experimental-yolo-2}, image object detection is done on ground-truth camera data. Objects on the background are detected, even if away from the camera ($\approx\SI{14}{\meter}$) and out of focus (see Sub-section~\ref{subsec:calibration:dof-and-calibration-object}). A human dummy is classified as a person and a knob is mistakenly as a sports ball. The chair and the television monitor are correctly classified, but their bounding boxes dimension are smaller than they should be, because of partial occlusion.
 On the right sub-figure,~\ref{fig:experimental-yolo-1}, calibrated data is used for image detection. Objects on the front are detected: a sports ball, a chair and a person. The last are detected with bounding box accuracy, even if occluded. On the background, no objects are detected, since the objects detected on sub-figure~\ref{fig:experimental-yolo-2} are occluded. 
 
 \begin{figure}[ht]
 	\centering
 	\begin{subfigure}[t]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{img/object-detection/experimental-2.jpg}
-		\caption{Object detection on a \ac{msl} football field, at \ac{irislab} research facility.  It detects the human dummy as a person and confuses a knob for a sports ball. On the back, the \ac{tv} monitor is correctly classified, but the bounding box is smaller, since it is occluded by the robotic arm.}
+		\caption{Object detection on a \ac{msl} football field, at \ac{irislab} research facility. It detects the human dummy as a person and confuses a knob for a sports ball. On the back, the tv monitor is correctly classified, but the bounding box is smaller, since it is occluded by the robotic arm.}
 		\label{fig:experimental-yolo-2}
 	\end{subfigure}
 	\qquad
@@ -129,22 +129,22 @@ On the right sub-figure,~\ref{fig:experimental-yolo-1}, calibrated data is used 
 
 
 \section{Correspondences between objects on image and point-cloud}
-An experimental setup with an intrinsically calibrated camera and \ac{lidar}, on which their rigid body transform is known\footnote{The method used to determine this rigid body transform on our experimental dataset is outlined on Section~\ref{sec:calibration:extrinsic}. Chapter~\ref{chapter:calibration} details all the calibration procedures that are pre-required for this section. For \ac{kitti} dataset, such transformations are already given.}, allows data conversion between its two coordinate frames, as shown previously on chapter~\ref{chapter:sensor-fusion}. 
+An experimental setup with an intrinsically calibrated camera and \ac{lidar}, on which their rigid body transform is known\footnote{The method used to determine this rigid body transform on our experimental dataset is outlined on Section~\ref{sec:calibration:extrinsic}. Chapter~\ref{chapter:calibration} details all the calibration procedures that are pre-required for this section. For \ac{kitti} dataset, such transformations are already given.}, allows data conversion between its two coordinate frames, as shown previously on Chapter~\ref{chapter:sensor-fusion}. 
 
 Matching the camera's \acp{roi} with \ac{lidar}'s require converting the data to a common coordinate frame between the two sensors and then using a matching algorithm to select the point cloud points that correspond to the classified object on the image.
 
-Determining the point cloud's \ac{roi} from the image bounding boxes implies establishing a $2D \leftrightarrow 3D$ correspondence between the data, which is used to match \acp{roi} on the two sensors. Similar to the methods for fusing different sensory data on Chapter~\ref{chapter:sensor-fusion}, two solutions based on the same principles are possible:
+Determining the point cloud's \ac{roi} from the image bounding boxes implies establishing a $2D \leftrightarrow 3D$ correspondence between the data, that is used to match \acp{roi} on the two sensors. Similar to the methods for fusing different sensory data on Chapter~\ref{chapter:sensor-fusion}, two solutions based on the same principle are possible:
 
 \begin{enumerate}
 	\item The 2D pixels are converted to a 3D ray, referenced on the \ac{lidar} coordinate frame. This method uses a technique of ray-casting, computing the rays from the camera sensor center that pass through the pixel coordinates;
-	\item The 3D points registered by the \ac{lidar} are projected to the image pixels plane, ``converting a two-dimensional \ac{roi} to a tridimensional \ac{roi}, A tridimensional bounding box can be estimated and drawn, for visualization purposes, on the point cloud. 
+	\item The 3D points registered by the \ac{lidar} are projected to the image pixels plane, ``converting a two-dimensional \ac{roi} to a tridimensional \ac{roi}, A tridimensional bounding box is estimated and drawn, for visualization purposes, on the point cloud. 
 \end{enumerate}
 
-On this section, both methods implementation is where presented, along with their results and a brief comparison. This section explains the implementation for computing the point cloud bounding boxes, by using the information of the image bounding boxes obtained with \ac{yolo}, as detailed on Section~\ref{sec:object-detection:image}. Bounding box estimation is also described, along with results for every stage of the processing chain.
+On this section, both methods' implementation is presented, along with their results and a brief comparison. This section explains the implementation for computing the point cloud bounding boxes, by using the information of the image bounding boxes obtained with \ac{yolo}, as detailed on Section~\ref{sec:object-detection:image}. Bounding box estimation is also described, along with results for every stage of the processing chain.
 
 
 \subsection{\texttt{Darknet-ros} Package Limitations and Contributions}
-\texttt{Darknet-ros} encapsulates the \texttt{Darknet} framework and allows its connection with other nodes on a \ac{ros} network. Excluding its interface for \ac{nn} configuration (\ac{nn} model and weights) and data input topics, which are detailed on~\cite{MarkoBjelonic}, \texttt{darknet-ros} provides 3 output topics:
+\texttt{Darknet-ros} encapsulates the \texttt{Darknet} framework and allows its connection with other nodes on a \ac{ros} network. Excluding its interface for \ac{nn} configuration (\ac{nn} model and weights) and data input topics, that are detailed on~\cite{MarkoBjelonic}, \texttt{darknet-ros} provides 3 output topics:
 
 \begin{enumerate}
 	\item \texttt{found\_object}: a standard integer message that indicates the number of objects found by the \texttt{Darknet} framework when running the desired \ac{nn} model;
@@ -152,18 +152,18 @@ On this section, both methods implementation is where presented, along with thei
 	\item \texttt{bboxes}: a custom message topic that contains a header with metadata and an array of bounding boxes detected on the image. Each bounding box element of this array indicates its class, id, probability and the minimum and maximum points that define the image bounding box for that object;
 \end{enumerate}
 
-For this work, precise synchronization between the point cloud and \texttt{darknet}'s outputs is required. However, \texttt{darknet-ros}' does not provide an interface with such functionality, lacking information for synchronizing the \texttt{found\_objects} topic with other topics.
+For this work, precise synchronization between the point cloud and \texttt{darknet}'s outputs is required. However, \texttt{darknet-ros}' does not provide an interface with such functionality, lacking information to synchronise the \texttt{found\_objects} topic with other topics.
 
-To mitigate this problem, we propose an improvement on \texttt{darknet-ros} package. Our proposal consists on defining a custom message for \texttt{found\_objects} topic that additionally to the standard integer indicating the number of objects found, also contains a header with the time stamps and frame id for synchronization. The \texttt{darknet-ros} core code was also changed in order to publish this new message type under \texttt{found\_objects} topic, ensuring also backwards compatibility.
+To mitigate this problem, we propose an improvement on \texttt{darknet-ros} package. Our proposal consists on defining a custom message for \texttt{found\_objects} topic that additionally to the standard integer indicating the found objects' number, also contains a header with the time stamps and frame id for synchronization. The \texttt{darknet-ros} core code was also changed to publish this new message type under \texttt{found\_objects} topic, ensuring also backwards compatibility.
 
 Those changes were later submitted to the original author of \texttt{darknet-ros}, which were accepted and merged with the publicly available source code~\cite{MarkoBjelonic}.
 
 
 \subsection{Ray Casting}
 \label{subsec:object-detection:ray-casting}
-The first implemented algorithm to match image and point cloud \acp{roi} involves a technique of ray casting, i.e., casting a ray from the camera center that passes thought the desired pixel, projecting it from the two-dimensional image representation to a three-dimensional, that is suited for comparing with \ac{lidar} data.
+The first implemented algorithm to match image and point cloud \acp{roi} involves a technique of ray casting, i.e., casting a ray from the camera center that passes thought the desired pixel, projecting it from the two-dimensional image representation to a three-dimensional, that is suited for comparison with \ac{lidar} data.
 
-After data conversion from one coordinate frame to the other, using the rigid body transform determined on Section~\ref{sec:calibration:extrinsic}, ray-casting allows the determination of 4 lines that delimit a 3D section of the point cloud, by casting the corners of the image bounding box. These 4 lines, transformed to the \ac{lidar} coordinate frame, define the boundaries of an infinite rectangular pyramid, with its vertex on the \ac{lidar} center. Considering a near and far parallel cut planes, that are perpendicular to the pyramid orientation, a pyramidal frustum is obtained (see figure~\ref{fig:pyramid-frustum}), containing all the point cloud points that are part of the tridimensional \ac{roi} for the object detected.  
+After data conversion from one coordinate frame to the other, using the rigid body transform determined on Section~\ref{sec:calibration:extrinsic}, ray-casting allows the determination of 4 lines that delimit a 3D section of the point cloud, by casting the corners of the image bounding box. These 4 lines, transformed to the \ac{lidar} coordinate frame, define the boundaries of an infinite rectangular pyramid, with its vertex on the \ac{lidar} center. Considering a near and far parallel cut planes that are perpendicular to the pyramid orientation, a pyramidal frustum is obtained (see figure~\ref{fig:pyramid-frustum}), containing all the point cloud points that are part of the tridimensional \ac{roi} for the object detected.  
 
 \begin{figure}[H]
 	\centering
@@ -184,9 +184,9 @@ Performing a frustum segmentation on the point cloud requires four steps:
 \end{itemize}
 
 \subsubsection{Back-project the pixels to rays}
-Projecting pixels to a ray (also called back projection) is the inverse process that is used to create an image on a camera\footnote{A camera projects the world points to a two-dimensional plane. See Sub-section~\ref{subsec:sota:camera-geometry}}. The projection matrix defined in equation~\ref{eq :camera_transform_full}, if inverted, can be used to calculate the transformation matrix that  back projects pixels into rays.
+Projecting pixels to a ray (also called back projection) is the inverse process that is used to create an image on a camera\footnote{A camera projects the world points to a two-dimensional plane. See Sub-section~\ref{subsec:sota:camera-geometry}}. The projection matrix defined in equation~\ref{eq :camera_transform_full}, if inverted, may be used to calculate the transformation matrix that  back projects pixels into rays.
 
-Since on our implementation, the transformation between different coordinate frames is done separately from the back-projection algorithm, the image pixels are already defined on the camera's coordinate frame. Therefore, the joint rotation and translation matrix, $\begin{bmatrix} R|t \end{bmatrix}$, is equal to the identity and a zero column vector, respectively, and does not need to be considered.
+Since on our implementation, the transformation between different coordinate frames is done separately from the back-projection algorithm, the image pixels are already defined on the camera's coordinate frame. Therefore, the joint rotation and translation matrix, $\begin{bmatrix} R|t \end{bmatrix}$, is equal to the identity and a zero column vector, respectively, and does not need to be accounted for.
 
 Following Hartley's and Zisserman's book~\cite{mvg_book}, our back-projection operation degenerates to computing the inverse of the intrinsic camera matrix, $K$, and multiply that inverse by the pixel coordinates referenced in affine coordinates, detailed on equation~\ref{eq:back-projection}. The rotation and translation to convert the rays from the camera's coordinate frame to \ac{lidar}'s are applied after the ray-casting operation.
 
@@ -225,9 +225,9 @@ Following Hartley's and Zisserman's book~\cite{mvg_book}, our back-projection op
 \end{align}
 
 \subsubsection{Rotation from the \ac{lidar} coordinate frames to the bounding boxes' coordinate frame}
-The rotation of the \ac{lidar} coordinate frame to each of the bounding boxes coordinate frames can be obtained by calculating the angle between the two rays: the ray from the camera center to the image bounding box center and the ray from the camera center to the image center. 
+The rotation of the \ac{lidar} coordinate frame to each of the bounding boxes coordinate frames is obtained by calculating the angle between the two rays: the ray from the camera center to the image bounding box center and the ray from the camera center to the image center. 
 
-Let $B^{center}$ be the image bounding box center, which can be calculated using equation~\ref{eq:bboxes-pixel-center} and $C^{center}$ be the image center, which corresponds to the intrinsic camera parameters $c_i, \forall i \in \{x, y\}$, as denoted in equation~\ref{eq:image-pixel-center}.
+Let $B^{center}$ be the image bounding box center, which can be calculated using equation~\ref{eq:bboxes-pixel-center} and $C^{center}$ be the image center, that corresponds to the intrinsic camera parameters $c_i, \forall i \in \{x, y\}$, as denoted in equation~\ref{eq:image-pixel-center}.
 
 \begin{equation}
 	\label{eq:bboxes-pixel-center}	
@@ -239,7 +239,7 @@ B^{center} = \left(\frac{x^{\text{bounding box}}_{min} + x^{\text{bounding box}}
 C^{center} = (c_x, c_y)
 \end{equation}
 
-Considering that the representation of a generic point $P$ in affine coordinates\footnote{Affine coordinates are the coordinates of a Projective space, such as the Cartesian coordinates are the coordinates of an Euclidean space.} is given by $P_{affine} = \left[P | 1\right]^T$, where $T$ represents the matrix transpose, and consider that on this case, $P \in \{B^{center}, C^{center}\}$. Denote also the ray projected by the camera origin that passes through the pixels defined by the points $B^{center}_{affine}$ and $C^{center}_{affine}$, as $\vec{b}$ and $\vec{c}$, respectively, where  $\vec{b}$ and $\vec{c}$ can be determined using equation~\ref{eq:back-projection}.
+Considering that the representation of a generic point $P$ in affine coordinates\footnote{Affine coordinates are the coordinates of a Projective space, such as the Cartesian coordinates are the coordinates of an Euclidean space.} is given by $P_{affine} = \left[P | 1\right]^T$, where $T$ represents the matrix transpose, and consider that on this case, $P \in \{B^{center}, C^{center} \}$. Denote also the ray projected by the camera origin that passes through the pixels defined by the points $B^{center}_{affine}$ and $C^{center}_{affine}$, as $\vec{b}$ and $\vec{c}$, respectively, where  $\vec{b}$ and $\vec{c}$ are determined using equation~\ref{eq:back-projection}.
 
 Then, the rotation of the \ac{lidar} coordinate frame to a new frame oriented to the bounding box can then be obtained by calculating the orientation quaternion between vector $\vec{c'}$ and $\vec{b'}$, corresponding to the vector $\vec{c}$ and $\vec{b}$ defined on the \ac{lidar} coordinate frame, respectively. The rotation transform can be denoted as $\mathbf{q}_{c'b'}$, which is capable of projecting a line from the coordinate frame of the bounding box, $b'$, to the \ac{lidar} coordinate frame, $c'$.
 
@@ -261,7 +261,7 @@ With some trigonometry and camera geometry\footnote{Camera geometry is detailed 
 \end{align}
 
 \subsubsection{Determine the near and far cut planes limits}
-The Near and Far Cut Planes can be defined by the data and \ac{lidar} constraints. Following the datasheet of the VLP-16~\cite{vlp16}, the \ac{lidar} used on the experimental setup, and HDL-64~\cite{VelodyneHDL64}, the \ac{lidar} used on the \ac{kitti} dataset, the Near Cut Plane can be defined to \SI{1}{\meter}, since the \acp{lidar} cannot detect smaller distances.
+The Near and Far Cut Planes may be defined by the data and \ac{lidar} constraints. Following the datasheet of the VLP-16~\cite{vlp16}, the \ac{lidar} used on the experimental setup, and HDL-64~\cite{VelodyneHDL64}, the \ac{lidar} used on the \ac{kitti} dataset, the Near Cut Plane is defined as \SI{1}{\meter}, since the \acp{lidar} cannot detect smaller distances.
 
 Due to data sparsity, both on the experimental and  \ac{kitti} dataset, a Far Plane of \SI{30}{\meter} is enough to guarantee that all the objects of interest on the \ac{fov} are present.
 
@@ -278,15 +278,15 @@ Using the constrains and methods detailed before, a \ac{ros} node, \texttt{image
 \end{figure}
 
 
-This node is implemented using \ac{pcl} frustum filter algorithm and Eigen linear algebra and matrix and vector operations. Eigen is a C++ library for linear algebra, matrix and vector operations and geometrical transformations, among other features~\cite{Eigenv3}. The pose of each of the bounding boxes is also computed, either in relation to the \ac{lidar}'s and the \ac{pcl}'s frustum algorithm coordinate frame. 
+This node is implemented using \ac{pcl} frustum filter algorithm and Eigen linear algebra and matrix and vector operations. Eigen is a C++ library for linear algebra, matrix and vector operations and geometric transformations, among other features~\cite{Eigenv3}. The pose of each of the bounding boxes is also computed, either towards the \ac{lidar}'s and the \ac{pcl}'s frustum algorithm coordinate frame. 
 
-Several alternatives to the methods described above (for \ac{fov} calculation, determine the \ac{lidar} rotation, etc.) have been implemented, but will not be described here. Several auxiliary functions (for debugging, visualization and computing other features) will also not be addressed, since they require a more in depth explanation of the implementation, which was no interest for such document. 
+Several alternatives to the methods described above (for \ac{fov} calculation, determine the \ac{lidar} rotation, for example) have been implemented, but will not be described here. Several auxiliary functions (for debugging, visualization and computing other features) will also not be addressed, since they require a more in depth explanation of the implementation, that was no interest for such document. 
 
 
 \subsubsection{Results}
 Applying the frustum filtering methodology described on the sub-sections above to the point cloud data can be seen on figure~\ref{fig:bbox-correspondences-on-kitti}. The dark grey points correspond to the original point cloud, \texttt{velodyne\_points}, and the orange points to the frustum filtered point cloud, \texttt{frustum\_filtered\_point\_cloud}.
 
-The red arrows represent the pose of each of the objects \acp{roi} and the yellow arrows the pose of those objects on the frustum filter coordinate frame, which differs from the Velodyne \ac{lidar} coordinate frame. While the Velodyne \ac{lidar} coordinate frame is z upwards, y leftwards and z forward\footnote{Velodyne \ac{lidar} coordinate frame on \ac{kitti} dataset can be seen better in figure~\ref{fig:kitti-tf-frames} on Sub-section~\ref{subsec:calibration:kitti-comparison} or on \ac{kitti}'s paper~\cite{Geiger2013a}.}; the \ac{pcl} frustum filter coordinate frame is y upwards, z rightwards and x forward.
+The red arrows represent the pose of each of the objects \acp{roi} and the yellow arrows the pose of those objects on the frustum filter coordinate frame, which differs from the Velodyne \ac{lidar} coordinate frame. Although the Velodyne \ac{lidar} coordinate frame is z upwards, y leftwards and z forward\footnote{Velodyne \ac{lidar} coordinate frame on \ac{kitti} dataset can be seen better in figure~\ref{fig:kitti-tf-frames} on Sub-section~\ref{subsec:calibration:kitti-comparison} or on \ac{kitti}'s paper~\cite{Geiger2013a}.}; the \ac{pcl} frustum filter coordinate frame is y upwards, z rightwards and x forward.
 
 \begin{figure}[ht]
 	\centering
@@ -295,9 +295,9 @@ The red arrows represent the pose of each of the objects \acp{roi} and the yello
 	\label{fig:bbox-correspondences-on-kitti}
 \end{figure}
 
-The results shown on figure~\ref{fig:bbox-correspondences-on-kitti} are not as expected. Mismatches between the bounding boxes on the image and \acp{roi} selected by the frustum filter are not coincident. Analyzing the unfiltered and the filtered point cloud, one can notice that some regions of the dark grey point cloud that correspond to the cars (that are detected on the image), are not considered a \ac{roi} and therefore are not filtered by the algorithms implemented and are not part of the filtered point cloud. Also, in contrast, some regions that have not been considered as \acp{roi} on the image are selected on the point cloud.
+The results shown on figure~\ref{fig:bbox-correspondences-on-kitti} are not as anticipated. Mismatches between the bounding boxes on the image and \acp{roi} selected by the frustum filter are not coincident. Analyzing the unfiltered and the filtered point cloud, one can notice that some regions of the dark grey point cloud that correspond to the cars (that are detected on the image), are not considered a \ac{roi} and therefore are not filtered by the algorithms implemented and are not part of the filtered point cloud. Also, in contrast, some regions that have not been considered as \acp{roi} on the image are selected on the point cloud.
 
-To our best understandings, there is a mismatch on determining the correspondences between the \acp{roi} on the image and \ac{lidar}. This mismatch can either be from the coordinate frames conversion, calculation of the \ac{lidar} rotation and \ac{fov} determination or by a combination of errors/imprecisions made in one of these steps. The implementation was debugged but the cause of the mismatch was not found. Therefore, a simpler algorithm to match the \acp{roi} between camera and \ac{lidar} was developed. 
+A mismatch on determining the correspondences between the \acp{roi} on the image and \ac{lidar} has been commit, that can either be from the coordinate frames conversion, calculation of the \ac{lidar} rotation and \ac{fov} determination or by a combination of errors/imprecisions made in one of these steps. The implementation was debugged but the cause of the mismatch was not found. Therefore, a simpler algorithm to match the \acp{roi} between camera and \ac{lidar} was developed. 
 
 
 \subsection{Projecting \ac{lidar} points to the image}
@@ -305,22 +305,22 @@ To our best understandings, there is a mismatch on determining the correspondenc
 
 The alternative method to establish correspondences is similar to the one used for Sensor Fusion, detailed in Chapter~\ref{chapter:sensor-fusion}. The difference between the implementation on the latter chapter and this is that instead of comparing if the projected \ac{lidar} points correspond to a pixel on the image, for \acp{roi} correspondences they must also be contained in an image bounding box. 
 
-This approach as a few drawbacks when compared to the previously described in Sub-section~\ref{subsec:object-detection:ray-casting}, but is easier and less complex. It requires only four steps, some already implemented previously:
+This approach as a few drawbacks when compared with the previously described in Sub-section~\ref{subsec:object-detection:ray-casting}, but is easier and less complex. It requires only four steps, some already implemented previously:
 
 \begin{enumerate}
 	\item Transform the \ac{lidar} point cloud from the \ac{lidar} coordinate frame to the camera's coordinate frame, as detailed in Sub-section~\ref{subsec:calibration:calibration-method}. Similar to the conversion on Chapter~\ref{chapter:sensor-fusion}, the coordinate conversion frame is the rigid body transform determined in section~\ref{sec:calibration:extrinsic}.;
 	\item Project the \ac{lidar} point cloud tridimensional points to the camera's image two-dimensional planes, using the methodology detailed in Sub-section~\ref{subsec:sensor-fusion-lidar-to-camera};
-	\item Check if the projected point cloud points correspond to image pixels inside of image bounding boxes. If so, save the index of the point cloud point;
+	\item Check if the projected point cloud points correspond to image pixels inside of image bounding boxes. If true, save the index of the point cloud point;
 	\item Using \ac{pcl}'s Extract Indices filter, a new point cloud is created from the original, containing the indexes selected on the previous step.
 \end{enumerate}
 
-However, the information of the detected objects (class, probability, etc.) obtained through the image object detection of Section~\ref{sec:object-detection:image} are harder to preserve, since every point is treated independently of the other and the point cloud is not organized, causing the spatial relation of the \acp{roi} on point cloud to not be preserved.
+However, the information of the detected objects (class, probability) obtained through the image object detection of Section~\ref{sec:object-detection:image} are harder to preserve, since every point is treated independently of the other and the point cloud is not organised, causing the spatial relation of the \acp{roi} on point cloud to not be preserved.
 
 
 \subsubsection{Implementation}
 The methodology chosen build on the implementation detailed on section~\ref{sec:object-detection:image}. A new node, \texttt{correspondences\_finder}, responsible for extracting the indices and  publishing a filtered point cloud, is implemented. The \texttt{filtered\_point\_cloud} contains all the points that belong to the \acp{roi} correspondent to the image bounding boxes. 
 
-The node is agnostic about the objects that are identified by the image object detection algorithms, only considering the bounding box dimensions and ignoring its class and confidence. Considering the mathematical notation of a bounding box as $bbox^i_j$, where $i$ corresponds to the bounding box index on \texttt{darknet-ros}' \texttt{bboxes} message and $j$ the coordinate of the bounding box, such as $j \in \{x, y\}$. Let also the number of the bounding boxes index be denoted as $\text{found\_object}$. A correspondence is made when the point cloud projection coordinates are such that a given point cloud point $P = (p_x, p_y,p_z)$ verifies equation~\ref{eq:correspondences-condition}.
+The node is agnostic about the objects that are identified by the image object detection algorithms, considering only the bounding box dimensions and ignoring its class and confidence. Considering the mathematical notation of a bounding box as $bbox^i_j$, where $i$ corresponds to the bounding box index on \texttt{darknet-ros}' \texttt{bboxes} message and $j$ the coordinate of the bounding box, such as $j \in \{x, y\}$. Let also the number of the bounding boxes index be denoted as $\text{found\_object}$. A correspondence is made when the point cloud projection coordinates are such that a given point cloud point $P = (p_x, p_y,p_z)$ verifies equation~\ref{eq:correspondences-condition}.
 
 \begin{align}
 	\label{eq:correspondences-condition}
@@ -342,7 +342,7 @@ The node diagram is presented on figure~\ref{fig:correspondences-finder-standalo
 \subsubsection{Results}
 On figure~\ref{fig:projected-correspondences}, the results caused by applying the \texttt{correspondences\_finder} node are presented in lilac. The top part of the image presents the camera feed and the bottom the point cloud, with the relevant TF coordinate frames also visible. The  dark gray points represent the original \ac{lidar} data. 
 
-Analyze the results, one can see that the objects of interest (on the case of figure~\ref{fig:projected-correspondences}, cars) are filtered and part of the point cloud that contains the \acp{roi}, marked in lilac. In every \ac{roi}, however, some outlier points are also selected. This is because the image bounding boxes being rectangular, which results on non-optimal bounding boxes dimensions, causing the appearance of outliers when correspondences between the \ac{lidar} and camera data are made.
+Analysing the results, we conclude that the objects of interest (on figure~\ref{fig:projected-correspondences}, cars) are filtered and part of the point cloud that contains the \acp{roi}, marked in lilac. In every \ac{roi}, however, some outlier points are also selected. This is because the image bounding boxes being rectangular, which results on non-optimal bounding boxes dimensions, causing the appearance of outliers when correspondences between the \ac{lidar} and camera data are made.
 
 \begin{figure}[H]
 	\centering
@@ -352,7 +352,7 @@ Analyze the results, one can see that the objects of interest (on the case of fi
 \end{figure}
 
 \subsection{Comparison between the two methods}
-The results of the two approaches can be compared on figure~\ref{fig:rois-matching-comparison}. In orange, the results of Sub-section~\ref{subsec:object-detection:ray-casting}, based on ray-casting and data conversion from the camera to \ac{lidar}; and in lilac, the results of Sub-section~\ref{subsec:object-detection:projection-correspondences}, based on projecting the \ac{lidar} points to the image plan and verifying which points lay inside the image bounding boxes limits.
+The results of the two approaches can be compared on figure~\ref{fig:rois-matching-comparison}. In orange, the results of Sub-section~\ref{subsec:object-detection:ray-casting}, based on ray-casting and data conversion from the camera to \ac{lidar}; and in lilac, the results of Sub-section~\ref{subsec:object-detection:projection-correspondences}, based on projecting the \ac{lidar} points to the image plan and verifying which points laid inside the image bounding boxes limits.
 
 
 \begin{figure}[H]
@@ -368,13 +368,13 @@ After analyzing the comparison between both algorithms on figure~\ref{fig:rois-m
 \label{subsec:object-detection:bounding-boxes-and-roi}
 Estimating a \ac{roi} on a point cloud from an image has the caveat of requiring the conversion between a 2D object (a rectangle representing a bounding box on the image) to a 3D object (a parallelepiped representing a bounding box on the point cloud). As detailed on the Chapter~\ref{chapter:sensor-fusion}, such conversion requires the estimation of one degree of freedom, depth, whose information is absent from the image.
 
-In our case, as detailed in this chapter, we want to draw a bounding box on the point cloud using only the information of the camera. Therefore, we need to estimate the depth of the 3D bounding box that contains all the points of an object that correspond to the object of interest on the image, that was classified during the image detection procedure (see Section~\ref{sec:object-detection:image}).
+As detailed in this chapter, we want to draw a bounding box on the point cloud using only the information of the camera. Therefore, we need to estimate the depth of the 3D bounding box that contains all the points of an object that correspond to the object of interest on the image, that was classified during the image detection procedure (see Section~\ref{sec:object-detection:image}).
 
-To reduce mismatches and improved the accuracy of the bounding boxes, before computing them, the point cloud is filtered using a voxel filter to uniform point cloud density on the already filtered \acp{roi} and then this voxelized point cloud is feed to a clustering algorithm, to select on the points of each \ac{roi} that correspond to the actual object of interest, reducing the number of outliers. The resulting clusters are then used on the bounding box algorithm.
+To reduce mismatches and improved the accuracy of the bounding boxes, before computing them, the point cloud is filtered using a voxel filter to uniform point cloud density on the already filtered \acp{roi} and then this voxelized point cloud is feed to a clustering algorithm, to select on the points of each \ac{roi} that correspond to the actual object of interest, reducing outliers. The resulting clusters are then used on the bounding box algorithm.
 
 
 \subsubsection{Voxelization}
-To reduce the number of points on the filtered point cloud (speeding up the process) and ensure a more uniform point density, \ac{pcl}'s Voxel Grid filter is used to voxelize the point cloud. \ac{pcl}'s voxel grid creates a tridimensional grid of voxels that encapsulate all the point cloud points and, for every voxel, the centroid of the points within each voxel is computed, replacing all the voxel's points with its centroid.
+To reduce the number of points on the filtered point cloud (speeding up the process) and to uniform point density, \ac{pcl}'s Voxel Grid filter is used to voxelize the point cloud. \ac{pcl}'s voxel grid creates a tridimensional grid of voxels that encapsulate all the point cloud points and, for every voxel, the centroid of the points within each voxel is computed, replacing all the voxel's points with its centroid.
 
 On our experimental datasets, a voxel grid of \SI{0.04}{\centi\meter} was used, causing a reduction of 5\% to 15\% on the filtered point cloud dimensions.
 
@@ -386,14 +386,14 @@ Since the point cloud density varies with distance, clustering will cause the di
 The Euclidean Filter uses 3 parameters:
 
 \begin{enumerate}
-	\item \textbf{Cluster tolerance:} Maximum distance between the points of the cluster, measuring using a Euclidean L2 norm. If the L2 norm between a cluster point and a candidate cluster point is bigger greater than this parameter, the candidate point is not part of the cluster;
+	\item \textbf{Cluster tolerance:} Maximum distance between the points of the cluster, measuring using a Euclidean L2 norm. If the L2 norm between a cluster point and a candidate cluster point is greater than this parameter, the candidate point is not part of the cluster;
 	\item \textbf{Minimum cluster size:} Minimum number of points, that verify the cluster tolerance condition, that are required to create a cluster. If the number of points that verify condition 1 are smaller than this number, a cluster is not created;
-	\item \textbf{Maximum cluster size:} Maximum number of points, that verify the cluster tolerance condition, that can be part of a cluster. If the number of points that verify condition 1 are greater than this number, a cluster is not created.
+	\item \textbf{Maximum cluster size:} Maximum number of points, that verify the cluster tolerance condition, that can be part of a cluster. The number of points that verify condition 1 must be smaller or equal than this parameter, otherwise a cluster is not created.
 \end{enumerate}
 
 To ease the estimation of the filter parameters, \texttt{correspondences\_finder\_node} was changed to contain a \ac{ros} dynamic reconfigure server, allowing the modification of the filter parameters in real-time during program execution. 
 
-To tune the parameters, minimum and maximum cluster size were set to 1 and 25000, respectively. Cluster tolerance was then decreased from\SIrange{10}{0.2}{\meter} with non-uniform steps until each of the clusters contain only one object. Then, the minimum cluster size was increased until only the clusters of interest remain, i.e., the clusters that correspond to the objects detected on the image bounding boxes, which resulted on a number of points equal $150$. With this first estimation carried, the parameters were fine-tuned, resulting on the final values for the parameters presented on table~\ref{tab:euclidian-cluster-specs}.
+To tune the parameters, minimum and maximum cluster size were set to 1 and 25000, respectively. Cluster tolerance was then decreased from\SIrange{10}{0.2}{\meter} with non-uniform steps until each of the clusters contain only one object. Then, the minimum cluster size was increased until only the clusters of interest remain, i.e., the clusters that correspond to the objects detected on the image bounding boxes, which results on a number of points equal $150$. With this first estimation carried, the parameters were fine-tuned, resulting on the final values for the parameters presented on table~\ref{tab:euclidian-cluster-specs}.
 
 \begin{table}[H]
 	\centering
@@ -407,22 +407,22 @@ To tune the parameters, minimum and maximum cluster size were set to 1 and 25000
 	 Maximum cluster size & $8000$ \\
 	 \bottomrule
 	\end{tabular}
-	\caption{\ac{pcl}'s Euclidean Cluster filter parameters used on our algorithms. On \ac{kitti}'s and our data, these parameters can segment the clusters corresponding to the object while removingsomee outliers on the \ac{roi}. These parameters are set as the default for the \ac{ros} dynamic configure server and can be changed during runtime.}
+	\caption{\ac{pcl}'s Euclidean Cluster filter parameters used on our algorithms. On \ac{kitti}'s and our data, these parameters can segment the clusters corresponding to the object while removing some outliers on the \ac{roi}. These parameters are set as the default for the \ac{ros} dynamic configure server and can be changed during runtime.}
 	\label{tab:euclidian-cluster-specs}
 \end{table}
 
-\footnotetext{This value can be selected from the interval of \SIrange{0.17}{0.19}{\meter}, yielding also good results. On our case, the middle of the interval was selected.}
+\footnotetext{This value may be selected from the interval of \SIrange{0.17}{0.19}{\meter}, yielding also good results.}
 
 \subsubsection{Bounding Box Estimation}
 \label{subsubsec:object-detection:bounding-box-estimation}
 Bounding box estimation requires the computation of the bounding boxes position, orientation and dimensions, for each of the clusters. Considering only rectangular/parallelepiped bounding box, two types of rectangular bounding boxes can be used:
 
 \begin{enumerate}
-	\item \textbf{\ac{aabb}:} are defined on the viewer coordinate frame, with their position given in relation to the viewer's coordinate frame. Normally, they enclose empty space and have a  higher volume than the object they contain;
-	\item \textbf{\ac{obb}:} are defined on the object unique coordinate frame\footnote{The object unique coordinate frame is computed using Principal Component Analysis techniques, which compute the variance along the tridimensional cluster data and defines three axis (the object unique coordinate frame) from the data eigen vectors.}, having a better fit to the object than \ac{aabb}. Their position is the origin of their own coordinate frame, which is not aligned with the viewer coordinate frame, and they are oriented to minimize the volume of the bounding box, which results in lower dimensions.
+	\item \textbf{\ac{aabb}:} are defined on the viewer coordinate frame, with their position given in relation to the viewer's coordinate frame. Normally, they enclose empty space and have a higher volume than the object they contain;
+	\item \textbf{\ac{obb}:} are defined on the object unique coordinate frame\footnote{The object unique coordinate frame is computed using Principal Component Analysis techniques, which compute the variance along the tridimensional cluster data and defines three axes (the object unique coordinate frame) from the data eigen vectors.}, having a better fit to the object than \ac{aabb}. Their position is the origin of their own coordinate frame, that is not aligned with the viewer coordinate frame, and they are oriented to minimise the volume of the bounding box, which results in lower dimensions.
 \end{enumerate}
 
-While \ac{obb} produces better bounding boxes, they are object specific and defined on the cluster coordinate frame. Such definition difficulties the visualization and computation of the cluster bounding box on the viewer coordinate frame, when comparing with the \ac{aabb}, which is already defined on the viewer coordinate frame.  Regardless of the difficulties, since \ac{obb} optimizes its dimensions and orientation to the cluster data, the resulting bounding boxes are in ``strange'' positions on the viewers coordinate frame. On the other hand, \ac{aabb}, which also have 3 \ac{degof} on its orientation, rotate along each of the viewer coordinate axis, therefore resulting on a more ``familiar'' bounding box.
+Although \ac{obb} produces better bounding boxes, those are object specific and defined on the cluster coordinate frame. Such definition difficulties the visualization and computation of the cluster bounding box on the viewer coordinate frame, when comparing with the \ac{aabb}, which is already defined on the viewer coordinate frame. Regardless of the difficulties, since \ac{obb} optimizes its dimensions and orientation to the cluster data, the resulting bounding boxes are in ``strange'' positions on the viewers coordinate frame. On the other hand, \ac{aabb}, which also have 3 \ac{degof} on its orientation, rotates along each of the viewer coordinate axis, therefore resulting on a more ``familiar'' bounding box.
 
 None of the above types as the notion of the object it is enclosing, therefore the 3 \ac{degof} on the bounding box orientation results on bounding boxes that are not ``physically possible'', with some part of it being below the road, either due to a non-zero pitch or roll\footnote{On a Z-Y-X Euler angle rotation frame, pitch is the rotation along the y-axis and roll is the rotation along the xx axis.}. To ensure a bounding box that as physical sense, such as a car's bounding box not being defined below the road, for instance; the bounding box orientation needs to be degenerate to contain only the yaw component, i.e., the rotation along the z-axis. Let $\theta$ be the angle between the $x$ and $y$ axis coordinates of the bounding box and the degenerated rotation matrix along the z-axis is defined in equation~\ref{eq:z-degenerate-rotation-matrix}.
 
@@ -436,9 +436,9 @@ None of the above types as the notion of the object it is enclosing, therefore t
 	\end{bmatrix}
 \end{equation}
 
-Since \ac{aabb} is defined on the coordinate frame of the viewer, it is aligned with the remaining of the data and the degeneration of the bounding box orientation to rotate only around the z-axis is more simply and yields better results than an \ac{obb} referenced on the viewers coordinate frame with a z-axis degenerated rotation. Such is due to the \ac{obb} dimensions are defined on its axis and scaling is needed when converting to a bounding box that is orientated along the viewer coordinate frame. Therefore, our solution uses an \acf{aabb}.
+Since \ac{aabb} is defined on the coordinate frame of the viewer, it is aligned with the remaining of the data and the degeneration of the bounding box orientation to rotate only around the z-axis is simpler and yields better results than an \ac{obb} referenced on the viewers coordinate frame with a z-axis degenerated rotation. Such is because the \ac{obb} dimensions are defined on its axis and scaling is needed when converting to a bounding box that is orientated along the viewer coordinate frame. Therefore, our solution uses an \acf{aabb}.
 
-Both bounding boxes type have support on \ac{pcl}, using the class \texttt{MomentOfInertiaEstimation}, which allows, among other features, the computation of \ac{obb} and \ac{aabb}. Since our solution uses an \ac{aabb}, we can also define the bounding box without using \ac{pcl}'s \texttt{MomentOfInertiaEstimation}, by determining the cluster centroid and its maximum and minimum points.
+Both bounding boxes type have support on \ac{pcl}, using the class \texttt{MomentOfInertiaEstimation}, that allows, among other features, the computation of \ac{obb} and \ac{aabb}. Since our solution uses an \ac{aabb}, we can also define the bounding box without using \ac{pcl}'s \texttt{MomentOfInertiaEstimation}, by determining the cluster centroid and its maximum and minimum points.
 
 The three methods were implemented and compared for speed over 100 iterations, with the results presented on table~\ref{tab:bounding-box-estimation-times}.
 
@@ -458,11 +458,11 @@ The three methods were implemented and compared for speed over 100 iterations, w
 	\label{tab:bounding-box-estimation-times}
 \end{table}
 
-From this table, one can see that the manual estimation, which uses \texttt{pcl::MinMax3D} to determine the minimum and maximum coordinates of the cluster on each axis, is up to 23 times faster than the \texttt{MomentOfInertiaEstimation} class when determining the bounding box position, orientation and dimensions, while producing the same results. Since the bounding box estimation is performed during the callback, which needs to be executed faster than \texttt{Darknet-ros}, a speed higher than \SI{1.8}{\hertz} is required\footnote{\SI{1.8}{\hertz} is the maximum frame rate of \texttt{Darknet-ros}. See Sub-Section~\ref{subsec:object-detection:image-results} for more details.}. Therefore, the Manual Estimation of the bounding box is preferred instead of using the \texttt{MomentOfInertiaEstimation} \ac{pcl} class.
+From table~\ref{tab:bounding-box-estimation-times}, the manual estimation, that uses \texttt{pcl::MinMax3D} to determine the minimum and maximum coordinates of the cluster on each axis, is up to 23 times faster than the \texttt{MomentOfInertiaEstimation} class when determining the bounding box position, orientation and dimensions, while producing the same results. Since the bounding box estimation is done during the callback, which needs to be executed faster than \texttt{Darknet-ros}, a speed higher than \SI{1.8}{\hertz} is required\footnote{\SI{1.8}{\hertz} is the maximum frame rate of \texttt{Darknet-ros}. See Sub-Section~\ref{subsec:object-detection:image-results} for more details.}. Therefore, the Manual Estimation of the bounding box is preferred instead of using the \texttt{MomentOfInertiaEstimation} \ac{pcl} class.
 
-Visualization of the bounding boxes is performed using the \texttt{RViz} \texttt{jsk\_rviz\_plugins}, from \texttt{jsk\_visualization} package~\cite{jsk_visualization}. This package defines a bounding boxes' message that can be used on \ac{ros} nodes and also defines a plugin that can be used in \texttt{RViz} to display the bounding boxes alongside point clouds and other data types, for example. Results of the estimated point cloud bounding boxes, in blue, are shown on figure~\ref{fig:bboxes-3d-kitti}, overlapped with the filtered point cloud (in lilac) and the original point cloud (in dark gray).
+Visualization of the bounding boxes is achieved using the \texttt{RViz} \texttt{jsk\_rviz\_plugins}, from \texttt{jsk\_visualization} package~\cite{jsk_visualization}. This package defines a bounding boxes' message that can be used on \ac{ros} nodes and also defines a plugin that can be used in \texttt{RViz} to display the bounding boxes alongside point clouds and other data types, for example. Results of the estimated point cloud bounding boxes, in blue, are shown on figure~\ref{fig:bboxes-3d-kitti}, overlapped with the filtered point cloud (in lilac) and the original point cloud (in dark gray).
 
-Despite the results looking promising, there is a caveat that is hard to notice. The bounding boxes are \acl{aabb}, which implies that they are oriented alongside the viewer coordinate frame. On our implementation, this frame is the \texttt{velo\_link}, the \ac{lidar} coordinate frame. Because the \ac{lidar} coordinate frame is not a fixed coordinate frame on the \ac{kitti} dataset, there are some situations where the requirement that the bounding boxes are aligned with the \ac{lidar} coordinate frame axis will force the bounding box to not be aligned with the road direction, specially when the \ac{kitti}'s car does a curve. Such behaviour will still result on a valid bounding box that encloses all the cluster, but its orientation is coincident with what a human eye will understand. No attempts of solving this problem were carried. 
+Despite the promising results, a caveat that is hard to notice is present on the implementation carried. The bounding boxes are of \acl{aabb} type, implying that they are oriented alongside the viewer coordinate frame. On our implementation, this frame is the \texttt{velo\_link}, the \ac{lidar} coordinate frame. Because the \ac{lidar} coordinate frame is not a fixed coordinate frame on the \ac{kitti} dataset, there are some situations where the requirement that the bounding boxes are aligned with the \ac{lidar} coordinate frame axis will force the bounding box to not be aligned with the road direction, specially when the \ac{kitti}'s car does a curve. Such behaviour will still result on a valid bounding box that encloses all the cluster, but its orientation will not coincide with the human perception of the ``correct'' object's bounding box. No attempts of solving this problem were carried. 
 
 \begin{figure}[ht!]
 	\centering
@@ -495,4 +495,9 @@ Despite the results looking promising, there is a caveat that is hard to notice.
 
 
 \section{Final Remarks}
+On this chapter, image object detection is used to identify and crop \aclp{roi} on the point cloud. \ac{yolo} is the \acl{sota} \acl{cnn} selected to perform image object detection, which is integrated with the \ac{ros} network using \texttt{Darknet-ros} package. To determine the equivalent \ac{roi} on the point cloud from the image, two algorithms are developed. The first, establishes $2D \rightarrow 3D$ (from pixels to rays) correspondences and performs frustum filtering on the point cloud; and the second projects tridimensional point cloud points to the image plane, i.e., $3D \rightarrow 2D$ correspondences, selecting the points whose projection is contained on an image bounding box. Considering the accuracy of the \acp{roi} correspondences between image and point cloud, the latter algorithm is preferred, and the filtered point cloud is voxel filtered and clustered, using \ac{pcl}'s Voxel Grid and Euclidean Cluster filters. 
+
+Such processing chain allows the identification of point cloud clusters that correspond to objects of interest, previously classified by the image object detection. This clusters can then be used for point cloud bounding box estimation and \ac{lidar} interference analysis on objects of interest. Regarding the bounding box estimation, two types are researched: \acf{obb} and \acf{aabb}. Since the goal of bounding box drawing is to show the viewer the objects of interest and their limits, \ac{aabb} are preferred and more intuitive. To speed up the \ac{pcl}'s native implementation of \ac{aabb} computation, the \ac{aabb} position, orientation and dimensions are computed using an alternative methods implemented by us, which yield the similar results and require less than 5\% of the previous execution time.
+
+From this chapter, the main outcome is a processing chain that is capable of extracting the point cloud subsets, representing objects of interest, previously detected on image using image object detection. Such processing chain is relevant since it allows us to analyze the \ac{lidar} interference on objects that are relevant for self-driving vehicles. The requirements of such implementation are that the camera's and \ac{lidar}'s must be intrinsic calibrated and that their extrinsic calibration must be known.
 
