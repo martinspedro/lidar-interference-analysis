@@ -1,9 +1,11 @@
 .PHONY: all build preview print ebook cleanall clean
 
 # Vars
-SRC     := ${PWD}
-OUT     := ${PWD}/build
-SCRIPTS := ${PWD}/scripts
+SRC           := ${PWD}
+GRAPHICS      := ${PWD}/tikz
+OUT           := ${PWD}/build
+OUT-GRAPHICS  := ${PWD}/build/figs
+SCRIPTS       := ${PWD}/scripts
 
 # Commands
 LATEXMK := latexmk
@@ -18,10 +20,10 @@ LATEXMK_FLAGS += -e '$$makeindex=qq/sh -c "cd "`dirname "%D"`" ; makeindex %O -o
 all: build
 
 build:
-	cd ${OUT} ; ${LATEXMK} ${LATEXMK_FLAGS} -cd ${SRC}/cover.tex ${SRC}/matter.tex
+	cd ${OUT} ; ${LATEXMK} ${LATEXMK_FLAGS} -cd ${SRC}/cover.tex ${GRAPHICS}/datasets-tree.tex ${SRC}/matter.tex
 
 preview: build
-	(${LATEXMK} ${LATEXMK_FLAGS} -pvc -cd ${SRC}/cover.tex & ${LATEXMK} ${LATEXMK_FLAGS} -pvc -cd ${SRC}/matter.tex)
+	(${LATEXMK} ${LATEXMK_FLAGS} -pvc -cd ${SRC}/cover.tex & ${LATEXMK} ${LATEXMK_FLAGS} -pvc -cd ${SRC}/matter.tex & ${LATEXMK} ${LATEXMK_FLAGS} -pvc -cd ${GRAPHICS}/datasets-tree.tex)
 
 print: build
 	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -dNOPAUSE -dQUIET -dBATCH -sOutputFile=${OUT}/thesis-print.pdf ${OUT}/matter.pdf
