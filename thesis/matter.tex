@@ -200,7 +200,11 @@
 \usepackage{enumitem} 
 \usepackage{indentfirst}
 \usepackage{multirow}
+\usepackage[edges]{forest}
 %\usepackage[inkscape=yes, inkscapelatex=true]{svg}
+
+\usetikzlibrary{external} 
+\tikzexternalize % activate!
 
 %\svgsetup{%
 %convertdpi={png=600},%
@@ -228,7 +232,6 @@
 	\fontsize{8}{10}\selectfont
 	\input{#1.pdf_tex}%
 }
-
 
 % Custom SI
 \DeclareSIUnit{\bytes}{bytes}
@@ -368,7 +371,8 @@
 
 
 %Load appendix
-\input{appendix/appendix-a} 
-\input{appendix/appendix-b}
+\input{appendix/appendix-a} \newpage 
+\input{appendix/appendix-b} \newpage
+\input{appendix/appendix-c}
 
 \end{document}
