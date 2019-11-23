@@ -94,7 +94,7 @@ On \ac{it} 2 Dark Room, only \textit{Scenario B} follows these guidelines, which
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.3]{img/datasets/test-subfolders.png}
-	\caption{Detail of the hierarchy of a ``test day''. Everyday data was recorded, calibration and ground-truth data were recorded. \textit{Multiple Lidar Interference} folder contains the parameters under test and each of the tested values.}
+	\caption{Detail of the hierarchy of a ``test day''. On each day data was recorded, calibration and ground-truth data were recorded. \textit{Multiple Lidar Interference} folder contains the parameters under test and each of the tested values.}
 	\label{fig:test-subfolders}
 \end{figure}
 
@@ -110,7 +110,7 @@ On a specific value for a parameter under test, three bag files are present, as 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.3]{img/datasets/parameter-test-files.png}
-	\caption{Data recorded using \texttt{rosbag} tool, for a single value of a parameter under test.\textit{README.md}, on this type of folder, details the conditions under which data was gathered.}
+	\caption{Data recorded using \texttt{rosbag} tool, for a single value of a parameter under test. \textit{README.md}, on this type of folder, details the conditions under which data was gathered.}
 	\label{fig:parameter-test-files}
 \end{figure}
 
@@ -119,10 +119,74 @@ On \textit{IRIS Laboratory} folder, two test folders are present, containing all
 
 To ease the access to this data structure, \texttt{datasets\_path} library was implemented, both on C++ and Python 3, to allow ubiquitous managing of data loading for tests and saving of results.
 
-\section{Bosch Datasets}
-The start of our study on \ac{lidar} interference used 3 datasets 
+\section{Bosch\cp~Dataset}
+We start by investigating \ac{lidar} interference using Bosch's dataset. This dataset consists of 3 \ac{ros} bag files, one recorded by a HESAI Pandar40 and two other by Velodyne's VLP-16. Each of the bag files correspond to the same experimental scenario: the two \acp{lidar} are placed, side by side, on top of a table, with the Pandar40 about \SI{50}{\centi\meter} to the left of the VLP-16. For each of the tests, data is recorded for about \SIrange{10}{15}{\second} and the two \acp{lidar} are always switched on.
 
-\section{Outliers without physical context analysis}
+To analyse the interference, we start by analysing at the data in \texttt{Rviz}, noticing two phenomenons: 
+
+\begin{enumerate}
+	\item Data appears to be more noisy, as if it was oscillating with greater magnitude around a fixed point on its measurement axis, when comparing with \ac{kitti}'s dataset;
+	\item Some of the measurements correspond to points outside of the room dimensions.
+\end{enumerate}
+
+For the first case, we present two hypotheses: it is caused by the interference of the other \ac{lidar} or due to the measurements being taken in small rooms. The understand the second phenomenon, a two dimensional scatter map of the point cloud, viewed from above, is plotted. This representation does not take in consideration the measurement density, which might be misleading, since interfered measurements should have a higher ``geometric'' dispersion when comparing with the correct measurements of the real world.
+
+These results are present on figure~\ref{fig:bosch-pandar-vs-vlp16}, with the left subfigure, (\subref{fig:bosch-pandar40}), showing HESAI's Pandar40 data, represented in green, and the right subfigure, (\subref{fig:bosch-vlp16-1}), showing Velodyne's VLP-16 data, represented in yellow. For each of the subfigures, we notice in the center a rectangular shape, the room, and the outliers are distributed in a circular arrange, with preference for some azimuthal angles. The circular range is due to the hardware time window to measure the reception pulse and software distance threshold to register the data. On Pandar40, the software constrain is \SI{200}{\meter} and on VLP-16 is \SI{130}{\meter}. 
+
+Considering the HESAI's \ac{lidar} is left to the Velodyne's \ac{lidar}, the occurrence of interference seem to be more significant to HESAI's right, i.e., between the two \acp{lidar}. On the other hand, Velodyne's outliers tend to its left, the side on which the HESAI's is in. With HESAI's outliers concentrated on its first geometric quadrant and Velodyne's outliers on the second geometric quadrant, such results seem to indicate that interference is directional. However, from this data we cannot determine if this is due to direct interference, reflections or both.
+
+\begin{figure}[ht!]
+	\centering
+	\begin{subfigure}[t]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/bosch/pandar40.png}
+		\caption{HESAI's Pandar40 data scatter plot.}
+		\label{fig:bosch-pandar40}
+	\end{subfigure}
+	\qquad
+	\begin{subfigure}[t]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/bosch/vlp16-test1.png}
+		\caption{Velodyne's VLP-16 data scatter plot}
+		\label{fig:bosch-vlp16-1}
+	\end{subfigure}
+	\caption{Scatter plot of the data gathered by HESAI's Pandar40, (\subref{fig:bosch-pandar40}), and Velodyne's VLP-16, (\subref{fig:bosch-vlp16-1}). The measurements are plotted only on the X-Y plane, flatenning the height of the points. }
+	\label{fig:bosch-pandar-vs-vlp16}
+\end{figure}
+
+We also analyze the results from the second VLP-16bag file, and compare with the first, on figure~\ref{fig:bosch-vlp16-comparison}. The previous shown data, on figure~\ref{fig:bosch-vlp16-1} is shown in yellow and the second dataset in blue. On the center, the room can be seen, and the data, independently of the bag file, seems to have the same dispersion and directionality.
+
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[scale=0.33]{img/bosch/vlp16-tests-overlaid.png}
+	\caption{Scatter plot of the \ac{ros} bags containing Velodyne's VLP-16 data, gathered under the same conditions with almost an hour of difference. Thee measurements are plotted only on the X-Y plane, flatenning the height of the points. Comparison between the grid and blue points shows a macro-correspondance }
+	\label{fig:bosch-vlp16-comparison}
+\end{figure}
+
+
+
+Since the room had people moving and no data without interference is present, this dataset cannot be used for a refined analysis of the interference, since the approach and methods we devise suppose that the environment is static, in order for a ground truth model to be generated. Since we have no camera information, no object detection processing chain can be implemented (similar to Chapter~\ref{chapter:object-detection}). 
+
+Our solution is then to quantize this outliers and trying to understand more about their behavior, which is the approach detailed on the next Section.
+
+
+
+
+\section{Room Outliers Contabilization}
+After the qualitative analysis on the previous Section, from which we concluded that the \ac{lidar} interference appears to be directional and this Section details the implementation and results of a quantitative approach to the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
+
+To analyze the data, a simple \ac{ros} node was implemented, with both offline and online versionsn. Offline operation implies that the node does not operate in real-time, being capable of handling large datasets and \ac{ros} ba files. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (tipically, a \ac{ros} bag player or a driver). Instead, the node loads and parses the bag file, as fast as it can, keeping its data private on its own program memory.
+To quantify this inteference, the node only requires knwoledge about the room dimensions, determining the number of messages received, average points per message, absolute and relative number of outliers and inliers. 
+
+Despite not accounting for interference inside the room dimensions, this interference model intends to measure what, to the ``naked eye'', is clearly and erroneous measure, caused by interference: measurements outside the physical dimensions of the room where the \acp{lidar} are located. Since the interference inside the room dimensions is not considered, we can view this metric as a minorant for \ac{lidar} interference, which can never be confused with other \ac{lidar} behaviors and noise.
+
+\subsection{Bosch Dataset}
+
+\subsection{Our Experimental Dataset}
+
+\subsubsection{Distance}
+\subsubsection{Height}
+\subsubsection{\acp{lidar} \ac{los} Obstruction}
+\subsubsection{Direction}
+
 
 \section{Ground-Truth Generation}
 \label{sec:lidar-interference:ground-truth}
