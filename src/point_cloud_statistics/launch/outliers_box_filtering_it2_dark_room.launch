@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+-->
+
+<launch>
+  <arg name="min_point_x" default="-1.11" />
+  <arg name="min_point_y" default="-2.1" />
+  <arg name="min_point_z" default="-0.97" />
+  <arg name="max_point_x" default="6.34" />
+  <arg name="max_point_y" default="3.69" />
+  <arg name="max_point_z" default="1.89" />
+  <arg name="point_distance_tolerance" default="0.05" />
+
+
+  <node pkg="point_cloud_statistics" type="point_cloud_box_filtering_node" name="Outliers_Box_Filtering" output="screen"
+        args="$(arg dataset_name)" >
+      <param name="min_point/x" value="$(arg min_point_x)"/>
+      <param name="min_point/y" value="$(arg min_point_y)"/>
+      <param name="min_point/z" value="$(arg min_point_z)"/>
+      <param name="max_point/x" value="$(arg max_point_x)"/>
+      <param name="max_point/y" value="$(arg max_point_y)"/>
+      <param name="max_point/z" value="$(arg max_point_z)"/>
+      <param name="point_distance_tolerance" value="$(arg point_distance_tolerance)"/>
+  </node>
+
+</launch>
