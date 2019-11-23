@@ -220,6 +220,8 @@
 \def\todo{\textsuperscript{\textit{\textcolor{red}{TODO}}}}
 \def\cp{\textsuperscript{\textcopyright}} 
 
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
 \newcommand{\executeiffilenewer}[3]{%
 	\ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
 	{\pdffilemoddate{#2}}>0%
