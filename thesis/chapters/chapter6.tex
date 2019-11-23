@@ -161,22 +161,18 @@ We also analyze the results from the second VLP-16bag file, and compare with the
 	\label{fig:bosch-vlp16-comparison}
 \end{figure}
 
-
-
 Since the room had people moving and no data without interference is present, this dataset cannot be used for a refined analysis of the interference, since the approach and methods we devise suppose that the environment is static, in order for a ground truth model to be generated. Since we have no camera information, no object detection processing chain can be implemented (similar to Chapter~\ref{chapter:object-detection}). 
 
 Our solution is then to quantize this outliers and trying to understand more about their behavior, which is the approach detailed on the next Section.
 
 
-
-
 \section{Room Outliers Contabilization}
-After the qualitative analysis on the previous Section, from which we concluded that the \ac{lidar} interference appears to be directional and this Section details the implementation and results of a quantitative approach to the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
+After the qualitative analysis of the previous Section on Bosch's dataset, from which we concluded that the \ac{lidar} interference appears to be directional and causes outliers outside of the room dimensions, this Section details the implementation and results of a quantitative approach to the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
 
-To analyze the data, a simple \ac{ros} node was implemented, with both offline and online versionsn. Offline operation implies that the node does not operate in real-time, being capable of handling large datasets and \ac{ros} ba files. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (tipically, a \ac{ros} bag player or a driver). Instead, the node loads and parses the bag file, as fast as it can, keeping its data private on its own program memory.
-To quantify this inteference, the node only requires knwoledge about the room dimensions, determining the number of messages received, average points per message, absolute and relative number of outliers and inliers. 
+To analyze the data, a \ac{ros} node, with both offline and online versions, was implemented. Offline operation implies that the node does not have real-time constraints, being capable of handling large \ac{ros} bag files and datasets. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (tipically, a \ac{ros} bag player or a device driver). Instead, the node loads and parses the bag file, as fast as it can or as fast is instructed to, keeping its data private on its own program memory. This alternative permits processing large amounts of data and realizing complex analysis on it.
 
-Despite not accounting for interference inside the room dimensions, this interference model intends to measure what, to the ``naked eye'', is clearly and erroneous measure, caused by interference: measurements outside the physical dimensions of the room where the \acp{lidar} are located. Since the interference inside the room dimensions is not considered, we can view this metric as a minorant for \ac{lidar} interference, which can never be confused with other \ac{lidar} behaviors and noise.
+To quantify this inteference, the node only requires knwoledge about the room dimensions and it  determines the number of messages received, average points per message, absolute and relative number of outliers and inliers. Despite not accounting for interference inside the room dimensions, this interference model intends to measure what, to the ``naked eye'', is clearly and erroneous measure, caused by interference: measurements outside the physical dimensions of the room where the \acp{lidar} are located. Since the possible interference inside the room dimensions is not considered, we can view this metric as a minorant for the \ac{lidar} interference.
+%, which can never be confused with other \ac{lidar} behaviors and noise.
 
 \subsection{Bosch Dataset}
 
