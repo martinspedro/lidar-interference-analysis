@@ -29,6 +29,8 @@ public:
    */
   BoxFilter(float x_min, float x_max, float y_min, float y_max, float z_min, float z_max);
 
+  BoxFilter();
+
   /**
    * \brief Filter object constructor
    */
@@ -42,6 +44,21 @@ public:
    * \returns false if point is outside the box dimensions of the filter
    */
   bool pointInsideBox(pcl::PointXYZ point);
+
+  void printBoxDimensions();
+
+  float getXMin();
+  float getYMin();
+  float getZMin();
+  float getXMax();
+  float getYMax();
+  float getZMax();
+  void setXMin(float x_min);
+  void setYMin(float y_min);
+  void setZMin(float z_min);
+  void setXMax(float x_max);
+  void setYMax(float y_max);
+  void setZMax(float z_max);
 
 private:
   float x_min_;  //!< X axis minimum coordinate value of the box
