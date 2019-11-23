@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rosrun graphics_generation box_filter_it2_dark_room_setups.py
+rosrun graphics_generation box_filter_distance_setups.py
+rosrun graphics_generation box_filter_direction_setups.py
+rosrun graphics_generation box_filter_height_setups.py
+rosrun graphics_generation box_filter_human_setups.py
+rosrun graphics_generation box_filter_LOS_setups.py
