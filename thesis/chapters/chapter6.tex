@@ -167,16 +167,36 @@ Our solution is then to quantize this outliers and trying to understand more abo
 
 
 \section{Room Outliers Contabilization}
-After the qualitative analysis of the previous Section on Bosch's dataset, from which we concluded that the \ac{lidar} interference appears to be directional and causes outliers outside of the room dimensions, this Section details the implementation and results of a quantitative approach to the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
+After the qualitative analysis of the previous Section on Bosch's dataset, from which we concluded that the \ac{lidar} interference appears to be directional and causes outliers outside of the room dimensions, this Section details the implementation and results of a quantitative approach to analyze the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
 
 To analyze the data, a \ac{ros} node, with both offline and online versions, was implemented. Offline operation implies that the node does not have real-time constraints, being capable of handling large \ac{ros} bag files and datasets. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (tipically, a \ac{ros} bag player or a device driver). Instead, the node loads and parses the bag file, as fast as it can or as fast is instructed to, keeping its data private on its own program memory. This alternative permits processing large amounts of data and realizing complex analysis on it.
 
 To quantify this inteference, the node only requires knwoledge about the room dimensions and it  determines the number of messages received, average points per message, absolute and relative number of outliers and inliers. Despite not accounting for interference inside the room dimensions, this interference model intends to measure what, to the ``naked eye'', is clearly and erroneous measure, caused by interference: measurements outside the physical dimensions of the room where the \acp{lidar} are located. Since the possible interference inside the room dimensions is not considered, we can view this metric as a minorant for the \ac{lidar} interference.
-%, which can never be confused with other \ac{lidar} behaviors and noise.
 
 \subsection{Bosch Dataset}
+To determine the room dimensions, we display the data on \texttt{Rviz} and then use the selection tool determine the maximum and minimum value on every axis that defines the room dimensions. This process is manual, and prone to error.
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{@{}llC{2cm}C{2cm}C{2cm}C{2cm}@{}}
+		\toprule
+		\multicolumn{2}{l}{Test Scenario} & \# \ac{lidar} messages & Average Points Per Message & \# interfered points & Relative \% of points \\
+			\midrule
+		\multicolumn{2}{l}{\textit{Velodyne VLP-16}}  & 1  & 2 & 3 & 4  \\ 
+			\phantom{a} & Test \#1  & 1  & 2 & 3 & 4  \\ 
+			\phantom{a} & Test \#2  & 1  & 2 & 3 & 4  \\ 
+		\midrule
+		\multicolumn{2}{l}{\textit{HESAI Pandar40}} & 1 & 2 & 3 & 4  \\ 
+			\phantom{a} & Test \#1  & 1  & 2 & 3 & 4  \\ 
+	\end{tabular}
+	\caption{Statistics of Bosch interference dataset. Room dimensions were manually determining from the interference dataset by selecting the points that correspond to the maximum and minimum value alongside the axis.}
+	\label{tab:bosch-dataset-stats}
+\end{table}
+
 
 \subsection{Our Experimental Dataset}
+For our experimental dataset, we can automate the determination of the room dimensions from the data, since we have measurements without interference. We developed a \ac{ros} node that is capable of parsing a ground truth bag file and determining the room dimensions, on the \ac{lidar} coordinate frame. To account for some noise on the data, the majorant and minorant of the room dimensions was considered and a 5\% tolerance was used. All the points that are not contained within the room dimensions of all three Euclidian coordinates plus the tolerance, are considered outliers.
 
 \subsubsection{Distance}
 \subsubsection{Height}
