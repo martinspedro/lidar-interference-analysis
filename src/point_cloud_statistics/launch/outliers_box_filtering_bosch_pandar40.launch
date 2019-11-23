@@ -11,6 +11,7 @@ Author: Pedro Martins (martinspedro@av.it.pt)
   <arg name="max_point_y" default="2.1" />
   <arg name="max_point_z" default="2.5" />
   <arg name="point_distance_tolerance" default="0.05" />
+  <arg name="lidar_point_cloud_topic" default="/pandar_node/pandar_points" />
 
 
   <node pkg="point_cloud_statistics" type="point_cloud_box_filtering_node" name="Outliers_Box_Filtering" output="screen"
@@ -22,6 +23,7 @@ Author: Pedro Martins (martinspedro@av.it.pt)
       <param name="max_point/y" value="$(arg max_point_y)"/>
       <param name="max_point/z" value="$(arg max_point_z)"/>
       <param name="point_distance_tolerance" value="$(arg point_distance_tolerance)"/>
+      <param name="lidar_point_cloud_topic" value="$(arg lidar_point_cloud_topic)"/>
   </node>
 
 </launch>
