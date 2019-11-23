@@ -20,9 +20,9 @@ const std::string BOSCH_TEST_DATASET_FULL_PATH = BOSCH_DATASETS_FULL_PATH + "201
 const std::string BOSCH_TEST_DATASET_BAG = "andre_2018-11-09-17-55-23.bag";
 
 const std::string BOSCH_INTERFERENCE_DATASET_FULL_PATH = BOSCH_DATASETS_FULL_PATH + "VLP16 e Hesai Pandar 40/";
-const std::string BOSCH_PANDAR40_INTERFERENCE_DATASET_BAG = "pandar40_interference_01_2017-11-07-15-42-58.bag";
-const std::string BOSCH_VLP16_INTERFERENCE_DATASET_BAG_1 = "vlp16_interference_01_2017-11-07-15-31-28.bag";
-const std::string BOSCH_VLP16_INTERFERENCE_DATASET_BAG_2 = "vlp16_interference_02_2017-11-07-15-55-37.bag";
+const std::string BOSCH_PANDAR40_INTERFERENCE_DATASET_FOLDER = "HESAI Pandar40/";
+const std::string BOSCH_VLP16_INTERFERENCE_DATASET_FOLDER_1 = "VLP16 - 2017-11-07-15-55-37/";
+const std::string BOSCH_VLP16_INTERFERENCE_DATASET_FOLDER_2 = "VLP16 - 2017-11-07-15-31-28/";
 
 const std::string KITTI_DATASETS_FULL_PATH = DATASETS_FULL_PATH + "Kitti/rosbag/";
 const std::string KITTI_DATASETS_FULL_PATH_2011_09_26 = KITTI_DATASETS_FULL_PATH + "2011_09_26/";
@@ -238,6 +238,10 @@ const std::map<const std::string, const std::string> test_scenario_map = {
 };
 
 const std::map<const std::string, const std::string> datasets_map = {
+  // Bosch Inteference dataset
+  { "bosch_pandar40", BOSCH_INTERFERENCE_DATASET_FULL_PATH + BOSCH_PANDAR40_INTERFERENCE_DATASET_FOLDER },
+  { "bosch_vlp16_1", BOSCH_INTERFERENCE_DATASET_FULL_PATH + BOSCH_VLP16_INTERFERENCE_DATASET_FOLDER_1 },
+  { "bosch_vlp16_2", BOSCH_INTERFERENCE_DATASET_FULL_PATH + BOSCH_VLP16_INTERFERENCE_DATASET_FOLDER_2 },
   // IT2 Dark Room Interference Datasets (Setup B)
   { "closer_above", IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + "closer_above/" },
   { "closer_aligned", IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + "closer_aligned/" },
