@@ -30,6 +30,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh_("~");
 
   double min_x, min_y, min_z, max_x, max_y, max_z, tolerance;
+  std::string lidar_point_cloud_topic;
   nh_.getParam("min_point/x", min_x);
   nh_.getParam("min_point/y", min_y);
   nh_.getParam("min_point/z", min_z);
@@ -37,6 +38,7 @@ int main(int argc, char** argv)
   nh_.getParam("max_point/y", max_y);
   nh_.getParam("max_point/z", max_z);
   nh_.getParam("point_distance_tolerance", tolerance);
+  nh_.getParam("lidar_point_cloud_topic", lidar_point_cloud_topic);
 
   tolerance += 1.0d;  // Add 1 to tolerance to keep the current value
 
@@ -55,7 +57,7 @@ int main(int argc, char** argv)
   ground_truth_bag.open(full_bag_path);
 
   std::vector<std::string> topics;
-  topics.push_back(std::string("/velodyne_points"));
+  topics.push_back(std::string(lidar_point_cloud_topic));
   rosbag::View view(ground_truth_bag, rosbag::TopicQuery(topics));
 
   foreach (rosbag::MessageInstance const m, view)
