@@ -131,6 +131,8 @@ const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME = "interferen
 const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interference_bag_intensity.bin";
 const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.csv";
 
+const std::string INTERFERENCE_BOX_FILTER_FILE_NAME = "interference_box_filter.csv";
+
 const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_HIST_FILE_NAME = "ground_truth_average_point_distance_"
                                                                        "histogram.png";
 const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_COLOR_MESH_FILE_NAME = "ground_truth_average_point_distance_"
@@ -214,6 +216,8 @@ const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BA
                                                                                           "distance_errors_polar_plot_"
                                                                                           "direction";
 
+const std::string INTERFERENCE_BOX_FILTER_BAR_FILE = "interference_box_filter_outliers.png";
+
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
 const std::string FURTHER_DISTANCE_AFFIX = "further";
@@ -225,6 +229,7 @@ const std::string ABOVE_HEIGHT_AFFIX = "above";
 const std::string AFFIX_SEPARATOR = "_";
 
 const std::map<const std::string, const std::string> test_scenario_map = {
+  { "it2_dark_room", IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH },
   { "distance", CAMBADA_SCENARIO_A_DISTANCE_INTERFERENCE_FOLDER_FULL_PATH },
   { "height", CAMBADA_SCENARIO_A_HEIGHT_INTERFERENCE_FOLDER_FULL_PATH },
   { "human", CAMBADA_SCENARIO_A_HUMAN_INTERFERENCE_FOLDER_FULL_PATH },
@@ -323,6 +328,7 @@ const std::map<const std::string, const std::string> results_map = {
   { INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
   { INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
   { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BOX_FILTER_FILE_NAME, INTERFERENCE_ANALYSIS_FOLDER_RELATIVE_PATH },
 };
 
 const std::map<const std::string, const std::string> graphics_map = {
@@ -342,6 +348,7 @@ const std::map<const std::string, const std::string> graphics_map = {
   { INTERFERENCE_BAG_DISTANCE_HIST_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
   { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_COMPARISON_BAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
   { INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME, GRAPHICS_FOLDER_RELATIVE_PATH },
+  { INTERFERENCE_BOX_FILTER_BAR_FILE, GRAPHICS_FOLDER_RELATIVE_PATH },
 };
 
 const std::string getTestScenarioFullPath(const std::string test_scenario_name)
