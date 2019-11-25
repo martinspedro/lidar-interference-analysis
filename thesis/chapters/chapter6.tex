@@ -422,8 +422,34 @@ Using the pre-determined ground truth models (see Section~\ref{sec:lidar-interfe
 \subsubsection{Direction}
 
 \section{Point-to-Point Analysis}
-\subsection{Theoretical Principle}
+Point-to-Point analysis quantifies the magnitude of \ac{lidar} interferference by counting the amount of points that distance from the point cloud model by a given threshold. The distance is computed, point by point, between the coordinates of the ground truth model and each of the point cloud frames of the interference bag file. 
+
+Point-to-point analysis relies on an organized point cloud structure, which was first introduced on sub-Section~\ref{subsec:lidar-interference:frame-registration}. This data structure organizes an input point cloud, reshaping its data into a matricial form, similar to a depth image. Each of the matrix indexes corresponds to a \ac{lidar} measurement, being the row index determined by the data \ac{laser} ID and the column index determined by its azimuthal poistion, which is given on equation~\ref{eq:azimuthal-angle-index}. 
+
+By organizing the point cloud of the ground truth model and the point cloud of the interference frame, a direct comparison between two points that corresponds to the same measurement can be done. To measure \ac{lidar} interference using point-to-point analysis, the Euclidian distance between the two points, the ground truth model and the interference frame, is determined, following equation~\ref{eq:euclidian-distance}.
+
+\begin{equation}
+	\label{eq:euclidian-distance}
+	\begin{split}
+	\displaystyle
+	\text{Euclidian distance} = & \sqrt{(x_{\text{ground\_truth}} - x_{\text{interference\_frame}})^2 + (y_{\text{ground\_truth}} - y_{\text{interference\_frame}})^2} \\
+															& \displaystyle \quad \overline{\rule{0pt}{2.5ex} + (z_{\text{ground\_truth}} - z_{\text{interference\_frame}})^2 }
+	\end{split}
+\end{equation}
+
+If this process is repeated for all the pairs of points on the organized point clouds, a matrix of depths differences between the ground truth and the interference frame is computed. This matrix of distances is serialized\footnote{Data serialization consists on converting a data complex data structure to a stream of bytes, in order to saved on file or sent. On the case of the depth differences matrix, it means transforming the two-dimensional matrix in a one-dimensional vector.}, generating a vector containining the distances differences. For each point cloud frame, the process is repeated and the new vector of distances is appended to the previous one. 
+
+To determine the magnitude of the interference for a specific value of a parameter under test, the distances difference vector, which will be denoted as $d_\text{vec}$, is iterated and the depth difference is compared with a distance threshold, $d_\text{threshold}$. The normalized difference can then be obtained by dividing the number of interfered points with the number of points, as detailed in euquation~\ref{eq:normalized-interference-depth}, where $N$ is the number of elements on the vector (the number of point cloud points).
+
+\begin{equation}
+	\label{eq:normalized-interference-depth}
+	\displaystyle
+	\text{Normalized Interference} = \frac{\sum\limits^{N-1}_{i = 0} d_{\text{vec}}(i)
+	> d_\text{threshold}}{N}
+\end{equation}
+
 \subsection{Implementation}
+
 \subsection{Results}
 \subsubsection{Distance}
 \subsubsection{Height}
