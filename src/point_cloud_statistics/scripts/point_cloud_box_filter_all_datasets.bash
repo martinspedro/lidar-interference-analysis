@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# Run all scripts that compute data
+#
+
+rosrun point_cloud_statistics point_cloud_box_filter_it2_dark_room_datasets.bash
+rosrun point_cloud_statistics point_cloud_box_filter_cambada_setup_A_datasets.bash
+rosrun point_cloud_statistics point_cloud_box_filter_cambada_setup_B_datasets.bash

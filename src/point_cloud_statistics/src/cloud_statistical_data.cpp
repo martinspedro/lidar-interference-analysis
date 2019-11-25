@@ -22,6 +22,7 @@ CloudStatisticalData::CloudStatisticalData()
   this->points_variance_per_msg = 0.0d;
 
   this->relative_out_points = 0.0d;
+  this->relative_in_points = 0.0d;
 }
 
 void CloudStatisticalData::printPointStatistics()
@@ -64,14 +65,21 @@ std::stringstream CloudStatisticalData::outputStringFormattedStatistics()
   return temp_sstr;
 }
 
+void CloudStatisticalData::computeStats()
+{
+  this->relative_out_points = (double)(this->outliers_points_count) / this->point_count;
+  this->relative_in_points = (double)(this->inliers_points_count) / this->point_count;
+  this->points_average_per_msg = (double)(this->point_count) / (double)(this->point_cloud_msg_count);
+}
+
 void CloudStatisticalData::computeOutliersRelativeValue()
 {
   this->relative_out_points = (double)(this->outliers_points_count) / this->point_count;
 }
 
-inline double CloudStatisticalData::getOutliersPercentage()
+void CloudStatisticalData::computeInliersRelativeValue()
 {
-  return this->relative_out_points * 100.0d;
+  this->relative_in_points = (double)(this->inliers_points_count) / this->point_count;
 }
 
 }  // namespace statistics

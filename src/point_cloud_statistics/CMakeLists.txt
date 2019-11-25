@@ -145,8 +145,17 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(point_cloud_box_filtering_node         src/point_cloud_box_filtering_node.cpp src/box_filter)
-add_executable(point_cloud_box_filtering_runtime_node src/point_cloud_box_filtering_runtime_node.cpp src/box_filter)
+add_executable(point_cloud_box_filtering_node
+      src/point_cloud_box_filtering_node.cpp
+      src/box_filter
+      src/cloud_statistical_data.cpp)
+
+add_executable(point_cloud_dimensions_analyzer_node
+src/point_cloud_dimensions_analyzer_node.cpp)
+
+add_executable(point_cloud_box_filtering_runtime_node
+      src/point_cloud_box_filtering_runtime_node.cpp
+      src/box_filter)
 
 add_executable(point_cloud_change_detection_node
       src/point_cloud_change_detection_node.cpp
@@ -187,6 +196,12 @@ add_executable(point_cloud_interference_analysis_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(point_cloud_box_filtering_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   datasets_info
+)
+
+target_link_libraries(point_cloud_dimensions_analyzer_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    datasets_info

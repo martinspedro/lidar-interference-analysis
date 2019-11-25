@@ -25,6 +25,7 @@ struct CloudStatisticalData
   double points_variance_per_msg;
 
   double relative_out_points;
+  double relative_in_points;
 
   CloudStatisticalData();
 
@@ -33,8 +34,19 @@ struct CloudStatisticalData
   std::stringstream outputStringFormattedPointStatistics();
   std::stringstream outputStringFormattedStatistics();
 
+  void computeStats();
   void computeOutliersRelativeValue();
-  inline double getOutliersPercentage();
+  void computeInliersRelativeValue();
+
+  inline double getOutliersPercentage()
+  {
+    return this->relative_out_points * 100.0d;
+  }
+
+  inline double getInliersPercentage()
+  {
+    return this->relative_in_points * 100.0d;
+  }
 };
 
 }  // namespace statistics

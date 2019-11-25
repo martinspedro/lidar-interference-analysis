@@ -161,7 +161,9 @@ int main(int argc, char** argv)
         octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
         ++ground_truth_bag_stats.point_cloud_msg_count;
-        ground_truth_bag_stats.point_count += point_cloud.size();
+
+        // ground_truth_bag_stats.point_count += point_cloud.size();
+        ground_truth_bag_stats.point_count += octree.getLeafCount();
         ground_truth_bag_stats.outliers_points_count += newPointIdxVector.size();
 
         octree.deleteTree();
@@ -198,7 +200,8 @@ int main(int argc, char** argv)
         octree.getPointIndicesFromNewVoxels(newPointIdxVector);
 
         ++interference_bag_stats.point_cloud_msg_count;
-        interference_bag_stats.point_count += point_cloud.size();
+        // interference_bag_stats.point_count += point_cloud.size();
+        interference_bag_stats.point_count += octree.getLeafCount();
         interference_bag_stats.outliers_points_count += newPointIdxVector.size();
 
         octree.deleteTree();
@@ -218,6 +221,14 @@ int main(int argc, char** argv)
     interference_errors.push_back(interference_bag_stats.getOutliersPercentage());
     real_errors.push_back(interference_bag_stats.getOutliersPercentage() -
                           ground_truth_bag_stats.getOutliersPercentage());
+
+    std::stringstream octree_difference_statistics_text;
+    octree_difference_statistics_text << "DIFFERENCE: " << std::endl
+                                      << interference_bag_stats.getOutliersPercentage() -
+                                             ground_truth_bag_stats.getOutliersPercentage()
+                                      << std::endl;
+    logger_file << octree_difference_statistics_text.str();
+    std::cout << octree_difference_statistics_text.str();
   }
 
   ground_truth_bag.close();  // close ground truth bag file

@@ -17,33 +17,48 @@
 
 #include "multiple_lidar_interference_mitigation_bringup/datasets_info.hpp"
 #include "point_cloud_statistics/box_filter.hpp"
+#include "point_cloud_statistics/cloud_statistical_data.hpp"
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-
-const std::string bags_folder_path = "/media/martinspedro/Elements/mine/IT2 Dark Room/Scenario B/";
-
-inline const std::string constructFullBagPath(const std::string bag_type, std::string dataset_name)
-{
-  return datasets_path::IT2_DARK_ROOM_SCENARIO_B1_INTERFERENCE_FOLDER_FULL_PATH + dataset_name + "/" + bag_type;
-}
 
 int main(int argc, char** argv)
 {
   // Initialize ROS
-  ros::init(argc, argv, "point_cloud_histogram");
+  ros::init(argc, argv, "point_cloud_box_filter");
+
+  // Get Private parameters
+  ros::NodeHandle nh_("~");
+
+  double min_x, min_y, min_z, max_x, max_y, max_z, tolerance;
+  std::string lidar_point_cloud_topic;
+  nh_.getParam("min_point/x", min_x);
+  nh_.getParam("min_point/y", min_y);
+  nh_.getParam("min_point/z", min_z);
+  nh_.getParam("max_point/x", max_x);
+  nh_.getParam("max_point/y", max_y);
+  nh_.getParam("max_point/z", max_z);
+  nh_.getParam("point_distance_tolerance", tolerance);
+  nh_.getParam("lidar_point_cloud_topic", lidar_point_cloud_topic);
+
+  tolerance += 1.0d;  // Add 1 to tolerance to keep the current value
+
+  BoxFilter room((float)(min_x * tolerance), (float)(max_x * tolerance), (float)(min_y * tolerance),
+                 (float)(max_y * tolerance), (float)(min_z * tolerance), (float)(max_z * tolerance));
+
+  point_cloud::statistics::CloudStatisticalData interference_bag_stats =
+      point_cloud::statistics::CloudStatisticalData();
+
+  std::string full_bag_path = datasets_path::constructFullPathToDataset(argv[1], datasets_path::INTERFERENCE_BAG_NAME);
+  ROS_INFO_STREAM("Opening rosbag file on: " << full_bag_path);
 
   PointCloud::Ptr cloudPtr(new PointCloud);
 
-  std::cout << "Opening rosbag" << constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]) << std::endl;
-  rosbag::Bag bag;
-  bag.open(constructFullBagPath(datasets_path::INTERFERENCE_BAG_NAME, argv[1]));
+  rosbag::Bag ground_truth_bag;
+  ground_truth_bag.open(full_bag_path);
 
   std::vector<std::string> topics;
-  topics.push_back(std::string("/velodyne_points"));
-  rosbag::View view(bag, rosbag::TopicQuery(topics));
-
-  long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
-  BoxFilter dark_room(-2.0, 7.0, -3.0, 4.5, -1.9, 3.5);  // added 1 meter in every direction
+  topics.push_back(std::string(lidar_point_cloud_topic));
+  rosbag::View view(ground_truth_bag, rosbag::TopicQuery(topics));
 
   foreach (rosbag::MessageInstance const m, view)
   {
@@ -52,32 +67,46 @@ int main(int argc, char** argv)
     {
       PointCloud point_cloud;
       fromROSMsg(*msg, point_cloud);
-      ++msg_count;
+
+      ++interference_bag_stats.point_cloud_msg_count;
       for (int j = 0; j < point_cloud.points.size(); j++)
       {
-        point_count++;
-        if (dark_room.pointInsideBox(point_cloud.points[j]))
+        interference_bag_stats.point_count++;
+        if (room.pointInsideBox(point_cloud.points[j]))
         {
-          ++in_points_count;
+          ++interference_bag_stats.inliers_points_count;
         }
         else
         {
-          ++out_points_count;
+          ++interference_bag_stats.outliers_points_count;
         }
       }
     }
   }
 
-  bag.close();
+  ground_truth_bag.close();
 
-  float relative_percentage_out_points = (float)(out_points_count) / point_count * 100;
-  float relative_percentage_in_points = (float)(in_points_count) / point_count * 100;
+  interference_bag_stats.computeStats();
+  interference_bag_stats.printStatistics();
 
-  std::cout << "Number of received Point Cloud Messages: " << msg_count << std::endl
-            << "Number of received Point Cloud 3D Points: " << point_count << std::endl
-            << "From which " << out_points_count << "(" << relative_percentage_out_points
-            << "%) are outside the room limits and " << in_points_count << "(" << relative_percentage_in_points
-            << "%) are inside room dimensions" << std::endl;
+  /*********************************************************************************************************************
+   *                                                   Data Saving
+   ********************************************************************************************************************/
 
+  std::fstream fout;  // file pointer
+  std::string interference_csv_stats =
+      datasets_path::constructFullPathToResults(argv[1], datasets_path::INTERFERENCE_BOX_FILTER_FILE_NAME);
+  fout.open(interference_csv_stats, std::ios::out | std::ios::trunc);  // creates a new csv file with writing permission
+
+  std::stringstream full_statistics;
+  full_statistics << interference_bag_stats.point_cloud_msg_count << ", " << interference_bag_stats.point_count << ", "
+                  << interference_bag_stats.points_average_per_msg << ", "
+                  << interference_bag_stats.inliers_points_count << ", " << interference_bag_stats.outliers_points_count
+                  << std::endl;
+
+  fout << full_statistics.str();
+  fout.close();
+
+  ROS_INFO_STREAM("Interference Results saved on csv file on: " << interference_csv_stats);
   return EXIT_SUCCESS;
 }
