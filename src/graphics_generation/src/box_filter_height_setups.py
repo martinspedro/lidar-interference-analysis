@@ -42,7 +42,7 @@ for i in range(0, len(height_values), 1):
 
 print("Done! Plotting Bar Graph... "),
 fig, ax = plt.subplots(figsize=(16,9))
-rects = ax.bar(range(0, len(height_values), 1), errors_normalized, log=True, label=r'$\frac{\#\ of\ outliers}{\#\ of\ points}$', tick_label=height_values)
+rects = ax.barh(range(0, len(height_values), 1), errors_normalized, log=True, label=r'$\frac{\#\ of\ outliers}{\#\ of\ points}$', tick_label=height_values)
 ax.legend(prop={'size': 24})
 ax.set_xlabel('Height difference between the LiDARs (m)')
 ax.set_ylabel('Normalized relative number of Outliers')
