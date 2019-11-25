@@ -1,0 +1,60 @@
+digraph graphname {
+	graph [bb="0,0,472.58,130",
+		compound=True,
+		rank=same,
+		rankdir=LR,
+		ranksep=0.2
+	];
+	node [label="\N"];
+	subgraph cluster___camera {
+		graph [bb="85.993,8,318.99,122",
+			compound=True,
+			label="/camera",
+			lheight=0.21,
+			lp="202.49,110.5",
+			lwidth=0.61,
+			rank=same,
+			rankdir=LR,
+			ranksep=0.2,
+			style=bold
+		];
+		subgraph cluster___camera__image_raw {
+			graph [bb="93.993,16,310.99,91",
+				compound=True,
+				label="/camera/image_raw",
+				lheight=0.21,
+				lp="202.49,79.5",
+				lwidth=1.51,
+				rank=same,
+				rankdir=LR,
+				ranksep=0.2,
+				style=bold
+			];
+			n_n__camera__image_raw__image_topics			 [URL=topic_3A__camera__image_raw__image_topics,
+				height=0.5,
+				label="/camera/image_raw/image_topics",
+				pos="202.49,42",
+				shape=box3d,
+				tooltip="topic:/camera/image_raw/image_topics",
+				width=2.7917];
+		}
+	}
+	n___cameracalibrator	 [URL=__cameracalibrator,
+		height=0.5,
+		label="/cameracalibrator",
+		pos="399.79,42",
+		shape=ellipse,
+		tooltip="/cameracalibrator",
+		width=2.022];
+	n_n__camera__image_raw__image_topics -> n___cameracalibrator	 [penwidth=1,
+		pos="e,326.84,42 303.16,42 307.65,42 312.13,42 316.58,42"];
+	n___camera	 [URL=__camera,
+		height=0.5,
+		label="/camera",
+		pos="38.997,42",
+		shape=ellipse,
+		tooltip="/camera",
+		width=1.0832];
+	n___camera -> n_n__camera__image_raw__image_topics	 [penwidth=1,
+		pos="e,101.82,42 78.158,42 82.418,42 86.892,42 91.51,42"];
+}

@@ -1,0 +1,125 @@
+% https://tex.stackexchange.com/questions/405192/how-to-insert-folder-icon-in-root-node-with-forest-package/405253#405253
+\documentclass[border=10pt,multi,tikz]{standalone}
+\usepackage[edges]{forest}
+\usepackage{siunitx}
+\definecolor{folderbg}{RGB}{124,166,198}
+\definecolor{folderborder}{RGB}{110,144,169}
+\newlength\Size
+\setlength\Size{4pt}
+\tikzset{%
+  folder/.pic={%
+    \filldraw [draw=folderborder, top color=folderbg!50, bottom color=folderbg] (-1.05*\Size,0.2\Size+5pt) rectangle ++(.75*\Size,-0.2\Size-5pt);
+    \filldraw [draw=folderborder, top color=folderbg!50, bottom color=folderbg] (-1.15*\Size,-\Size) rectangle (1.15*\Size,\Size);
+  },
+  file/.pic={%
+    \filldraw [draw=folderborder, top color=folderbg!5, bottom color=folderbg!10] (-\Size,.4*\Size+5pt) coordinate (a) |- (\Size,-1.2*\Size) coordinate (b) -- ++(0,1.6*\Size) coordinate (c) -- ++(-5pt,5pt) coordinate (d) -- cycle (d) |- (c) ;
+  },
+}
+\forestset{%
+  declare autowrapped toks={pic me}{},
+  pic dir tree/.style={%
+    for tree={%
+      folder,
+      font=\ttfamily,
+      grow'=0,
+    },
+    before typesetting nodes={%
+      for tree={%
+        edge label+/.option={pic me},
+      },
+    },
+  },
+  pic me set/.code n args=2{%
+    \forestset{%
+      #1/.style={%
+        inner xsep=2\Size,
+        pic me={pic {#2}},
+      }
+    }
+  },
+  pic me set={directory}{folder},
+  pic me set={file}{file},
+}
+\begin{document}
+\begin{forest}
+  pic dir tree,
+  where level=0{}{% folder icons by default; override using file for file icons
+    directory,
+  },
+[Experimental Datasets
+  [IRIS Laboratory
+    [2019-08-28 (Setup A)
+			[Camera Calibration
+				[Intrinsic Calibration Images]
+				[intrinsic\_camera\_calibration.bag, file]
+				[original\_raw.bag, file]
+				[camera\_calibration.log, file]
+				[README.md, file]
+			]
+			[Ground Truth
+				[ground\_truth.bag, file]
+				[README.md, file]
+			]
+			[Multiple LiDAR Interference
+				[Distance
+					[1 m
+						[ground\_truth.bag, file]
+						[interference.bag, file]
+						[original\_raw.bag, file]
+						[README.md, file]
+					]
+					[2 m]
+					[...]
+					[12 m]
+				]
+				[Height
+					[0.623 m]
+					[0.715 m]
+					[...]
+					[1.277 m]
+				]
+				[Human]
+				[LiDARs Line Of Sight Obstruction]
+				[Rotation Frequency]
+				[README.md, file]
+			]
+		]
+		[2019-08-29 (Setup B)
+			[Camera Calibration]
+			[Ground Truth]
+			[Multiple LiDAR Interference
+				[Direction
+					[\SI{0}{\degree}]
+					[...]
+					[\SI{330}{\degree}]
+				]
+			]
+		]
+		[README.md, file]
+  ]
+  [IT2 Dark Room
+    [2019-07-06 (Scenario A)]
+		[2019-07-08 (Scenario A)]
+    [2019-07-31 (Scenario B)
+			[Camera Calibration]
+			[Ground Truth]
+			[Multiple Lidar Interference
+				[closer\_above
+					[ground\_truth.bag, file]
+					[interference.bag, file]
+					[original\_raw.bag, file]
+					[README.md, file]
+				]
+				[...]
+				[README.md, file]
+			]
+			[README.md, file]
+		]
+		[README.md, file]
+	]
+	[Other data
+		[...]
+	]
+]
+\end{forest}
+\end{document}

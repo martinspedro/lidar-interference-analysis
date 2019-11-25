@@ -1,0 +1,60 @@
+digraph graphname {
+	graph [bb="0,0,433.18,130",
+		compound=True,
+		rank=same,
+		rankdir=LR,
+		ranksep=0.2
+	];
+	node [label="\N"];
+	subgraph cluster___camera {
+		graph [bb="137.99,8,315.99,122",
+			compound=True,
+			label="/camera",
+			lheight=0.21,
+			lp="226.99,110.5",
+			lwidth=0.61,
+			rank=same,
+			rankdir=LR,
+			ranksep=0.2,
+			style=bold
+		];
+		subgraph cluster___camera__rgb {
+			graph [bb="145.99,16,307.99,91",
+				compound=True,
+				label="/camera/rgb",
+				lheight=0.21,
+				lp="226.99,79.5",
+				lwidth=0.92,
+				rank=same,
+				rankdir=LR,
+				ranksep=0.2,
+				style=bold
+			];
+			t___camera__rgb__image_raw			 [URL=topic_3A__camera__rgb__image_raw,
+				height=0.5,
+				label="/camera/rgb/image_raw",
+				pos="226.99,42",
+				shape=box,
+				tooltip="topic:/camera/rgb/image_raw",
+				width=2.0278];
+		}
+	}
+	n___darknet_ros	 [URL=__darknet_ros,
+		height=0.5,
+		label="/darknet_ros",
+		pos="378.58,42",
+		shape=ellipse,
+		tooltip="/darknet_ros",
+		width=1.5165];
+	t___camera__rgb__image_raw -> n___darknet_ros	 [penwidth=1,
+		pos="e,323.96,42 300.12,42 304.64,42 309.16,42 313.64,42"];
+	n___KITTI_dataset	 [URL=__KITTI_dataset,
+		height=0.5,
+		label="/KITTI_dataset",
+		pos="64.994,42",
+		shape=ellipse,
+		tooltip="/KITTI_dataset",
+		width=1.8054];
+	n___KITTI_dataset -> t___camera__rgb__image_raw	 [penwidth=1,
+		pos="e,153.89,42 130.42,42 134.76,42 139.17,42 143.59,42"];
+}

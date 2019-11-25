@@ -86,7 +86,7 @@ tags
 [._]*.un~
 
 # Catkin custom files
-CATKIN_IGNORE
+# CATKIN_IGNORE
 
 # Rospackage folders
 src/bbox3d
