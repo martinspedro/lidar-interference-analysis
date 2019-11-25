@@ -26,11 +26,11 @@ height_values = [-0.15, 0, 0.14]
 test_codename = "it2_dark_room"
 
 # Numpy arrays to hold data
-errors_normalized  = np.zeros((len(distance_strings),len(height_strings) ), dtype=np.double)
+errors_normalized  = np.zeros((len(height_strings),len(distance_strings) ), dtype=np.double)
 
-for i in range(0, len(distance_strings), 1):
-    for j in range(0, len(height_strings), 1):
-        test_scenario = str(distance_strings[i]) + "_" + str(height_strings[j])
+for i in range(0, len(height_strings), 1):
+    for j in range(0, len(distance_strings), 1):
+        test_scenario = str(distance_strings[j]) + "_" + str(height_strings[i])
         print(test_scenario)
 
         filename = datasets_path.constructFullPathToResults(test_scenario, datasets_path.INTERFERENCE_BOX_FILTER_FILE_NAME)
