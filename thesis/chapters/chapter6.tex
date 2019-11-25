@@ -170,9 +170,11 @@ Our solution is then to quantize this outliers and trying to understand more abo
 \section{Room Outliers Contabilization}
 After the qualitative analysis of the previous Section on Bosch's dataset, from which we concluded that the \ac{lidar} interference appears to be directional and causes outliers outside of the room dimensions, this Section details the implementation and results of a quantitative approach to analyze the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
 
-To analyze the data, a \ac{ros} node, with both offline and online versions, was implemented. Offline operation implies that the node does not have real-time constraints, being capable of handling large \ac{ros} bag files and datasets. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (tipically, a \ac{ros} bag player or a device driver). Instead, the node loads and parses the bag file, as fast as it can or as fast is instructed to, keeping its data private on its own program memory. This alternative permits processing large amounts of data and realizing complex analysis on it.
+To analyze the data, a \ac{ros} node, with both offline and online versions, was implemented. Offline operation implies that the node does not have real-time constraints, being capable of handling large \ac{ros} bag files and datasets. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (tipically, a \ac{ros} bag player or a device driver) and the \ac{ros} network does not need to be setup up and running. Instead, the node loads and parses the bag file, as fast as it can or as fast as it is instructed to, keeping its data private on its own program memory. This alternative permits processing large amounts of data and realizing complex analysis on it.
 
-To quantify this inteference, the node only requires knwoledge about the room dimensions and it  determines the number of messages received, average points per message, absolute and relative number of outliers and inliers. To account for some noise on the data, the majorant and minorant of the room dimensions are considered and a 5\% tolerance is given. All the points that are not contained within the room dimensions of all three Euclidian coordinates, scaled by the tolerance, are considered outliers. To determine if a point is an inlier or an outlier, equation~\ref{eq:box-outlier-condition} is applied, where $P$ is the point being classified and $t$ the tolerance on the room dimensions. 
+To quantify this inteference, the node only needs to know the room dimensions, which we considered to be the majorant and minorant of the room dimensions along each of the 3 cartesian axes. With it, it can determine the number of point cloud messages received, average number of points per message, absolute and relative number of outliers and inliers. To account for some noise on the data, to the room limits dimensions, a 5\% tolerance is applied. 
+
+An outlier is a point that is not contained within the room dimensions, in all three Cartesian coordinates, considering also the tolerance scaling. Given a point under classification, $P$, and define the tolerance as $t$, equation~\ref{eq:box-outlier-condition} describes the mathematical decision applied to determine if that point cloud point is an inlier or an outlier.
 
 \begin{equation}
 	\label{eq:box-outlier-condition}
@@ -185,13 +187,13 @@ To quantify this inteference, the node only requires knwoledge about the room di
 	\end{cases}
 \end{equation}
 
-Despite not accounting for interference inside the room dimensions, this interference model intends to measure what, to the ``naked eye'', is clearly an erroneous measure, caused by interference: measurements outside the physical dimensions of the room where the \acp{lidar} are located. Since the possible interference inside the room dimensions is not considered, we can view this metric as a minorant for the \ac{lidar} interference.
+Despite this analysis not accounting for the possible interference inside the room dimensions, this interference model intends to measure what, to the ``naked eye'', is clearly an erroneous measure, caused by \ac{lidar} interference: measurements outside the physical dimensions of the room where the \acp{lidar} are located. Since the possible interference inside the room dimensions is not considered, we can view this metric as a minorant for the \ac{lidar} interference.
 
 
 \subsection{Bosch Dataset}
-To determine the room dimensions, we display the data on \texttt{Rviz} and then use the selection tool to determine the maximum and minimum value on every axis that defines the room dimensions. This process is manual, and prone to error. After determining such parameters, the data is analyzed, and the results are presented on table~\ref{tab:bosch-dataset-stats}.
+To determine the room dimensions on Bosch dataset, we display the data on \texttt{RViz} and then use the selection tool to determine the maximum and minimum value on each axis that defines the room dimensions. This process is manual, and prone to error, specially since on this dataset, the \ac{lidar} axes are not oriented with the room\footnote{We can say that the \ac{lidar} axes are oriented with the room when a straight wall was one of its coordinates fixed on the \ac{lidar} coordinate frame, i.e., for every wall, there a \ac{lidar} axis that is parallel with the normal defined by the plane of the wall.} After determining such parameters, the data is analyzed and the results are presented on table~\ref{tab:bosch-dataset-stats}.
 
-\begin{table}[H]
+\begin{table}[!ht]
 	\centering
 	\renewcommand{\arraystretch}{1.2}
 	\begin{tabular}{@{}llC{2cm}C{2.5cm}C{3.5cm}@{}}
@@ -210,22 +212,24 @@ To determine the room dimensions, we display the data on \texttt{Rviz} and then 
 	\label{tab:bosch-dataset-stats}
 \end{table}
 
-On Bosch's experimental setup, we can conclude that between one to two outliers outside of the room limits are expected for every 1000 points of data. These results offer a peak into \ac{lidar} interference, but several precautions when taking conclusions must be observed.
+On Bosch's experimental setup, we can conclude that between one to two outliers outside of the room limits are expected for every 1000 points of data. These results offer a peak into \ac{lidar} interference, but we must restrain ourselves from premature conclusions.
 
-Relatevely speaking, Pandar40 seems to have an higher presence of outliers than VLP-16, and data seems to suggest that an higher rotation speed increases the occurence of ``outside of the room dimensions'' outliers. However, the data diversity is reduced and the data that is available as low statiscally significance, since the number of tests is small and the duration of each of the bag files is at max \SI{20}{\second}.
+Relatevely speaking, Pandar40 seems to have an higher presence of outliers than VLP-16, and data seems to suggest that an higher rotation speed increases the occurence of ``outside of the room dimensions'' outliers. However, the data diversity is reduced and the data that is available has low statiscally significance, since the number of tests is small and the duration of each of the bag files is smaller than \SI{20}{\second}.
 
-We also need to consider that the room limits were manually determined, and therefore, are proned to error, which may be causing measurements inside of the room diemnsions, inliers, to be considered erroneous and marked as outliers. Since the \acp{lidar} axis were not oriented along the room dimensions, the errors are even more likely. Also, the two \ac{lidar} are extremely close to each (less than 0.5\% of their measurement range) and on top of a table, which causes, at that distance, the lower beams of one \ac{lidar} to be reflected to the other \ac{lidar}. 
+We also need to consider that the room limits were manually determined, therefore these results are more prone to be affected by human error, which may be causing \ac{lidar} measurements inside of the room dimensions, inliers, to be considered erroneous and marked as outliers. Since the \ac{lidar} axes were also not oriented with the room, the errors are more likely. Also, the two \acp{lidar} are extremely close to each (less than 0.5\% of their measurement range, i.e., \SI{0.5}{\meter} and on the top of a table, which causes, at that distance, the lower beams of one \ac{lidar} to be reflected onto the other \ac{lidar}. 
 
-Despite no veridects can be extracted from this data, we can affirm that the conditions under which this dataset is taken fosters the occurence of mutual \ac{lidar} interference, biasing the data by creating laboratorial scenarios difficult to happen on self-driving cars.
+Despite no conclusive veridects can be extracted from this data, we can affirm that the conditions under which this dataset is taken fosters the occurence of mutual \ac{lidar} interference, biasing the data by creating laboratorial scenarios difficult to happen on self-driving cars. We are also not sure if the higher number of interference on the HESAI Pandar40 is because it has more lasers or because Velodyne VLP-16 as more ``protection'' against interference\footnote{Velodyne as been working on this are. See the Release Notes on~\cite{vlp16}.}. 
 
 \subsection{Our Experimental Dataset}
-For our experimental dataset, we can automate the determination of the room dimensions from the data, since we have measurements of the environments under test without interference. Therefore the previous errors that could be caused by the manual estimation of room limits are removed. We developed a \ac{ros} node that is capable of parsing a ground truth bag file and determining the room dimensions, on the \ac{lidar} coordinate frame. 
+For our experimental dataset, we can automate the determination of the room dimensions from the data, since we have measurements of the test environments without interference. Therefore, the previous uncertanties regarding the manual determination of room limits are not present anymore. To automate the process, we developed a \ac{ros} node that parses a ground truth bag file and determines the room dimensions, considering the minorant and majorant points of the point cloud, , on the \ac{lidar} coordinate frame. 
 
-As stated on Sub-section~\ref{subsec:lidar-interference:parameters-under-test}, 5 parameters under test are varied for the generation of the datasets, on \ac{irislab} facilities. However, every attempt to access HESAI's Pandar40 webserver, to configure the rotation speed~\cite{Pandar40UserGuide} were unfruitful. Several \ac{ros} drivers were used, including official \ac{sdk} from HESAI\cp~, but no results. Therefore, we abandon the acquisition of interference data when the two \acp{lidar} operate at a different rotation speed.
+As stated on Sub-section~\ref{subsec:lidar-interference:parameters-under-test}, 5 parameters under test are varied on our dataset, on \ac{irislab} facilities. The data gathered is analyzed and the results, for each of the parameters, are presented below, with the exception of the rotation speed.
 
+
+Changing the rotation speed would require acessing HESAI's Pandar40 webserver, through an Ethernet conection, to configure its rotation speed~\cite{Pandar40UserGuide}. This attempts, however, were unfruitful, despite the several \ac{ros} drivers used, including official \ac{sdk} from HESAI\cp. Alternatively, VLP-16 rotation speed could be changed, instead, but we wanted the victim operation parameters to be constant at all time. Therefore, we opt to abandon the acquisition of interference data when the two \acp{lidar} operate at a different rotation speed.
 
 \subsubsection{Distance}
-The distance parameter was varied from \SIrange{1}{12}{\meter}, with steps of \SI{1}{\meter}. While varying the interferer position, the victim \ac{lidar} remain unchanged. The interferer height was keept constant and ensuring that the top \acp{lidar} optical center was at approximately the same height, with their relative orientation was kept at approximately \SI{0}{\degree}.
+The distance parameter was varied from \SIrange{1}{12}{\meter}, with steps of \SI{1}{\meter}. While varying the interferer position, the victim's \ac{lidar} remain unchanged. The interferer height was keept constant and ensuring that the \acp{lidar} optical center was at approximately the same height, with their relative orientation kept at approximately \SI{0}{\degree}.
 
 The normalized number of outliers, with regard to the number of received points, is visualized on the bar chart on figure~\ref{fig:box-filter-outliers-distance}, for all the distances. The range of outliers varies from $10^{-7}$ to $10^{-5}$, significantly different from the results on Bosch's dataset, which were all on the order of magnitude of $10^{-3}$.
 
@@ -239,28 +243,25 @@ The normalized number of outliers, with regard to the number of received points,
 Despite the data not revelaing any perceivable patterns, there is a tendency for the higher values of outliers to occur for a closer distance between the \acp{lidar}. Note that this results do not indicate that the interference is higher the shorter the distance, but that the interference causes an higher number of points to be outside of the room dimensions if the two \acp{lidar} are closer. 
 
 \subsubsection{Height}
-Due to the \ac{lidar} photoreceptor's and laser's orientation and internal organization, there are, theoretical, relative positioning and orientation between the \acp{lidar} that either minize the interference and potentiate it. No theoretical analysis of such relations was carried, due to its impracticality: the application of such results to an extent it would benefit this research would require the alingment of a laser and a photoreceptor, whose position is only known approximatted, in free space optics of two rotating devices.
+Due to the \ac{lidar} photoreceptors and lasers orientation and internal organization, there are, theoretical, relative positioning and orientation between the two \acp{lidar} that either minize the interference or potentiate it. No theoretical analysis of such relations was carried, due to its impracticality: the application of such results to an extent it would benefit this research, i.e., gathering data under positions of maximum and minimum interference,  would require the alingment of a laser and a photoreceptor, whose position is only known approximatted, in free space of two different rotating devices.
 
-For a fixed distance, our goal was to understand if variations of several orders of magnitude occurred when the relative height between the devices changed, which could reveal the relevance of the relative positioniung between the \acp{lidar} and the impact of direct interference on \ac{lidar} interference.
+For a fixed distance, our goal was to understand if variations of several orders of magnitude occurred when the relative height between the devices changed, which could hint on the relevance of the relative positioniung between the \acp{lidar} and its impact on the \ac{lidar} interference behaviour.
 
-Figure~\ref{fig:box-filter-outliers-height} shows our analyzes of this parameter by measuring the relative number of outliers outside the room dimensions. Height difference values, presented on the x axis of the bar chart, indicate the relative height between the HESAI and the Velodyne. The interferer \ac{lidar} was placed at a distance of \SI{4}{\meter} of the victim and their relative orientation was kept approximately at \SI{0}{\degree}.
+Figure~\ref{fig:box-filter-outliers-height} shows our analyzes of this parameter by measuring the relative number of outliers outside the room dimensions. Height difference values, presented on the x axis of the bar chart, indicate the relative height between the HESAI and the Velodyne \acp{lidar}. The interferer \ac{lidar} was placed at a distance of \SI{4}{\meter} of the victim and their relative orientation was kept approximately at \SI{0}{\degree}.
 
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{img/lidar-interference/box-filtering/interference-box-filter-outliers-height.png}
-	\caption{Box filtering applied to all the interference data where the height was varied. On the x axis, the height variation indicates the Pandar40 relative position in relation to the VLP-16 and is measured at their supposed optical centers.}
+	\caption{Outliers analyzes when the parameter under test is height. On the x axis, the height variation indicates the Pandar40 relative position in relation to the VLP-16 and is measured at their supposed optical centers.}
 	\label{fig:box-filter-outliers-height}
 \end{figure}
 
-Results show that when they optical center is aligned, the number of outliers is at its lower, but coherent it the results of figure~\ref{fig:box-filter-outliers-distance}: around $2\E^{-6}$. Despite the higher interference value happenning for a height difference of $\approx \SI{-0.2}{\meter}$, there are no major differences between the interferer \ac{lidar} being placed at an height above or below the victim's \ac{lidar}. 
-
-Nevertheless, the results are all om the same order of magnitude, $10^{-6}$, having a small variation on the value of approximately 7 times, indicating that if the interferer \ac{lidar} is place above or below the victim, the number of outliers increases. The results, however, have less variation among them when comparing with the distance results: 0 to 2 orders of mangitude.
-
+The results obtained are all on the same order of magnitude, $10^{-6}$, having a variation, between its maximum and its minimum of approximately 7 times. They show that when their optical center is aligned, the number of outliers is at its lower, but coherent with the results of figure~\ref{fig:box-filter-outliers-distance}: around $2\E^{-6}$. Despite the higher interference value occurring for a height difference of $\approx \SI{-0.2}{\meter}$, opting to place the interferer \ac{lidar} above or below the victim \ac{lidar} increases the number of outliers when comparing with the two \acp{lidar} being aligned. However, opting from above instead of below (or vice-versa), does not appear to have any significant advantage. 
 
 \subsubsection{\acp{lidar} \ac{los} Obstruction}
-To assess the impact of direct vs indirect interference on the outliers, we obstrcuted the \acf{los} between the \acp{lidar} with a pole. The goal of this obstruction is to block direct beams between the two \acp{lidar}. With this contraption, we measure the interference at even distances, with the obstacle placed in the middle distance of the two \acp{lidar}. As expected, when the distance is increased between the two \acp{lidar}, the distance between each of them to the obstcle decreases, resulting in a smaller angular occupation of the \acp{lidar} \ac{fov}, which potentially increases the number of rays that can cause indirect interference. No actions were taken to further research on this premise.
+To assess the impact of direct vs indirect interference on the number of outliers, we obstrcuted the \acf{los} between the two \acp{lidar} with a straight box. The goal of this obstruction is to block direct beams between the two \acp{lidar}, therefore eliminating direct \ac{lidar} interference. With this contraption, data is recorded at even distances between the two \ac{lidar}, with the obstacle placed in their middle distance. As expected, when the distance is increased between the two \acp{lidar}, the distance between each of them to the obstacle also increases, resulting in a smaller angular occupation of the \acp{lidar} \ac{fov} with the obstacle. Reducing the angular occupation potentially increases the number of rays that can cause indirect interference on the victim's \ac{lidar}. However, no actions were taken to further research on this premise, since \acp{lidar} interference behavior has not yet been fully understood.
 
-On figure~\ref{fig:box-filter-outliers-LOS}, the results are shown. For every distance analized, a reduction of one order of magnitude is noticeble, when comparing this results with the same results for the distance test, on figure~\ref{fig:box-filter-outliers-distance}. Only To exceptions occur: \SI{8}{\meter} and \SI{12}{\meter} data, on which the number of outliers remain approximately constant. 
+On figure~\ref{fig:box-filter-outliers-LOS}, the outlier analysis under a scenario of \ac{los} between the \acp{lidar} is shown. When comparing with the results of the distance test, on figure~\ref{fig:box-filter-outliers-distance}, a reduction of one order of magnitude is noticeble on all distances except the outliers at a distance of \SI{8}{\meter} and \SI{12}{\meter}, on which the number of outliers remain approximately equal. 
 
 \begin{figure}[!ht]
 	\centering
@@ -269,10 +270,10 @@ On figure~\ref{fig:box-filter-outliers-LOS}, the results are shown. For every di
 	\label{fig:box-filter-outliers-LOS}
 \end{figure}
 
-Those findings leds us to believe that the most significant part of the outliers that are outside of the room are caused by direct interference. Two subsets of the graphics' data are monotonous decrescent: from \SIrange{2}{6}{\meter} and \SIrange{8}{12}{\meter}. Inside each of these subsets, the number of outliers reduces with the distance, but the behavior described on the distance test, were the major valuers of outliers occured on short distances, is not verified where. We are also led to believe that to short distances, direct interference predominates, reason why on the distance setup, the initial values were much higher than they are now and thee results for the same distance but with \acp{lidar} \ac{los} obstruction is one order of magnitude smaller.
+Those findings leds us to believe that the most significant part of the outliers that are outside of the room are caused by direct interference. Two subsets of the graphics' data are monotonous decrescent: from \SIrange{2}{6}{\meter} and \SIrange{8}{12}{\meter}. Inside each of these subsets, the number of outliers reduces with the distance, but the behavior described on the distance test, were the major values of outliers occured on short distances, is not verified where. We are also led to believe that to short distances, direct interference predominates, reason why on the distance setup without \ac{los} obstruction, the number of outliers is higher to short distances than they are with \ac{los} obstruction.
 
-\subsubsection{Direction}
-To comprehend if the orientation between the \ac{lidar}'s affects the number of outliers, the interferer \ac{lidar} orientation was changed, keeping their relative distance constant. Tests were perfomed with an angular step of \SI{30}{\degree}, creating 12 data points that are shown on figure~\ref{fig:box-filter-outliers-direction}.
+\subsubsection{Relative orientation}
+To comprehend if the orientation between the \acp{lidar} affects the number of outliers, the interferer \ac{lidar} orientation was changed, keeping their relative distance constant. Tests were perfomed with an angular step of \SI{30}{\degree}, creating 12 data points that are shown on figure~\ref{fig:box-filter-outliers-direction}.
 
 \begin{figure}[!ht]
 	\centering
@@ -281,16 +282,14 @@ To comprehend if the orientation between the \ac{lidar}'s affects the number of 
 	\label{fig:box-filter-outliers-direction}
 \end{figure}
 
-From this graphic, the magnitude variation between the angular positions results on a relative number of outliers to one in a million points or 10 million points. We see that some directionality is present, with 4 angles, \SIlist[list-final-separator = {, }]{60; 90; 150; 180}{\degree}, having a normalized number of outliers one order of magnitude greater than the remaining 8 angles: $10^{-6}$ vs $10^{-7}$.
+The normalized number of outliers magnitude variation between the angular positions results on a relative number of outliers to one in a million points or to one in 10 million points. Some dependence with the relative \ac{lidar} orientation is present, with 4 angles, \SIlist[list-final-separator = {, }]{60; 90; 150; 180}{\degree}, having a normalized number of outliers one order of magnitude greater than the remaining 8 angles: $10^{-6}$ vs $10^{-7}$.
 
-
+% Note: Writing this here would imply creating figures that show the directionatility of the data, i.e., play the rosbag files and accumulate them on Rviz. Alternatively, a point accumulator ros node ros node can be built ;)
 %On figure~\ref{fig:bosch-pandar-vs-vlp16}, we see a clearly directionality of data and from our findings, there seem to be a small impact of the orientation between \acp{lidar}. As we have stated, the scatter plot represebntation seems to enfatize the problem of \ac{lidar} interference, making it seem more complex, when in reality, a heatmap should be used instead to represen, in order to plot the density.
 
 
 \subsubsection{\ac{it} Dark Room}
-\ac{it}2 Dark Room test methodology differs from the previous ones taken on \ac{irislab}, since two parameters were varied simultaneous: distance and height. The two-dimensionality of the data is presented on figure~\ref{fig:box-filter-outliers-it2}. Along its x-axis, distance is variated and on its y-axis, the relative height between the \acp{lidar} is changed.
-
-The white square on the left bottom of the figure is empty because the bag file containing that data was corrupted during saving and data could not be recovered. From the image, we corroborate the previous results from the distance tests (figure~\ref{fig:box-filter-outliers-distance}): the closer the \acp{lidar} are, the higher the number of outliers are. If the interferer \ac{lidar} is above the victim's \ac{lidar}, the number of outliers increases slighty.
+\ac{it} 2 Dark Room test methodology differs from the one used on \ac{irislab}, since two parameters were varied simultaneous, instead of only one: distance and height. The relation between this data is presented on figure~\ref{fig:box-filter-outliers-it2}. Along its x-axis, distance is variated and on its y-axis, the relative height between the \acp{lidar} is changed.
 
 \begin{figure}[!ht]
 	\centering
@@ -299,20 +298,81 @@ The white square on the left bottom of the figure is empty because the bag file 
 	\label{fig:box-filter-outliers-it2}
 \end{figure}
 
+The white square on the left bottom of the figure is empty because the bag file containing that data was corrupted during saving and data could not be recovered. From the image, we corroborate the previous results from the distance tests (figure~\ref{fig:box-filter-outliers-distance}): the closer the \acp{lidar} are, the higher the number of outliers. If the interferer \ac{lidar} is above the victim's \ac{lidar}, the number of outliers also increases slighty, when comparing with the other heights tested.
 
 \section{Ground-Truth Generation}
 \label{sec:lidar-interference:ground-truth}
-To deepen our understanding of \ac{lidar} interference, the possibility of interference on the inliers subset must also be considered, i.e., we must assume the premise that \ac{lidar} interference not only causes erroneous measures that are clearly outliers of the data, but also more subtle errors.
+To deepen our understanding of \ac{lidar} interference, the possibility that \ac{lidar} interference not only causes erroneous measures that are clearly outliers of the data, but also more subtle errors, possible similar to sensor noise, must be accepted. To test this premise, we need to compare the point clouds with interference with a known model of the environment, a ground-truth, that contains no interference.  
 
-To understand to a greater extent the impact of \ac{lidar} interference on its measurements, we need to compare the point clouds with interference with a known model of the environment, without interference. 
+A ground truth model of the environment cane be a specific point cloud from all the data or can be generated by considering multiple point cloud frames, from interference-free data. The latter is preferred, since it has more chances of removing sensor noise from the data. Due to the lack of no viable alternatives on the \acl{sota}, we propose two algorithms for ground-truth generation, which are capable of fusing multiple point cloud frames from a bag file, generating a model that better resembles the real characteristics of the room.
 
-To do so, a ground truth of the environment must be generated from interference-free data. Due to the lack of no viable alternatives on the \acl{sota}, we propose two algorithms for ground-truth generation, which are capable of fusing together multiple point cloud frames from a bag file, generating a model better resembles the characteristics of the room.
 
 \subsection{Frame Stitching}
 \label{subsec:lidar-interference:frame-stitching}
-	
-\subsection{Frame Accumulation}
-\label{subsec:lidar-interference:frame-accumulation}
+Frame stitching consists on, given two point cloud frames, aligning a second point cloud frame with the first and then merge their data into a single point cloud frame. Iteratively perfoming this operation would create a single point cloud that progressevly contains the best estimation of the environment point cloud, using multiple point clouds.
+
+To implement this, first the two frames to be stitched are filtered, using \ac{pcl}'s Voxel Grid filter, with a voxel edge length of \SI{5}{\centi\meter}. This step ensures the data density and spatial organization of the point clouds is similar, which yelds better results on the stitching process and also speeds it up, due to a reduction of the data points.
+
+To stitch the two voxelized data frames together, an \ac{icp} algorithm is used. Our solution uses \ac{pcl} library and therefore, \ac{pcl}'s implementation of the \ac{icp} algorithm. \ac{icp} is an algorithm oriented to merge point cloud that have been acquired from different positions and only have some points in common. It performs the computation of the joint rotation and translation matrix, that transforms one point cloud coordinate frame to the others', aligning them. The computation of \ac{icp}'s transformation matrix uses \ac{svd} to compute the rotation and translation matrix that aligns the two point clouds.
+
+On our case, \ac{icp} will align the two point clouds, that are taken from the same position, but whose data, due to the \ac{lidar} measurement noise, will not be equal. The parameters used for this algorithm are present on table~\ref{tab:frame-stitching-parameters}. On \ac{icp}'s algorithm, the correspondences to be considered for the statistical analysis of the \ac{icp}'s convergence must be smaller than \SI{2}{\centi\meter}. Three termination criterea for the algorithm exist and must be tuned:
+
+\begin{enumerate}
+	\item \textbf{Maximum number of iterations:} If the algorithm reaches this number of interations without converging, it stops and returns an error, indicating that it as not converged.
+	\item \textbf{Transformation Epsilon:} When iterating to refine the transformation computed internally, it terminates if the difference between the current and last transformation matrix is smaller than this parameter;
+	\item \textbf{Euclidian Difference Fitness Epsilon:} When iterating, terminates if the Euclidian errors (distance between the alinged source and target point cloud) is smaller than this threshold.
+\end{enumerate}
+
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{@{}lp{8cm}c@{}}
+		\toprule
+		\multicolumn{2}{l}{Specification} & Value \\
+			\midrule
+		\multicolumn{2}{l}{\textit{Voxel Filter}} & \\ 
+		\phantom{ab} & Voxel edge length & \SI{5}{\centi\meter} \\ 
+		\midrule
+		\multicolumn{2}{l}{\textit{\ac{pcl}'s \ac{icp}}} &  \\ 
+		\phantom{ab} & Maximum Correspondences Distance & \SI{2}{\centi\meter} \\
+								 & Maximum Number of Iterationt & 50 \\
+								 & Transfomration Epsilon & $1\E^{-8}$ \\
+								 & Euclidian Difference Fitness Epsilon & \SI{5}{\centi\meter} \\
+		\bottomrule
+	\end{tabular}
+	\caption{Parameter values used on the Frame Stitching algorithm, for the Voxel Grid and \ac{icp}.}
+	\label{tab:frame-stitching-parameters}
+\end{table}
+
+When it finishes computing the ground truth point cloud, the \ac{ros} node that implements this algorithm saves the ground truth \ac{lidar} point cloud on a \ac{pcd} file.
+
+This solution was some caveats, since it considers one of the point cloud frames to be the source to which all the other frames must be matched, i.e, the second frame is stitched to match the first frame, and the third frame is stitched to match the result of the filtered second and first frame, and so on. Also, despite \ac{pcl} being a templated library that can work with whatever point types are defined by the user, \ac{pcl} \ac{icp} implementation destroys the laser ID information that point clouds obtained from the VLP-16 contain, which limits the possibilities for interference analysis. 
+
+
+\subsection{Frame Registration}
+\label{subsec:lidar-interference:frame-registration}
+Frame Registration is a ground truth model generation algorithm based on an organized point cloud data structure, which was primarly developed for \ac{lidar} interference analysis, but was later generalized to be used for ground truth model generation.
+
+An organized point cloud is a data structure similar to the point cloud previously used, but its two-dimensional organization contains information about the adjacent points of a given point. This spacial organiztion mimics a depth image, with rows and columns, but differs from the latter since the data containing on each index of the data matrix is not only depth, but instead a point cloud point.
+
+Our implementation, which extends \ac{pcl}'s organized point data structure, is a generic and templated data structure, that can suport not only point cloud points as its basis data type. This peculiarity allows the usage of abstract point cloud containers, which contain point cloud data, but also other metrics, for every index of the data matrix. For ground truth generation, the container developed holds a vector of points cloud points, to store the registered point cloud points for that index. Fields for the intensity, position and distance are also available, both for the average value and the variance.
+
+The ground truth technique developed computes, for every point of all the point cloud frames on a bag file, the index (row and column) to which that point belongs on the organized point cloud structure, and appends it to the point vector of that index container. On spherical coordinates, the point row index corresponds to its azimuthal angle and the column to its polar angle. On Velodyne \ac{lidar}'s, the polar angle is determined by the laser ID from which the pulse was fired and the azimuthal angle can be determined by equation~\ref{eq:azimuthal-angle}, from which the $x$ and $y$ coordinates are known from the point data. From the azimuthal angle, the azimuthal index of the matrix can be found by dividing the azimuthal angle with the angular step of the VLP-16, as shown in equation~\ref{eq:azimuthal-angle-index}
+
+\begin{equation}
+	\label{eq:azimuthal-angle}
+	\theta = \arctan\left(\frac{y}{x}\right) \cdot \frac{\SI{180}{\degree}}{\pi}
+\end{equation}
+
+\begin{equation}
+	\label{eq:azimuthal-angle-index}
+	\theta_{\text{index}} = \frac{\theta}{\text{VLP-16 angular step}} = \frac{\theta}{\SI{0.2}{\degree}} 
+\end{equation}
+
+After registering the full point cloud data, the ground truth model can be generated. Our implementation uses an average estimator that iterates over all the indexes of the matrix, computing the average point cloud coordinate using the vector of points registered, which will be the ground truth model coordinates. Alongise this position value for the ground truth model, ithis estimator also computes the variance and average value of the point of vectors distance and intensity.
+
+
 
 \subsection{Comparison}
 
