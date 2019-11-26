@@ -84,6 +84,10 @@ plt.savefig(colored_mesh_filename)
 
 print("Done! Colored Mesh saved on: " + colored_mesh_filename)
 
+
+# Save Errors for latter
+errors_diference = errors_normalized
+
 # GROUND_TRUTH
 # Numpy arrays to hold data
 errors_absolute = np.zeros((len(distance_values), len(error_thresholds)), dtype=np.uint32)
@@ -147,9 +151,27 @@ plt.savefig(colored_mesh_filename)
 print("Done! Colored Mesh saved on: " + colored_mesh_filename)
 
 #
-#   INTENSITY
+#   DIFFERENCE
 #
+errors_diference = errors_diference - errors_normalized;
+print("Plotting Colored Mesh Graph..."),
+fig1, ax1 = plt.subplots(figsize=(16,9))
+cmap = plt.get_cmap('jet')
+im = ax1.pcolormesh(errors_diference, cmap=cmap)
+fig1.colorbar(im, ax=ax1)
+plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+plt.yticks(distance_values, distance_values)  # Set locations and labels
+ax1.set_xlabel('Interference distance Threshold (m)')
+ax1.set_ylabel('Distance between LiDARs (m)')
+ax1.set_title("Interfered points")
+fig1.tight_layout()
+plt.show(block=False)
 
+print("Done! Saving Colored Mesh Graph... "),
+colored_mesh_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.DIFFERENCE_INTERFERENCE_MESH_FILE_NAME)
+
+plt.savefig(colored_mesh_filename)
+print("Done! Colored Mesh saved on: " + colored_mesh_filename)
 
 #fig2, ax2 = plt.subplots()
 #x = np.arange(0, 1800, 1) * 360.0 / 1800.0
