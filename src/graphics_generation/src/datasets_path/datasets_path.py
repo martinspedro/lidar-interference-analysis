@@ -124,6 +124,8 @@ INTERFERENCE_BAG_DISTANCE_HIST_FILE_NAME = "interference_bag_distance_hist.png"
 INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_COMPARISON_BAR_FILE_NAME = "interference_analysis_octree_ocupation_comparison_bar.png"
 INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME = "interference_analysis_octree_ocupation_bar.png"
 
+DIFFERENCE_INTERFERENCE_MESH_FILE_NAME = "difference_ground_truth_interference_measurement.png"
+
 INTERFERENCE_HEIGHT_ABSOLUTE_ERRORS_FILE_NAME = "interference_height_absolute_errors.csv"
 INTERFERENCE_HEIGHT_TOTAL_POINTS_FILE_NAME = "interference_distance_total_points.csv"
 INTERFERENCE_HEIGHT_NORMALIZED_ERRORS_FILE_NAME = "interference_height_normalized_errors.csv"
@@ -167,6 +169,10 @@ INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME = "interferenc
 INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME = "interference_direction_distance_errors_polar_plot_direction";
 
 INTERFERENCE_BOX_FILTER_BAR_FILE = "interference_box_filter_outliers.png"
+
+OCTREE_INTERFERENCE_COLOR_MESH = "octree_interference_color_mesh.png"
+OCTREE_GROUND_TRUTH_COLOR_MESH = "octree_ground_truth_color_mesh.png"
+OCTREE_DIFFERENCE_COLOR_MESH = "octree_difference_color_mesh.png"
 
 CLOSER_DISTANCE_AFFIX = "closer"
 HALFWAY_DISTANCE_AFFIX = "halfway"

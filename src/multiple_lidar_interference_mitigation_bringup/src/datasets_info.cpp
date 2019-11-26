@@ -163,6 +163,8 @@ const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_COMPARISON_BAR_FILE_NAM
 const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BAR_FILE_NAME = "interference_analysis_octree_ocupation_bar."
                                                                          "png";
 
+const std::string DIFFERENCE_INTERFERENCE_MESH_FILE_NAME = "difference_ground_truth_interference_measurement.png";
+
 const std::string ICP_LOGGER_FILE_NAME = "icp_transformation_matrices.log";
 const std::string INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "interference_analysis_point_statistics.log";
 const std::string OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME = "octree_ocupation_statistics.log";
@@ -217,6 +219,10 @@ const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BA
                                                                                           "direction";
 
 const std::string INTERFERENCE_BOX_FILTER_BAR_FILE = "interference_box_filter_outliers.png";
+
+const std::string OCTREE_INTERFERENCE_COLOR_MESH = "octree_interference_color_mesh.png";
+const std::string OCTREE_GROUND_TRUTH_COLOR_MESH = "octree_ground_truth_color_mesh.png";
+const std::string OCTREE_DIFFERENCE_COLOR_MESH = "octree_difference_color_mesh.png";
 
 const std::string CLOSER_DISTANCE_AFFIX = "closer";
 const std::string HALFWAY_DISTANCE_AFFIX = "halfway";
