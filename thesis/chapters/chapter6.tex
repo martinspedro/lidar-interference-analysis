@@ -15,6 +15,11 @@ Following up on the outcomes provided by Chapter~\ref{chapter:object-detection},
 
 Lastly, we conclude our findings and compare them with the current \acl{sota} on \ac{lidar} interference.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EXPERIMENTAL SETUP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \section{Experimental Setup}
 \label{sec:lidar-interference:experimental-setup}
 
@@ -120,6 +125,12 @@ On \textit{IRIS Laboratory} folder, two test folders are present, containing all
 
 To ease the access to this data structure, \texttt{datasets\_path} library was implemented, both on C++ and Python 3, to allow ubiquitous managing of data loading for tests and saving of results.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% BOSCH DATASET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \section{Bosch\cp~Dataset}
 We start by investigating \ac{lidar} interference using Bosch's dataset. This dataset consists of 3 \ac{ros} bag files, one recorded by a HESAI Pandar40 and two other by Velodyne's VLP-16. Each of the bag files correspond to the same experimental scenario: the two \acp{lidar} are placed, side by side, on top of a table, with the Pandar40 about \SI{50}{\centi\meter} to the left of the VLP-16. For each of the tests, data is recorded for about \SIrange{10}{15}{\second} and the two \acp{lidar} are always switched on.
 
@@ -167,7 +178,13 @@ Since the room had people moving and no data without interference is present, th
 Our solution is then to quantize these outliers and trying to understand more about their behavior, which is the approach detailed on the next Section.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ROOM OUTLIERS ACCOUNTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \section{Room Outliers Accounting}
+\label{sec:lidar-interference:room-outliers}
 After the qualitative analysis of the previous Section on Bosch's dataset, from which we concluded that the \ac{lidar} interference appears to be directional and causes outliers outside of the room dimensions, this Section details the implementation and results of a quantitative approach to analyze the events described on phenomenon 2: \ac{lidar} measurements outside room dimensions.
 
 To analyze the data, a \ac{ros} node, with both offline and online versions, was implemented. Offline operation implies that the node does not have real-time constraints, being capable of handling large \ac{ros} bag files and datasets. The main difference from the online operation, that as been used so far, is that the node does not require another node on the network to publish data for him (typically, a \ac{ros} bag player or a device driver) and the \ac{ros} network does not need to be setup up and running. Instead, the node loads and parses the bag file, as fast as it can or as fast as it is instructed to, keeping its data private on its own program memory. This alternative permits processing large amounts of data and realizing complex analysis on it.
@@ -191,6 +208,7 @@ Despite this analysis not accounting for the possible interference inside the ro
 
 
 \subsection{Bosch Dataset}
+\label{subsec:lidar-interference:room-outliers-bosch}
 To determine the room dimensions on Bosch dataset, we display the data on \texttt{RViz} and then use the selection tool to determine the maximum and minimum value on each axis that defines the room dimensions. This process is manual, and prone to error, specially since on this dataset, the \ac{lidar} axes are not oriented with the room\footnote{We can say that the \ac{lidar} axes are oriented with the room when a straight wall was one of its coordinates fixed on the \ac{lidar} coordinate frame, i.e., for every wall, there a \ac{lidar} axis that is parallel with the normal defined by the plane of the wall.} After determining such parameters, the data is analyzed and the results are presented on table~\ref{tab:bosch-dataset-stats}.
 
 \begin{table}[!ht]
@@ -221,7 +239,7 @@ We also need to consider that the room limits were manually determined, therefor
 Despite no conclusive verdicts can be extracted from this data, we can affirm that the conditions under which this dataset is taken fosters the occurrence of mutual \ac{lidar} interference, biasing the data by creating laboratories scenarios difficult to happen on self-driving cars. We are also not sure if the higher number of interference on the HESAI Pandar40 is because it has more lasers or because Velodyne VLP-16 as more ``protection'' against interference\footnote{Velodyne as been working on this are. See the Release Notes on~\cite{vlp16}.}. 
 
 \subsection{Our Experimental Dataset}
-\label{subsec:lidar-interference:our-experimental-dataset}
+\label{subsec:lidar-interference:room-outliers-experimental-setup}
 For our experimental dataset, we can automate the determination of the room dimensions from the data, since we have measurements of the test environments without interference. Therefore, the previous uncertainties regarding the manual determination of room limits are not present anymore. To automate the process, we developed a \ac{ros} node that parses a ground truth bag file and determines the room dimensions, considering the minorant and majorant points of the point cloud, on the \ac{lidar} coordinate frame. 
 
 As stated on Sub-section~\ref{subsec:lidar-interference:parameters-under-test}, 5 parameters under test are varied on our dataset, on \ac{irislab} facilities. The data gathered is analyzed and the results, for each of the parameters, are presented below, with the exception of the rotation speed.
@@ -300,6 +318,13 @@ The normalized number of outliers magnitude variation between the angular positi
 \end{figure}
 
 The white square on the left bottom of the figure is empty because the bag file containing that data was corrupted during saving and data could not be recovered. From the image, we corroborate the previous results from the distance tests (figure~\ref{fig:box-filter-outliers-distance}): the closer the \acp{lidar} are, the higher the number of outliers. If the interferer \ac{lidar} is above the victim's \ac{lidar}, the number of outliers also increases slightly, when comparing with the other heights tested.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GROUND TRUTH GENERATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \section{Ground-Truth Generation}
 \label{sec:lidar-interference:ground-truth-generation}
@@ -380,20 +405,25 @@ After registering the full point cloud data, the ground truth model can be gener
 
 %Direct interference (on Kim's experimental setup and hardware) is likely to saturate the receptor of the interfered \ac{lidar}, which may or may not be considered a valid measurement by the hardware and may discarded by the driver before being registered;
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VOXEL TO VOXEL ANALYSIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Voxel-to-Voxel Analysis}
 \label{sec:lidar-interference:voxel-analysis}
 Voxel-to-voxel analysis quantifies the magnitude of the \ac{lidar} interference by measuring the amount of modified voxels between two tridimensional voxel grids: one that represents the ground truth model and another for each frame of the interference bag file.
 
-Voxel Grids convey the spatial representation of tridimensional data in a cluster of adjacent ``cubes'', each with the same edge length. Understanding which voxels have been modified in the point cloud means comparing, voxel by voxel, the state of occupation of the voxels in the ground truth voxel grid with the corresponding voxel on the interfered data voxel grid. 
+Voxel Grids convey spatial representation of tridimensional data in a cluster of adjacent ``cubes'', each with the same edge length. Understanding which voxels have been modified in the point cloud means comparing, voxel by voxel, the state of occupation of the voxels in the ground truth voxel grid with the corresponding voxel on the interfered data voxel grid. 
 
-An interference occurred in a voxel if its value changed between the clouds, i.e., if it was occupied in the ground truth model and is free on the interference point cloud frame or was free on the ground truth model and is occupied in the interference point cloud frame. This condition can be expressed as a boolean XOR operation between the two voxels  and is stated on its mathematical form in equation~\ref{eq:voxel-interference-condition}, where a result of \texttt{1} represents a interfered voxel and a result of \texttt{0} a voxel without interference.
+On the \ac{lidar} interference scenario, since the scenario is static, an interference is said to have occurred in a voxel if its value between the ground-truth model and interferered point cloud frame is different, i.e., if it was occupied in the ground truth model and is free on the interference point cloud frame or was free on the ground truth model and is occupied in the interference point cloud frame. This condition can be expressed as a boolean XOR operation between the two voxels to be compared (equation~\ref{eq:voxel-interference-condition}), where a result of \texttt{1} represents a voxel whose state has changed (therefore, was interfered) and a result of \texttt{0} a voxel whose state remained constant (therefore, without interference).
 
 \begin{equation}
 		\label{eq:voxel-interference-condition}
 		\text{Voxel has interference} = \text{Voxel}_\text{ground\_truth} \oplus  \text{Voxel}_\text{interference} 
 \end{equation}
 
-The relative number of interfered points can be obtained by the summation of equation~\ref{eq:voxel-interference-condition}, for all the voxels that are present on the voxel grid. Equation~\ref{eq:normalized-interference-voxels} states this operation, where $N_x$, $N_y$ and $N_z$ are the number of voxels along each of the subscript dimensions, that can be computed by equation~\ref{eq:voxel-grid-limits}.
+The relative number of modified voxels can be obtained by the summation of equation~\ref{eq:voxel-interference-condition}, for all the voxels that are present on the voxel grid. Equation~\ref{eq:normalized-interference-voxels} describes this operation, where $N_x$, $N_y$ and $N_z$ are the number of voxels along each of its subscript dimensions, that can be computed by equation~\ref{eq:voxel-grid-limits}.
 
 \begin{equation}
 	\label{eq:normalized-interference-voxels}
@@ -402,26 +432,150 @@ The relative number of interfered points can be obtained by the summation of equ
 
 \begin{equation}
 	\label{eq:voxel-grid-limits}
-	N_i = \frac{\max(i) - \min(i)}{\text{Voxel edge length}}, \forall i \in \{x, y, z\}.
+	N_i = \frac{\max(i) - \min(i)}{\text{Voxel edge length}}, \qquad \forall i \in \{x, y, z\}.
 \end{equation}
 
 \subsection{Implementation}
-Voxelizing the \ac{lidar} data would require, for the interference bag file, a voxel grid of \SI{260}{\meter} for each axis, since the \ac{lidar} drivers reject distance measurements that are greater than \SI{130}{\meter}. If a voxel grid with \SI{1}{\centi\meter} of edge length is used, we would require storing almost 1.76 billion voxels for a single frame. Assuming the simplest of scenarios, when each point is represented by 3 floating-point number of single precision, we would require $3\times \SI{4}{\bytes} = \SI{12}{\bytes}$ per point, yielding more than \SI{60}{\giga\byte} of data, which mainly has empty voxels and is cumbersome to process and operate it.
+Voxelizing\footnote{Voxelizing: converting a point cloud representation using points to one using voxels} the \ac{lidar} data would require, for the interference bag file, a voxel grid of \SI{260}{\meter} for each axis, since the \ac{lidar} drivers reject distance measurements that are greater than \SI{130}{\meter}. If a voxel grid with \SI{1}{\centi\meter} of edge length is used, such grid would have almost 1.76 billion voxels for a single point cloud frame. Assuming the simplest of scenarios, when each point is represented by 3 floating-point number of single precision, we would require $3\times \SI{4}{\bytes} = \SI{12}{\bytes}$ per point, yielding more than \SI{60}{\giga\byte} of data to manipulate and store. Most of it, however, would correspond to empty voxels.
 
-Our solution consists on replacing the full tridimensional voxel grid with a data structure that has the same structure, but is more efficient: an octree, a tree data structure used to partition three-dimensional space. Every octree node as 8 children, each corresponding to one of the 8 octants of a tridimensional Cartesian coordinate frame, recursively diving the tridimensional space. This solution is effective because, similar to a binary tree in 1D space, it only subdivides the 3D space if it requires more detail to represent a data point, therefore efficient in memory occupation.
+Our solution consists on replacing the full tridimensional voxel grid with a data structure that has the same structure, but is more efficient: an octree. An octree is a tree-like data structure used to partition three-dimensional space, where every node has 8 children, each corresponding to one of the 8 octants of a tridimensional Cartesian coordinate frame, recursively diving the tridimensional space. This solution is effective because, similar to a binary tree in 1D space, it only subdivides the 3D space if it requires more detail to represent a data point, therefore efficient in memory occupation.
 
-Out implementation relies on \ac{pcl}'s Octree Structure. In particular, \texttt{OctreePointCloudChangeDetector} class is used, which is built to detect changes on the octree structure of two point clouds: a ground truth model and the interference point cloud frame. 
+Out implementation relies on \ac{pcl}'s Octree Structure. In particular, \texttt{OctreePointCloudChangeDetector} class is used, which is built to detect changes on the octree structure when comparing the voxel representation of two point clouds: a ground truth model and each interference point cloud frame. 
 
-Using the pre-determined ground truth models (see Section~\ref{sec:lidar-interference:ground-truth-models}), an octree representation of the ground truth model is used as the source to each all the other point clouds will be compared. Then, frame by frame, the interferer bag file point clouds are loaded their octree representation is compared. The normalized number of interfered voxels are estimated, considering all the frames of the bag file, using equation~\ref{eq:normalized-interference-voxels}.
+Using the pre-determined ground truth models (see Section~\ref{sec:lidar-interference:ground-truth-generation}), an octree representation of the ground truth model is used as the source to each all the other point clouds will be compared. Then, frame by frame, the interferer bag file point clouds are loaded, converted to their octree representation, and then both octree representations are compared compared. The voxels which have changed from one octree to the other are accounted,considering all the frames of the bag file, using equation~\ref{eq:normalized-interference-voxels}.
 
 
 \subsection{Results}
 \label{subsec:lidar-interference:voxel-to-voxel-analysis}
 
+To test this method of analysis, some parameters under test were selected from the dataset:relative distance between the two \acp{lidar}; relative height between the two \acp{lidar}; and the relative distance between the two \acp{lidar} under \ac{los} obstruction. The voxel edge length was also varied in steps of \SI{0.05}{\meter}, from \SIrange{0.05}{0.45}{\meter}.
+
+Voxel-to-Voxel analysis has a caveat that must be considered: increasing the voxel edge size reduces the number of voxels that exist on the octree. Also, since octree's represent thridimensional data, doubling the voxel edge length could result on a reduction of the octree voxels number up to an eight of the previous number of voxels. 
+
+A large number of voxels (small voxel edge length) potentiates the occurrence of false positives\footnote{Voxels that are erroneously marked as interfered, because their state of occupancy was modified.}, because noisy points alternate between two adjacent voxels. A small number of voxels (large voxel edge length), results in an increase of false negatives\footnote{Interfered voxels that are erroneously marked as non-interfered, because their state of occupancy was not modified.}, because measurements whose interference modified their positioning by a small error, still belong to the same voxel. False positives are problematic becuase they indicate that the interference value is higher than really is and in contrast, false negatives reveal an interference value that is lower than the real value of interference.
+
+Our particular implementation was yet another issue. Since the relative number of modified voxels is expressed relative to the total number of voxels, changing the voxel edge length also changes the total number of voxels, changing the relative number of modified voxels. For a large voxel edge length, this behavior might cause the interference to actually be higher than the real value, due to the number of voxels being smaller. 
+
+To minimize the undesired impact of this behavior, we choose a voxel edge interval between \SI{0.05}{\meter} and \SI{0.45}{\meter}. The first boundary is determined by the typical \ac{lidar} interference value, $\pm\SI{3}{\centi\meter}$~\cite{VLP16}. The second is determined by analyzing our dataset, which on average has a reduction of 4 times the number of voxels when the voxel edge length is doubled. Our objects of interest on the dataset (chairs, person dummies, boxes, among others) have a size ranging from \SIrange{0.3}{1.1}{\meter}, aproximately. 
+
+To keep the voxel edge length small, we opt to choose a voxel edge length below a meter. Following this premise, the difference between a voxel edge length of \SI{0.40}{\meter} and \SI{0.80}{\meter} is an increase of 8 times in volume of the voxel. This difference, at the dimensions being discussed, is sufficient to contain noisy data from the measurements, reducing false positives, but also to generate some false negatives. Therefore, we choose the lower value for the voxel edge length, \SI{0.40}{\meter} and compute all the results for the voxel length following it, \SI{0.45}{\meter}.
+
+To understand the behavior of our ground truth generation algorithm, we opt also to analyze the relative number of modified voxels between the ground truth model and the ground truth point clouds used to generate it. To assess the difference between the results, these are also subtracted, to compare their relative number of voxels modified by the ground-truth bag file and the interference bag file.
+
 \subsubsection{Distance}
+For all the distance values (\SIrange{1}{12}{\meter} with a step of \SI{1}{\meter}), the voxel edge length was varied from \SIrange{0.05}{0.45}{\meter}, with steps of \SI{0.05}{\meter}. The comparison between the ground truth model and the interference bag are shown on sub-figure~\ref{fig:distance:interference-color-mesh} and the results of repeating the analysis between the ground truth model and the ground truth bag file used to generate it are shown on figure~\ref{fig:distance:ground-truth-color-mesh}.
+
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[c]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/distance/octree_interference_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when comparing the interference bag file with the ground truth model.}
+		\label{fig:distance:octree-interference-color-mesh}
+	\end{subfigure}
+	\qquad
+	\begin{subfigure}[c]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/distance/octree_ground_truth_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when comparing the ground truth bag file with the ground truth model.}
+		\label{fig:distance:octree-ground-truth-color-mesh}
+	\end{subfigure}
+	\\ \vspace{4mm}
+	\begin{subfigure}[c]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/distance/octree_difference_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when computing the difference between the results on sub-figure~(\subref{fig:distance:octree-interference-color-mesh}) and sub-figure~(\subref{fig:distance:octree-ground-truth-color-mesh}).}
+		\label{fig:distance:octree-difference-color-mesh}
+	\end{subfigure}
+
+	\caption{Voxel-to-Voxel \ac{lidar} interferference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. On subfigure~(\subref{fig:distance:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and on subfigure~(\subref{fig:distance:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting on subfigure~(\subref{fig:distance:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the distance between the \acp{lidar} and the y-axis the differnet values of voxel edge length to which tests were made.}
+	\label{fig:distance:octree-color-mesh}
+\end{figure}
+
+Analyzing sub-figure~\ref{fig:distance:octree-interference-color-mesh}, the relative number of modified voxels is 27.5\%, meaning that for a voxel grid size of $\SI{5}{\centi\meter}\times \SI{5}{\centi\meter}\times \SI{5}{\centi\meter}$, 27.5\% of the voxels which contain data were changed. However, comparing this results with the equivalent sub-figure, but which compares the ground-truth model with the ground-truth bag file, sub-figure~\ref{fig:distance:octree-ground-truth-color-mesh}, shows similar results.
+
+Despite a small variation of the relative number of modified voxel with the parameter under test (on the x-axis), the rate of change is greater on the y-axis with the increase of the voxel edge length. After a voxel edge length of \SI{0.3}{\meter}, the relative number of interfered voxels tends to stabilize. 
+
+The subtraction between the relative number of modified voxels on the interference and ground truth bags (sub-figure~\ref{fig:distance:octree-difference-color-mesh}). On this image, in general, the number is positive, which means that due to interference, the number of changes on the interference bag are greater than on the ground truth bag. The order of magnitude of the number of modified voxels between the two datasets is $10^{-3}$, which indicates that, on average one in each hundread voxels has changed its occupation status, due to its points being interfered and wrongly measured.
+
+
 \subsubsection{Height}
+For all the relative height values between the two \acp{lidar} (\SIlist[list-units=single]{0.623; 0.715; 0.818; 0.931; 1.032; 1.144; 1.277}{\meter}), the voxel edge length value was varied from \SIrange{0.05}{0.45}{\meter}, with steps of \SI{0.05}{\meter}. The comparison between the ground truth model and the interference bag are shown on sub-figure~\ref{fig:height:octree-interference-color-mesh} and the results of repeating the analysis between the ground truth model and the ground truth bag file used to generate it are shown on figure~\ref{fig:height:octree-ground-truth-color-mesh}.
+
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[c]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/height/octree_interference_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when comparing the interference bag file with the ground truth model.}
+		\label{fig:height:octree-interference-color-mesh}
+	\end{subfigure}
+	\qquad
+	\begin{subfigure}[c]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/height/octree_ground_truth_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when comparing the ground truth bag file with the ground truth model.}
+		\label{fig:height:octree-ground-truth-color-mesh}
+	\end{subfigure}
+	\\ \vspace{4mm}
+	\begin{subfigure}[c]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/height/octree_difference_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when computing the difference between the results on sub-figure~(\subref{fig:height:octree-interference-color-mesh}) and sub-figure~(\subref{fig:height:octree-ground-truth-color-mesh}).}
+		\label{fig:height:octree-difference-color-mesh}
+	\end{subfigure}
+
+	\caption{Voxel-to-Voxel \ac{lidar} interferference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. On subfigure~(\subref{fig:height:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and on subfigure~(\subref{fig:height:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting on subfigure~(\subref{fig:height:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the relative height between the \acp{lidar} optical center and the y-axis the differnet values of voxel edge length to which tests were made.}
+	\label{fig:height:octree-color-mesh}
+\end{figure}
+
+Analyzing sub-figure~\ref{fig:height:octree-interference-color-mesh}, the relative number of modified voxels is 25.0\%, meaning that for a voxel grid size of $\SI{5}{\centi\meter}\times \SI{5}{\centi\meter}\times \SI{5}{\centi\meter}$, 25.0\% of the voxels which contain data were changed. However, comparing this results with the equivalent sub-figure, but which compares the ground-truth model with the ground-truth bag file, sub-figure~\ref{fig:distance:octree-ground-truth-color-mesh}, shows similar results
+
+Despite a small variation of the relative number of modified voxel with the parameter under test (on the x-axis), the rate of change is greater on the y-axis with the increase of the voxel edge length. After a voxel edge length of \SI{0.25}{\meter}, the relative number of interfered voxels tends to stabilize. 
+
+The subtraction between the relative number of modified voxels on the interference and ground truth bags (sub-figure~\ref{fig:height:octree-difference-color-mesh}). On this image, in general, the subtraction yelds positive results, which implies that due to interference, the number of changes on the interference bag are greater than on the ground truth bag. The order of magnitude of the number of modified voxels between the two datasets ranges from $10^{-4}$ to $10^{-3}$, which indicates that, on average one in each hundread/thousand voxels has changed its occupation status, due to its points being interfered and wrongly measured.
+
+
 \subsubsection{\acp{lidar} \ac{los} Obstruction}
-\subsubsection{Direction}
+For all the distance values that the \acf{los} between the two \acp{lidar} was obstructed (\SIrange{1}{12}{\meter} with a step of \SI{2}{\meter}), the voxel edge length was varied from \SIrange{0.05}{0.45}{\meter}, with steps of \SI{0.05}{\meter}. The comparison between the ground truth model and the interference bag are shown on sub-figure~\ref{fig:los:interference-color-mesh} and the results of repeating the analysis between the ground truth model and the ground truth bag file used to generate it are shown on figure~\ref{fig:los:ground-truth-color-mesh}.
+
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[c]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/LOS/octree_interference_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when comparing the interference bag file with the ground truth model.}
+		\label{fig:los:octree-interference-color-mesh}
+	\end{subfigure}
+	\qquad
+	\begin{subfigure}[c]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/LOS/octree_ground_truth_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when comparing the ground truth bag file with the ground truth model.}
+		\label{fig:los:octree-ground-truth-color-mesh}
+	\end{subfigure}
+	\\ \vspace{4mm}
+	\begin{subfigure}[c]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{img/lidar-interference/LOS/octree_difference_color_mesh.png}
+		\caption{Voxel-to-Voxel analysis results when computing the difference between the results on sub-figure~(\subref{fig:los:octree-interference-color-mesh}) and sub-figure~(\subref{fig:los:octree-ground-truth-color-mesh}).}
+		\label{fig:los:octree-difference-color-mesh}
+	\end{subfigure}
+
+	\caption{Voxel-to-Voxel \ac{lidar} interferference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. On subfigure~(\subref{fig:los:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and on subfigure~(\subref{fig:los:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting on subfigure~(\subref{fig:los:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the distance between the \acp{lidar} to which the \acp{lidar} \ac{los} was obstructed, and the y-axis the differnet values of voxel edge length to which tests were made.}
+	\label{fig:los:octree-color-mesh}
+\end{figure}
+
+Analyzing sub-figure~\ref{fig:los:octree-interference-color-mesh}, the relative number of modified voxels is 27.5\%, meaning that for a voxel grid size of $\SI{5}{\centi\meter}\times \SI{5}{\centi\meter}\times \SI{5}{\centi\meter}$, 27.5\% of the voxels which contain data were changed. However, comparing this results withs with the equivalent sub-figure, but which compares the ground-truth model with the ground-truth bag file, sub-figure~\ref{fig:los:octree-ground-truth-color-mesh}, shows similar results
+
+Despite a small variation of the relative number of modified voxel with the parameter under test (on the x-axis), the rate of change is greater on the y-axis with the increase of the voxel edge length. After a voxel edge length of \SI{0.2}{\meter}, the relative number of interfered voxels tends to stabilize. 
+
+The subtraction between the relative number of modified voxels on the interference and ground truth bags (sub-figure~\ref{fig:height:octree-difference-color-mesh}), On this image (and corresponding data), in major results of the subtraction are positive, which means that due to interference, the number of changes on the interference bag are greater than on the ground truth bag. The order of magnitude of the number of modified voxels between the two datasets ranges from $10^{-3}$ to $10^-2$, which indicates that, on average one in each ten to hundread voxels has changed its occupation status, due to its points being interfered and wrongly measured.
+
+
+\subsubsection{Transversal Remarks to all the tests}
+Measuring the change detection was performed with the intent to classify, on a more macro-level, how does the interference affects the spatial organization of the point cloud. A voxel tridimensional structure was volumne, whereas a point does not; which was believe to be a good analysis to better handle the spatial organization of the point cloud. A better understanding of the spatial organization would allow to detect which regions of the point cloud were affected by interference, which voxels were changed and remain unnafected by interference and how did they change.
+
+However, the results presented do not allow such interpretation. Ground truth model generation seems to undermines the results, since it appears that the comparison of the point clouds used to generate the ground truth model yelds as many errors as the actual interfered data. Such similarity forced us to double check our implementations, but no mistakes were found. Subtracting one result from the other, while allowing the determination of the order of magnitude that described their differences, resulted in gibbersih, with no patterns being found on the data.
+
+After analysing the data and its results, our understanding is that we underestimate the impact of the \ac{lidar} noise on a voxel representation. If, for a given point near the edge of a voxel, the \ac{lidar} noise causes the measurement of the point to be on another adjacent voxel, a voxel has been modified. While using a small voxel size will magnify the impact of this behavior, since the distance of a point to its voxel limit are smaller; using a larger voxel size would not solve this situation, since a bigger volume of the point cloud is considered to be interfered. Both situations led to a misrepresentation of the spatial behavior of \ac{lidar} interference. 
+
+From this analysis, we can only conclude that the \ac{lidar} noise is much more significant than previously thought and that it affects the generation of the point cloud model to an extent that it can severly undermine our capability to make an educated guess about the \ac{lidar} interference behavior and magnitude.
+
+The orders of magnitude obtained through the subtraction of the two relative number of changed voxels, when compared with the results on sub-Section~\ref{subsec:lidar-interference:room-outliers-experimental-setup}, reveal a difference of 2 to 3 orders of magnitude, which might be indicative that the impact of \ac{lidar} interference does not have only the behavior described in Section~\ref{sec:lidar-interference:room-outliers}, but also a more subtle one.
+
+To deepen this analyis, an approach focused on the point will be carried on Section~\ref{sec:lidar-interference:point-to-point-analysis}, which will use the \textit{Frame Registration} method (see section~\ref{sec:lidar-interference:frame-registration}) to generate the ground-truth model instead of the \textit{Frame Accumulation} method, used by the voxel-to-voxel analysis.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -429,6 +583,7 @@ Using the pre-determined ground truth models (see Section~\ref{sec:lidar-interfe
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Point-to-Point Analysis}
+\label{sec:lidar-interference:point-to-point-analysis}
 Point-to-Point analysis quantifies the magnitude of \ac{lidar} interference by counting the amount of points that distance from the ground truth point cloud model by a given threshold. The distance is computed between the point position on the ground truth model and on each of the point cloud frames of the interference bag file, point by point.
 
 Point-to-point analysis relies on the spatial organization of the point cloud structure, which was first introduced on sub-Section~\ref{subsec:lidar-interference:frame-registration}. This data structure organizes an input point cloud, reshaping its data into a matrix structure, similar to a depth image. Each of the matrix indexes corresponds to a \ac{lidar} measurement, being the row index determined by the data \ac{laser} ID and the column index determined by its azimuthal position, which is given on equation~\ref{eq:azimuthal-angle-index}. 
@@ -518,7 +673,7 @@ Analyzing figure~\ref{fig:distance:color-mesh}, the normalized interference vari
 
 The subtraction between the normalized interference on the interference and ground truth bag, shown in sub-figure~\ref{fig:distance:difference-color-mesh}, reveals the order of magnitude of the interference: $10^{-4}$. As detailed in the beginning of the sub-Section, we assume, due to the number of points used on these statistcal analysis, that they are statistically representative of the noise associated with the \ac{lidar} measurements, therefore the difference between the two results (ground truth model vs ground truth bag and ground truth model vs interference bag), if the noise was the same magnitude on both, would reveal the magnitude of the interference. 
 
-Comparing this magnitude with the results on figure~\ref{fig:box-filter-outliers-distance}, whose magnitude vaies from $10^{-7}$ to $10^{-5}$, the total number of interfered points for the distance scenario, using a point by point analysis is 1 to 3 orders of magnitude greater than the normalized number of outliers outside the room dimensions (which are clearly caused by interference), detailed in sub-Section~\ref{subsec:lidar-interference:our-experimental-dataset}.
+Comparing this magnitude with the results on figure~\ref{fig:box-filter-outliers-distance}, whose magnitude vaies from $10^{-7}$ to $10^{-5}$, the total number of interfered points for the distance scenario, using a point by point analysis is 1 to 3 orders of magnitude greater than the normalized number of outliers outside the room dimensions (which are clearly caused by interference), detailed in sub-Section~\ref{subsec:lidar-interference:room-outliers-experimental-setup}.
 
 \subsubsection{Height}
 For all the relative height values between the two \acp{lidar} (\SIlist[list-units=single]{0.623; 0.715; 0.818; 0.931; 1.032; 1.144; 1.277}{\meter}), the threshold value was varied from \SIrange{0.05}{1.5}{\meter}, with steps of \SI{0.05}{\meter}. The results of the depth differences between the ground truth model and the interference bag are shown on sub-figure~\ref{fig:height:interference-color-mesh} and the results of applying the same point-to-point analysis between the ground truth model and the ground truth bag file used to generate it are shown on figure~\ref{fig:height:ground-truth-color-mesh}.
