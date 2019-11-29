@@ -1,10 +1,31 @@
-\section{Appendix B: AVT Manta G-505C Power Cable Pinout}
+\section{Appendix B: Powering AVT Manta G-505C}
 \label{sec:appendix-b}
 
-\begin{table}[H]
-	\renewcommand{\arraystretch}{1.2}
+To power the Manta G-504C, a laboratory benchtop was used. Manta consumes $3.9 W$~\cite{MantaG504C} while operating, accepting an input voltage between $8$ and $30$ $V_{DC}$. The power source used was set to  $12 V_{DC}$ and the current output was $\approx 0.33A$. Voltage and current were measured during all tests, and summarized qualitative results are presented on table~\ref{tab:manta-power}. 
+	
+\begin{table}[!ht]
 	\centering
-	\begin{tabular}{@{}cccl@{}}
+	\renewcommand{\arraystretch}{1.2}
+	\renewcommand{\tabcolsep}{0.45cm}
+	\begin{tabular}{@{}llll@{}}
+		\toprule
+					  & Minimum & Maximum & Median Value \\ \midrule
+		Current ($mA$) & $298 \pm 1$ & $330\pm 1$ & $312 \pm 1$ \\
+		Voltage ($V$)  & $12.00\pm 0.07 $ & $12.18\pm 0.07$ & $12.08\pm0.07$ \\
+		\bottomrule
+	\end{tabular}
+	\centering
+	\caption{Voltage and current measurements during Manta AVT G-504C operation. Minimum and Maximum values were registered, along with the median. The voltage errors were measured with a Univolt DT-64 multimeter and the current errors were measured on the power source digital display.}
+	\label{tab:manta-power}
+\end{table}
+
+The power cable provided is a U20 \ac{udp} cable with a HIROSE HR10A-10P-12S female connector. Since the mapping from the 8 pins \ac{udp} cable to the 12 pin connector was not available, a continuity test was made between the expected pinout of the power cable (for more details, see~\cite{AVTCables}) and its the real pinout. The results can be consulted on table~\ref{tab:manta-power-cable-pinout}.
+
+\begin{table}[!ht]
+	\renewcommand{\arraystretch}{1.2}
+	\rowcolors{3}{gray!10}{white}
+	\centering
+	\begin{tabular}{@{}C{2.5cm}cC{2.5cm}p{6cm}@{}}
 		\toprule
 		Connector Pin Number & I/O & Color on the cable & Pin Description \\ \midrule
 		1  & -   & Grey   & External GND \\
@@ -20,7 +41,8 @@
 		11 & In  & Blue   & Camera Input 2 - Opto Isolated \\
 		12 & Out & Green  & Camera Output 2 - Opto-isolated Open Emitter \\ 
 		\bottomrule 
-	\end{tabular} \caption{Full pinout for custom Power Cable for AVT Manta G504C RGB camera, using a HIROSE HR10A-10P-12S connector on the cable side. On the above table, `-' means that the pin as no direction associated and `N.C' stands for Not Connected on the cable side.}
+	\end{tabular} 
+	\caption{Full pinout for custom Power Cable for AVT Manta G504C RGB camera, using a HIROSE HR10A-10P-12S connector on the cable side. On the above table, `-' means that the pin as no direction associated and `N.C' stands for Not Connected on the cable side.}
 	\label{tab:manta-power-cable-pinout} 
 \end{table}
 
