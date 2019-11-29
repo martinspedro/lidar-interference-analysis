@@ -351,6 +351,7 @@ An additional \ac{ros} nodes is also created to compute and publish the rigid bo
 
 
 \subsection{Calibration Result}
+\label{subsec:calibration:extrinsic-results}
 To ease the calibration process, a \ac{ros} launch file is created. A launch file is written in \ac{xml} and provides instructions to \ac{ros} master node on how to run all the necessary nodes to implement a desired functionality. On this case, \texttt{rigid\_transform\_computation.launch}, launches the two visualizers (image and point cloud) and the node responsible for listening to the selected correspondences. 
 
 Several tests were performed with the possible algorithms for solving \ac{pnp}. Since for the version of \ac{opencv} used, $3.2.0$, the Direct-Least-Squares and Uncalibrated \ac{pnp} methods are unstable\cite{opencv_doc}, with only the Levenberg-Marquardt, Perspective-Three-Point and Effective~\ac{pnp} were tested. 
@@ -375,7 +376,12 @@ Although the planar chessboard used for intrinsic camera calibration was present
 	\label{fig:calibration-correspondences}
 \end{figure}
 
-After the manual selection of the points, the rotation and translation are obtained from the camera frame to the \ac{lidar} frame. If the transformation from the \ac{lidar} to the camera frame is required, the inverse transformation can be obtained by inverting the scalar component of the quaternion, $w$, such as $w^\text{LiDAR}_\text{camera} = - w^\text{camera}_\text{LiDAR}$. 
+After the manual selection of the points, the rotation and translation are obtained from the camera frame to the \ac{lidar} frame. If the transformation from the \ac{lidar} to the camera frame is required, the inverse transformation can be obtained by inverting the scalar component of the quaternion, $w$, as depicted in equation~\eqref{eq:quaternion-inversion}. 
+
+\begin{equation}
+	\label{eq:quaternion-inversion}
+	w^\text{LiDAR}_\text{camera} = - w^\text{camera}_\text{LiDAR}
+\end{equation}
 
 Extrinsic camera and \ac{lidar} calibration was performed whenever experimental measures were taken. The calibration for the camera intrinsic parameters given on equation~\ref{eq:camera-calibration-results} and the correspondences shown on image~\ref{fig:calibration-correspondences} are presented on below. On figure~\ref{fig:extrinsic-calibration-frames}, a visualization of the experimental setup sensors coordinate frames and the transformation between them is given.
 
