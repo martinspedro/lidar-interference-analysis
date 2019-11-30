@@ -200,7 +200,7 @@ Despite the straightforwardness of the process, one of the secondary goals of th
 
 However, preliminary tests with this tool indicate that it cannot save image topics at $9.2$~\ac{fps}. Other tests have shown that $8$~\ac{fps} is the best scenario where \texttt{rosbag} can record data without causing buffer flush due to overrun errors. 
 
-When calibrating the camera, \texttt{camera\_calibration} package drops the frame rate to $\approx 4$~\ac{fps}, because it cannot operate at the desired data flow. If de-Bayerization and/or rectification is being applied to the image for saving a pre-processed image, frame rate drops to $\approx 2$~\ac{fps}, since \texttt{image\_proc}, the package responsible for pre-processing the image, cannot process images at the data-rate required for them to be saved on disk, introducing an overhead. Therefore, all images are sent from camera on the raw format \texttt{BayerGB8} and recorded with \texttt{rosbag} in the same format. Note that despite the camera providing  the \texttt{RGB8Packed} color format, the hardware processing required on the camera hardware forces frame rate to be below $8$ \ac{fps}, reason why it was not chosen.
+When calibrating the camera, \texttt{camera\_calibration} package drops the frame rate to $\approx 4$~\ac{fps}, because it cannot operate at the desired data flow. If de-Bayerization\footnote{Converting the raw data, stored on a Bayer Filter raw format, to a RGB image} and/or rectification is being applied to the image for saving a pre-processed image, frame rate drops to $\approx 2$~\ac{fps}, since \texttt{image\_proc}, the package responsible for pre-processing the image, cannot process images at the data-rate required for them to be saved on disk, introducing an overhead. Therefore, all images are sent from camera on the raw format \texttt{BayerGB8} and recorded with \texttt{rosbag} in the same format. Note that despite the camera providing  the \texttt{RGB8Packed} color format, the hardware processing required on the camera hardware forces frame rate to be below $8$ \ac{fps}, reason why it was not chosen.
 
 At 8~\ac{fps}, the bandwidth occupied by a 5~\ac{mp} image stream is $8 \cdot 2452 \cdot 2056 \approx \SI[per-mode=symbol]{40}{\mega\byte\per\second}$. Manta bandwidth limit configuration register was set to a value $25\%$ higher, \SI[per-mode=symbol]{50}{\mega\byte\per\second}, to accommodate other transmissions from the computer to camera and vice-versa. No bandwidth problems were registered, besides occasionally frame drops on the starting or ending of computer processes.
 
@@ -411,7 +411,7 @@ Extrinsic camera and \ac{lidar} calibration was performed whenever experimental 
 \end{figure}
 
 \subsection{Comparison with \ac{kitti}}
-\label{subsec:calibration:kitii-comparision}
+\label{subsec:calibration:kitti-comparision}
 
 On \ac{kitti}, the number of coordinate frames is greater and have more complex interactions. While on the experimental setup the coordinates frames are all fixed, on \ac{kitti}, there is only one fixed frame, \texttt{world}. The car coordinate frame is named \texttt{base\_link} and the transformation between the \texttt{base\_link} and the camera are time-dependent.
 
@@ -432,3 +432,12 @@ Comparing with our experimental setup, the \ac{lidar} frame is similar and the c
 	\caption{TF visualization on \texttt{Rviz} of the TF tree between a subset of \ac{kitti}'s setup coordinate frames. \texttt{velo\_link} and \texttt{camera\_color\_left} represent the coordinate frames of the Velodyne HDL-64E \ac{lidar} and the RGB left camera, respectively.}
 	\label{fig:kitti-tf-frames}
 \end{figure}
+
+\section{Final Remarks}
+\label{sec:calibration:final-remarks}
+
+On this chapter, the experimental setup is presented with calibration thechniques and algorithms for intrinsic and extrinsic camera calibration. Camera, \ac{lidar} and lens specifications are detailed and briefly discussed, and the network setup and connection with the computer is also presented. Since our attempts focus on understanding the interference between \ac{lidar}'s and camera to accuratley sense the environment, a test between \ac{lidar} and the camera interference is also undertaken to assess if the \ac{lidar} interferes with the camera, from we conclude it doesnt.
+
+Sensory calibration of the experimental setup is done, preparing the data acquisition from the camera and \ac{lidar} to construct the experimental setup dataset. Intrinsic camera calibration is done, by using \ac{ros} \texttt{camera\_calibrator.py} package and moving a chessboard in front of the camera, combining rotation and translation motions. Using \acl{epnp}, the camera intrinsic matrix and the distortion coefficients for the lens are determined, which are used to rectify the camera image. Regarding \ac{lidar} calibration, the device comes calibrated by the manufacturer and only a few azimuthal and polar angle coefficients need to be loaded by the firmware and driver for measurement correction.
+
+work being developed on data fusion between the camera and \ac{lidar} (Chapter~\ref{chapter:sensor-fusion}), object detection on image and estimating the correspondent bounding boxes on 
