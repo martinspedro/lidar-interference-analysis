@@ -37,7 +37,7 @@ Projecting \ac{lidar} data to the image can be performed by re-purposing equatio
 
 Projecting \ac{lidar} data to the camera coordinate frame results on a 2D point that can be used to index the image pixel matrix. However, since the \ac{lidar} \ac{fov} is wider than the camera's, it is necessary to verify if the representation of the \ac{lidar} point on the camera referential corresponds to a valid image pixel. The camera orientation should also be considered, since the \ac{lidar} points on its negative z-axis mirror the points of it positive z-axis, corresponding to the same pixel.
 
-To translate and rotate the \ac{lidar} data to match the camera coordinate frame, the \ac{lidar} points are projected to the image using the affine transforms of equation~\ref{eq:lidar-to-camera-affine}. 
+To translate and rotate the \ac{lidar} data to match the camera coordinate frame, the \ac{lidar} points are projected to the image using the affine\footnote{Affine coordinates are the coordinates of a Projective space, such as the Cartesian coordinates are the coordinates of an Euclidean space.} transformation of equation~\ref{eq:lidar-to-camera-affine}. 
 
 \begin{equation}
 	\label{eq:lidar-to-camera-affine}
