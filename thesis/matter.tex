@@ -213,7 +213,7 @@
 %}%
 
 % Custom macros
-\def\etal{~\emph{et al}~}
+\def\etal{~\emph{et al.}~}
 \newcommand{\E}{\mathrm{e}} 
 \newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
 \def\citeneeded{\textsuperscript{\textit{\textcolor{blue}{citation needed}}}}
@@ -239,6 +239,8 @@
 \DeclareSIUnit{\bytes}{bytes}
 \DeclareSIUnit{\flop}{FLOP}
 \DeclareSIUnit{\flops}{FLOPS}
+\DeclareSIUnit{\revolutions}{revs}
+\DeclareSIUnit[per-mode=symbol]{\revspersecond}{\revolutions\per\second}
 
 % Begin document
 \begin{document}
@@ -373,6 +375,7 @@
 
 
 %Load appendix
+\newpage
 \input{appendix/appendix-a} \newpage 
 \input{appendix/appendix-b} \newpage
 \input{appendix/appendix-c}

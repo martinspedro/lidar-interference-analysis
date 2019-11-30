@@ -1,14 +1,14 @@
 \chapter{\ac{lidar} and Camera Data Fusion}
 \label{chapter:sensor-fusion}
 
-Data fusion consists on combining the information from two or more sources of data, that can be of equal or different types, adding value to the data set and allowing newer insights that are not possible from the parts. Data fusion (and sensor fusion) are two widely topics used on several areas, but on the context of this research, they mean that the depth information from the \ac{lidar} is combined with the color data from the camera.
+Data fusion consists of combining the information from two or more sources of data, that can be of equal or different types, adding value to the data set and allowing newer insights that are not possible from the parts alone, such as a representation on which is possible to understand the depth differences  between objects that are colored for easier identification. Data fusion (and sensor fusion) are two widely topics used on several areas, such as Industry 4.0, robotics and autonomous vehicles; but on the context of this research, it means that the depth information from the \ac{lidar} is combined with the color data from the camera.
 
-A pre-requisite to combine multiple sources of the data is that the relation between the information and the sensors must be known. In this case, this relation is the rigid body transform that allows the conversion between \ac{lidar} and camera coordinate frames. Such rigid body transform is already obtained in the previous chapter, on section~\ref{sec:calibration:extrinsic}. Examples of sensor fusion are also been presented on figure~\ref{fig:point_cloud_camera_fusion_example} from section~\nameref{sec:sota:sensor-fusion}.
+A pre-requisite to combine multiple sources of data is that a relation between the sensors is known. In this case, this relation is the rigid body transformation that allows the conversion between \ac{lidar} and camera coordinate frames. Such rigid body transform is already obtained in the previous chapter, in section~\ref{sec:calibration:extrinsic}. Examples of sensor fusion are also been presented on figure~\ref{fig:point_cloud_camera_fusion_example} from section~\ref{sec:sota:sensor-fusion}.
 
-As detailed in section~\ref{sec:sota:sensor-fusion}, two possible ways for combining \ac{lidar} and camera data exist: presenting depth information overlaid on an image or color information on a point cloud. For the purpose of this research, we are only interested on the latter, as it provides, on our opinion, a better way to verify the correctness of the calibration of chapter~\ref{chapter:calibration} and a more interesting \ac{lidar} interference analyses and possible mitigation.
+As detailed in section~\ref{sec:sota:sensor-fusion}, two possible ways for combining \ac{lidar} and camera data exist: presenting depth information overlaid on an image or color information on a point cloud. For the purpose of this work, we are only interested on the latter, as it provides, on our opinion, a better way to verify the correctness of the calibration of chapter~\ref{chapter:calibration} and a more interesting \ac{lidar} interference analysis and possible mitigation.
 
 \section{Combining \ac{lidar} and Camera Data}
-``Point Cloud Coloring'' consists on augmenting the information contained on a point cloud by adding to each point a RGB triplet indicating the point's color. Velodyne point clouds, besides the Euclidean coordinates of the point, also contain the intensity measurement and the laser ID/ring number\footnote{Laser ID and ring number are two concepts that can be inter-changed without loss of context. The former is more commonly used on written text while the latter is used on the source code.} of the laser and photoreceptor pair.
+``Point Cloud Coloring'' consists of augmenting the information contained on a point cloud by adding to each point a RGB triplet indicating the point's color. Velodyne point clouds, besides the Euclidean coordinates of the point, also contain the intensity measurement and the laser ID/ring number\footnote{Laser ID and ring number are two concepts that can be inter-changed without loss of context. The former is more commonly used on written text while the latter is used on the source code.} of the laser and photodetector pair.
 
 To add color data to the point cloud, two approaches can be used, depending on the source and target coordinate system:
 
@@ -20,24 +20,24 @@ To add color data to the point cloud, two approaches can be used, depending on t
 Both approaches have their advantages and drawbacks, which will be discussed on the next two sub-sections.
 
 \subsection{Camera $\rightarrow$ \ac{lidar}} 
-Using the camera as the source coordinate system implies that the 2D pixel's information must be converted to a tridimensional format. However, when applying equation~\ref{eq:camera_transform_full}, depth and scale information are lost, and without further constrains, it is not possible to determine the position of the 3D point that gave origin to the image pixel\footnote{For more information, the reader is advised to research on Single View Geometry or see Part I of~\cite{mvg_book}.}. 
+Using the camera as the source coordinate system implies that the 2D pixel's information must be converted to a tridimensional format. However, when applying equation~\ref{eq:camera_transform_full}, depth and scale information are lost, and without further constraints, it is not possible to determine the position of the 3D point that gave origin to the image pixel\footnote{For more information, the reader is advised to research on Single View Geometry or see Part I of~\cite{mvg_book}.}. 
 
-Therefore, re-projecting pixels to a 3D coordinate system is an undetermined system of equations, causing the geometric representation of the system to be either a ray or a quadrangular pyramid, depending on the camera sensor being considered continuous or discrete, respectively. For simplification, from now on it is considered that the 3D representation of a pixel is a ray that contains the focal point and the pixel to be projected.
+Therefore, re-projecting pixels to a 3D coordinate system is an under-determined system of equations, causing the geometric representation of the system to be either a ray or a quadrangular pyramid, depending on the camera sensor being considered continuous or discrete, respectively. For simplification, from now on it is considered that the 3D representation of a pixel is a ray that contains the focal point and the pixel to be projected.
 
-After computing the ray coefficients, for data fusion the pixels projected into rays must be matched to the point cloud points. Due to the sparse nature of the \ac{lidar} data, most of the pixels does not have a correspondence with 3D points, and a criterion to reduce the number of pixels projected could be used. For the Velodyne VLP-16, the azimuthal step is $0.2$º and the polar step $2$º. Therefore, the number of pixels to be projected can be reduced, but that reduction must be accompanied by a solution for dealing with multiple matches and point color from multiple pixels. Dealing with multiple matches implies proposing an algorithm that decides  how to color a group of 3D points that are the correspondence of a group of pixels, since a group of pixels contains pixels with different RGB values.
+After computing the ray coefficients, for data fusion the pixels projected into rays must be matched to the point cloud points. Due to the sparse nature of the \ac{lidar} data, most of the pixels do not have a correspondence with 3D points, and a criterion to reduce the number of pixels projected could be used. For the Velodyne VLP-16, the azimuthal step is \SI{0.2}{\degree} and the polar step \SI{2}{\degree}. Therefore, the number of pixels to be projected can be reduced, but that reduction must be accompanied by a solution for dealing with multiple matches and point color from multiple pixels. Dealing with multiple matches implies proposing an algorithm that decides  how to color a group of 3D points that are the correspondence of a group of pixels, since a group of pixels contains pixels with different RGB values.
 
 Once the pixels have been projected to rays on the camera coordinate frame, before they can be matched with the \ac{lidar} points, the coefficients that define the ray must be converted to the \ac{lidar} coordinate frame.
 
-The major drawback of this method is that for high definition images, the considerations on reducing the number of projected pixels must be taken, since the number of rays to be computed can become impractical. For our experimental setup, a 5~\ac{mp}, without any optimizations, would require the computation of more than 5 million rays, their projection to the point cloud coordinate frame and matching with the point cloud points.
+The major drawback of this method is that for high definition images, the considerations on reducing the number of projected pixels must be taken, since the number of rays to be computed can become impractical. For our experimental setup, not considering any optimizations, would require the computation of more than 5 million rays, their projection to the point cloud coordinate frame and matching with the point cloud points.
 
 
 \subsection{\ac{lidar} $\rightarrow$ Camera}
 \label{subsec:sensor-fusion-lidar-to-camera}
-Projecting \ac{lidar} data to the image can be performed by re-purposing equation~\ref{eq camera_transform_full}: the object points are considered to be \ac{lidar} 3D point coordinates and the joint rotation and translation matrix is replaced by the extrinsic transform between the \ac{lidar} and the camera coordinate frame, which is the inverse transform of the one determined in chapter~\ref{chapter:calibration}.
+Projecting \ac{lidar} data to the image can be performed by re-purposing equation~\eqref{eq: camera_transform_full}: the object points are considered to be \ac{lidar} 3D point coordinates and the joint rotation and translation matrix are replaced by the rigid body transformation between the \ac{lidar} and the camera coordinate frame, which can be obtained by inverting the rigid body transformation determined in Section~\ref{sec:calibration:extrinsic}. As detailed in sub-Section~\ref{subsec:calibration:extrinsic-results}, this inversion, since we are using a quaternion notation, is equivalent to change the quaternion scalar component to its symmetric number, as depicted in equation~\eqref{eq:quaternion-inversion}.
 
-Projecting \ac{lidar} data to the camera coordinate frame results on a 2D point that can be used to index the image pixel matrix. However, since the \ac{lidar} \ac{fov} is wider than the camera's, it is necessary to verify if the representation of the \ac{lidar} point on the camera referential corresponds to a valid image pixel. The camera orientation should also be considered, since the \ac{lidar} points on its negative z-axis mirrored the points of it positive z-axis, corresponding to the same pixel.
+Projecting \ac{lidar} data to the camera coordinate frame results on a 2D point that can be used to index the image pixel matrix. However, since the \ac{lidar} \ac{fov} is wider than the camera's, it is necessary to verify if the representation of the \ac{lidar} point on the camera referential corresponds to a valid image pixel. The camera orientation should also be considered, since the \ac{lidar} points on its negative z-axis mirror the points of it positive z-axis, corresponding to the same pixel.
 
-To translate and rotate the \ac{lidar} data to match the camera coordinate frame, the \ac{lidar} points are projected to the image using the affine transforms of equation~\ref{eq:lidar-to-camera-affine}. 
+To translate and rotate the \ac{lidar} data to match the camera coordinate frame, the \ac{lidar} points are projected to the image using the affine\footnote{Affine coordinates are the coordinates of a Projective space, such as the Cartesian coordinates are the coordinates of an Euclidean space.} transformation of equation~\ref{eq:lidar-to-camera-affine}. 
 
 \begin{equation}
 	\label{eq:lidar-to-camera-affine}
@@ -73,6 +73,7 @@ To obtain the normalized 2D Point that represents the coordinates of a pixel in 
 
 
 \section{Implementation}
+\label{sec:sensor-fusion:implementation}
 The implementation we opt to follow is the second method described: \ac{lidar}  $\rightarrow$ Camera, for three reasons:
 
 \begin{enumerate}
@@ -82,45 +83,60 @@ The implementation we opt to follow is the second method described: \ac{lidar}  
 \end{enumerate}
 
 
-To fuse the \ac{lidar} and camera data, a ``Point Cloud Coloring'' \ac{ros} node is implemented. This node is responsible for synchronizing the camera information and images with the point cloud data from the \ac{lidar}, triggering a callback function on every synchronization event. On the callback, the point cloud points are translated and rotated to match the camera coordinate frame and the points are projected to the image using the affine described previously on equation~\ref{eq:lidar-to-camera-affine}.
+To fuse the \ac{lidar} and camera data, a ``Point Cloud Coloring'' \ac{ros} node is implemented. This node is responsible for synchronizing the camera information and images with the point cloud data from the \ac{lidar}, triggering a callback function on every synchronization event. On the callback, the point cloud points are translated and rotated to match the camera coordinate frame and the points are projected to the image using the affine transformation described previously in equation~\ref{eq:lidar-to-camera-affine}.
 
-The full node graph is presented on figure~\ref{fig:sensor-fusion-rosgraph}, containing not only the node responsible for the data fusion itself, but also the other nodes required for the calibration. On this image, \emph{camera} nodes and topics are boxed together, visually separating the two types of sensors: camera and image; and \ac{lidar} and point clouds.
+The full node graph is presented on figure~\ref{fig:sensor-fusion-rosgraph}, containing not only the node responsible for the data fusion itself, but also the other nodes required for the calibration. In this image, \texttt{camera} nodes and topics are boxed together, visually separating the two types of sensors: camera and image; and \ac{lidar} and point clouds.
 
-A \emph{tf} (short for transform) block can also be shown, receiving the output of two nodes: \emph{LiDAR\_to\_world} and \emph{compute\_rigid\_body\_transform}. The first a static transform publisher, that sends the rotation quaternion and translation vector that can be used to positioning the \ac{lidar} in the referential for the test scenario; the second is a node that publishes the rigid body transform obtained in section~\ref{sec:calibration:extrinsic}. Lastly, \emph{Point\_Cloud\_Coloring} node receives all this data and publishes a colored point cloud, at $\approx 4.2 Hz$, more than two times slower that the $10 Hz$ at which ``common'' point cloud data is published on the \ac{ros} network. \emph{Rviz} is a \ac{ros} multi-sensor data visualizer.
+A \texttt{tf} (short for transform) block can also be shown, receiving the output of two nodes: \texttt{LiDAR\_to\_world} and \texttt{compute\_rigid\_body\_transform}. The first a static transform publisher, that sends the rotation quaternion and translation vector that can be used to positioning the \ac{lidar} in the referential for the test scenario; the second is a node that publishes the rigid body transform obtained in section~\ref{sec:calibration:extrinsic}. Lastly, \texttt{Point\_Cloud\_Coloring} node receives all this data and publishes a colored point cloud, at $\approx \SI{4.2}{\hertz}$, more than two times slower that the \SI{10}{\hertz} at which ``common'' point cloud data is published on the \ac{ros} network. \texttt{Rviz} is a \ac{ros} multi-sensor data visualizer.
 
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 	\centering
 	\def\svgwidth{\columnwidth}
 	\graphicspath{{img/sensor_fusion/}}
 		\includesvg{img/sensor_fusion/sensor-fusion-with-calibration}
-		\caption{\ac{ros} graph with the nodes used in data fusion between the \ac{lidar} and camera. The camera and \ac{lidar} topics are separated visually, with the camera still requiring the \emph{image\_proc} package to de-Bayering the raw image data. Data is fused on the node \emph{Point\_Cloud\_Coloring}, using the RGB image, point cloud, camera parameters and rigid body transforms.}
+		\caption{\ac{ros} graph with the nodes used in data fusion between the \ac{lidar} and camera. The camera and \ac{lidar} topics are separated visually, with the camera still requiring the \texttt{image\_proc} package to de-Bayering the raw image data. Data is fused on the node \texttt{Point\_Cloud\_Coloring}, using the RGB image, point cloud, camera parameters and rigid body transforms.}
 	\label{fig:sensor-fusion-rosgraph}
 \end{figure}
 
 
 \section{Results}
-On figure~\ref{fig:cambada-sensor-fusion}, the results using the experimental data shown in calibration are presented. Due to the nature of the figure (an image of a tridimensional colored point cloud), one does not instantly recognize the chessboard pattern, the ball and the person; and might even consider the results as unsatisfactory. 
+The algorithm described on the section above is applied both to our experimental dataset and \ac{kitti}'s, being the results compared. Two test locations are used: a larger and a smaller room, with the user and the objects of interest at different distances from the camera.
 
-\begin{figure}[H]
+Fusing the data on our experimental dataset (sub-Section~\ref{subsec:sensor-fusion:experimental-dataset}), requires applying the calibration steps detailed on chapter~\ref{chapter:calibration}:
+
+\begin{enumerate}
+	\item Intrinsic camera calibration~(subsection~\ref{subsec:calibration:intrinsic}) to determine the camera intrinsic parameters and its projection matrix, to rectify the image and project world points to the camera coordinate frame;
+	\item \ac{lidar} offset calibration, by loading the azimuthal and polar correction parameters that intrinsically calibrate the \ac{lidar};
+	\item Rigid body transformation determination, by selecting the correspondences that allow the extrinsic calibration between the \ac{lidar} and camera.
+\end{enumerate}
+
+After these steps, our experimental data can be fused using the implementation described in Section~\ref{sec:sensor-fusion:implementation}.
+
+Regarding \ac{kitti}'s dataset, the steps mentioned above do not have to be taken and sensor-fusion can be done directly using the dataset data, since the rigid body transformation between sensors is already available. Results for this dataset are shown on sub-Section~\ref{subsec:sensor-fusion:kitti}.
+
+\subsection{Experimental Dataset}
+\label{subsec:sensor-fusion:experimental-dataset}
+The results using the experimental data shown in calibration are presented, on figure~\ref{fig:cambada-sensor-fusion}. Due to the nature of the figure (an image of a tridimensional colored point cloud), one does not instantly recognize the chessboard pattern, the ball and the person; and might even consider the results as unsatisfactory. 
+
+\begin{figure}[!ht]
 	\centering
-	\begin{subfigure}[c]{0.45\textwidth}
+	\begin{subfigure}[t]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{img/sensor_fusion/cambada_fusion_points.png}
-		\caption{The coordinate frames of the \ac{lidar} and the camera are also present on the image. The colored point cloud is represented with points of 4 pixels and 70\% of transparency.}
+		\caption{}
 		\label{fig:sensor-fusion:cambada-points}
 	\end{subfigure}
 	\qquad
-	\begin{subfigure}[c]{0.45\textwidth}
+	\begin{subfigure}[t]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{img/sensor_fusion/cambada_fusion_squares.png}
 		\caption{The rectangles presented on the image have a size 4 cm and a transparency of 70\%.}
 		\label{fig:sensor-fusion:cambada-squares}
 	\end{subfigure}
-\caption{Data fusion between the camera and the \ac{lidar} on a \ac{msl} field. The colored point cloud presented with points~\ref{fig:sensor-fusion:cambada-points} or squares~\ref{fig:sensor-fusion:cambada-squares} does not improve significantly the results. Due to the low density of data, it is not immediate the recognition of the ball, box, person and chessboard.}
+	\caption{Data fusion between the camera and the \ac{lidar} on a \ac{msl} field. The colored point cloud is presented on sub-figure: (\subref{fig:sensor-fusion:cambada-points}) with points of 4 pixels and 70\% of transparency, with the coordinate frames also shown; (\subref{fig:sensor-fusion:cambada-squares}) with squares of \SI{4}{\centi\meter} of size and a transparency of 70\%.}
 	\label{fig:cambada-sensor-fusion}
 \end{figure}
 
-
-However, such results are obtained due to a low point density (VLP-16 only has 16 lines of data\footnote{Actually, our Velodyne VLP-16 has one of its lasers broken, therefore we only have 15 lines of data.}) and distance from the objects to the camera (a few meters). Another test, with different objects and on a smaller room, with the objects of interest closer, is shown on figure~\ref{fig:dark-room-sensor-fusion}.
+However, such results are obtained with a low point density (VLP-16 only has 16 lines of data\footnote{Actually, our Velodyne VLP-16 has one of its lasers out of order, therefore we only have 15 lines of data.}) and a distance from the objects to the camera (a few meters). Another test, with different objects in a smaller room and with the objects of interest closer, is shown on figure~\ref{fig:dark-room-sensor-fusion}.
 
 \begin{figure}[H]
 	\centering
@@ -129,25 +145,45 @@ However, such results are obtained due to a low point density (VLP-16 only has 1
 	\label{fig:dark-room-sensor-fusion}
 \end{figure}
 
-Lastly, to demonstrate the effect of point cloud density on point cloud coloring, the nodes developed were applied to \ac{kitti} data set, which uses a Velodyne HDL-64E, with 64 pairs of laser beams and photoreceptors, having $4\times$ more lines than our setup. The resulting colored point cloud is presented on figure~\ref{fig:kitti-sensor-fusion}, and the differences between the figures~\ref{fig:cambada-sensor-fusion} and~\ref{fig:dark-room-sensor-fusion} can clearly be noted from figure~\ref{fig:kitti-sensor-fusion}. 
+\subsection{\ac{kitti}}
+\label{subsec:sensor-fusion:kitti}
+Applying the developed nodes to \ac{kitti} data set, which uses a Velodyne HDL-64E, with 64 pairs of laser beams and photodetectors, having $4\times$ more lines than our setup, results on the colored point cloud presented in figure~\ref{fig:kitti-sensor-fusion}. This cloud has some differences when compared with the figures~\ref{fig:cambada-sensor-fusion} and~\ref{fig:dark-room-sensor-fusion}, such as:
 
-On figure~\ref{fig:kitti-sensor-fusion} delays between the colored point cloud and the image are visible. That occurs since our implementation cannot run in real time and \ac{kitti} camera data is published at $10 Hz$.
+\begin{itemize}
+	\item The increase of photorealism in the colored point cloud, due to the increase in the number of laser beams;
+	\item The dynamic scenario on \ac{kitti} dataset, compared to ours static experimental scenario.
+\end{itemize}
 
-\begin{figure}[H]
+On figure~\ref{fig:kitti-sensor-fusion}, a mismatch between the top and bottom part of the sub-figures can be observed, even if accounting for the different \ac{fov} and view port for the camera and \ac{lidar}. This mismatch is due to the processing delay introduced by the point cloud coloring \ac{ros} node, which results on the colored point cloud being published to the \ac{ros} network with a large delay and our implementation cannot keep up with the publishing demand of \ac{kitti}'s dataset data rate, which causes the mismatch between the points positioning along the car direction of movement. Such mismatch and delay, however, is only due to the hardware  specifications running the algorithm, as is completely eliminated by using a computer with better specifications, specially on \ac{ram}, \ac{gpu} and \ac{cpu}.
+
+\begin{figure}[!ht]
 	\centering
-	\begin{subfigure}[c]{0.45\textwidth}
+	\begin{subfigure}[c]{0.8\textwidth}
 		\includegraphics[width=\textwidth]{img/sensor_fusion/kitti-sensor-fusion-1.png}
-		\caption{Data fusion on a road scenario from \ac{kitti} dataset. The cyclist and the car can clearly been identified on the colored point cloud. Colored point cloud is represented with Points with 6 pixels of size and 50\% of transparency.}
+		\caption{}
 		\label{fig:kitti-sensor-fusion-1}
 	\end{subfigure}
-	\qquad
-	\begin{subfigure}[c]{0.45\textwidth}
+	\\ \vspace{4mm}
+	\begin{subfigure}[c]{0.8\textwidth}
 		\includegraphics[width=\textwidth]{img/sensor_fusion/kitti-sensor-fusion-2.png}
-		\caption{Data fusion on a road scenario from \ac{kitti} dataset. The car, the wall, the road lines and the shadows can clearly be seen on the colored point cloud. Colored point cloud is represented with Points with 6 pixels of size and 50\% of transparency.}
+		\caption{}
 		\label{fig:kitti-sensor-fusion-2}
 	\end{subfigure}
-	\caption{Data fusion between the camera and the \ac{lidar} on the \ac{kitti} dataset. On the top there is the image and on the bottom the colored point cloud. Note that there is a mismatch between the image being shown and the image used to create the colored point cloud of 2 frames.}
+	\caption{Data fusion between camera and \ac{lidar} applied to the \ac{kitti} dataset. On the top there is the image and on the bottom the colored point cloud, displayed in points with 6 pixels of size and 50\% of transparency. Note that there is a mismatch between the image being shown and the image used to create the colored point cloud of 2 frames. In sub-figure~(\subref{fig:kitti-sensor-fusion-1}), a cyclist and the car can clearly been identified on the colored point cloud and in sub-figure~(\subref{fig:kitti-sensor-fusion-2}), the car, the wall, the road lines and the shadows can clearly be seen on the colored point cloud.}
 	\label{fig:kitti-sensor-fusion}
 \end{figure}
 
+
+\subsection{Impact of point cloud density}
+On figure~\ref{fig:dark-room-sensor-fusion}, it is evident that coloring a point cloud results on the loss of many high level features that are present on an image. On the resulting colored point cloud can be difficult to distinguish any objects with the original image and if the viewer does not know the scene being displayed.
+
+Such loss of context and high level features is due to the scarce nature of a point cloud in relation to the camera. A 16-beam \ac{lidar} would only have 16 rows of depth data, while a 5\ac{mp} image will have 1920 rows of pixels. That relation means that only 0.83\% of the image rows will have correspondences on the point cloud. Such is the case of our experimental data.
+
+If the number of pixels is considered instead, assuming a high camera \ac{fov} of \SI{90}{\degree} (which is not our case, since monocular camera \ac{fov} is normally lower), a quarter of the point cloud points, $\approx 7200$ points are candidates for correspondences between camera and \ac{lidar}, resulting in only 0.14\% of pixels on the image having a correspondence to the point cloud. 
+
+For \ac{kitti}'s dataset, a 2\ac{mp} camera is used and a 64 beams \ac{lidar}, which yields almost 6\% of the image rows having correspondences and $\approx 5.76\%$ of the image pixels having a corresponding point on the \ac{lidar} point cloud. Comparing with our setup, \ac{kitti} as a number of correspondences between image pixels and point cloud points 41 times higher, which results on the clear difference in photorealism between figures~\cite{fig:cambada-sensor-fusion} and \cite{fig:dark-room-sensor-fusion} with figure~\cite{fig:kitti-sensor-fusion}.
+
+Therefore, we can conclude that merging color with the point cloud depth information, on the way we implemented it, is not a feasible solution either to generate better data for autonomous vehicles, assessing the calibration results or possibly mitigating the interference, due to the losses in the information contained on the image. A solution to tackle such scarcity of the \ac{lidar} data and its impacts on point cloud coloring would be to generate a mesh cloud  from a point cloud and then performing mesh cloud coloring and/or interpolation of the point cloud, in order to increase it point cloud density. Obviously, using a \ac{lidar} with a higher number of laser beams will help mitigate this problem.
+
+%\section{Final Remarks}
 
