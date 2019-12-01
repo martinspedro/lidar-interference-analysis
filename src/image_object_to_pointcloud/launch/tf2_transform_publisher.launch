@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+Author: Pedro Martins (martinspedro@av.it.pt)
+Description: TODO
+-->
+
+<launch>
+   <!-- PARAMETERS -->
+   <param name="use_sim_time" value="true" />
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_velodyne"
+    args="−0.156714088124 −0.0206731034739 -0.258170823407 0.487219246678 −0.499909358687 0.521690432045 -0.490456044796 camera_link velodyne" /> -->
+<node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_velodyne"
+  args="−0.156714088124 −0.0206731034739 -0.258170823407  0.4872192 -0.4999094 0.5216904 -0.490456 velodyne camera_link " />
+</launch>
