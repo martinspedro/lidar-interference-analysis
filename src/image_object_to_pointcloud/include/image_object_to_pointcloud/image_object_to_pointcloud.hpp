@@ -21,7 +21,7 @@
 #include "jsk_recognition_msgs/BoundingBox.h"
 
 // Define types to be used depending on the dataset
-#define USE_WITH_KITTI
+//#define USE_WITH_KITTI
 
 #ifdef USE_WITH_KITTI
 typedef point_cloud::PointCloudXYZ PointCloudType;
@@ -39,7 +39,7 @@ inline bool pixelInsideBoundingBox(cv::Point2i pixel, darknet_ros_msgs::Bounding
          (pixel.y <= bounding_box.ymax);
 }
 
-inline cv::Point3d PCLToOpenCvPoint(pcl::PointXYZ pcl_point)
+inline cv::Point3d PCLToOpenCvPoint(PointType pcl_point)
 {
   return cv::Point3d(pcl_point.x, pcl_point.y, pcl_point.z);
 }
@@ -53,7 +53,7 @@ inline Eigen::Vector3f PCLPointXYZToEigenVector3f(pcl::PointXYZ pcl_point)
   return temp_vec;
 }
 
-inline geometry_msgs::Vector3 PCLPointXYZToGeometryMsgsVector(pcl::PointXYZ pcl_point)
+inline geometry_msgs::Vector3 PCLPointXYZToGeometryMsgsVector(PointType pcl_point)
 {
   geometry_msgs::Vector3 temp_vec;
   temp_vec.x = (double)(pcl_point.x);
@@ -62,7 +62,7 @@ inline geometry_msgs::Vector3 PCLPointXYZToGeometryMsgsVector(pcl::PointXYZ pcl_
   return temp_vec;
 }
 
-inline geometry_msgs::Point PCLPointXYZToGeometryMsgsPoint(pcl::PointXYZ pcl_point)
+inline geometry_msgs::Point PCLPointXYZToGeometryMsgsPoint(PointType pcl_point)
 {
   geometry_msgs::Point temp_point;
   temp_point.x = (double)(pcl_point.x);

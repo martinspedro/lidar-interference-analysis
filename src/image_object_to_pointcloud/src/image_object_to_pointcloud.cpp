@@ -1,4 +1,5 @@
 
+#define PCL_NO_PRECOMPILE
 #define EIGEN_RUNTIME_NO_MALLOC  // Define this symbol to enable runtime tests for allocations
 
 #include <Eigen/Core>
@@ -218,7 +219,7 @@ void computeOBB(const PointCloudType::ConstPtr point_cloud_cluster_ptr,
   feature_extractor.setInputCloud(point_cloud_cluster_ptr);
   feature_extractor.compute();
 
-  pcl::PointXYZ min_point_OBB, max_point_OBB, position_OBB;
+  PointType min_point_OBB, max_point_OBB, position_OBB;
   Eigen::Matrix3f rotational_matrix_OBB;
   feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
 
@@ -254,8 +255,7 @@ void computeAABB(const PointCloudType::ConstPtr point_cloud_cluster_ptr,
   feature_extractor.setInputCloud(point_cloud_cluster_ptr);
   feature_extractor.compute();
 
-  pcl::PointXYZ min_point_AABB;
-  pcl::PointXYZ max_point_AABB;
+  PointType min_point_AABB, max_point_AABB;
   feature_extractor.getAABB(min_point_AABB, max_point_AABB);
 
   geometry_msgs::Point AABB_centroid;  // Bounding Box middle Point
