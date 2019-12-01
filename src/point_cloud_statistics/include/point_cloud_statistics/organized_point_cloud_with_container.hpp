@@ -17,6 +17,8 @@
 #include <ros/console.h>
 #include <boost/shared_ptr.hpp>
 
+#include <cmath>
+
 namespace point_cloud
 {
 namespace organized
@@ -36,7 +38,7 @@ public:
 
   void registerPointCloud(pcl::PointCloud<DataT> unorganized_cloud)
   {
-    ROS_DEBUG_NAMED("call_stack", "[registerVelodynePointCloud]");
+    ROS_DEBUG_NAMED("call_stack", "[registerPointCloud]");
 
     for (int i = 0; i < unorganized_cloud.size(); ++i)
     {
@@ -44,6 +46,11 @@ public:
       ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
 
       // push_back point to data_points vector
+      if (unorganized_cloud.points[i].ring == velodyne::DEFAULT_RING_VALUE)
+      {
+        unorganized_cloud.points[i].ring = computeLaserID(unorganized_cloud.points[i]);
+      }
+
       this->at(azimuth_index, unorganized_cloud.points[i].ring).data_points.push_back(unorganized_cloud.points[i]);
     }
   }
@@ -51,7 +58,7 @@ public:
   template <typename IntensityT>
   void computeStats(std::vector<IntensityT>& azimuth, std::vector<IntensityT>& laser)
   {
-    ROS_DEBUG_NAMED("call_stack", "[registerVelodynePointCloud]");
+    ROS_DEBUG_NAMED("call_stack", "[computeStats]");
 
     for (int i = 0; i < this->height; ++i)
     {
@@ -93,6 +100,7 @@ public:
       }
       laser[i].mean /= (float)(this->width);
     }
+    ROS_DEBUG_NAMED("call_stack", "[registerVelodynePointCloud] End");
   }
 
   void generateModel(OrganizedPointCloud<DataT>* point_cloud)
@@ -131,8 +139,23 @@ protected:
     float fixed_point_shifted_azimuth = floor(shifted_azimuth * 10.0f) / 10.0f;
     float index =
         fixed_point_shifted_azimuth * (float)(this->width - 1) / point_cloud::organized::FULL_REVOLUTION_DEGREE_F;
-
     return (unsigned int)(index);
+  }
+
+  float getPolar(const DataT point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[getPolar]");
+    float r = computeEuclideanDistanceToOrigin(point);
+    return asin(point.z / r) * point_cloud::organized::RADIAN_TO_DEGREE_F;
+  }
+
+  unsigned int computeLaserID(const DataT point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[computeLaserID]");
+    float polar_angle = getPolar(point);
+    float rounded_polar_angle = roundf(polar_angle);
+    unsigned int index = velodyne::vlp16::getLaserIDfromPolarAngle((unsigned int)(rounded_polar_angle));
+    return index;
   }
 
   float computeEuclideanDistanceToOrigin(const DataT point)

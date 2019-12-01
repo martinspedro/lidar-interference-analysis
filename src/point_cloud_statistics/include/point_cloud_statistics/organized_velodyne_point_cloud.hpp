@@ -28,7 +28,7 @@ public:
     ROS_DEBUG_NAMED("call_stack", "[OrganizedVelodynePointCloud] with (%d, %d)", width, height);
   }
 
-  void organizePointCloud(const velodyne::VelodynePointCloud unorganized_cloud)
+  void organizePointCloud(velodyne::VelodynePointCloud unorganized_cloud)
   {
     ROS_DEBUG_NAMED("call_stack", "[organizeVelodynePointCloud]");
     this->header = unorganized_cloud.header;  // use sequence number, stamp and frame_id from the unorganized cloud
@@ -39,6 +39,13 @@ public:
       unsigned int azimuth_index = getAzimuthIndex(unorganized_cloud.points[i]);
 
       ROS_ASSERT_MSG(azimuth_index < this->width, "Azimuth index %d vs size %d", azimuth_index, this->width);
+
+      // If the ring value of the point is invalid (normally caused by PCL algorithms), compute ring value from Polar
+      // Angle
+      if (unorganized_cloud.points[i].ring == velodyne::DEFAULT_RING_VALUE)
+      {
+        unorganized_cloud.points[i].ring = computeLaserID(unorganized_cloud.points[i]);
+      }
 
       if (this->at(azimuth_index, unorganized_cloud.points[i].ring).ring == velodyne::DEFAULT_RING_VALUE)
       {
@@ -59,6 +66,25 @@ public:
                */
       }
     }
+  }
+
+  // \TODO This two functions are repeated from organized_point_cloud_with_container code and should be fixed
+protected:
+  float getPolar(const velodyne::PointXYZIR point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[getPolar]");
+    float r = computeEuclideanDistanceToOrigin(point);
+    return asin(point.z / r) * point_cloud::organized::RADIAN_TO_DEGREE_F;
+  }
+
+  unsigned int computeLaserID(const velodyne::PointXYZIR point)
+  {
+    ROS_DEBUG_NAMED("call_stack", "[computeLaserID]");
+    float polar_angle = getPolar(point);
+    float rounded_polar_angle = roundf(polar_angle);
+    unsigned int index = velodyne::vlp16::getLaserIDfromPolarAngle((unsigned int)(rounded_polar_angle));
+
+    return index;
   }
 };
 
