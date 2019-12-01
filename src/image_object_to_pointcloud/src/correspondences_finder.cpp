@@ -83,8 +83,13 @@ const double PIXEL_SIZE = 3.45e-6;
 
 const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyForCallback;
 
+#ifdef USE_WITH_KITTI
 const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
+const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_link";
+#else
+const std::string LIDAR_TF2_REFERENCE_FRAME = "velodyne";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
+#endif
 
 const bool EXTRACT_INDEX_FROM_POINT_CLOUD = true;
 const bool REMOVE_INDEX_FROM_POINT_CLOUD = false;
@@ -153,8 +158,12 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 
   // Note that Kitti inverts the image dimensions, therefore we invert them when creating a new cv::Size object
   filterPointCloudFromCameraROIs(object_count->count, b_boxes, point_cloud_camera_ptr, cam_model_,
-                                 cv::Size(im_dimensions.height, im_dimensions.height), NEAR_PLANE_DISTANCE,
-                                 FAR_PLANE_DISTANCE, index_ptr);
+#ifdef USE_WITH_KITTI
+                                 cv::Size(im_dimensions.height, im_dimensions.width),
+#else
+                                 cv::Size(im_dimensions.width, im_dimensions.height),
+#endif
+                                 NEAR_PLANE_DISTANCE, FAR_PLANE_DISTANCE, index_ptr);
 
   // EXTRACT_INDEX_FROM_POINT_CLOUD sets the filter to output a point cloud with the points of the given indexes
   pcl::ExtractIndices<PointType> point_cloud_idx_filter(EXTRACT_INDEX_FROM_POINT_CLOUD);
