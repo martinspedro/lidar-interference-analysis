@@ -169,6 +169,12 @@ add_executable(ground_truth_model_estimation_node
       src/organized_point_cloud_utilities.cpp
       src/vlp_16_utilities.cpp)
 
+add_executable(ground_truth_roi_model_estimation_node
+      src/ground_truth_roi_model_estimation_node.cpp
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp)
+
 add_executable(icp_model_estimation_node
       src/icp_model_estimation_node.cpp
       src/point_cloud_statistics.cpp
@@ -177,7 +183,14 @@ add_executable(icp_model_estimation_node
 
 add_executable(point_cloud_interference_analysis_node
       src/point_cloud_interference_analysis_node.cpp
-      src/bar_chart_plotter.cpp
+      src/cloud_statistical_data.cpp
+      src/point_cloud_statistics.cpp
+      src/organized_point_cloud_utilities.cpp
+      src/vlp_16_utilities.cpp
+    )
+
+add_executable(point_cloud_roi_interference_analysis_node
+      src/point_cloud_roi_interference_analysis_node.cpp
       src/cloud_statistical_data.cpp
       src/point_cloud_statistics.cpp
       src/organized_point_cloud_utilities.cpp
@@ -218,6 +231,12 @@ target_link_libraries(point_cloud_change_detection_node
    datasets_info
 )
 
+target_link_libraries(ground_truth_roi_model_estimation_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   datasets_info
+)
+
 target_link_libraries(ground_truth_model_estimation_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
@@ -231,6 +250,13 @@ target_link_libraries(icp_model_estimation_node
 )
 
 target_link_libraries(point_cloud_interference_analysis_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${PYTHON_LIBRARIES}
+   datasets_info
+)
+
+target_link_libraries(point_cloud_roi_interference_analysis_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${PYTHON_LIBRARIES}
