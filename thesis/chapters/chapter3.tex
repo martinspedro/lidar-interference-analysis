@@ -135,14 +135,14 @@ Focusing a camera can only be attained for an exact distance from the camera~\ci
 
 ``Acceptably sharp focus'' means that a point in the real world would not result in a point on the image (as happens in precise focus), but in a blurred spot~\cite{Photopillers}. However, if the size of blur is small enough, little to no differences can be perceived and the image is considered to be focused~\cite{Photopillers}. The maximum size at which this blur is not noticed by the viewer (given a specific sensor size, dimension of the viewed photo, viewing distance and acuity of the viewer) is when the \ac{coc} is smaller than the pixel size~\cite{Photopillers, Merklinger1993}.
 
-The first step in focusing an image requires the calculation of the hyperfocal distance, $H$, the distance at which the camera is focused to ensure objects from half of this distance to the infinity are in an ``acceptably sharp focus'' (referred to as just focus, from now on). This distance can be calculated using the equation~\ref{eq:hyperfocal_distance}, below, where $f$ is the focal length, $F_N$ is the F-number and $c$ the \ac{coc} limit. Hyperfocal near limit is defined as $H_\text{near} = \rfrac{H}{2}$.
+The first step in focusing an image requires the calculation of the hyperfocal distance, $H$, the distance at which the camera is focused to ensure objects from half of this distance to the infinity are in an ``acceptably sharp focus'' (referred to as just focus, from now on). This distance can be calculated using the equation~\eqref{eq:hyperfocal_distance}, below, where $f$ is the focal length, $F_N$ is the F-number and $c$ the \ac{coc} limit. Hyperfocal near limit is defined as $H_\text{near} = \rfrac{H}{2}$.
 
 \begin{equation}
 	\label{eq:hyperfocal_distance}
 	H = \frac{f^2}{F_Nc} + f \approx \frac{f^2}{F_Nc} 
 \end{equation}
 
-Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is obtained by subtracting the farthest and nearest distances at which an object is focused (see equation~\ref{eq:dof}), indicating the distance between this two points~\cite{Photopillers, Merklinger1993, mvg_book}. The nearest and farthest points can be calculated using the equations~\ref{eq:dof-near} and~\ref{eq:dof-far}, respectively, where $d$ is the target object distance to the camera sensor.
+Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is measured in meters and is obtained by subtracting the farthest and nearest distances at which an object is focused (see equation~\eqref{eq:dof}), indicating the distance between this two points~\cite{Photopillers, Merklinger1993, mvg_book}. The nearest and farthest points can be calculated using the equations~\eqref{eq:dof-near} and~\eqref{eq:dof-far}, respectively, where $d$ is the target object distance to the camera sensor.
 
 \begin{subequations}
 	\label{eq:dof_all}
@@ -153,9 +153,9 @@ Known the hyperfocal distance, the \acf{dof} can be calculated. \ac{dof} is meas
 	\end{align}
 \end{subequations}
 
-Equations~\ref{eq:dof_all} make it possible to select a desired \acl{dof} for an image that guarantees that all the objects of interest are focused. Taking in consideration that smaller apertures (bigger F-numbers) will increase the exposition time~\cite{Merklinger1993} (since the amount of light illuminating the sensor will be lower), a target distance can be selected with the guarantee that all the objects from the near \ac{dof} point to the far \ac{dof} will be sharp.
+Equations~\eqref{eq:dof_all} make it possible to select a desired \acl{dof} for an image that guarantees that all the objects of interest are focused. Taking in consideration that smaller apertures (bigger F-numbers) will increase the exposition time~\cite{Merklinger1993} (since the amount of light illuminating the sensor will be lower), a target distance can be selected with the guarantee that all the objects from the near \ac{dof} point to the far \ac{dof} will be sharp.
 
-Rewriting the equation~\ref{eq:dof-near} to calculate the objects distance, giving the minimum distance at the objects must be focused, one gets: %the equation~\ref{eq:dof-subject-distance}.
+Rewriting the equation~\eqref{eq:dof-near} to calculate the objects distance, giving the minimum distance at the objects must be focused, one gets: %the equation~\eqref{eq:dof-subject-distance}.
 
 \begin{equation}
 	\label{eq:dof-subject-distance}
@@ -191,7 +191,7 @@ For calibration, around 50 unique photos are taken for each setup. These images 
 		\includegraphics[width=0.9\textwidth]{img/camera-calibration/left-0048.png}
 	\end{subfigure}
 	
-	\caption{Subset of 6 figures used on camera intrinsic calibration. The figures are all on greyscale and for each figure, the chessboard pattern was moved to generate an unique rotational matrix and translation vector in relation to the camera coordinate frame.}
+	\caption{Subset of 6 figures used on camera intrinsic calibration. The figures are all on greyscale and for each figure, the chessboard pattern was moved to generate a unique rotational matrix and translation vector in relation to the camera coordinate frame.}
 	\label{fig:camera-calibration-images}
 \end{figure}
 
@@ -218,7 +218,7 @@ The F-number needs to be adjusted not only to ensure the requirements of the exp
 
 \subsubsection{\acl{dof} and calibration object}
 \label{subsec:calibration:dof-and-calibration-object}
-Solving equation~\ref{eq:hyperfocal_distance} and replacing its result on equation~\ref{eq:dof-subject-distance}, we can obtain $d$, the object distance at which the camera must be focused. The object to be focused is the calibrating pattern and the $DoF_{near}$ limit is select to be the distance at which the calibration pattern fills the camera~\ac{fov}. The calculations can be seen in equation~\ref{eq:hyperfocal-and-dof-values}.
+Solving equation~\eqref{eq:hyperfocal_distance} and replacing its result on equation~\eqref{eq:dof-subject-distance}, we can obtain $d$, the object distance at which the camera must be focused. The object to be focused is the calibrating pattern and the $DoF_{near}$ limit is select to be the distance at which the calibration pattern fills the camera~\ac{fov}. The calculations can be seen in equation~\eqref{eq:hyperfocal-and-dof-values}.
 
 \begin{subequations}
 	\label{eq:hyperfocal-and-dof-values}
@@ -272,7 +272,7 @@ The \ac{ros} node diagrams can be seen on figure~\ref{fig:camera-calibration-ros
 	\label{fig:camera-calibration-rosgraph}
 \end{figure}
 
-The camera was calibrated daily whenever experimental measures were taken. The calibration for one of these days is shown below, where $\mathbf{K}$ is the camera intrinsic parameters' matrix, $\mathbf{D}$ is the lens distortion coefficients vector and $\mathbf{P}$ the camera projective matrix. %on equation~\ref{eq:camera-calibration-results}.
+The camera was calibrated daily whenever experimental measures were taken. The calibration for one of these days is shown below, where $\mathbf{K}$ is the camera intrinsic parameters' matrix, $\mathbf{D}$ is the lens distortion coefficients vector and $\mathbf{P}$ the camera projective matrix. %on equation~\eqref{eq:camera-calibration-results}.
 
 \begin{subequations}
 	\label{eq:camera-calibration-results}
@@ -308,9 +308,9 @@ This file must be converted to a more suitable format, \acs{yaml}~\footnote{\acs
 \label{sec:calibration:extrinsic}
 Calibrating the camera and \ac{lidar}, as explained in section~\ref{subsec:sota:camera-intrinisc-calibration}, requires determining the rigid body transform between the reference frames of the two sensors. A rigid body transform, also known as a Euclidean Isometry since it preserves the distance between points~\cite{mvg_book}, has 6 \ac{degof}, that can be represented by a translation and a rotation vector.
 
-Due to the ambiguity of the rotation vector and its variety of interpretations: (1) it can represent one of twelve Euler angles notation, angle axis notation, amongst others; (2) this notation is normally replaced by the unambiguous rotation matrix (see equation~\ref{eq:camera_transform_full} for an example) or a quaternion. Such representations are also free from gimbal lock, a mathematical limitation of the vector representation, that can cause one rotation axis ``locking'' on another, resulting on their rotation no longer being independent of the other, removing one \acl{degof} and degenerating into a two-dimensional rotational space. For more details on gimbal lock and other singularities see~\cite{mvg_book, Slabaugh, camera_models}.
+Due to the ambiguity of the rotation vector and its variety of interpretations: (1) it can represent one of twelve Euler angles notation, angle axis notation, amongst others; (2) this notation is normally replaced by the unambiguous rotation matrix (see equation~\eqref{eq:camera_transform_full} for an example) or a quaternion. Such representations are also free from gimbal lock, a mathematical limitation of the vector representation, that can cause one rotation axis ``locking'' on another, resulting on their rotation no longer being independent of the other, removing one \acl{degof} and degenerating into a two-dimensional rotational space. For more details on gimbal lock and other singularities see~\cite{mvg_book, Slabaugh, camera_models}.
 
-In this thesis, the preferred notation is a quaternion, which is also adopted by \ac{ros}~\cite{Foote2014}. A quaternion is a mathematical object belonging to $\mathbb{R}^4$, that has a vector (or imaginary) part and a scalar (or real) part. Its representation is denoted on equation~\ref{eq:quaternion-notation}, where $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ are the normalized unit vectors of the $x$, $y$ and $z$ axis, respectively; and $w$ is the scalar part. More information on quaternions can be found on~\cite{mvg_book}.
+In this thesis, the preferred notation is a quaternion, which is also adopted by \ac{ros}~\cite{Foote2014}. A quaternion is a mathematical object belonging to $\mathbb{R}^4$, that has a vector (or imaginary) part and a scalar (or real) part. Its representation is denoted on equation~\eqref{eq:quaternion-notation}, where $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ are the normalized unit vectors of the $x$, $y$ and $z$ axis, respectively; and $w$ is the scalar part. More information on quaternions can be found on~\cite{mvg_book}.
 
 \begin{equation}
 	\label{eq:quaternion-notation}
@@ -319,7 +319,7 @@ In this thesis, the preferred notation is a quaternion, which is also adopted by
 
 \subsection{Calibration Method}
 \label{subsec:calibration:calibration-method}
-Given the nature of the sensors: a camera image is two-dimensional and the \ac{lidar} data is tridimensional; the extrinsic calibration needs to consider the projective geometry and its transformations on the camera. Revisiting equation~\ref{eq:jointRotationTranslationTransform}, our goal is to determine the joint rotation and translation matrix that allows the conversion of coordinates from the \ac{lidar} to the camera frame. To account for projective geometry, equation~\ref{eq:camera_transform_full} must be considered when establishing 3D points to image pixels correspondences.
+Given the nature of the sensors: a camera image is two-dimensional and the \ac{lidar} data is tridimensional; the extrinsic calibration needs to consider the projective geometry and its transformations on the camera. Revisiting equation~\eqref{eq:jointRotationTranslationTransform}, our goal is to determine the joint rotation and translation matrix that allows the conversion of coordinates from the \ac{lidar} to the camera frame. To account for projective geometry, equation~\eqref{eq:camera_transform_full} must be considered when establishing 3D points to image pixels correspondences.
 
 The method implemented to calibrate the camera and \ac{lidar} is inspired by Scaramuzza~\etal~\cite{Scaramuzza} and Brabec's~\cite{brabec2014} work. The method proposed consists on manually selecting the correspondences between image pixels and 3D points on the \ac{lidar} point cloud. If a single synchronized frame from the camera and \ac{lidar} is used, one can consider the scene as static, and therefore, the joint rotation and translation matrix present in equation~\eqref{eq:camera_transform_full} is actually the same as the matrix present on equation~\eqref{eq:jointRotationTranslationTransform}. 
 
@@ -383,7 +383,7 @@ After the manual selection of the points, the rotation and translation are obtai
 	w^\text{LiDAR}_\text{camera} = - w^\text{camera}_\text{LiDAR}
 \end{equation}
 
-Extrinsic camera and \ac{lidar} calibration was performed whenever experimental measures were taken. The calibration for the camera intrinsic parameters given on equation~\ref{eq:camera-calibration-results} and the correspondences shown on image~\ref{fig:calibration-correspondences} are presented on below. On figure~\ref{fig:extrinsic-calibration-frames}, a visualization of the experimental setup sensors coordinate frames and the transformation between them is given.
+Extrinsic camera and \ac{lidar} calibration was performed whenever experimental measures were taken. The calibration for the camera intrinsic parameters given on equation~\eqref{eq:camera-calibration-results} and the correspondences shown on image~\ref{fig:calibration-correspondences} are presented on below. On figure~\ref{fig:extrinsic-calibration-frames}, a visualization of the experimental setup sensors coordinate frames and the transformation between them is given.
 
 \begin{subequations}
 	\label{eq:camera-to-lidar-transform}
@@ -436,8 +436,10 @@ Comparing with our experimental setup, the \ac{lidar} frame is similar and the c
 \section{Final Remarks}
 \label{sec:calibration:final-remarks}
 
-On this chapter, the experimental setup is presented with calibration thechniques and algorithms for intrinsic and extrinsic camera calibration. Camera, \ac{lidar} and lens specifications are detailed and briefly discussed, and the network setup and connection with the computer is also presented. Since our attempts focus on understanding the interference between \ac{lidar}'s and camera to accuratley sense the environment, a test between \ac{lidar} and the camera interference is also undertaken to assess if the \ac{lidar} interferes with the camera, from we conclude it doesnt.
+On this chapter, the experimental setup is presented and the intrinsic and extrinsic calibration of its sensors is detailed. Camera, \ac{lidar} and lens specifications are given and briefly discussed, along with their relative positioning, network setup and connection with the computer. Since camera will be used to understand and possibly mitigate \ac{lidar} interference through sensor fusion, we confirm that the camera is free from interference by the \ac{lidar} in a test without any other light sources.
 
-Sensory calibration of the experimental setup is done, preparing the data acquisition from the camera and \ac{lidar} to construct the experimental setup dataset. Intrinsic camera calibration is done, by using \ac{ros} \texttt{camera\_calibrator.py} package and moving a chessboard in front of the camera, combining rotation and translation motions. Using \acl{epnp}, the camera intrinsic matrix and the distortion coefficients for the lens are determined, which are used to rectify the camera image. Regarding \ac{lidar} calibration, the device comes calibrated by the manufacturer and only a few azimuthal and polar angle coefficients need to be loaded by the firmware and driver for measurement correction.
+Sensory calibration is performed to allow data acquisition from the camera and \ac{lidar} to construct the experimental setup dataset. Intrinsic camera calibration is carried by using \ac{ros} \texttt{camera\_calibrator.py} package and moving a chessboard in front of the camera, combining rotation and translation motions. Using Effective \acl{pnp}, the camera intrinsic matrix and the distortion coefficients for the lens are determined, which are used to rectify the camera image. Regarding \ac{lidar} calibration, the device comes calibrated by the manufacturer and only azimuthal and polar angle coefficients need to be loaded by the firmware and driver for measurement correction.
 
-work being developed on data fusion between the camera and \ac{lidar} (Chapter~\ref{chapter:sensor-fusion}), object detection on image and estimating the correspondent bounding boxes on 
+Extrinsic calibration between the camera and \ac{lidar} is performed to the determinate the rigid body transformation between the two, allowing the conversion of data between their coordinate frames. Our proposed algorithm is based on the selection of at least four $2D \leftrightarrow 3D$ correspondences between the image and the point cloud. A calibration pattern is not required. We adapt the work of Scaramuzza\etal and Brabec's, which is used to calibrate a camera, to determine the rigid body transform between the \ac{lidar} and camera, by solving for the joint rotation and translation matrix. To do so, our implementation consists of an image and point cloud visualizers, a node to receive the selected points and compute the rigid body transform and a client node to trigger the computation and saving of results.
+
+From this chapter, our main takeout is a generic extrinsic calibration algorithm and its implementation on \ac{ros}, that can calibrated any \ac{ros} compatible monocular camera and 3D \ac{lidar}. We also intrinsically calibrate the camera, performing the first step of any computer vision project and obtain the rigid body transform between the sensors of our setup, to be used later. The work developed on this chapter is essential for the data fusion between the camera and \ac{lidar} (Chapter~\ref{chapter:sensor-fusion}) and object detection on image and estimating the correspondent bounding boxes on the point cloud (Chapter~\ref{chapter:object-detection}).
