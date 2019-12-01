@@ -1,0 +1,21 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  L2_norm_tolerance: 0.5
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      L2_norm_tolerance: 0.5
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      max_cluster_size: 8000.0
+      min_cluster_size: 40.0
+      name: Default
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      type: ''
+    state: []
+  max_cluster_size: 8000.0
+  min_cluster_size: 40.0
+state: []
