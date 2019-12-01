@@ -17,6 +17,7 @@ extern const unsigned int VLP16_LASER_COUNT;
 extern const float AZIMUTHAL_ANGULAR_RESOLUTION;
 extern const unsigned int AZIMUTHAL_UNIQUE_ANGLES_COUNT;
 
+const unsigned int getLaserIDfromPolarAngle(const int polar_angle);
 }  // namespace vlp16
 
 }  // namespace velodyne
