@@ -15,6 +15,7 @@
 #include <pcl/point_cloud.h>
 
 #include <boost/shared_ptr.hpp>
+#include <ostream>
 
 namespace velodyne
 {
@@ -38,6 +39,20 @@ struct PointXYZIR
     , intensity(DEFAULT_FLOAT_VALUE)
     , ring(DEFAULT_RING_VALUE)
   {
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const PointXYZIR& object)
+  {
+    out << "(" << object.x << ", " << object.y << ", " << object.z << ", " << object.intensity << ", " << object.ring
+        << ")";
+    return out;
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, PointXYZIR& object)
+  {
+    out << "(" << object.x << ", " << object.y << ", " << object.z << ", " << object.intensity << ", " << object.ring
+        << ")";
+    return out;
   }
 
 } EIGEN_ALIGN16;
