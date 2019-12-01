@@ -102,7 +102,9 @@ extern const std::string CAMERA_CALIBRATION_BAG_NAME;
 extern const std::string GROUND_TRUTH_BAG_NAME;
 extern const std::string GROUND_TRUTH_BEGINNING_BAG_NAME;
 extern const std::string GROUND_TRUTH_FINAL_BAG_NAME;
+extern const std::string GROUND_TRUTH_ROI_BAG_NAME;
 extern const std::string INTERFERENCE_BAG_NAME;
+extern const std::string INTERFERENCE_ROI_BAG_NAME;
 extern const std::string RAW_BAG_NAME;
 
 extern const std::string GROUND_TRUTH_MODEL_FOLDER_RELATIVE_PATH;
@@ -112,6 +114,8 @@ extern const std::string GRAPHICS_FOLDER_RELATIVE_PATH;
 extern const std::string ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME;
 extern const std::string ICP_GROUND_TRUTH_MODEL_PCD_NAME;
 extern const std::string ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME;
+extern const std::string GROUND_TRUTH_ROI_MODEL_PCD_NAME;
+
 extern const std::string GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME;
 extern const std::string GROUND_TRUTH_LASER_INTENSITY_BIN_NAME;
 extern const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME;
@@ -121,8 +125,11 @@ extern const std::string GROUND_TRUTH_POINT_INTENSITY_VARIANCE_BIN_NAME;
 
 extern const std::string GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
 extern const std::string GROUND_TRUTH_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
+extern const std::string ROI_GROUND_TRUTH_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
 
 extern const std::string INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
+extern const std::string ROI_INTERFERENCE_BAG_POINTS_DISTANCE_VECTOR_BIN_NAME;
+
 extern const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME;
 extern const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME;
 
@@ -181,6 +188,7 @@ extern const std::string OCTREE_DIFFERENCE_COLOR_MESH;
 
 extern const std::string ICP_LOGGER_FILE_NAME;
 extern const std::string INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME;
+extern const std::string ROI_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME;
 extern const std::string OCTREE_INTERFERENCE_ANALYSIS_LOGGER_FILE_NAME;
 
 extern const std::string CLOSER_DISTANCE_AFFIX;
