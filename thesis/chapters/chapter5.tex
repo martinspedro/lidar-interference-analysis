@@ -129,6 +129,7 @@ On the right sub-figure,~\ref{fig:experimental-yolo-1}, calibrated data is used 
 
 
 \section{Correspondences between objects in image and point-cloud}
+\label{sec:object-detection:correspondences-image-point-cloud}
 An experimental setup with an intrinsically calibrated camera and \ac{lidar}, on which their rigid body transformation is known\footnote{The method used to determine this rigid body transformation on our experimental dataset is outlined on Section~\ref{sec:calibration:extrinsic}. Chapter~\ref{chapter:calibration} details all the calibration procedures that are pre-required for this section. For \ac{kitti} dataset, such transformations are already given.}, allows data conversion between its two coordinate frames, as shown previously in Chapter~\ref{chapter:sensor-fusion}. 
 
 Matching the camera's \acp{roi} with \ac{lidar}'s require converting the data to a common coordinate frame between the two sensors and then using a matching algorithm to select the point cloud points that correspond to the classified object on the image.
@@ -395,6 +396,7 @@ Since the point cloud density varies with distance, clustering will cause the di
 The Euclidean Filter uses 3 parameters:
 
 \begin{enumerate}
+	\label{enum:object-detection:cluster-parameters}
 	\item \textbf{Cluster tolerance:} Maximum distance between the points of the cluster, measuring using a Euclidean L2 norm. If the L2 norm between a cluster point and a candidate cluster point is greater than this parameter, the candidate point is not part of the cluster;
 	\item \textbf{Minimum cluster size:} Minimum number of points, that verify the cluster tolerance condition, that are required to create a cluster. If the number of points that verify condition 1 are smaller than this number, a cluster is not created;
 	\item \textbf{Maximum cluster size:} Maximum number of points, that verify the cluster tolerance condition, that can be part of a cluster. The number of points that verify condition 1 must be smaller or equal than this parameter, otherwise a cluster is not created.
