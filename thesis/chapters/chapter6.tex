@@ -317,7 +317,7 @@ The normalized number of outliers magnitude variation between the angular positi
 \label{fig:box-filter-outliers-it2}
 \end{figure}
 
-The white square on the left bottom of the figure is empty because the bag file containing that data was corrupted during saving and data could not be recovered. From the image, we corroborate the previous results from the distance tests (figure~\ref{fig:box-filter-outliers-distance}): the closer the two \acp{lidar} are, the higher the number of outliers. If the interferer \ac{lidar} is above the victim's \ac{lidar}, the number of outliers also increases slightly, when comparing with the other heights tested.
+The white square on the left bottom of the figure is empty because the bag file containing that data was corrupted during saving and data could not be recovered. From the image, we corroborate the previous results from the distance tests (figure~\ref{fig:box-filter-outliers-distance}): the closest the two \acp{lidar} are, the higher the number of outliers. If the interferer \ac{lidar} is above the victim's \ac{lidar}, the number of outliers also increases slightly, when comparing with the other heights tested.
 
 
 
@@ -452,7 +452,7 @@ To test this method of analysis, some parameters under test were selected from t
 
 Voxel-to-Voxel analysis has a caveat that must be considered: increasing the voxel edge size reduces the number of voxels that exist on the octree. Also, since octree's represent tridimensional data, doubling the voxel edge length could result on a reduction of the octree voxels number up to an eight of the previous number of voxels. 
 
-A large number of voxels (small voxel edge length) potentiates the occurrence of false positives\footnote{Voxels that are erroneously marked as interfered, because their state of occupancy was modified.}, because noisy points alternate between two adjacent voxels. Fewer voxels (large voxel edge length), results in an increase of false negatives\footnote{Interfered voxels that are erroneously marked as non-interfered, because their state of occupancy was not modified.}, because measurements whose interference modified their positioning by a small error, still belong to the same voxel. False positives are problematic because they indicate that the interference value is higher than really is and in contrast, false negatives reveal an interference value that is lower than the real value of interference.
+Large numbers of voxels (small voxel edge length) potentiates the occurrence of false positives\footnote{Voxels that are erroneously marked as interfered, because their state of occupancy was modified.}, because noisy points alternate between two adjacent voxels. Fewer voxels (large voxel edge length), results in an increase of false negatives\footnote{Interfered voxels that are erroneously marked as non-interfered, because their state of occupancy was not modified.}, because measurements whose interference modified their positioning by a small error, still belong to the same voxel. False positives are problematic because they indicate that the interference value is higher than really is and in contrast, false negatives reveal an interference value that is lower than the real value of interference.
 
 Our particular implementation was yet another issue. Since the relative number of modified voxels is expressed relative to the total number of voxels, changing the voxel edge length also changes the total number of voxels, changing the relative number of modified voxels. For a large voxel edge length, this behavior might cause the interference to actually be higher than the real value, due to the number of voxels being smaller. 
 
@@ -565,7 +565,7 @@ The subtraction between the relative number of modified voxels on the interferen
 
 
 \subsubsection{Transversal Remarks to all the tests}
-Measuring the change detection was performed with the intent to classify, on a more macro-level, how does the interference affects the spatial organization of the point cloud. A voxel tridimensional structure was volume, whereas a point does not; which was believed to be a good analysis to better handle the spatial organization of the point cloud. A better understanding of the spatial organization would allows detecting which regions of the point cloud were affected by interference, which voxels were changed and remain unaffected by interference and how did they change.
+Measuring the change detection was performed with the intent to classify, on a more macro-level, how does the interference affect the spatial organization of the point cloud. A voxel tridimensional structure was volume, whereas a point does not; which was believed to be a good analysis to better handle the spatial organization of the point cloud. A better understanding of the spatial organization would allow detecting which regions of the point cloud were affected by interference, which voxels were changed and remain unaffected by interference and how did they change.
 
 However, the results presented do not allow such interpretation. Ground truth model generation seems to undermine the results, since it appears that the comparison of the point clouds used to generate the ground truth model yields as many errors as the actual interfered data. Such similarity forced us to double check our implementations, but no mistakes were found. Subtracting one result from the other, while allowing the determination of the order of magnitude that described their differences, resulted in gibberish, with no patterns being found on the data.
 
@@ -632,7 +632,7 @@ The results presented on this sub-Section are based on the comparison of the poi
 
 Before dwelling into the results, some considerations must be made regarding the ground truth model. The two algorithms were developed on the premise, as stated in the user guide and datasheet of the Velodyne VLP-16 \ac{lidar}, that the typical distance error a measurement can have, due to sensor noise, is \SI{3}{\centi\meter}~\cite{VLP16}. This means that, when looking at the results caused by \ac{lidar} interference on Section~\ref{sec:lidar-interference:box-filtering}, we assume that a ``well-behaved'' \ac{lidar}, under interference from another \ac{lidar}, if analyzed using a threshold that is larger than its maximum error, will not exbibit false positives errors due to sensory noise.
 
-We were wrong. Our findings reveal not only that the sensory noise is larger than the typical error \SI{3}{\centi\meter} error on a static scenario, as specified on their datashee~,\cite{VLP16}, but also that, to some extent, \ac{lidar} measurement noise ``shadows'' the real impact of interference, forbidding us to make a educated assessment of its extent.
+We were wrong. Our findings reveal not only that the sensory noise is larger than the typical error \SI{3}{\centi\meter} error on a static scenario, as specified on their datasheet~,\cite{VLP16}, but also that, to some extent, \ac{lidar} measurement noise ``shadows'' the real impact of interference, forbidding us to make an educated assessment of its extent.
 
 We assume that, due to the statistical behavior of measurements, the measurement error of a given distance would be affected by a normal distribution, with mean of \SI{3}{\centi\meter}. Since the standard deviation of the error is not given, we assumed an interval of three sigma, below the normal industry standards of six sigma\citeneeded. An interval of three sigma implies that, given a reasonable threshold such that its value was greater than $3\sigma$ (even not knowing such value) only 0.3\% of the points in the ground truth model would be, theoretically, mistakenly measured as interference when they in fact are noise. Therefore, when analyzing \ac{lidar} data that has been interfered, each point labelled as interfered had a probability of $0.3\%$ of being a false positive, being the erroneous measurement caused by the sensor noise, and not the other \ac{lidar}.
 
@@ -759,7 +759,7 @@ Accepting the first hypothesis as valid implies that the number of points contai
 
 Also, if we analyze the sub-figures (a) and (b), from figures~\ref{fig:distance:color-mesh},~\ref{fig:height:color-mesh} and~\ref{fig:los:color-mesh}, their overall trend is similar, which indicates that they must represent with accuracy the noise phenomena, otherwise some variations among them would be seen, due to the magnitude of \ac{lidar} measurement noise.
 
-The second hypothesis seems far-fetched, but considering that the normalized point cloud interference is on the order of $10^{-4}$, it only requires 3 points\footnote{Considering the average VLP-16 point cloud with 28800 points, the number of points which have been interfered are: $\approx 10^{-4} \times 28800 = 2.88$.} to be possible.
+The second hypothesis seems far-fetched, but considering that the normalized point cloud interference is on the order of $10^{-4}$, it only requires 3 points\footnote{Considering the typical VLP-16 point cloud with 28800 points, the number of points which have been interfered are: $\approx 10^{-4} \times 28800 = 2.88$.} to be possible.
 
 
 
@@ -768,11 +768,12 @@ The second hypothesis seems far-fetched, but considering that the normalized poi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Interference on \acp{roi}}
-The previous analysis on \ac{lidar} interference has considered only outliers (Section~\ref{sec:lidar-interference:room-outliers}), the voxel occupation change (Section~\ref{sec:lidar-interference:voxel-analysis}) or the distance between points in a point-to-point analysis (Section~\ref{sec:lidar-interference:point-to-point-analysis}). On this section we offer a complementar analysis, based on a point-to-point analysis of the interference, but on specific objects of interest.
+\label{sec:lidar-interference:interference-roi}
+The previous analysis on \ac{lidar} interference has considered only outliers (Section~\ref{sec:lidar-interference:room-outliers}), the voxel occupation change (Section~\ref{sec:lidar-interference:voxel-analysis}) or the distance between points in a point-to-point analysis (Section~\ref{sec:lidar-interference:point-to-point-analysis}). On this section we offer a complementer analysis, based on a point-to-point analysis of the interference, but on specific objects of interest.
 
 This analysis is possible due to the outcomes of Chapter~\ref{chapter:object-detection}, which allow the determination of correspondences between \acp{roi} detected on the image and their corresponding points on the point cloud. From such correspondences, we can select a \ac{roi} on the point cloud, generate its ground truth from non-interfered data and compare the model with the interfered point cloud frames.
 
-However, on our experimental datasets, detailed in Section~\ref{sec:lidar-interference:experimental-setup}, the possible objects of interest are further away from the \ac{lidar}. With a polar angular step between lasers of \SI{2}{\degree}, at \SI{3}{\meter} from the \ac{lidar}, there is a vertical distance of \SI{10}{\centi\meter} between each lase scan. At \SI{5}{\meter}, where some of the detected objects are present, \SI{17.4}{\centi\meter} and at \SI{12}{\meter}, where the human dummy is located\footnote{Please note that an obvious solution would be to take measurements with the dummy closer to the camera, on the scenarios described in~\ref{subsec:lidar-interference:parameters-under-test}. Such solution was not possible due to the dummy belonging to an experiment and cannot be moved.}, we expect a vertical distance between \ac{lidar} \ac{laser} scans of \SI{42}{\centi\meter}, totalizing only 3 lines of data for the dummy.
+However, on our experimental datasets, detailed in Section~\ref{sec:lidar-interference:experimental-setup}, the possible objects of interest are further away from the \ac{lidar}. With a polar angular step between lasers of \SI{2}{\degree}, at \SI{3}{\meter} from the \ac{lidar}, there is a vertical distance of \SI{10}{\centi\meter} between each laser scan. At \SI{5}{\meter}, where some detected objects are present, \SI{17.4}{\centi\meter} and at \SI{12}{\meter}, where the human dummy is located\footnote{Please note that an obvious solution would be to take measurements with the dummy closer to the camera, on the scenarios described in~\ref{subsec:lidar-interference:parameters-under-test}. Such solution was not possible due to the dummy belonging to an experiment and cannot be moved.}, we expect a vertical distance between \ac{lidar} \ac{laser} scans of \SI{42}{\centi\meter}, totalling only 3 lines of data for the human dummy.
 
 To tackle this issue, already expected, a different dataset was previously recorded, codenamed \textit{Human}. A standing person was positioned on the dataset, detected by the camera and \ac{lidar}. Its position on the \ac{lidar} coordinates are detailed on Table~\ref{tab:human-position}, and the interferer \ac{lidar} distance to the target value was varied from~\SIrange{3}{6}{\meter}, with steps of \SI{1}{\meter}. Other conditions were similar to the distance test: optical centers aligned and the azimuthal angular position between the two close to zero.
 
@@ -789,7 +790,7 @@ To tackle this issue, already expected, a different dataset was previously recor
 		$z_\text{max}$ & \SI{0.88}{\meter} \\
 		\bottomrule
 	\end{tabular}
-	\caption[Person position in relation to the \ac{lidar} coordinate frame on the \textit{Human} dataset.]{Person position in relation on the \ac{lidar} coordinate frame on the \textit{Human} dataset. Note that the \ac{lidar} axis, x is forward, y is leftwards and z is upwards. $z_\text{min}$ is the position of the feets and $z_\text{max}$ the top of the head.}
+	\caption[Person position in relation to the \ac{lidar} coordinate frame on the \textit{Human} dataset.]{Person position in relation on the \ac{lidar} coordinate frame on the \textit{Human} dataset. Note that the \ac{lidar} axis, x is forward, y is leftwards and z is upwards. $z_\text{min}$ is the position of the feet and $z_\text{max}$ the top of the head.}
 	\label{tab:human-position}
 \end{table}
 
@@ -798,7 +799,7 @@ On Figure~\ref{fig:human-test-scenario}, an example of the test scenario, taken 
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{img/lidar-interference/human/test-scenario-white-balanced.png}
-	\caption[Test scenario for analysing the \ac{lidar} interference in \acp{roi}.]{Example of the \textit{Human} test scenario, used for analysing the \ac{lidar} interference in \acp{roi}. The HESAI Pandar 40 \ac{lidar}, for the test scenario being shown, is placed at a distace of \SI{6}{\meter} from Velodyne VLP-16 and the person position is indicated on Table~\ref{tab:human-position}. Other objects, such a soccer ball, a chair and a human dummy are also present on the image.}
+	\caption[Test scenario for analyzing the \ac{lidar} interference in \acp{roi}.]{Example of the \textit{Human} test scenario, used for analyzing the \ac{lidar} interference in \acp{roi}. The HESAI Pandar 40 \ac{lidar}, for the test scenario being shown, is placed at a distance of \SI{6}{\meter} from Velodyne VLP-16 and the person position is indicated on Table~\ref{tab:human-position}. A soccer ball, a chair and a human dummy are also present on the image.}
 	\label{fig:human-test-scenario}
 \end{figure}
 
@@ -806,7 +807,7 @@ On Figure~\ref{fig:human-test-scenario}, an example of the test scenario, taken 
 \label{subsec:lidar-interference:roi-implementation}
 To analyze the interference on the selected \ac{roi} we opt to reuse the previous algorithms for ground truth generation (see Frame Registration, on sub-Section~\ref{subsec:lidar-interference:frame-registration}) and interference analysis (see Point-to-Point Analysis, on Section~\ref{sec:lidar-interference:point-to-point-analysis}), which are both implemented as offline nodes. Therefore, the results of the object detection and point cloud bounding box estimation applied to the \textit{Human} dataset must be recorded to a bag file, so that it can be loaded by \texttt{ground\_truth\_model\_estimation\_node} and \texttt{point\_cloud\_interference\_analysis\_node}.
 
-The recording apparatus is shown on Figure~\ref{fig:human-roi-generation}. From the camera intrinsic calibration parameters and the image, the \texttt{darknet\_ros} detects the objects and \texttt{correspondences\_finder}, using the point cloud data (\texttt{/velodyne\_point}), the rigid body transform between the camera and \ac{lidar} (\texttt{/camera\_to\_velodyne}) and the image bounding boxes information determines the point cloud points that belong to the object(s) on the \acp{roi}, \texttt{point\_cloud\_clusters}, required for \ac{lidar} interference analysis using Point-to-Point Analysis,
+The recording apparatus is shown on Figure~\ref{fig:human-roi-generation}. From the camera intrinsic calibration parameters and the image, the \texttt{darknet\_ros} detects the objects. \texttt{correspondences\_finder} determines the point cloud points that belong to the object(s) on the \acp{roi}, \texttt{point\_cloud\_clusters}, required for \ac{lidar} interference analysis using Point-to-Point Analysis. It uses the point cloud data (\texttt{/velodyne\_point}), the rigid body transform between the camera and \ac{lidar} (\texttt{/camera\_to\_velodyne}) and the image bounding boxes information.
 
 
 \begin{figure}[!ht]
@@ -840,11 +841,9 @@ These parameters were fine-tuned using the dynamic reconfigure capabilities of t
 \end{table}
 
 \subsection{Results}
-To establish a comparison between the \ac{lidar} interference analysis on \ac{roi} on the point cloud, first a Point-to-Point analysis is applied on all the frames of the bag files, simirlarly to the work presented on sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}.
+To establish a comparison between the \ac{lidar} interference analysis on \ac{roi} on the point cloud, first a Point-to-Point analysis is applied on all the frames of the bag files, similarly to the work presented on sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}.
 
-Using the algorithm detailed on sub-Section~\ref{subsec:lidar-interference:roi-implementation}, the bag files containing the point cloud points for the clusters on the \acp{roi} are generated, their ground truth models computed using \textit{Frame Registration} (see sub-Section~\ref{subsec:lidar-interference:frame-registration}) and analyzed used Point-to-Point analysis algorithm.
-
-After both analysis, done with the same algorithms, are completed, some remarks are given and the results are compared.
+Using the algorithm detailed on sub-Section~\ref{subsec:lidar-interference:roi-implementation}, the bag files containing the point cloud points for the clusters on the \acp{roi} are generated, their ground truth models computed using \textit{Frame Registration} (see sub-Section~\ref{subsec:lidar-interference:frame-registration}) and analyzed used Point-to-Point analysis algorithm. After both analysis, done with the same algorithms, are completed, some remarks are given and the results are compared.
 
 \subsubsection{Without \ac{roi} extraction}
 With the person placed at (\SI{5.01}{\meter}, \SI{-1.02}{\meter}) on the \ac{lidar} coordinate frame, the distance between the two \acp{lidar} was incremented from \SIrange{3}{6}{\meter}, with steps of \SI{1}{\meter}, measured in the same conditions as the distance test (see sub-Section~\ref{subsec:lidar-interference:parameters-under-test} for more details). 
@@ -880,11 +879,11 @@ The interference magnitude was analyzed with a varying distance threshold value,
 
 Analyzing figure~\ref{fig:human:color-mesh}, contrary to the results shown on sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}, the distance threshold value does not dominate the interference behavior. The interference lowers with the increasing of the distance between the \acp{lidar} and the distance threshold.
 
-As described in the beginning of sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}, sub-Figures~\ref{fig:human:interference-color-mesh} and~\ref{fig:human:ground-truth-color-mesh} are practically similar. Their subtraction, performed to determine the interference order of magnitude, shown on sub-figure~\ref{fig:human:difference-color-mesh}, indicates an interference on the order of magnitude of $10^{-4}$. We follow were assumptions stated on sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}.
+As described in the beginning of sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}, sub-Figures~\ref{fig:human:interference-color-mesh} and~\ref{fig:human:ground-truth-color-mesh} are practically similar. Their subtraction, performed to determine the interference order of magnitude, shown on sub-figure~\ref{fig:human:difference-color-mesh}, indicates an interference on the order of magnitude of $10^{-4}$. We follow were assumptions on \ac{lidar} measurement noise stated on sub-Section~\ref{subsec:lidar-interference:point-to-point-analysis-results}.
 
-Sub-Figure~\ref{fig:human:difference-color-mesh} shows that, in general, the smooth variation along the x-axis (threshold distance) is disrupted by the more abrupt variation on the y-axis (distance between \acp{lidar}). For \SI{3}{\meter}, the subtraction yields negative results, which show that the ground truth model has more errors than when it is compared with the ground truth bag than the interference bag. To the distance of \SI{5}{\meter}, when the interferer \ac{lidar} is side by side with the person, the iterference is at its minimum, independently of the threshold value. For \SI{4}{\meter} and \SI{6}{\meter}, the interference is at its maximumize for the whole range of thresholds. 
+Sub-Figure~\ref{fig:human:difference-color-mesh} shows that, in general, the smooth variation along the x-axis (threshold distance) is disrupted by the more abrupt variation on the y-axis (distance between \acp{lidar}). For \SI{3}{\meter}, the subtraction yields negative results, which show that the ground truth model has more errors than when it is compared with the ground truth bag than the interference bag. To the distance of \SI{5}{\meter}, when the interferer \ac{lidar} is side by side with the person, the interference is at its minimum, independently of the threshold value. For \SI{4}{\meter} and \SI{6}{\meter}, the interference is at its maximize for the whole range of thresholds. 
 
-Since the \acp{lidar} \ac{los} was never obstructed, direct interference was only changed due to the distance and we have not observed such dispar behaviors neither on sub-Figure~\ref{fig:distance:difference-color-mesh} nor sub-Figure~\ref{fig:los:difference-color-mesh}. Since direct  \ac{lidar} interference was possible and even with the \acp{lidar} \ac{los} obstructed the behavior does not have any similarities, we can only conclude that the presence of the person (as an obstacle) changes the behavior of the interference significantly, which indicates that besides the more common physical parameters of the setup, such as distance, height, orientation and \ac{los}, there are other parameters, dependending on the obstacles positioning on the scene.
+Since the \acp{lidar} \ac{los} was never obstructed, direct interference was only changed due to the distance, and we have not observed such behaviors neither on sub-Figure~\ref{fig:distance:difference-color-mesh} nor sub-Figure~\ref{fig:los:difference-color-mesh}. Since direct  \ac{lidar} interference was possible and even with the \acp{lidar} \ac{los} obstructed the behavior does not have any similarities, we can only conclude that the presence of the person (as an obstacle) changes the behavior of the interference significantly, which indicates that besides the more common physical parameters of the setup, such as distance, height, orientation and \ac{los}, there are other parameters, depending on the obstacles positioning on the scene.
 
 
 \subsubsection{With \ac{roi} Extraction}
@@ -921,18 +920,18 @@ The results of the depth differences between the ground truth model and the inte
 	\label{fig:human:roi-color-mesh}
 \end{figure*}
 
-A small residual interference can be seen on Figure~\ref{fig:lidar-interference:roi-interference-color-mesh} for distance thresholds greater than \SI{0.15}{\centi\meter}. We affirm that this behavior is interference since we see no similiraties on the analysis of the ground truth bag, on Figure~\ref{fig:lidar-interference:roi-ground-truth-color-mesh}.
+A small residual interference can be seen on Figure~\ref{fig:human:roi-interference-color-mesh} for distance thresholds greater than \SI{0.15}{\centi\meter}. We affirm that this behavior is interference since we see no similarities on the analysis of the ground truth bag, on Figure~\ref{fig:human:roi-ground-truth-color-mesh}.
 
-\subsection{Comparison between ROI and no ROI}
-On this Section the same dataset was analysed using the same algorithms, both for interference analysis and ground truth generation, only differing on the subset of data: the whole point cloud frame or a subset corresponding to a \ac{roi}.
+\subsection{Comparison between whole point cloud analysis and \ac{roi} extraction}
+On this sub-Section, the same dataset was analyzed using the same algorithms, both for interference analysis and ground truth generation, only differing on the subset of data: the whole point cloud frame or a subset corresponding to a \ac{roi}.
 
-Comparing the ground truth model with the interference bag with (sub-Figure~\ref{fig:human:roi-interference-color-mesh}) and without \ac{roi} extraction (sub-Figure~\ref{fig:human:interference-color-mesh}), one can see that they are quite similar on their behavior and the order of magnitude. Such results indicate that the local behavior of the interference seems to match its global behavior. However, when comparing the ground truth bag with (sub-Figure~\ref{fig:human:roi-ground-truth-color-mesh}) and without interference (sub-Figure~\ref{fig:human:ground-truth-color-mesh}), the behavior differs: with \ac{roi} extraction the distance errors measured are one order of magnitude smaller and null after a threshold of \SI{0.15}{\centi\meter}. 
+Comparing the ground truth model with the interference bag with (sub-Figure~\ref{fig:human:roi-interference-color-mesh}) and without \ac{roi} extraction (sub-Figure~\ref{fig:human:interference-color-mesh}), one can see that they are quite similar on their behavior and the order of magnitude. Such results indicate that the local behavior of the interference seems to match its global behavior. However, when comparing the ground truth bag with (sub-Figure~\ref{fig:human:roi-ground-truth-color-mesh}) and the \ac{roi} without interference (sub-Figure~\ref{fig:human:ground-truth-color-mesh}), the behavior differs: with \ac{roi} extraction the distance errors measured are one order of magnitude smaller and null after a threshold of \SI{0.15}{\centi\meter}. 
 
-Therefore, the behavior of the subtraction of the interference and ground truth errors is different with (sub-Figure~\ref{fig:human:roi-difference-color-mesh}) and without \ac{roi} extraction (sub-Figure~\ref{fig:human:difference-color-mesh}): while on the former the interference is of an order of magnitude of $10^{-4}$, on the latter is $10^{-2}$. The distance at which the interference is maximum (\SI{4}{\meter} and \SI{6}{\meter}) or minimum (\SI{5}{\meter}) is not present when \ac{roi} extraction is done. The analysis on the extracted \ac{roi} is also more ``welll-behaved'': the number of errors is maximum when the \acp{lidar} are closer and the threshold is smaller; and is minimum when the \acp{lidar} are further away and the threshold is maximum, wiht smooth transitions on both axis between the two.
+Therefore, the behavior of the subtraction of the interference and ground truth errors is different with (sub-Figure~\ref{fig:human:roi-difference-color-mesh}) and without \ac{roi} extraction (sub-Figure~\ref{fig:human:difference-color-mesh}): while on the former the interference is of an order of magnitude of $10^{-4}$, on the latter is $10^{-2}$. The distance at which the interference is maximum (\SI{4}{\meter} and \SI{6}{\meter}) or minimum (\SI{5}{\meter}) is not present when \ac{roi} extraction is done. The analysis on the extracted \ac{roi} is also more ``well-behaved'': the number of errors is maximum when the \acp{lidar} are closer and the threshold is smaller; and is minimum when the \acp{lidar} are further away and the threshold is maximum, with smooth transitions on both axis between the two extremes.
 
-When comparing point clouds with and without \ac{roi} extraction, caution must be observed on ``jumping'' to conclusions. \acp{roi} contain a small number of points when compared with the the whole point cloud: 128.4 and 26243.2, on average, respectively. Since \ac{roi} filtering removes points that are not aligned with the object of interest, the outliers described in sub-Section~\ref{subsec:object-detection:projection-correspondences} are filtered out; clustering removes points that are not near the object of interest position on the \ac{lidar} coordinate frame, so severe interference and the outliers aligned with the \ac{roi} direction, analyzed on~\ref{sec:lidar-interference:room-outliers-experimental-setup}.
+When comparing point clouds with and without \ac{roi} extraction, caution must be observed on ``jumping'' to conclusions. \acp{roi} contains fewer points when compared with the whole point cloud: 128.4 and 26243.2, on average, respectively. Since \ac{roi} filtering removes points that are not aligned with the object of interest, the outliers described in sub-Section~\ref{subsec:object-detection:projection-correspondences} are filtered out; clustering removes points that are not near the object of interest position on the \ac{lidar} coordinate frame, so severe interference and the outliers aligned with the \ac{roi} direction, analyzed on sub-Section~\ref{subsec:lidar-interference:room-outliers-experimental-setup}.
 
-Not wnting to draw preliminar conclusion from such a small dataset on \ac{roi} interference analysis (we only tested for 4 distances, in the same room, with the same object of interest), but our data seems to show that selecting \ac{roi} of the clustering reduces the noise of the ground-truth model generation and shows that, on the conditions of our scenario, the relative interferenceon an object of interest is hgiher than on the entire point cloud. Such conclusions could undermine the possibility of point cloud object detection, as we assume, since the level of intereference (due to the number of points) also been reduced, is greater.
+Not wanting to draw preliminary conclusion from such a small dataset on \ac{roi} interference analysis (we only tested for 4 distances, in the same environment, with the same object of interest), but our data seems to show that selecting \ac{roi} of the clustering reduces the noise of the ground-truth model generation and shows that, on the conditions of our scenario, the relative interference on an object of interest is higher than on the entire point cloud. Such conclusions could undermine the possibility of point cloud object detection, as we assume, since the level of interference (due to the number of points) also been reduced, is greater.
 
 Then, we postulate the hypothesis that \ac{lidar} noise is more present on regions on the point cloud that have reduced interest and the interference on \ac{roi}. Such hypothesis was not tested.
 
@@ -940,14 +939,40 @@ Then, we postulate the hypothesis that \ac{lidar} noise is more present on regio
 
 \section{\acl{sota} Comparison}
 \label{sec:lidar-interference:sota-comparison}
+Despite the experimental setups being quite different, since ours uses a multi-beam tridimensional \ac{lidar} and Kim's\etal and Popko's\etal using a single beam two-dimensional \ac{lidar}, we will attempt to establish comparisons between our results and theirs.
 
+Popko's\etal repeats Kim's\etal setups, and they have 4 experimental setups: two \textit{Side-by-Side} configurations, one for maximizing direct interference (\textit{Face-to-Face}) and another to minimize it and study scattered interference, \textit{Back-to-Back}. The test scenarios can be seen on Figure~\ref{fig:kim-setups}. 
+
+Establishing parallelisms with ours, \textit{Distance} test scenario is a good candidate for \textit{Face-to-Face} and our \textit{\ac{lidar} \ac{los} Obstruction} a  good candidate to be evaluated against \textit{Back-to-back}. All the other test scenarios, except for \textit{\ac{lidar} \ac{los} Obstruction}, can be used to compare against the Kim's\etal and Popko's\etal \textit{Side-by-Side} results, but since these results main objective is to study the impact of the \ac{fov} between the two \ac{lidar}, not allowing them to detect each other, no comparisons will be made for \textit{Side-by-Side} study.
+
+During this comparison we will not consider the interfered lines metric, since in our opinion, it is not relevant to understand interference and might be misleading, since on our case, a single error on a line of $\approx 1800$ points will result on an interfered line. Table~\ref{tab:kim-vs-ours-comparison} shows the results of Kim's\etal setups versus ours. Since only one of Popko's\etal setups has experimental quantitative measurements: \textit{Side-by-Side \#1} with 1.04\% of interference, it is not possibility to compare with ours' and Kim's\etal.
+
+
+\begin{table}[!ht]
+	\vspace{6mm}
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{@{}p{7.5cm}cc@{}}
+			\toprule
+			\multirow{2}{*}{Experimental Setup Codename} & \multicolumn{2}{c}{Relative Frequence of Interfered Points} \\ \cmidrule{2-3}
+																									 & Kim's\etal & Our's\\
+			\midrule
+			\textit{Face-to-Face} vs \textit{Distance}   & $2.583\E^{-5}$  & $\approx 10^{-4}$ \\ \midrule
+			\textit{Back-to-Back A} vs \textit{\ac{lidar} \ac{los} Obstruction}  & $3.387\E^{-6}$ & \multirow{2}{*}{$\approx 10^{-6}$} \\
+			\textit{Back-to-Back B} vs \textit{\ac{lidar} \ac{los} Obstruction} & $3.514\E^{-6}$ & \\ \bottomrule
+		\end{tabular}
+		\caption[Comparison of Kim's\etal interferference with our results for equivalent setups.]{Comparison of Kim's\etal setups interference measurements with our equivalent setups.}
+		\label{tab:kim-vs-ours-comparison}
+\end{table}
+
+When the \acp{lidar} can interfere directly, i.e, there are no objects in between, our measurement of interference is higher than Kim's\etal by one degree of magnitude. We can justify that difference since on Kim's setup the two \acp{lidar} have their laser aligned at polar angle of \SI{0}{\degree} and VLP-16 and Pandar40 have more lasers oriented on another directions, with the VLP-16 not having a laser placed at a polar angle of \SI{0}{\degree}. Comparing \textit{Back-to-Back} tests with our \textit{\ac{lidar} \ac{los} Obstruction}, the results are on the same order of magnitude, revealing that the impact of scatter interference between \ac{lidar}'s, even if comparing a scanner with only one line to one with 16, remain similar. Popko's\etal results do not match ours or Kim's results, having and order of magnitude for the test scenario \textit{Side-by-Side \#1} of 1.04\%.
 
 \section{Departing notes}
 For all the data presented, there are two considerations that are not addressed:
 
 \begin{itemize}
 	\item We have no certainties about the likeliness of direct \ac{lidar} interference saturating the receptor of the victim's \ac{lidar}. If such behavior is possible, it may or may not be considered a valid measurement by the hardware, and may or may not be discarded by the device driver firmware before being accessible by the user;
-	\item The \ac{lidar}'s hardware and the driver firmware impose a maximum on the distance at which a point can be measured. Therefore we have no way of contabilizing points that would span outside the limit of the \ac{lidar} measurement distance. 
+	\item The \ac{lidar}'s hardware and the driver firmware impose a maximum on the distance at which a point can be measured. Therefore, we have no way of count the points that would span outside the limit of the \ac{lidar} measurement distance. 
 \end{itemize}
 
 Our experiments had led us to tinkering about these problems, but no action was taken to address them.
