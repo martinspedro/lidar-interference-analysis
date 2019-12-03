@@ -91,6 +91,8 @@ GRAPHICS_FOLDER_RELATIVE_PATH = "Graphics/"
 ORGANIZED_GROUND_TRUTH_MODEL_PCD_NAME = "organized_ground_truth_model.pcd"
 ICP_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model.pcd"
 ICP_UNVOXELIZED_GROUND_TRUTH_MODEL_PCD_NAME = "icp_ground_truth_model_unvoxelized.pcd"
+GROUND_TRUTH_ROI_MODEL_PCD_NAME = "ground_truth_roi_model.pcd";
+
 GROUND_TRUTH_AZIMUTH_INTENSITY_BIN_NAME = "ground_truth_azimuth_intensity.bin"
 GROUND_TRUTH_LASER_INTENSITY_BIN_NAME = "ground_truth_laser_intensity.bin"
 GROUND_TRUTH_AVERAGE_POINT_DISTANCE_BIN_NAME = "ground_truth_average_point_distance.bin"
@@ -175,6 +177,10 @@ INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_LASER_BASE_NAME = "interferenc
 INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BASE_NAME = "interference_direction_distance_errors_polar_plot_direction";
 
 INTERFERENCE_BOX_FILTER_BAR_FILE = "interference_box_filter_outliers.png"
+
+GROUND_TRUTH_ROI_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_roi_distance_color_mesh.png"
+INTERFERENCE_ROI_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "interference_roi_distance_color_mesh.png"
+DIFFERENCE_ROI_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "difference_roi_distance_color_mesh.png"
 
 OCTREE_INTERFERENCE_COLOR_MESH = "octree_interference_color_mesh.png"
 OCTREE_GROUND_TRUTH_COLOR_MESH = "octree_ground_truth_color_mesh.png"

@@ -227,6 +227,10 @@ const std::string INTERFERENCE_DIRECTION_DISTANCE_ERRORS_POLAR_PLOT_DIRECTION_BA
 
 const std::string INTERFERENCE_BOX_FILTER_BAR_FILE = "interference_box_filter_outliers.png";
 
+const std::string GROUND_TRUTH_ROI_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "ground_truth_roi_distance_color_mesh.png";
+const std::string INTERFERENCE_ROI_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "interference_roi_distance_color_mesh.png";
+const std::string DIFFERENCE_ROI_DISTANCE_ERRORS_COLOR_MESH_FILE_NAME = "difference_roi_distance_color_mesh.png";
+
 const std::string OCTREE_INTERFERENCE_COLOR_MESH = "octree_interference_color_mesh.png";
 const std::string OCTREE_GROUND_TRUTH_COLOR_MESH = "octree_ground_truth_color_mesh.png";
 const std::string OCTREE_DIFFERENCE_COLOR_MESH = "octree_difference_color_mesh.png";
