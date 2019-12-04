@@ -1,13 +1,46 @@
 \chapter{\acl{sota}}
 \label{chapter:sota}
+On this chapter we detail the foundation for this work, by conducting a thoroughly and extensive analysis to the current state of the art of several topics required on our work, giving some considerations about which approaches are followed and why.
+
+This chapter is organized as follows. Section~\ref{sec:sota:software-middleware} contains a brief analysis of the current possibilities for middleware and message passing software between programs and systems, allowing a better code workflow and modularity. On Section~\ref{sec:sota:datasets}, an analysis of the currently available online datasets for autonomous driving is given, along with a comparison of their key features. Section~\ref{sec:sota:camera} details the usage of camera in computer vision applications, its geometry, intrinsic calibration and image processing libraries. On Section~\ref{sec:sota:lidar}, considerations on automotive \ac{lidar} are given regarding its construction and technology, accompanied by an analysis of point cloud manipulation software. Having the camera and \ac{lidar} detailed, an in-depth analysis of their extrinsic calibration procedures is given. Section~\ref{sec:sota:sensor-fusion} details three different techniques of sensor-fusion between camera and \ac{lidar}. On Section~\ref{sec:sota:object-detection}, object detection on image is detailed, presenting some techniques and commonly used  public image datasets for training. Lastly, Section~\ref{sec:sota:lidar-interference} gathers and compares all the work on \ac{lidar} interference, either from the standpoint of an attacker wanting to purposely interfere with a \ac{lidar} and academic research seeking to understand the phenomena.
+
+
+\section{Middleware Software and Message Passing}
+\label{sec:sota:software-middleware}
+Analyzing the \ac{lidar} interference is our primary goal, but several other objectives have been established for this work, on Section~\ref{sec:introduction:objectives}. Fulfilling them requires using a \ac{lidar} and a camera, through a multi-sensor approach, which enables us to analyze interference as a pure interference phenomenon between sensors and understanding its impact on \ac{roi}.
+
+Developing such software, however, requires more than standalone program files, due to the complex interactions between sensors and data. Is crucial, for the success of this work, that standalone programs, which perform their own set of tasks, could communicate it each other, seamlessly, exchanging data and commands.
+
+With those considerations, we require the usage of a middleware, a software layer that can communicate directly with the operative system kernel and hardware devices, abstracting its behavior through an \ac{api} that allows for the programs to communicate with the hardware devices, the kernel and amongst themselves\cite{Etzkorn2017, Huang2010}. Such software also implements a message passing infrastructure between peer-to-peer and/or client-server communication, for data exchange and marshalling~\cite{Etzkorn2017}.
+
+\subsection{Middleware software libraries and Robotics} 
+Several middleware libraries, written in many languages, are available online, capable of message passing between programs:
+
+\begin{enumerate}
+	\item \textbf{PocoLibs:} an Open-Source library developed by OpenRobots that allows for communication between process on a computer system, with support for real-time~\cite{Pocolibs};
+	\item \textbf{\ac{lcm} library:} focused on low latency and high-bandwidth, this library is developed with real-time systems in mind, providing data marshalling and message passing between a publisher and subscriber~\cite{Huang2010b};
+	\item \textbf{ZeroMQ:} a framework with bindings for many languages that can be used to transport messages between process, \ac{tcp} or multicast, for example. Allows a series of different connection types~\cite{ZeroMQ}.
+	\item \textbf{\ac{yarp}:} a collection of programs, written in C++, focused on enabling peer-to-peer communication, supporting \ac{tcp}, \ac{udp}, multicast, amongst many other protocols~\cite{Metta2006};
+	\item \textbf{\ac{ros}:} a complex and extensive framework for developing and test robot software. It was developed with the goal of simplifying the task of building complex and robust robot behavior, independently of the hardware and mechanical platform. Offers a collection of tools, libraries and conventions~\cite{ROS};
+	\item \textbf{\ac{ros} 2:} a more recent iteration of the \ac{ros} development, focused on extending \ac{ros} capabilities to new use cases, such as multiple robot teams, small embedded platforms and real-time systems~\cite{ROS2};
+	\item \textbf{\ac{mrpt}:} a mobile robot library, written in C++, which aims to provide a set of tools and libraries for computer vision, motion planning and \ac{slam}. It also directly supports hardware and implements message passing middleware~\cite{MRPT};
+\end{enumerate}
+
+While the first 4 listed alternatives are focused on generic communication between processes\footnote{Despite its name, \acf{yarp} is not a robotic operative system or framework, but instead a message passing framework for robots.}, inter-process and common know communication protocols, the last 3 are oriented for robotics, providing a comprehensive set of tools for robotics development besides the message passing. The latter is preferred, since it has the potential to unburden us from the development of generic debug tools, data visualization and logging. Therefore, we exclude PocoLibs~\cite{Pocolibs}, \ac{lcm} library~\cite{Huang2010b}, ZeroMQ~\cite{ZeroMQ} and \ac{yarp}~\cite{Metta2006}.
+
+Since our work is also not oriented for real-time applications, we will not use \ac{ros} 2~\cite{ROS2}. Comparing the three robotic platforms, \ac{mrpt} is focused on robot mobility, \ac{slam}, computer vision and motion planning, while \ac{ros} is more generic and widely used, containing all the capabilities of \ac{mrpt}. Also, \ac{ros} is more widely accepted and has a larger community.
+
+Therefore, for the middleware layer and message passing we will use \ac{ros}, taking also advantage of all the other tools it provides and its Open-Source third-party libraries.
+
+
 
 \section{Datasets}
 \label{sec:sota:datasets}
 
-Training an autonomous vehicle to be capable of driving itself is a complex challenge with multiple parts and problems to solve: recognizing other road users (people, vehicles, cyclists); understanding traffic signs; track and estimate the movement of the road users; plan the path; accurate modelling of the environment; among many others. Developing models that can describe and solve these problems, but also testing systems and other software, requires huge amounts of data.
+Training an autonomous vehicle to be capable of driving itself is a complex challenge with multiple parts and problems to solve: recognizing other road users (people, vehicles, cyclists); understanding traffic signs; track and estimate the movement of the road users; plan the path; accurate modelling of the environment; amongst many others. Developing models that can describe and solve these problems, but also testing systems and other software, requires huge amounts of data.
 %To both train neural networks and other genetic algorithms,
 
-To accelerate this progress, a collaborative effort is being made to release free datasets online for public usage under permissive licenses. These datasets vary in their objective, sensory data available, conditions which data has been acquired, driving conditions and format on which they are provided, among other aspects. 
+To accelerate this progress, a collaborative effort is being made to release free datasets online for public usage under permissive licenses. These datasets vary in their objective, sensory data available, conditions which data has been acquired, driving conditions and format on which they are provided, amongst other aspects. 
 
 Despite this work not intending to study autonomous driving, the algorithms developed for calibration, sensor fusion and computing the correspondence between objects of interest in image and point cloud are not exclusive for application on datasets with interference. Therefore, using public available datasets (which no not have interference) not only allows the development of those algorithms before experimental data can be gathered, but also widen the applicability of such work, without losing their applicability to the particular situation of \ac{lidar} interference.
 
