@@ -32,6 +32,10 @@ Since our work is also not oriented for real-time applications, we will not use 
 
 Therefore, for the middleware layer and message passing we will use \ac{ros}, taking also advantage of all the other tools it provides and its Open-Source third-party libraries.
 
+\section{\ac{ros} version}
+\ac{ros} has two long term support versions, whose release schedule is synchronized with Ubuntu operative system~\cite{ROS}. At the time of writing, two versions are currently available: \textit{\ac{ros} Kinetic Kame} and \textit{\ac{ros} Melodic Morenia}.
+
+\textit{\ac{ros} Kinetic} was released in May 2016 and support ends on April 2021. \textit{\ac{ros} Melodic} was released in May 2018 and its end of life is on May 2023. At the time of this work, the most recent version, \textit{\ac{ros} Melodic}, is stable, free of release bugs and most of the \textit{\ac{ros} Kinetic} libraries have already been ported. Therefore, our choice relies on \textit{\ac{ros} Melodic Morenia}, since more concretely, version \texttt{1.14.3}. To work with this version of \ac{ros}, the C++ standard used is version 14.
 
 
 \section{Datasets}
