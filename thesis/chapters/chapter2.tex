@@ -16,7 +16,7 @@ With those considerations, we require the usage of a middleware, a software laye
 \subsection{Middleware software libraries and Robotics} 
 Several middleware libraries, written in many languages, are available online, capable of message passing between programs:
 
-\begin{enumerate}
+\begin{itemize}
 	\item \textbf{PocoLibs:} an Open-Source library developed by OpenRobots that allows for communication between process on a computer system, with support for real-time~\cite{Pocolibs};
 	\item \textbf{\ac{lcm} library:} focused on low latency and high-bandwidth, this library is developed with real-time systems in mind, providing data marshalling and message passing between a publisher and subscriber~\cite{Huang2010b};
 	\item \textbf{ZeroMQ:} a framework with bindings for many languages that can be used to transport messages between process, \ac{tcp} or multicast, for example. Allows a series of different connection types~\cite{ZeroMQ}.
@@ -24,7 +24,7 @@ Several middleware libraries, written in many languages, are available online, c
 	\item \textbf{\ac{ros}:} a complex and extensive framework for developing and test robot software. It was developed with the goal of simplifying the task of building complex and robust robot behavior, independently of the hardware and mechanical platform. Offers a collection of tools, libraries and conventions~\cite{ROS};
 	\item \textbf{\ac{ros} 2:} a more recent iteration of the \ac{ros} development, focused on extending \ac{ros} capabilities to new use cases, such as multiple robot teams, small embedded platforms and real-time systems~\cite{ROS2};
 	\item \textbf{\ac{mrpt}:} a mobile robot library, written in C++, which aims to provide a set of tools and libraries for computer vision, motion planning and \ac{slam}. It also directly supports hardware and implements message passing middleware~\cite{MRPT};
-\end{enumerate}
+\end{itemize}
 
 While the first 4 listed alternatives are focused on generic communication between processes\footnote{Despite its name, \acf{yarp} is not a robotic operative system or framework, but instead a message passing framework for robots.}, inter-process and common know communication protocols, the last 3 are oriented for robotics, providing a comprehensive set of tools for robotics development besides the message passing. The latter is preferred, since it has the potential to unburden us from the development of generic debug tools, data visualization and logging. Therefore, we exclude PocoLibs~\cite{Pocolibs}, \ac{lcm} library~\cite{Huang2010b}, ZeroMQ~\cite{ZeroMQ} and \ac{yarp}~\cite{Metta2006}.
 
@@ -32,7 +32,7 @@ Since our work is also not oriented for real-time applications, we will not use 
 
 Therefore, for the middleware layer and message passing we will use \ac{ros}, taking also advantage of all the other tools it provides and its Open-Source third-party libraries.
 
-\section{\ac{ros} version}
+\subsection{\ac{ros} version}
 \ac{ros} has two long term support versions, whose release schedule is synchronized with Ubuntu operative system~\cite{ROS}. At the time of writing, two versions are currently available: \textit{\ac{ros} Kinetic Kame} and \textit{\ac{ros} Melodic Morenia}.
 
 \textit{\ac{ros} Kinetic} was released in May 2016 and support ends on April 2021. \textit{\ac{ros} Melodic} was released in May 2018 and its end of life is on May 2023. At the time of this work, the most recent version, \textit{\ac{ros} Melodic}, is stable, free of release bugs and most of the \textit{\ac{ros} Kinetic} libraries have already been ported. Therefore, our choice relies on \textit{\ac{ros} Melodic Morenia}, since more concretely, version \texttt{1.14.3}. To work with this version of \ac{ros}, the C++ standard used is version 14.
