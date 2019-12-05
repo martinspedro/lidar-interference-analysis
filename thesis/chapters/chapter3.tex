@@ -300,6 +300,7 @@ The camera was calibrated daily whenever experimental measures were taken. The c
 	
 
 \section{\ac{lidar} Intrinsic Calibration}
+\label{sec:calibration:lidar}
 Unlike a camera, \acp{lidar} do not possess a typical calibration procedure. For Velodyne VLP-16 reflectivity measurements are factory calibrated, in a procedure described in~\cite{vlp16} and a \ac{xml} file is provided with the \ac{lidar}, containing corrections for the \ac{lidar} operating parameters.
 
 This file must be converted to a more suitable format, \acs{yaml}~\footnote{\acs{yaml} is an acronym for \acl{yaml}. The author chose not to follow the norm of expanding acronyms' inline due to acronym recursive nature, to facilitate reading.}, which is \ac{ros} default and can be loaded by the Velodyne \ac{ros} driver package, \texttt{velodyne}, for correction of the \ac{lidar} measurements. After observing the point cloud with test objects such as boxes and walls, \ac{lidar} calibration is observed to be accurate and no further calibration procedures were undertaken.
