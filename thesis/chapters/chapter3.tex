@@ -309,7 +309,7 @@ This file must be converted to a more suitable format, \acs{yaml}~\footnote{\acs
 \label{sec:calibration:extrinsic}
 Calibrating the camera and \ac{lidar}, as explained in Section~\ref{subsec:sota:camera-intrinisc-calibration}, requires determining the rigid body transform between the reference frames of the two sensors. A rigid body transform, also known as a Euclidean Isometry since it preserves the distance between points~\cite{mvg_book}, has 6 degrees of freedom, that can be represented by a translation and a rotation vector.
 
-Due to the ambiguity of the rotation vector and its variety of interpretations: (1) it can represent one of twelve Euler angles notation, angle axis notation, amongst others; (2) this notation is normally replaced by the unambiguous rotation matrix (see Equation~\eqref{eq:camera_transform_full} for an example) or a quaternion. Such representations are also free from gimbal lock, a mathematical limitation of the vector representation, that can cause one rotation axis ``locking'' on another, resulting on their rotation no longer being independent of the other, removing one \acl{degof} and degenerating into a two-dimensional rotational space. For more details on gimbal lock and other singularities see~\cite{mvg_book, Slabaugh, camera_models}.
+Due to the ambiguity of the rotation vector and its variety of interpretations: (1) it can represent one of twelve Euler angles notation, angle axis notation, amongst others; (2) this notation is normally replaced by the unambiguous rotation matrix (see Equation~\eqref{eq:camera_transform_full} for an example) or a quaternion. Such representations are also free from gimbal lock, a mathematical limitation of the vector representation, that can cause one rotation axis ``locking'' on another, resulting on their rotation no longer being independent of the other, removing one degree of freedom and degenerating into a two-dimensional rotational space. For more details on gimbal lock and other singularities see~\cite{mvg_book, Slabaugh, camera_models}.
 
 In this thesis, the preferred notation is a quaternion, which is also adopted by \ac{ros}~\cite{Foote2014}. A quaternion is a mathematical object belonging to $\mathbb{R}^4$, that has a vector (or imaginary) part and a scalar (or real) part. Its representation is denoted on Equation~\eqref{eq:quaternion-notation}, where $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ are the normalized unit vectors of the $x$, $y$ and $z$ axis, respectively; and $w$ is the scalar part. More information on quaternions can be found on~\cite{mvg_book}.
 
@@ -344,7 +344,7 @@ Another node, \texttt{rigid\_transform\_computation} is responsible for listenin
 \end{figure}
 
 
-The algorithm implemented to compute the 6-\ac{degof} rigid body transformation uses \ac{opencv} \texttt{solvePnP}, which gives the intrinsic camera parameters and the manually selected correspondences between the object points (3D points from \ac{lidar}). It can also compute the rotation and translation vectors. For solving the \ac{pnp} problem, several algorithms can be used: Levenberg-Marquardt~\cite{Levenberg1943}, Effective~\ac{pnp}~\cite{Lepetit2009}, Perspective-Three-Point~\cite{Gao2003}, Direct-Least-Squares~\cite{Hesch2011} or Exhaustive Linearization — Uncalibrated \ac{pnp}~\cite{Penate-Sanchez2013a}. The \ac{ros} node implemented provides an argument to select the desired algorithm to be applied to solve the \ac{pnp} problem.
+The algorithm implemented to compute the 6 degrees of freedom rigid body transformation uses \ac{opencv} \texttt{solvePnP}, which gives the intrinsic camera parameters and the manually selected correspondences between the object points (3D points from \ac{lidar}). It can also compute the rotation and translation vectors. For solving the \ac{pnp} problem, several algorithms can be used: Levenberg-Marquardt~\cite{Levenberg1943}, Effective~\ac{pnp}~\cite{Lepetit2009}, Perspective-Three-Point~\cite{Gao2003}, Direct-Least-Squares~\cite{Hesch2011} or Exhaustive Linearization — Uncalibrated \ac{pnp}~\cite{Penate-Sanchez2013a}. The \ac{ros} node implemented provides an argument to select the desired algorithm to be applied to solve the \ac{pnp} problem.
 
 After resolving the \ac{pnp} with one of the methods above, Rodrigues' algorithm is used to convert the \ac{opencv} rotation vector to a rotation matrix~\cite{Dai2015}, which is then used to derive the quaternion. Combining the quaternion with the translation vector, a static transform is published to the \ac{ros} network, which can be used to convert and fuse data from the camera coordinate frame to the \ac{lidar} and vice-versa.
 
@@ -412,7 +412,7 @@ Extrinsic camera and \ac{lidar} calibration was performed whenever experimental 
 \end{figure}
 
 \subsection{Comparison with \ac{kitti}}
-\label{subsec:calibration:kitti-comparision}
+\label{subsec:calibration:kitti-comparison}
 
 On \ac{kitti}, the number of coordinate frames is greater and have more complex interactions. While on the experimental setup the coordinates frames are all fixed, on \ac{kitti}, there is only one fixed frame, \texttt{world}. The car coordinate frame is named \texttt{base\_link} and the transformation between the \texttt{base\_link} and the camera are time-dependent.
 
