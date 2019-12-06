@@ -85,19 +85,19 @@ The implementation we opt to follow is the second method described: \ac{lidar}  
 
 To fuse the \ac{lidar} and camera data, a ``Point Cloud Coloring'' \ac{ros} node is implemented. This node is responsible for synchronizing the camera information and images with the point cloud data from the \ac{lidar}, triggering a callback function on every synchronization event. On the callback, the point cloud points are translated and rotated to match the camera coordinate frame and the points are projected to the image using the affine transformation described previously in Equation~\eqref{eq:lidar-to-camera-affine}.
 
-The full node graph is presented on Figure~\ref{fig:sensor-fusion-rosgraph}, containing not only the node responsible for the data fusion itself, but also the other nodes required for the calibration. In this image, \texttt{camera} nodes and topics are boxed together, visually separating the two types of sensors: camera and image; and \ac{lidar} and point clouds.
+The full node graph is presented on Figure~\ref{fig:sensor-fusion-rosgraph}, in Appendix~\ref{appendix:appendix-diagrams}, containing not only the node responsible for the data fusion itself, but also the other nodes required for the calibration. In this image, \texttt{camera} nodes and topics are boxed together, visually separating the two types of sensors: camera and image; and \ac{lidar} and point clouds.
 
 A \texttt{tf} (short for transform) block can also be shown, receiving the output of two nodes: \texttt{LiDAR\_to\_world} and \texttt{compute\_rigid\_body\_transform}. The first a static transform publisher, that sends the rotation quaternion and translation vector that can be used to positioning the \ac{lidar} in the referential for the test scenario; the second is a node that publishes the rigid body transform obtained in Section~\ref{sec:calibration:extrinsic}. Lastly, \texttt{Point\_Cloud\_Coloring} node receives all this data and publishes a colored point cloud, at $\approx \SI{4.2}{\hertz}$, more than two times slower that the \SI{10}{\hertz} at which ``common'' point cloud data is published on the \ac{ros} network. \texttt{Rviz} is a \ac{ros} multi-sensor data visualizer.
 
 
-\begin{figure}[!ht]
-	\centering
-	\def\svgwidth{\columnwidth}
-	\graphicspath{{img/sensor_fusion/}}
-		\includesvg{img/sensor_fusion/sensor-fusion-with-calibration}
-		\caption[\ac{ros} node graph implemented for coloring the point cloud.]{\ac{ros} graph with the nodes used in data fusion between the \ac{lidar} and camera. The camera and \ac{lidar} topics are separated visually, with the camera still requiring the \texttt{image\_proc} package to de-Bayering the raw image data. Data is fused on the node \texttt{Point\_Cloud\_Coloring}, using the RGB image, point cloud, camera parameters and rigid body transforms.}
-	\label{fig:sensor-fusion-rosgraph}
-\end{figure}
+%\begin{figure}[!ht]
+%	\centering
+%	\def\svgwidth{\columnwidth}
+%	\graphicspath{{img/sensor_fusion/}}
+%		\includesvg{img/sensor_fusion/sensor-fusion-with-calibration-print}
+%		\caption[\ac{ros} node graph implemented for coloring the point cloud.]{\ac{ros} graph with the nodes used in data fusion between the \ac{lidar} and camera. The camera and \ac{lidar} topics are separated visually, with the camera still requiring the \texttt{image\_proc} package to de-Bayering the raw image data. Data is fused on the node \texttt{Point\_Cloud\_Coloring}, using the RGB image, point cloud, camera parameters and rigid body transforms.}
+%	\label{fig:sensor-fusion-rosgraph}
+%\end{figure}
 
 
 \section{Results}
@@ -163,7 +163,7 @@ On Figure~\ref{fig:kitti-sensor-fusion}, a mismatch between the top and bottom p
 	\begin{subfigure}[c]{0.8\textwidth}
 		\includegraphics[width=\textwidth]{img/sensor_fusion/kitti-sensor-fusion-1.png}
 		\caption{}
-		\label{fi		g:kitti-sensor-fusion-1}
+		\label{fig:kitti-sensor-fusion-1}
 	\end{subfigure}
 	\\ \vspace{4mm}
 	\begin{subfigure}[c]{0.8\textwidth}
@@ -171,7 +171,7 @@ On Figure~\ref{fig:kitti-sensor-fusion}, a mismatch between the top and bottom p
 		\caption{}
 		\label{fig:kitti-sensor-fusion-2}
 	\end{subfigure}
-	\caption{Data fusion between camera and \ac{lidar} applied to the \ac{kitti} dataset. On the top there is the image and on the bottom the colored point cloud, displayed in points with 6 pixels of size and 50\% of transparency. Note that there is a mismatch between the image being shown and the image used to create the colored point cloud of 2 frames. In sub-Figure~(\subref{fig:kitti-sensor-fusion-1}), a cyclist and the car can clearly been identified on the colored point cloud and in sub-Figure~(\subref{fig:kitti-sensor-fusion-2}), the car, the wall, the road lines and the shadows can clearly be seen on the colored point cloud.}
+	\caption[Example of data fusion on \acs{kitti} dataset.]{Data fusion between camera and \ac{lidar} applied to the \ac{kitti} dataset. On the top there is the image and on the bottom the colored point cloud, displayed in points with 6 pixels of size and 50\% of transparency. Note that there is a mismatch between the image being shown and the image used to create the colored point cloud of 2 frames. In sub-Figure~(\subref{fig:kitti-sensor-fusion-1}), a cyclist and the car can clearly been identified on the colored point cloud and in sub-Figure~(\subref{fig:kitti-sensor-fusion-2}), the car, the wall, the road lines and the shadows can clearly be seen on the colored point cloud.}
 	\label{fig:kitti-sensor-fusion}
 \end{figure}
 
@@ -185,14 +185,14 @@ If the number of pixels is considered instead, assuming a high camera \ac{fov} o
 
 For \ac{kitti}'s dataset, a 2\ac{mp} camera is used and a 64 beams \ac{lidar}, which yields almost 6\% of the image rows having correspondences and $\approx 5.76\%$ of the image pixels having a corresponding point on the \ac{lidar} point cloud. Comparing with our setup, \ac{kitti} has a number of correspondences between image pixels and point cloud points 41 times higher, which results on the clear difference in photorealism between figures~\ref{fig:cambada-sensor-fusion} and~\ref{fig:dark-room-sensor-fusion} with Figure~\ref{fig:kitti-sensor-fusion}.
 
-Therefore, we can conclude that merging color with the point cloud depth information, on the way we implemented it, is not a feasible solution either to generate better data for autonomous vehicles, assessing the calibration results or possibly mitigating the interference, due to the losses in the information contained on the image. A solution to tackle such scarcity of the \ac{lidar} data and its impacts on point cloud coloring would be to generate a mesh cloud  from a point cloud and then performing mesh cloud coloring and/or interpolation of the point cloud, in order to increase it point cloud density. Obviously, using a \ac{lidar} with a higher number of laser beams will help mitigate this problem.
+Therefore, we can conclude that merging color with the point cloud depth information, on the way we implemented it, is not a feasible solution either to generate better data for autonomous vehicles, assessing the calibration results or possibly mitigating the interference, due to the losses in the information contained on the image. A solution to tackle such sparsity of the \ac{lidar} data and its impacts on point cloud coloring would be to generate a mesh cloud  from a point cloud and then performing mesh cloud coloring and/or interpolation of the point cloud, in order to increase it point cloud density. Obviously, using a \ac{lidar} with a higher number of laser beams will help mitigate this problem.
 
 \section{Final Remarks}
-On this chapter, image and point cloud data are fused to create a ``colored point cloud'': a tridimensional point representation of the scene with depth and color information. The perks of such process are detailed on this chapter and a brief discussion of data fusion representation possibilities: color on point cloud points or depth points overlapped on a 2D image. Our implementation chooses the former and two possible implementation are discussed.  
+In this chapter, image and point cloud data are fused to create a ``colored point cloud'': a tridimensional point representation of the scene with depth and color information. The perks of such process are detailed in this chapter and a brief discussion of data fusion representation possibilities is provided: color on point cloud points or depth points overlapped on a 2D image. Our implementation chooses the former and two possible implementation are discussed.  
 
-To implement these data fusion, the rigid body transformation between the \ac{lidar} and camera must be determined, following the procedures in Section~\ref{sec:calibration:extrinsic} and the camera and \ac{lidar} must be intrinsically calibrated as indicated in Sections~\ref{sec:calibration:camera} and~\ref{sec:calibration:lidar}. Our implementation, a single online \ac{ros} node, assumes these steps are undertaken and listens to the \ac{lidar} and camera data, synchronizing it and coloring the point cloud. For determine the color of the points, we use the $2D \rightarrow 3D$ correspondences.
+To implement such a data fusion, the rigid body transformation between the \ac{lidar} and camera must be determined, following the procedures in Section~\ref{sec:calibration:extrinsic} and the camera and \ac{lidar} must be intrinsically calibrated as indicated in Sections~\ref{sec:calibration:camera} and~\ref{sec:calibration:lidar}. Our implementation, a single online \ac{ros} node, assumes these steps are undertaken and listens to the \ac{lidar} and camera data, synchronizing it and coloring the point cloud. To determine the color of the points, we use the $2D \rightarrow 3D$ correspondences.
 
-The results from this chapter show, visually, that the extrinsic calibration developed on Chapter~\ref{chapter:calibration} is correctly done. However, when comparing the results obtained on \ac{kitti} dataset with ours, our implementation lacks point cloud density to generate a photorealistic colored point cloud. Such drawbacks are caused by the higher \acl{mp} camera and lower number of lasers on our \ac{lidar}, but it reveals that this approach is not the correct one to create better models for autonomous driving. We would have hopped that by using a camera we could help mitigate this problem by merging data together, but this crude approach of projecting data from one coordinate frame to another is not enough. We also discuss briefly the possibility to interpolate the data, to create a better model.
+The results from this chapter show, visually, that the extrinsic calibration developed on Chapter~\ref{chapter:calibration} is correctly done. However, when comparing the results obtained on \ac{kitti} dataset with ours, our implementation lacks point cloud density to generate a photorealistic colored point cloud. Such drawback is caused by the low resolution of our \ac{lidar}\footnote{It should be noted that higher resolution \acp{lidar} for automotive were not available.}, and it reveals that this approach is not the correct one to create good models for autonomous driving. We would have hopped that by using a camera we could help mitigate this problem by merging data together, but this crude approach of projecting data from one coordinate frame to another is clearly not enough. We also briefly discuss the possibility to interpolate the data, to create a better model.
 
 
 From this chapter, the main outcome is the understanding of transforming and fusing data from one to another, along with some insights on the possibility to use data/sensor fusion to mitigate the \ac{lidar} interference. Also, one takeout are the algorithms and libraries for point cloud to image re-projection, which are used to estimate the point cloud bounding box from the image bounding boxes, on Chapter~\ref{chapter:object-detection} since the mathematical description of the two problems is similar.

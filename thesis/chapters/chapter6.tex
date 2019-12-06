@@ -297,7 +297,7 @@ To comprehend whether the orientation between the \acp{lidar} affects the number
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.5\textwidth]{img/lidar-interference/box-filtering/interference-box-filter-outliers-direction.png}
+\includegraphics[width=0.8\textwidth]{img/lidar-interference/box-filtering/interference-box-filter-outliers-direction.png}
 \caption[Relative number of outliers when the relative orientation between the \acp{lidar} is varied on \ac{irislab}.]{Normalized number of outliers, regarding the orientation between the \ac{lidar}. On this polar chart, the higher the bar, the higher the value of interference. For 4 angles (\SIlist[list-final-separator = {, }]{60; 90; 150; 180}{\degree}) the relative interference is ten times higher than the other angular positions.}
 \label{fig:box-filter-outliers-direction}
 \end{figure}
@@ -483,7 +483,7 @@ For all the distance values (\SIrange{1}{12}{\meter} with a step of \SI{1}{\mete
 	\label{fig:distance:octree-ground-truth-color-mesh}
 \end{subfigure}
 \\ \vspace{4mm}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{0.6\textwidth}
 	\includegraphics[width=\textwidth]{img/lidar-interference/distance/octree_difference_color_mesh.png}
 	\caption{}%Voxel-to-Voxel analysis results when computing the difference between the results on sub-Figure~(\subref{fig:distance:octree-interference-color-mesh}) and sub-Figure~(\subref{fig:distance:octree-ground-truth-color-mesh}).}
 	\label{fig:distance:octree-difference-color-mesh}
@@ -517,7 +517,7 @@ For all the relative height values between the two \acp{lidar} (\SIlist[list-uni
 	\label{fig:height:octree-ground-truth-color-mesh}
 \end{subfigure}
 \\ \vspace{4mm}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{0.6\textwidth}
 	\includegraphics[width=\textwidth]{img/lidar-interference/height/octree_difference_color_mesh.png}
 \caption{}%Voxel-to-Voxel analysis results when computing the difference between the results on sub-Figure~(\subref{fig:height:octree-interference-color-mesh}) and sub-Figure~(\subref{fig:height:octree-ground-truth-color-mesh}).}
 	\label{fig:height:octree-difference-color-mesh}
@@ -551,7 +551,7 @@ For all the distance values that the \acf{los} between the two \acp{lidar} was o
 	\label{fig:los:octree-ground-truth-color-mesh}
 \end{subfigure}
 \\ \vspace{4mm}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{0.6\textwidth}
 	\includegraphics[width=\textwidth]{img/lidar-interference/LOS/octree_difference_color_mesh.png}
 	\caption{}%Voxel-to-Voxel analysis results when computing the difference between the results on sub-Figure~(\subref{fig:los:octree-interference-color-mesh}) and sub-Figure~(\subref{fig:los:octree-ground-truth-color-mesh}).}
 	\label{fig:los:octree-difference-color-mesh}
@@ -638,11 +638,11 @@ Before dwelling into the results, some considerations must be made regarding the
 
 Unfortunately, such a reasonable expectation was not met. Our findings reveal not only that the sensor noise is larger than the typical error \SI{3}{\centi\meter} error on a static scenario, as specified on their datasheet,~\cite{VLP16}, but also that, to some extent, \ac{lidar} measurement noise is dominant over the real impact of interference, forbidding us to make an educated assessment of its extent.
 
-We assume that, due to the statistical behavior of measurements, the measurement error of a given distance would be affected by a normal distribution, with mean of \SI{3}{\centi\meter}. Since the standard deviation of the error is not given, we assumed an interval of three sigma, below the normal industry standards of six sigma\citeneeded. An interval of three sigma implies that, given a reasonable threshold such that its value was greater than $3\sigma$ (even not knowing such value) only 0.3\% of the points in the ground truth model would be, theoretically, mistakenly measured as interference when they in fact are noise. Therefore, when analyzing \ac{lidar} data that has been interfered, each point labelled as interfered had a probability of $0.3\%$ of being a false positive, being the erroneous measurement caused by the sensor noise, and not the other \ac{lidar}.
+We assume that, due to the statistical behavior of measurements, the measurement error of a given distance would be affected by a normal distribution, with mean of \SI{3}{\centi\meter}. Since the standard deviation of the error is not given, we assumed an interval of three sigma, below the normal industry standards of six sigma. An interval of three sigma implies that, given a reasonable threshold such that its value was greater than $3\sigma$ (even not knowing such value) only 0.3\% of the points in the ground truth model would be, theoretically, mistakenly measured as interference when they in fact are noise. Therefore, when analyzing \ac{lidar} data that has been interfered, each point labelled as interfered had a probability of $0.3\%$ of being a false positive, being the erroneous measurement caused by the sensor noise, and not the other \ac{lidar}.
 
 To test our hypotheses, the interference analysis algorithms were also applied to the ground truth bag files, comparing how good the ground truth model was when compared with the point cloud frames that were used to generate it. Our results, as will be detailed next for each of the parameters under test which Point-to-Point analysis was done (distance, height and \ac{los} obstruction), show that when analyzing the ground truth bag for ``interference'', the same order of magnitude is obtained when analyzing the actual interfered bag file. Both bag files where compared against the same ground truth model.
 
-On an attempt to cast a light on such results, we subtract to the normalized number of interference points obtained analyzing the interference bag file the normalized number of erroneous points obtained by analyzing the ground truth bag file. This operation is not intended to be used to obtain direct conclusions, only to help to understanding if the order of magnitude of this difference is similar to the order of magnitude of the interference computed on Section~\ref{sec:lidar-interference:room-outliers-experimental-setup}. If so, that would indicate that the predominant behavior of the interference is to create outliers that significantly differ from the correct data. If not, \ac{lidar} interference has a more subtle behavior, which can be mistaken by sensor noise, and more advanced techniques of analysis, which separate the two, must be carried to fully study the problem and its behavior.
+On an attempt to cast a light on such results, we subtract to the normalized number of interference points obtained analyzing the interference bag file the normalized number of erroneous points obtained by analyzing the ground truth bag file. This operation is not intended to be used to obtain direct conclusions, only to help to understanding if the order of magnitude of this difference is similar to the order of magnitude of the interference computed on sub-Section~\ref{subsec:lidar-interference:room-outliers-experimental-setup}. If so, that would indicate that the predominant behavior of the interference is to create outliers that significantly differ from the correct data. If not, \ac{lidar} interference has a more subtle behavior, which can be mistaken by sensor noise, and more advanced techniques of analysis, which separate the two, must be carried to fully study the problem and its behavior.
 
 Subtracting the two normalized interference values assumes that the number of points used to compute this statistical results are statistically representative of the \ac{lidar} measurement noise behavior, which is not fully understood, and may lead to wrong interpretations being made from the data, by basing our observations under false premises. Since we are operating with almost 50 million of points per each value of a parameter under test, we consider that the amount of data being manipulated statistically represents the noise behavior.
 
@@ -663,7 +663,7 @@ For all the distance values (\SIrange{1}{12}{\meter} with a step of \SI{1}{\mete
 	\label{fig:distance:ground-truth-color-mesh}
 \end{subfigure}
 \\ \vspace{4mm}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{0.6\textwidth}
 	\includegraphics[width=\textwidth]{img/lidar-interference/distance/difference_ground_truth_interference_measurement.png}
 \caption{}%Point-to-Point analysis results when computing the difference between the results on sub-Figure~(\subref{fig:distance:interference-color-mesh}) and sub-Figure~(\subref{fig:distance:ground-truth-color-mesh}).}
 	\label{fig:distance:difference-color-mesh}
@@ -696,7 +696,7 @@ For all the relative height values between the two \acp{lidar} (\SIlist[list-uni
 	\label{fig:height:ground-truth-color-mesh}
 \end{subfigure}
 \\ \vspace{4mm}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{0.6\textwidth}
 	\includegraphics[width=\textwidth]{img/lidar-interference/height/difference_ground_truth_interference_measurement.png}
 \caption{}%Point-to-Point analysis results when computing the difference between the results on sub-Figure~(\subref{fig:height:interference-color-mesh}) and sub-Figure~(\subref{fig:height:ground-truth-color-mesh}).}
 	\label{fig:height:difference-color-mesh}
@@ -730,7 +730,7 @@ For all the distances that the \acf{los} between the two \acp{lidar} was obstruc
 	\label{fig:los:ground-truth-color-mesh}
 \end{subfigure}
 \\ \vspace{4mm}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{0.6\textwidth}
 	\includegraphics[width=\textwidth]{img/lidar-interference/LOS/difference_ground_truth_interference_measurement.png}
 \caption{}%Point-to-Point analysis results when computing the difference between the results on sub-Figure~(\subref{fig:los:interference-color-mesh}) and sub-Figure~(\subref{fig:los:ground-truth-color-mesh}).}
 	\label{fig:los:difference-color-mesh}
@@ -757,7 +757,7 @@ Regarding the colormap scale, to the right of each image, its lowest scale value
 
 \begin{enumerate}
 	\item Since the interference bag file is recorded with the triple of the duration of the ground truth bag file, the effects of interference and noise are ``diluted'' during normalization, due to the larger number of points;
-	\item Due to an unforeseen  combination of some parameters, the interference effect on the point distance counteracted the noise, resulting in the point being containe!ht inside the threshold limits.
+	\item Due to an unforeseen  combination of some parameters, the interference effect on the point distance counteracted the noise, resulting in the point being contained inside the threshold limits.
 \end{enumerate}
 
 Accepting the first hypothesis as valid implies that the number of points contained on the bag files are not statistically representative of the \ac{lidar} measurement noise phenomena, which is the premise upon all this analysis is carried. If the number of points under test changes the value of the normalized interference, then the number of points being used is not enough to statistically represent the phenomena, and we cannot subtract the error measurements to obtain the order of magnitude of the interference.
@@ -812,17 +812,17 @@ On Figure~\ref{fig:human-test-scenario}, an example of the test scenario, taken 
 \label{subsec:lidar-interference:roi-implementation}
 To analyze the interference on the selected \ac{roi} we opt to reuse the previous algorithms for ground truth generation (see Frame Registration, on sub-Section~\ref{subsec:lidar-interference:frame-registration}) and interference analysis (see Point-to-Point Analysis, on Section~\ref{sec:lidar-interference:point-to-point-analysis}), which are both implemented as offline nodes. Therefore, the results of the object detection and point cloud bounding box estimation applied to the \textit{Human} dataset must be recorded to a bag file, so that it can be loaded by \texttt{ground\_truth\_model\_estimation\_node} and \texttt{point\_cloud\_interference\_analysis\_node}.
 
-The recording apparatus is shown on Figure~\ref{fig:human-roi-generation}. From the camera intrinsic calibration parameters and the image, the \texttt{darknet\_ros} detects the objects. \texttt{correspondences\_finder} determines the point cloud points that belong to the object(s) on the \acp{roi}, \texttt{point\_cloud\_clusters}, required for \ac{lidar} interference analysis using Point-to-Point Analysis. It uses the point cloud data (\texttt{/velodyne\_point}), the rigid body transform between the camera and \ac{lidar} (\texttt{/camera\_to\_velodyne}) and the image bounding boxes information.
+The recording apparatus is shown on Figure~\ref{fig:human-roi-generation}, on Appendix~\ref{appendix:appendix-diagram}. From the camera intrinsic calibration parameters and the image, the \texttt{darknet\_ros} detects the objects. \texttt{correspondences\_finder} determines the point cloud points that belong to the object(s) on the \acp{roi}, \texttt{point\_cloud\_clusters}, required for \ac{lidar} interference analysis using Point-to-Point Analysis. It uses the point cloud data (\texttt{/velodyne\_point}), the rigid body transform between the camera and \ac{lidar} (\texttt{/camera\_to\_velodyne}) and the image bounding boxes information.
 
 
-\begin{figure}[!ht]
-	\centering
-	\def\svgwidth{\columnwidth}
-	\graphicspath{{img/lidar-interference/human/}}
-	\includesvg{img/lidar-interference/human/human-roi-generation}
-	\caption[\ac{ros} node graph to implement the \acp{roi} recording for later analysis.]{\ac{ros} node graph representing the nodes and their interactions to generate and record the point cloud clusters corresponding to the \ac{roi}'s in the image. \texttt{Rosbag\_Player} is responsible for playing the dataset data; \texttt{darknet\_ros} for computing the image bounding boxes and \texttt{correspondences\_finder} the point cloud corresponding to the object on the \ac{roi}. \texttt{/Bag\_Recorder} is a \ac{ros} bag record to save the data generated into a bag file.}
-	\label{fig:human-roi-generation}
-\end{figure}
+%\begin{figure}[!ht]
+%	\centering
+%	\def\svgwidth{\columnwidth}
+%	\graphicspath{{img/lidar-interference/human/}}
+%	\includesvg{img/lidar-interference/human/human-roi-generation-print}
+%	\caption[\ac{ros} node graph to implement the \acp{roi} recording for later analysis.]{\ac{ros} node graph representing the nodes and their interactions to generate and record the point cloud clusters corresponding to the \ac{roi}'s in the image. \texttt{Rosbag\_Player} is responsible for playing the dataset data; \texttt{darknet\_ros} for computing the image bounding boxes and \texttt{correspondences\_finder} the point cloud corresponding to the object on the \ac{roi}. \texttt{/Bag\_Recorder} is a \ac{ros} bag record to save the data generated into a bag file.}
+%	\label{fig:human-roi-generation}
+%\end{figure}
 
 As detailed in sub-Section~\ref{subsec:object-detection:bounding-boxes-and-roi}, the clustering algorithm can be tuned to filter the undesired data using three parameters. Those parameters were previously tuned for \ac{kitti} dataset, in order to select the road vehicles on the image as the objects of interest. On \ac{irislab} \textit{Human} dataset, the only object of interest present on the image is the person, and so the parameters are adjusted to remove all the points from the \ac{roi} that do not belong to the person. 
 
@@ -855,25 +855,25 @@ With the person placed on the \ac{lidar} coordinate frame at (\SI{5.01}{\meter},
 
 The interference magnitude was analyzed with a varying distance threshold value, from \SIrange{0.05}{0.5}{\meter}, with steps of \SI{0.05}{\meter}. The results of the depth differences between the ground truth model and the interference bag are shown on sub-Figure~\ref{fig:human:interference-color-mesh} and the results of applying the same point-to-point analysis between the ground truth model and the ground truth bag file used to generate the ground truth model are shown on Figure~\ref{fig:human:ground-truth-color-mesh}.
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 	\centering
-	\begin{subfigure}[c]{\textwidth}
+	\begin{subfigure}[c]{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.65\textwidth]{img/lidar-interference/human/interference_distance_color_mesh.png}
+		\includegraphics[width=\textwidth]{img/lidar-interference/human/interference_distance_color_mesh.png}
 		\caption{}
 		\label{fig:human:interference-color-mesh}
 	\end{subfigure}
-	\\ \vspace{2mm}
-	\begin{subfigure}[c]{\textwidth}
+	\qquad
+	\begin{subfigure}[c]{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.65\textwidth]{img/lidar-interference/human/ground_truth_distance_color_mesh.png}
+		\includegraphics[width=\textwidth]{img/lidar-interference/human/ground_truth_distance_color_mesh.png}
 		\caption{}
 		\label{fig:human:ground-truth-color-mesh}
 	\end{subfigure}
 	\\ \vspace{2mm}
-	\begin{subfigure}[c]{\textwidth}
+	\begin{subfigure}[c]{0.6\textwidth}
 		\centering
-		\includegraphics[width=0.65\textwidth]{img/lidar-interference/human/difference_ground_truth_interference_measurement.png}
+		\includegraphics[width=\textwidth]{img/lidar-interference/human/difference_ground_truth_interference_measurement.png}
 		\caption{}
 		\label{fig:human:difference-color-mesh}
 	\end{subfigure}
@@ -898,32 +898,32 @@ Since the maximum distance between any point is \SI{0.5}{\meter}, due to the clu
 
 The results of the depth differences between the ground truth model and the interference bag are shown on sub-Figure~\ref{fig:human:roi-interference-color-mesh} and the results of applying the same point-to-point analysis between the ground truth model and the ground truth bag file used to generate the ground truth model are shown on Figure~\ref{fig:human:roi-ground-truth-color-mesh}.
 
-\begin{figure*}[p]
+\begin{figure}[!ht]
 	\centering
-	\begin{subfigure}[c]{\textwidth}
+	\begin{subfigure}[c]{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.6\textwidth]{img/lidar-interference/human/interference_roi_distance_color_mesh.png}
+		\includegraphics[width=\textwidth]{img/lidar-interference/human/interference_roi_distance_color_mesh.png}
 		\caption{}
 		\label{fig:human:roi-interference-color-mesh}
 	\end{subfigure}
-	\\ \vspace{2mm}
-	\begin{subfigure}[c]{\textwidth}
+	\qquad
+	\begin{subfigure}[c]{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.6\textwidth]{img/lidar-interference/human/ground_truth_roi_distance_color_mesh.png}
+		\includegraphics[width=\textwidth]{img/lidar-interference/human/ground_truth_roi_distance_color_mesh.png}
 		\caption{}
 		\label{fig:human:roi-ground-truth-color-mesh}
 	\end{subfigure}
 	\\ \vspace{2mm}
-	\begin{subfigure}[c]{\textwidth}
+	\begin{subfigure}[c]{0.6\textwidth}
 		\centering
-		\includegraphics[width=0.6\textwidth]{img/lidar-interference/human/difference_roi_distance_color_mesh.png}
+		\includegraphics[width=\textwidth]{img/lidar-interference/human/difference_roi_distance_color_mesh.png}
 		\caption{}
 		\label{fig:human:roi-difference-color-mesh}
 	\end{subfigure}
 
 	\caption[Point-to-Point analysis of the interference on the seleced \ac{roi} of the \textit{Human} dataset.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. On sub-Figure~(\subref{fig:human:roi-interference-color-mesh}), the interfered bag is compared against the ground truth model and on sub-Figure~(\subref{fig:human:roi-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting on sub-Figure~(\subref{fig:human:roi-difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of the distance between the two \acp{lidar}.} 
 	\label{fig:human:roi-color-mesh}
-\end{figure*}
+\end{figure}
 
 A small residual interference can be observed on Figure~\ref{fig:human:roi-interference-color-mesh} for distance thresholds greater than \SI{0.15}{\centi\meter}. We affirm that this behavior is due to interference since we see no similarities on the analysis of the ground truth bag, on Figure~\ref{fig:human:roi-ground-truth-color-mesh}.
 

@@ -275,16 +275,16 @@ The Near and Far Cut Planes may be defined by the data and \ac{lidar} constraint
 Due to point cloud data scarcity, both on the experimental and  \ac{kitti} dataset, a Far Plane of \SI{30}{\meter} is enough to guarantee that all the objects of interest on the \ac{fov} are present.
 
 \subsubsection{Implementation}
-Using the constrains and methods detailed before, a \ac{ros} node, \texttt{image\_bbox\_to\_point\_cloud\_node}, is written to perform frustum filtering on the point cloud using the image bounding boxes determined by \texttt{darknet-ros}. The node diagram is shown on Figure~\ref{fig:ros-graph-frustum}, where the node \texttt{Kitti\_dataset} is a \texttt{rosbag} player and \texttt{darknet-ros} is the node described in Section~\ref{sec:object-detection:image}, responsible for image object detection. \texttt{Rviz} is the \ac{ros} visualizer, configured to show the transformations between the coordinate frames, the original point cloud and the frustum filtered point cloud.
+Using the constrains and methods detailed before, a \ac{ros} node, \texttt{image\_bbox\_to\_point\_cloud\_node}, is written to perform frustum filtering on the point cloud using the image bounding boxes determined by \texttt{darknet-ros}. The node diagram is shown on Figure~\ref{fig:ros-graph-frustum}, in Appendix~\ref{appendix:appendix-diagram}, where the node \texttt{Kitti\_dataset} is a \texttt{rosbag} player and \texttt{darknet-ros} is the node described in Section~\ref{sec:object-detection:image}, responsible for image object detection. \texttt{Rviz} is the \ac{ros} visualizer, configured to show the transformations between the coordinate frames, the original point cloud and the frustum filtered point cloud.
 
-\begin{figure}[t]
-	\centering
-	\def\svgwidth{\columnwidth}
-	\graphicspath{{img/image-object-to-point-cloud/}}
-	\includesvg{img/image-object-to-point-cloud/frustum}
-	\caption[\ac{ros} node graph for the point cloud frustum filter algorithm.]{\ac{ros} node graph corresponding to the implementation of the Point Cloud Frustum Filter node from the image bounding boxes.}
-	\label{fig:ros-graph-frustum}
-\end{figure}
+%\begin{figure}[t]
+%	\centering
+%	\def\svgwidth{\columnwidth}
+%	\graphicspath{{img/image-object-to-point-cloud/}}
+%	\includesvg{img/image-object-to-point-cloud/frustum-print}
+%	\caption[\ac{ros} node graph for the point cloud frustum filter algorithm.]{\ac{ros} node graph corresponding to the implementation of the Point Cloud Frustum Filter node from the image bounding boxes.}
+%	\label{fig:ros-graph-frustum}
+%\end{figure}
 
 
 This node is implemented using \ac{pcl} frustum filter algorithm and Eigen library. Eigen is a C++ library for linear algebra, matrix and vector operations and geometric transformations, among other features~\cite{Eigenv3}. The pose of each of the bounding boxes is also computed, either towards the \ac{lidar}'s and the \ac{pcl}'s frustum algorithm coordinate frame. 
@@ -339,16 +339,16 @@ The node is agnostic about the objects that are identified by the image object d
 			& \exists P \in [\min(bbox^i_x), \max(bbox^i_x)] \cap [\min(bbox^i_y), \max(bbox^i_y)] 
 \end{align}
 
-The node diagram is presented on Figure~\ref{fig:correspondences-finder-standalone}. Similar to Figure~\ref{fig:bbox-correspondences-on-kitti}, the implementation requires the usage of \texttt{Darknet-ros} to compute the image bounding boxes. The two alternatives are completely interchangeable, publishing the same type of message (a point cloud) and receiving the same inputs: the original \ac{lidar} point cloud, coordinate frame transforms and \texttt{darknet-ros} bounding boxes message and the number of detected objects.
+The node diagram is presented on Figure~\ref{fig:correspondences-finder-standalone}, on Appendix~\ref{appendix:appendix-diagram}. Similar to Figure~\ref{fig:bbox-correspondences-on-kitti}, the implementation requires the usage of \texttt{Darknet-ros} to compute the image bounding boxes. The two alternatives are completely interchangeable, publishing the same type of message (a point cloud) and receiving the same inputs: the original \ac{lidar} point cloud, coordinate frame transforms and \texttt{darknet-ros} bounding boxes message and the number of detected objects.
 
-\begin{figure}[!ht]
-	\centering
-	\def\svgwidth{\columnwidth}
-	\graphicspath{{img/image-object-to-point-cloud/}}
-	\includesvg{img/image-object-to-point-cloud/correspondences-finder-standalone}	
-	\caption[\ac{ros} node diagram for the estimation ob point cloud bounding box from image bounding boxes of objects of interest.]{\ac{ros} node diagram for \texttt{correspondences\_finder} implementation. It uses \texttt{Darknet-ros} to compute the image bounding boxes and a \texttt{rosbag} player to publish \ac{kitti} dataset data. The node publishes a point cloud message, \texttt{filtered\_point\_cloud}, containing the \ac{lidar} \acp{roi}' points, selected from the input point cloud, \texttt{velodyne\_points}.}
-	\label{fig:correspondences-finder-standalone}
-\end{figure}
+%\begin{figure}[!ht]
+%	\centering
+%	\def\svgwidth{\columnwidth}
+%	\graphicspath{{img/image-object-to-point-cloud/}}
+%	\includesvg{img/image-object-to-point-cloud/correspondences-finder-standalone-print}	
+%	\caption[\ac{ros} node diagram for the estimation ob point cloud bounding box from image bounding boxes of objects of interest.]{\ac{ros} node diagram for \texttt{correspondences\_finder} implementation. It uses \texttt{Darknet-ros} to compute the image bounding boxes and a \texttt{rosbag} player to publish \ac{kitti} dataset data. The node publishes a point cloud message, \texttt{filtered\_point\_cloud}, containing the \ac{lidar} \acp{roi}' points, selected from the input point cloud, \texttt{velodyne\_points}.}
+%	\label{fig:correspondences-finder-standalone}
+%\end{figure}
 
 \subsubsection{Results}
 On Figure~\ref{fig:projected-correspondences}, the results caused by applying the \texttt{correspondences\_finder} node are presented in lilac. The top part of the image presents the camera feed and the bottom the point cloud, with the relevant TF coordinate frames also visible. The  dark gray points represent the original \ac{lidar} data. 
@@ -510,7 +510,7 @@ Visualization of the bounding boxes is achieved using the \texttt{RViz} \texttt{
 		\caption{Two bounding boxes are presented in blue for the two closest cars, of all the \acp{roi} that were projected on the point cloud. The outliers of the \acp{roi} can also be seen, as several zones of the point cloud are filtered by the \texttt{correspondences\_finder\_node}.}
 		\label{fig:bboxes-3d-kitti-top}
 	\end{subfigure}
-	\caption{Point Cloud tridimensional bounding boxes estimation using the methods described on Sub-Section~\ref{subsec:object-detection:bounding-boxes-and-roi}. The 3D bounding boxes are estimated from the image bounding boxes (top of sub-figure). The dark gray point cloud represents the original point cloud gathered by the \ac{lidar} and the lilac zones correspond to the filtered point cloud using \texttt{correspondences\_finder\_node}, node used to filter the original point cloud. In blue, the point cloud bounding boxes are shown, which are estimated from the image bounding boxes, given on the top of the sub-figures. Three different scenarios are presented: side~\subref{fig:bboxes-3d-kitti-side}, front~\subref{fig:bboxes-3d-kitti-front} and top~\subref{fig:bboxes-3d-kitti-top}. The original point cloud is presented using points 4 pixels wide and 10\% of transparency. The filtered point cloud is presented with points 6 pixels wide and 70\% of transparency. Bounding boxes line width is set to \SI{0.1}{\meter}.} 
+	\caption[Comparison between the estimated tridimensional bounding boxes' dimensions and position and the point cloud data, object clusters and \acs{roi}.]{Point Cloud tridimensional bounding boxes estimation using the methods described on Sub-Section~\ref{subsec:object-detection:bounding-boxes-and-roi}. The 3D bounding boxes are estimated from the image bounding boxes (top of sub-figure). The dark gray point cloud represents the original point cloud gathered by the \ac{lidar} and the lilac zones correspond to the filtered point cloud using \texttt{correspondences\_finder\_node}, node used to filter the original point cloud. In blue, the point cloud bounding boxes are shown, which are estimated from the image bounding boxes, given on the top of the sub-figures. Three different scenarios are presented: side~\subref{fig:bboxes-3d-kitti-side}, front~\subref{fig:bboxes-3d-kitti-front} and top~\subref{fig:bboxes-3d-kitti-top}. The original point cloud is presented using points 4 pixels wide and 10\% of transparency. The filtered point cloud is presented with points 6 pixels wide and 70\% of transparency. Bounding boxes line width is set to \SI{0.1}{\meter}.} 
 	\label{fig:bboxes-3d-kitti}
 \end{figure}
 

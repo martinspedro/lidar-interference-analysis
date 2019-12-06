@@ -79,7 +79,7 @@ The test car, a Volkswagen Passat, is equipped with two stereo pairs, one with c
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{img/sensor_fusion/passat_sensors.jpg}
-	\caption[Volkswagen Passat used for recording \acs{kitti} dataset.]{Volkswagen Passat equipped with the sensors described in sub-Section~\ref{subsec:introduction:scope-motivation} graphs, for the \ac{kitti} dataset. On the top, the Velodyne \ac{lidar} and below the 2 stereo pairs (color and grey). On the back, the \ac{imu} and \ac{gps} systems are present.}
+	\caption[Volkswagen Passat used for recording \acs{kitti} dataset.]{Volkswagen Passat equipped with the sensors described in Section~\ref{sec:introduction:scope_motivation} graphs, for the \ac{kitti} dataset. On the top, the Velodyne \ac{lidar} and below the 2 stereo pairs (color and grey). On the back, the \ac{imu} and \ac{gps} systems are present.}
 	\label{fig:sota:kitti_sensors}
 \end{figure}
 
@@ -699,7 +699,7 @@ Kim\etal tests show the temporal and spatial locality of the data. Temporal loca
 
 The experiment conducted in~\cite{Kim2015a} captured a ground-truth model for 4 hours and the interference data for 50 hours. For a given angle position, Kim concluded that for his experimental setup, 4.4\% of the total number of full line scans were interfered, but that number only translates to one in every 2000 point (0.05\% interfered points for the total number of registered points). When considering the nature of interference, spatial interference is rare: 78\% of the interfered points are not interfered on their next measurement (against 15\% that are), and only 7\% of the angular positions are interfered consecutively 3 or more times, for a record of 13 (meaning \SI{0.5}{\second} of interference). For consecutive interference on nearby azimuthal angles on the same scan, only 30\% of the interference happens within single angular step and 26\% on a second. The largest consecutive number of angles with interference are 102, which translates to \SI{25.5}{\degree}.
 
-In~\cite{Kim2015b}, Kim~\etal reports new tests on \ac{lidar} interference, adding two new tests: a side-by-side with a small displacement and a face-to-face test. In~\cite{Kim2015c} a back-to-back test is also performed. Note that despite the experimental setup \textit{Side by side \#1} (Figure~\ref{fig:kim-setup-side-by-side-1}) being identical to the setup on~\cite{Kim2015a}, disagreements on all evaluated metrics occur. Therefore, for this test, the results discussed before, taken from~\cite{Kim2015a}, and results presented on Table~\ref{tab:kim_2015_results}, based on~\cite{Kim2015b, Kim2015c}, are not in agreement. No explanations are provided for such difference and the issue is not addressed by Kim\etal on~\cite{Kim2015b, Kim2015c}.
+In~\cite{Kim2015b}, Kim~\etal reports new tests on \ac{lidar} interference, adding two new tests: a side-by-side with a small displacement and a face-to-face test. In~\cite{Kim2015c} a back-to-back test is also performed. Note that despite the experimental setup \textit{Side by side \#1} (Figure~\ref{fig:kim-side-by-side-1}) being identical to the setup on~\cite{Kim2015a}, disagreements on all evaluated metrics occur. Therefore, for this test, the results discussed before, taken from~\cite{Kim2015a}, and results presented on Table~\ref{tab:kim_2015_results}, based on~\cite{Kim2015b, Kim2015c}, are not in agreement. No explanations are provided for such difference and the issue is not addressed by Kim\etal on~\cite{Kim2015b, Kim2015c}.
 
 \begin{table}[!ht]
 	\centering

@@ -253,7 +253,7 @@ The \ac{ros} node diagrams can be seen on Figure~\ref{fig:camera-calibration-ros
 		\centering
 		\def\svgwidth{\columnwidth}
 		\graphicspath{{img/camera-calibration/}}
-		\includesvg{img/camera-calibration/bag-rosgraph}
+		\includesvg{img/camera-calibration/bag-rosgraph-print}
 		%\includegraphics[width=0.8\textwidth]{img/camera-calibration/bag-rosgraph.png}
 		\caption{\ac{ros} node graph for the camera calibration procedure using the \texttt{rosbag} tool. \texttt{RosbagPlayer} is the node that plays back the data stored on the bag file.}
 		\label{fig:camera-calibration-bag-rosgraph}
@@ -263,7 +263,7 @@ The \ac{ros} node diagrams can be seen on Figure~\ref{fig:camera-calibration-ros
 		\centering
 		\def\svgwidth{\columnwidth}
 		\graphicspath{{img/camera-calibration/}}
-		\includesvg{img/camera-calibration/avt-rosgraph}
+		\includesvg{img/camera-calibration/avt-rosgraph-print}
 		%\includegraphics[width=0.8\textwidth]{img/camera-calibration/avt-rosgraph.png}		
 		\caption{\ac{ros} node for the camera calibration procedure using the \ac{avt} Vimba \ac{ros} driver. \texttt{camera} node refers to \ac{ros} node that wraps the \ac{avt} Vimba driver.}
 		\label{fig:camera-calibration-avt-rosgraph}
@@ -330,18 +330,18 @@ Since the intrinsic calibration matrix is already obtained by the method describ
 
 
 \subsection{Implementation}
-To extrinsically calibrate the camera and \ac{lidar}, a multi-node network approach was followed, which can be seen on Figure~\ref{fig:extrinsic-calibration-rosgraph}. Using \ac{opencv} and \ac{pcl}, two visualizers were encapsulated under \ac{ros} nodes written in C++, that subscribe camera and \ac{lidar} messages, respectively. The point cloud visualizer, \texttt{PCL\_Viewer\_with\_Pose}, receives the point cloud data from the \texttt{rosbag} player or the \texttt{velodyne} driver and publishes the coordinates of the selected point and the viewer pose. \texttt{Image\_Visualizer} publishes the pixels selected by the user, but requires the de-Bayering and conversion to RGB of the raw image using the \texttt{image\_proc} package. Despite being wrapped in \ac{ros}, each of the visualizers provides standalone callbacks, that support ``frame freezing'' for correspondences selection.
+To extrinsically calibrate the camera and \ac{lidar}, a multi-node network approach was followed, which can be seen on Figure~\ref{fig:extrinsic-calibration-rosgraph}, on Appendix~\ref{appendix:appendix-diagrams}. Using \ac{opencv} and \ac{pcl}, two visualizers were encapsulated under \ac{ros} nodes written in C++, that subscribe camera and \ac{lidar} messages, respectively. The point cloud visualizer, \texttt{PCL\_Viewer\_with\_Pose}, receives the point cloud data from the \texttt{rosbag} player or the \texttt{velodyne} driver and publishes the coordinates of the selected point and the viewer pose. \texttt{Image\_Visualizer} publishes the pixels selected by the user, but requires the de-Bayering and conversion to RGB of the raw image using the \texttt{image\_proc} package. Despite being wrapped in \ac{ros}, each of the visualizers provides standalone callbacks, that support ``frame freezing'' for correspondences selection.
 
 Another node, \texttt{rigid\_transform\_computation} is responsible for listening to messages containing the selected pixels and points, registering their correspondences. This node  instantiates two \ac{ros} services servers, that can be called asynchronously: one for computing the rigid body transform and another to save the correspondences selected on a \ac{csv} file, for later usage. 
 
-\begin{figure}[!ht]
-	\centering
-	\def\svgwidth{\columnwidth}
-	\graphicspath{{img/calibration/}}
-	\includesvg{img/calibration/extrinsic-calibration-rosgraph}
-	\caption{\ac{ros} node graph for the extrinsic calibration. The nodes are represented in  ellipses and the topics between them in rectangles. Rosbag Player is responsible reproducing the recorded topics.}
-	\label{fig:extrinsic-calibration-rosgraph}
-\end{figure}
+%\begin{figure}[!ht]
+%	\centering
+%	\def\svgwidth{\columnwidth}
+%	\graphicspath{{img/calibration/}}
+%	\includesvg{img/calibration/extrinsic-calibration-rosgraph-print}
+%	\caption{\ac{ros} node graph for the extrinsic calibration. The nodes are represented in  ellipses and the topics between them in rectangles. Rosbag Player is responsible reproducing the recorded topics.}
+%	\label{fig:extrinsic-calibration-rosgraph}
+%\end{figure}
 
 
 The algorithm implemented to compute the 6 degrees of freedom rigid body transformation uses \ac{opencv} \texttt{solvePnP}, which gives the intrinsic camera parameters and the manually selected correspondences between the object points (3D points from \ac{lidar}). It can also compute the rotation and translation vectors. For solving the \ac{pnp} problem, several algorithms can be used: Levenberg-Marquardt~\cite{Levenberg1943}, Effective~\ac{pnp}~\cite{Lepetit2009}, Perspective-Three-Point~\cite{Gao2003}, Direct-Least-Squares~\cite{Hesch2011} or Exhaustive Linearization — Uncalibrated \ac{pnp}~\cite{Penate-Sanchez2013a}. The \ac{ros} node implemented provides an argument to select the desired algorithm to be applied to solve the \ac{pnp} problem.
