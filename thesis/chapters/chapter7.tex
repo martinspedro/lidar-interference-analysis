@@ -1,31 +1,34 @@
 \chapter{Conclusions and Future Work}
 \label{chapter:conclusion}
 
-We start this Master's thesis by framing a simple question: \textit{``What happens if two LiDARs that coexist in the same space are switched on simultaneously?''}. We did not know and neither does the academic community, since the work done on the topic so far is not extensive neither representative of such phenomena~\cite{Kim2015a, Kim2015b, Kim2015c, Kim2017, Popko2019a, Popko2019b}. Therefore, the sole purpose of this work was to devise experimental setups and develop software so that the behavior of \ac{lidar} interference could be fully understood, and if possible, mitigated. Providing an answer to such simple question is, as we had found, more complex than the question being asked.
+We started this Master's thesis by framing a simple question: \textit{``What happens if two LiDARs that coexist in the same space are switched on simultaneously?''}. We did not know and neither does the academic community, since the work done on the topic so far is not extensive nor representative~\cite{Kim2015a, Kim2015b, Kim2015c, Kim2017, Popko2019a, Popko2019b}. Therefore, the sole purpose of this work was to devise experimental setups and develop software so that the behavior of \ac{lidar} interference could be fully understood, and, if possible, mitigated. Providing an answer to such a simple question is, as we had found out, more complex than the question being asked.
 
-Our work focus on understanding \ac{lidar} interference under two different perspectives: the first, as a pure interference problem, where we seek to measure, quantify and model the crosstalk one \ac{lidar} causes on the measurements of another; the second, to understand the practical implications of such interference on objects that are relevant to autonomous vehicles, such as cars, persons and cyclists, by comparing their point clouds with and without interference. While the first perspective led us to analyze the problem from a statistical point of view, the second made us use a camera to identify those objects of interest, since the \ac{lidar} data was not trustworthy, and to estimate their position and corresponding points on the point cloud. 
+Modelling \ac{lidar} interference is crucial when most of the solutions for autonomous vehicles rely on a \ac{lidar} (sometimes in more than one) to autonomously navigate. Let us not forget that more than reducing commute times and improving our quality of life, autonomous vehicles (and the technology developed on the process of making autonomous vehicles a reality) are one of the best technological solutions the industry and researchers offer to tackle the growing rate of road deaths~\cite{WHO2018}. %More than a gadget, an autonomous vehicle is a tool to slow down the accelerating rate of deaths on the road: 1 every 23 seconds, 90\% of which due to human error~\cite{WHO2018, WHOvisualizer}.
 
-Modelling \ac{lidar} interference is crucial when most of the solutions for autonomous vehicles rely on \ac{lidar} (sometimes in more than one) to autonomously navigate. Let us not forget that more than reducing commute times and improving our quality of life, autonomous vehicles (and the technology developed on the process of making autonomous vehicles a reality) are one of the best technological solutions the industry and researchers offer to tackle the growing rate of road deaths~\cite{WHO2018}. More than a gadget, an autonomous vehicle is a tool to slow down the accelerating rate of deaths on the road: 1 every 23 seconds, 90\% of which due to human error~\cite{WHO2018, WHOvisualizer}.
+Our work focuses on understanding \ac{lidar} interference under two different perspectives: the first, as a pure interference problem, where we seek to measure, quantify and model the crosstalk one \ac{lidar} causes on the measurements of another; the second, to understand the practical implications of such interference on the observation of objects that are relevant to autonomous vehicles, such as cars, persons and cyclists, by comparing their point clouds with and without interference. While the first perspective led us to analyze the problem from a statistical point of view, the second made us use a camera to identify those objects of interest, 
+%since the \ac{lidar} data was not trustworthy, 
+and to estimate their position and corresponding points on the point cloud. 
+
 
 \section{Summary of Work Developed}
 We start our analysis of \ac{lidar} interference by tackling the problem from the second perspective, since the \acp{lidar}'s were not available on the early stages of the work and its data could be replaced, in the beginning, with online datasets. We start this work by a thorough research on the state of the art of online datasets for autonomous vehicles, followed by intrinsic camera calibration, extrinsic camera and \ac{lidar} calibration, object detection and \ac{lidar} interference. During this process, we select the public dataset we were going to use, \ac{kitti}, and the software tools for our work: \ac{ros} for the whole system integration, \ac{opencv} for image processing tasks, \ac{pcl} for point cloud manipulation and Eigen for matrix and linear algebra. Regarding programming languages, our choice is C++ for all the code except graphics generation and statistical analysis, which is done in Python 3. 
 
-Following this thoroughly research of the state of the art, we begin our work by calibrating the camera, using the standard procedure of moving a known chessboard and detect its corners on the image. To extrinsically calibrate the camera and the \ac{lidar}, we implemented a software package that computes their rigid body transformation, through the user selection of  correspondences between \ac{lidar} and camera. We devise an experimental setup with objects of interest for a tridimensional calibration and put this software to test, acquiring the rigid body transform between the \ac{lidar} and camera on our experimental setup.
+Following this thorough research of the state of the art, we begin our work by calibrating the camera, using the standard procedure of moving a known chessboard and detect its corners on the image. To extrinsically calibrate the camera and the \ac{lidar}, we implemented a software package that computes their rigid body transformation, through the user selection of  correspondences between \ac{lidar} and camera. We devise an experimental setup with objects of interest for a tridimensional calibration and put this software to test, acquiring the rigid body transform between the \ac{lidar} and camera on our experimental setup.
 
-Having a calibrated experimental setup, we ought to explore techniques of data fusion, by implementing a \ac{ros} package capable of merging the color information from the camera's into the \ac{lidar} point cloud. A colored point cloud serves the purpose of verifying, qualitative, the correctness of the experimental setup extrinsic calibration and allows the augmentation of the point cloud information on each point,  which might be useful for establishing correspondences between the point cloud and the camera. While such data augmentation techniques were not required later, due to the scarcity of the point clouds gathered, on an implementation level, the work developed for point cloud coloring (in special, the coordinate frame transformations, projective geometry operations and others) were a steeping stone for camera to \ac{lidar} \acfp{roi} correspondences.
+Having a calibrated experimental setup, we explore techniques of data fusion, by implementing a \ac{ros} package capable of merging the color information from the camera's into the \ac{lidar} point cloud. A colored point cloud serves the purpose of verifying, qualitatively, the correctness of the experimental setup extrinsic calibration and allows the augmentation of the point cloud information on each point, which might be useful for establishing correspondences between the point cloud and the camera. While such data augmentation techniques were not required later, due to the sparsity of the point clouds gathered, on an implementation level, the work developed for point cloud coloring (in special, the coordinate frame transformations, projective geometry operations and others) were a stepping stone for camera to \ac{lidar} \acfp{roi} correspondences.
 
 Seeking to extrapolate the position of \acp{roi} on the point cloud using \acp{roi} on the camera, we start by using \ac{yolo} to perform image object detection. The bounding boxes detected were then converted to \acp{roi} on the point cloud using similar techniques to data fusion. On the point cloud domain, we filtered and clustered the data, extracting the largest cluster with higher point density, which correspond to objects of interest: cars for \ac{kitti} dataset and persons for our experimental dataset. With such tools, we are capable of extracting a subset of the point cloud, corresponding to an object on a \ac{roi} without relying on the \ac{lidar} information. Such feature is crucial to be applied when the \ac{lidar} data happens to be corrupted by interference.
 
-Lastly, we ``head back'' and starting working on the first approach to the problem: analyzing \ac{lidar} interference as a pure interference phenomena. We start by detailing how we updated our experimental setup for interference analysis, how and why we built our dataset the way we did and explaining preliminary measurements from Bosch\cp experimental dataset. We start by measuring the obvious effects of interference: points further away from the scene, most of the times outside the dimensions of the room under the test has been performed. To this algorithm we followed two analysis: 1) quantifying the changes of voxels to understand how interference affects the spatial organization of the data; 2) quantifying how each point of the point cloud is affected by interference. Such analysis required the generation of a ground-truth model, free from interference, that better represented the scene. These results are presented and discussed, from which we derive conclusions, but no general model of \ac{lidar} interference.
+Having all those tools available, we start working on the first approach to the problem: analyzing \ac{lidar} interference as a pure interference phenomena. We start by detailing how we updated our experimental setup for interference analysis, how and why we built our dataset the way we did and explaining preliminary measurements from Bosch\cp~experimental dataset. We start by measuring the obvious effects of interference: points far away from the scene, most of the times beyond the dimensions of the room at which the test had been performed. To analysis followed: 1) quantifying the changes of voxels to understand how interference affects the spatial organization of the data; 2) quantifying how each point of the point cloud is affected by interference. Such analysis required the generation of a ground-truth model, free from interference, that better represented the scene. These results are presented and discussed, from which we derive conclusions.
 
-Merging the two perspectives together, a complementary test is also performed, using the \ac{roi} estimator to extract the points of a \ac{roi} from the point cloud and the methods for interference analysis and ground-truth model generation. The novel results are compared with and without interference and with and without \ac{roi} extracting. To sum-up \ac{lidar} interference, we summarize our outcomes and compare our results with the state of the art on \ac{lidar} interference.
+Merging the two perspectives together, a complementary test is also performed, using the \ac{roi} estimator to extract the points of a \ac{roi} from the point cloud and the methods for interference analysis and ground-truth model generation. The results are compared with and without interference and with and without \ac{roi} extracting. Finally, we summarize our outcomes and compare our results with the state of the art on \ac{lidar} interference.
 
 \section{Main Outcomes}
 \label{sec:conclusion:main-outcomes}
 We can divide our outcomes in two types: tools and results. Regarding tools, three major frameworks are the direct product of this thesis and can be reused:
 
 \begin{enumerate}
-	\item \textbf{Extrinsic camera and \ac{lidar} calibration:} for a generic \ac{lidar} and monocular camera, this toolbox allows the estimation of their extrinsic calibration parameters by using correspondences between image and point cloud selected by the user. Does not require a calibration pattern and has the possibility of using multiple non-linear regression methods;
+	\item \textbf{Extrinsic camera and \ac{lidar} calibration:} for a generic \ac{lidar} and monocular camera, this toolbox allows the estimation of their extrinsic calibration parameters by using correspondences between image and point cloud selected by the user. It does not require a calibration pattern and has the possibility of using multiple non-linear regression methods;
 	\item \textbf{\ac{roi} extraction on \ac{lidar} using image object detection bounding boxes:} given a generic object detection neural network that complies with the pre-requisites of this toolbox regarding results output format, this toolbox allows the extraction of the point cloud subset that corresponds to the object detected on the image;  
 	\item \textbf{\ac{lidar} interference analysis:} comprising 4 types of analysis, 2 ground truth generation algorithms and several other useful tools, this toolbox boosts the understanding of \ac{lidar} interference behavior. The point-to-point analysis method is templated and can use different estimators for interference analysis. Our implementation only provides one: a simple distance threshold; but it can easily be adapted to the necessities of new datasets or new statistical metrics. It provides a logger of all the process, automatic results saving and scripts for generating graphics, either for a single test or using the data from  analysis with different parameters.
 \end{enumerate}
@@ -34,16 +37,16 @@ Regarding results, our findings allows us to conclude that, \textit{``if two LiD
 
 \begin{itemize}
 	\item They interfere and the interference is dependent on the scene where the experimental setup is placed;
-	\item The direct interference predominates over scattered/reflected interference, producing an error one degree of magnitude greater than if the \ac{los} between \acp{lidar} is obstructed; % justified on the state of the art, LOS and Distance
-	\item Varying distance, height and direction, on our experimental setup, is not the major cause of variations on the interference value. Instead, our results show that the metric used to evaluate the interference as more significance than the parameters under test that we choose, revealing that this physical parameters might not be the variables that have the most impact on interference behavior;
-	\item \ac{lidar} noise masks the interference effect, sometimes predominating over it;
+	\item Direct interference predominates over scattered/reflected interference, producing an error one degree of magnitude greater than if the \ac{los} between \acp{lidar} is obstructed; % justified on the state of the art, LOS and Distance
+	\item Varying distance, height and direction, on our experimental setup, is not the major cause of variation on the interference value. Instead, our results show that the metric used to evaluate the interference has more significance than the parameters under test that we choose, revealing that these physical parameters between the \acp{lidar} might not be the variables that have the most impact on interference behavior;
+	\item \ac{lidar} noise masks the interference effect, sometimes dominating over it;
 	\item Interference can have two behaviors: 
 		\begin{enumerate}
-			\item Explicit interference: the interfered points are clearly visible and cause clear erroneous measures, that are normally outside of the room dimensions. This is the less predominant interference;
-			\item Masked interference: the interfered points have a smaller distance offset between their corresponding point and sometimes can be confused with noise. This appears to be the predominant effect but is still unclear due to the difficult to distinguish it from \ac{lidar} noise.
+			\item Explicit interference: the interfered points are clearly visible and cause clearly erroneous measures, that are normally beyhond the room dimensions. This is the less predominant interference;
+			\item Masked interference: the interfered points have a smaller distance offset between their corresponding point and sometimes can be confused with noise. This appears to be the predominant effect but is still unclear due to the difficulty to distinguish it from \ac{lidar} noise.
 		\end{enumerate}
-	\item From all our tests, interference values on the entire point cloud seem to variate between $10^{-6}$ to $10^{-3}$, depending on the dataset and measuring metrics;
-	\item On \ac{roi}, the local interference behavior is similar to the global interference behavior, but the relative value of interfered points increases, due to the low number of points;
+	\item From all our tests, interference values on the entire point cloud seem to vary between $10^{-6}$ to $10^{-3}$, depending on the dataset and measuring metrics;
+	\item In an \ac{roi}, the local interference behavior is similar to the global interference behavior, but the relative value of interfered points increases, due to the low number of points;
 	\item \ac{roi} extraction:
 		\begin{itemize}
 			\item Reduces the \ac{lidar} noise associated with the ground-truth generation and produces a ground-truth model with the relative number of errors one order of magnitude lower;
@@ -60,43 +63,42 @@ During the research on \ac{lidar} interference, several constraints that were ou
 Material Limitations:
 \begin{itemize}
 	\item Only two \ac{lidar} models were available: Velodyne VLP-16 and HESAI Pandar40; and there was no possibility to study \ac{lidar} interference using the same \ac{lidar} model or more than one \ac{lidar} acting as the interferer;
-	\item The Manta G-504C camera, is indicated for industrial computer vision on am industrial carpet and not automotive real-time operation;
+	\item The Manta G-504C camera, is indicated for industrial computer vision on an industrial carpet and not for automotive real-time operation;
 	\item The computer used is a medium tier personal laptop, not indicated for large data processing and real-time neural network processing, which undermines the performance and speed of some toolboxes developed;
-		
 \end{itemize}
 
-Regarding other constraints, the experimental material was only available in July 2019, which slow down the experimental analysis and tests and limited the type of scenes and environments data could be gathered.
+Regarding other constraints, the experimental material was only available in July 2019, which  limited the type of scenes and environments data that could be gathered.
 
 
 \section{Future Work}
 \label{sec:conclusion:future-work}
 
-Triggered by a simple question, this work provided some answers to the phenomena of \ac{lidar} interference, and the first answers for a tridimensional \ac{lidar} interference analysis, resulting from a parallel analysis to some multitudes of the interference. However, if we provided some answers on this topic, we leave some questions for the academic community:
+Triggered by a simple question, this work provided some answers to the phenomena of \ac{lidar} interference, and the first answers for a tridimensional \ac{lidar} interference analysis, resulting from a parallel analysis to some multitudes of the interference. However, if we got some answers on this topic, we also got new some questions:
 
 \begin{itemize}
-	\item What happens if three \acp{lidar} that coexist on the same place are switched on simultaneously? And if instead of three, we use more?
-	\item Is the \ac{lidar} interference dependent on the models of the \acp{lidar} used?
-	\item Is the \ac{lidar} interference scene dependent?
+	\item What happens if three \acp{lidar} that coexist on the same place?% are switched on simultaneously? And if instead of three, we use more?
+	\item Is \ac{lidar} interference dependent on the models of the \acp{lidar} used?
+	\item Is \ac{lidar} interference scene dependent?
 	\item What are the variables that influence the most the interference?
 	\item How to separate \ac{lidar} noise from interference?
-	\item Can direct interference saturate the receptor of the victim \ac{lidar}? And if so, what are the consequences from an interference standpoint?
-	\item How can we mitigate the \ac{lidar} interference, using signal processing techniques??
-	\item Are the any viable solutions to reduce/eliminate interference, from a hardware standpoint?
+	\item Can direct interference saturate the photodetector of the victim \ac{lidar}? And if so, what are the consequences of an interference standpoint?
+	\item How can we mitigate the \ac{lidar} interference?
+	\item Are there any viable solutions to reduce/eliminate interference, from a hardware standpoint?
 \end{itemize}
 
-To address some of these questions, and also improve the work were presented, we propose the following topics for future work:
+To address some of these questions, and also improve on the presented work were presented, we propose the following topics for future work:
 
 \begin{itemize}
 	\item Ray-tracing simulation of multiple \ac{lidar} interference scenarios, to understand the interference behavior. From our preliminary research, we recommend Gazebo\cp;
 	\item Repeating the experimental setup of this thesis, using different models, from different manufacturers and beam density;
-	\item Extend the research of this thesis to open field, bigger pavilions and test dynamic scenarios;
+	\item Capture \ac{lidar} interference data in an open field, bigger pavilions and dynamic scenarios;
 	\item Improve the ground-truth model generation;
 	\item Expand the analysis provided by this work, considering already available data present on the dataset developed, such as intensity;
 	\item Expand the point-to-point interference analysis, by implementing, for instance Gerald Popko's\etal statistical method~\cite{Popko2019b};
 	\item Refactor and improve the developed software, by adding unitary tests, continuous integration, better documentation and user guides.
 \end{itemize}
 
-We firmly believe that understanding \ac{lidar} interference is crucial for a society deeply committed to make autonomous vehicles became a reality. Gunzung Kim\etal provided a first experimental analysis on the interference of two-dimensional \ac{lidar} and Gerald Popko\etal theorize the interference behavior and attempted a Monte Carlo simulation. Our work expands the interference analysis for tridimensional \acp{lidar}, expands the scenarios under test and attempt to compare the interference on the whole point cloud and the same \acp{roi}. 
+%We firmly believe that understanding \ac{lidar} interference is crucial for a society deeply committed to make autonomous vehicles became a reality. Gunzung Kim\etal provided a first experimental analysis on the interference of two-dimensional \ac{lidar} and Gerald Popko\etal theorize the interference behavior and attempted a Monte Carlo simulation. Our work expands the interference analysis for tridimensional \acp{lidar}, expands the scenarios under test and attempt to compare the interference on the whole point cloud and the same \acp{roi}. 
 
-However, many answers about the relevance of \ac{lidar} interference are yet unanswered and more experimental tests and theoretical models are required, to fully characterize the interference and its consequences on autonomous vehicles. Robust alternatives to crosstalk, both from a technological and signal processing standpoint, are also desirable.
+%However, many answers about the relevance of \ac{lidar} interference are yet unanswered and more experimental tests and theoretical models are required, to fully characterize the interference and its consequences on autonomous vehicles. Robust alternatives to crosstalk, both from a technological and signal processing standpoint, are also desirable.
 
