@@ -201,6 +201,7 @@
 \usepackage{indentfirst}
 \usepackage{multirow}
 \usepackage[edges]{forest}
+\usepackage{lscape}
 %\usepackage[inkscape=yes, inkscapelatex=true]{svg}
 
 \usetikzlibrary{external} 
@@ -242,6 +243,7 @@
 \DeclareSIUnit{\revolutions}{revs}
 \DeclareSIUnit[per-mode=symbol]{\revspersecond}{\revolutions\per\second}
 
+%
 % Begin document
 \begin{document}
 \ifthenelse{\equal{\useoverleaf}{0}}{}{\makecoverfile{}}%
@@ -306,6 +308,44 @@
 
 %Select Page style
 \pagestyle{plain}
+
+\newcommand{\hfTextSize}{\footnotesize}
+\newcommand{\headTextStyle}{\lsstyle\scshape\MakeTextLowercase}
+\nouppercaseheads
+\makeevenhead{headings}%
+             {}%
+             {}%
+             {}
+\makeevenhead{plain}%
+             {}%
+             {}%
+             {}
+\makeoddhead{headings}%
+            {}%
+            {}%
+            {}
+\makeoddhead{plain}%
+            {}%
+            {}%
+            {}
+\makeevenfoot{headings}%
+             {}%
+             {\hfTextSize\thepage}%
+             {}
+\makeevenfoot{plain}%
+             {}%
+             {\hfTextSize\thepage}%
+             {}
+\makeoddfoot{headings}%
+            {}%
+            {\hfTextSize\thepage}%
+            {}
+\makeoddfoot{plain}%
+            {}%
+            {\hfTextSize\thepage}%
+            {}
+
+
 
 \frontmatter
 
@@ -379,6 +419,7 @@
 \chapter{Appendices}
 \input{appendix/appendix-a} \newpage 
 \input{appendix/appendix-b} \newpage
-\input{appendix/appendix-c}
+\input{appendix/appendix-c} \newpage
+\input{appendix/appendix-d}
 
 \end{document}
