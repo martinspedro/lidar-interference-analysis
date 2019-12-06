@@ -97,14 +97,13 @@ tools/
 documentation/
 
 # Thesis subfolders to ignore
-images/
-Node\ Graphs/
 diagrams/
 videos/
-
+figs/
 
 # PDFs and images
 *.pdf
 *.jpeg
 *.jpg
 *.png
+*.svg
