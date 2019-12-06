@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
+plt.rcParams.update({'font.size': 18})
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -44,14 +45,25 @@ colors = plt.cm.coolwarm(np.array(errors_normalized) / np.max(np.array(errors_no
 
 rows = 1
 cols = 1
-fig, ax = plt.subplots(rows, cols, sharex=False, sharey=False, figsize=(8,8))
+fig, ax = plt.subplots(rows, cols, sharex=False, sharey=False, figsize=(12,12))
 ax = plt.subplot(111, projection='polar')#, figsize=(16,9))
+
+# Axis ticks only show up on the bottom and left of the plot.
+ax.get_xaxis().tick_bottom()
+ax.get_yaxis().tick_left()
+
+#plt.grid(True, which="minor", color='grey', linestyle='-', linewidth=0.5, alpha=0.2)
+
 rects = ax.bar(direction_values_radian, errors_normalized, width=width, bottom=0.0, color=colors, alpha=1.0, label=r'$\frac{\#\ of\ outliers}{\#\ of\ points}$')
-ax.legend(loc=0, prop={'size': 24})
-ax.set_title("Variation of outliers with the orientation between LiDARs")
+#ax.legend(loc='lower right', prop={'size': 24})
+#ax.set_title("Variation of outliers with the orientation between LiDARs")
+f = matplotlib.ticker.ScalarFormatter(useOffset=False, useMathText=True)
+toSci = lambda y,pos : "${}$".format(f._formatSciNotation('%1.10e' % y))
+plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(toSci))
 ax.set_xticks(direction_values_radian)
-ax.set_xticklabels(direction_values)
+#ax.set_xticklabels(direction_values)
 #ax.set_yticklabels(errors_normalized)
+ax.set_rlabel_position(-22.5)
 fig.tight_layout()
 plt.show(block=False)
 

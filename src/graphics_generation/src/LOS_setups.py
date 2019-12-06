@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
+plt.rcParams.update({'font.size': 20})
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -66,15 +67,19 @@ else:
 
 
 print("Plotting Colored Mesh Graph..."),
-fig1, ax1 = plt.subplots(figsize=(16,9))
+fig1, ax1 = plt.subplots(figsize=(12,9))
 cmap = plt.get_cmap('jet')
+# Axis ticks only show up on the bottom and left of the plot.
+ax1.get_xaxis().tick_bottom()
+ax1.get_yaxis().tick_left()
+
 im = ax1.pcolormesh(errors_normalized, cmap=cmap)
-fig1.colorbar(im, ax=ax1)
-plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+fig1.colorbar(im, ax=ax1, format='%0.0e')
+plt.xticks(range(0, int(len(error_thresholds)/1), 4), error_thresholds[::4])
 plt.yticks(range(0, len(distance_values), 1), distance_values)  # Set locations and labels
-ax1.set_xlabel('Interference distance Threshold (m)')
-ax1.set_ylabel('Distance between LiDARs (m)')
-ax1.set_title("Interfered points")
+ax1.set_xlabel('Interference distance Threshold (m)', size=22, fontstyle='italic')
+ax1.set_ylabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
+#ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
 
@@ -133,15 +138,19 @@ else:
 
 
 print("Plotting Colored Mesh Graph..."),
-fig1, ax1 = plt.subplots(figsize=(16,9))
+fig1, ax1 = plt.subplots(figsize=(12,9))
 cmap = plt.get_cmap('jet')
+# Axis ticks only show up on the bottom and left of the plot.
+ax1.get_xaxis().tick_bottom()
+ax1.get_yaxis().tick_left()
+
 im = ax1.pcolormesh(errors_normalized, cmap=cmap)
-fig1.colorbar(im, ax=ax1)
-plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+fig1.colorbar(im, ax=ax1, format='%0.0e')
+plt.xticks(range(0, int(len(error_thresholds)/1), 4), error_thresholds[::4])
 plt.yticks(range(0, len(distance_values), 1), distance_values)  # Set locations and labels
-ax1.set_xlabel('Interference distance Threshold (m)')
-ax1.set_ylabel('Distance between LiDARs (m)')
-ax1.set_title("Interfered points")
+ax1.set_xlabel('Interference distance Threshold (m)', size=22, fontstyle='italic')
+ax1.set_ylabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
+#ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
 
@@ -155,16 +164,19 @@ print("Done! Colored Mesh saved on: " + colored_mesh_filename)
 #   DIFFERENCE
 #
 errors_diference = errors_diference - errors_normalized;
-print("Plotting Colored Mesh Graph..."),
-fig1, ax1 = plt.subplots(figsize=(16,9))
+fig1, ax1 = plt.subplots(figsize=(12,9))
 cmap = plt.get_cmap('jet')
+# Axis ticks only show up on the bottom and left of the plot.
+ax1.get_xaxis().tick_bottom()
+ax1.get_yaxis().tick_left()
+
 im = ax1.pcolormesh(errors_diference, cmap=cmap)
-fig1.colorbar(im, ax=ax1)
-plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+fig1.colorbar(im, ax=ax1, format='%0.0e')
+plt.xticks(range(0, int(len(error_thresholds)/1), 4), error_thresholds[::4])
 plt.yticks(range(0, len(distance_values), 1), distance_values)  # Set locations and labels
-ax1.set_xlabel('Interference distance Threshold (m)')
-ax1.set_ylabel('Distance between LiDARs (m)')
-ax1.set_title("Interfered points")
+ax1.set_xlabel('Interference distance Threshold (m)', size=22, fontstyle='italic')
+ax1.set_ylabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
+#ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
 

@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
+plt.rcParams.update({'font.size': 20})
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -41,12 +42,22 @@ for i in range(0, len(height_values), 1):
     print(errors_normalized[i])
 
 print("Done! Plotting Bar Graph... "),
-fig, ax = plt.subplots(figsize=(16,9))
+fig, ax = plt.subplots(figsize=(12,9))
+
+# Remove the plot frame lines
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+
+# Axis ticks only show up on the bottom and left of the plot.
+ax.get_xaxis().tick_bottom()
+ax.get_yaxis().tick_left()
+
+plt.grid(True, which="minor", color='grey', linestyle='-', linewidth=0.5, alpha=0.5)
 rects = ax.barh(range(0, len(height_values), 1), errors_normalized, log=True, label=r'$\frac{\#\ of\ outliers}{\#\ of\ points}$', tick_label=height_values)
-ax.legend(prop={'size': 24})
-ax.set_xlabel('Height difference between the LiDARs (m)')
-ax.set_ylabel('Normalized relative number of Outliers')
-ax.set_title("Variation of outliers with Height between LiDARs")
+ax.legend(prop={'size': 28})
+ax.set_xlabel('Normalized relative number of Outliers', size=22, fontstyle='italic')
+ax.set_ylabel('Height difference between the LiDARs (m)', size=22, fontstyle='italic')
+#ax.set_title("Variation of outliers with Height between LiDARs")
 #ax.set_xticks(range(0, len(height_values), 1), height_values)
 fig.tight_layout()
 plt.show(block=False)

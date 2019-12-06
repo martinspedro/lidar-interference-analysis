@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
+plt.rcParams.update({'font.size': 20})
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -20,6 +21,10 @@ error_thresholds = np.arange(0.05, 1.55, 0.05, dtype=np.double)
 height_values = [0.623, 0.715, 0.818, 0.931, 1.032, 1.144, 1.277]
 folder_values = ["0.6", "0.7", "0.8", "0.9", "1.0", "1.1", "1.2"]
 test_codename = "height"
+
+# Subtract Velodyne LiDAR height to get HESAI height relative to it
+height_values = [round(value - 0.918,3) for value in height_values]
+
 #
 #   DISTANCE
 #
@@ -66,15 +71,17 @@ else:
 
 
 print("Plotting Colored Mesh Graph..."),
-fig1, ax1 = plt.subplots(figsize=(16,9))
+fig1, ax1 = plt.subplots(figsize=(12,9))
 cmap = plt.get_cmap('jet')
+ax1.get_xaxis().tick_bottom()
+ax1.get_yaxis().tick_left()
 im = ax1.pcolormesh(errors_normalized, cmap=cmap)
-fig1.colorbar(im, ax=ax1)
-plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+fig1.colorbar(im, ax=ax1, format='%0.0e')
+plt.xticks(range(0, int(len(error_thresholds)/1), 4), error_thresholds[::4])
 plt.yticks(range(0, len(height_values), 1), height_values)  # Set locations and labels
 ax1.set_xlabel('Interference distance Threshold (m)')
-ax1.set_ylabel('Distance between LiDARs (m)')
-ax1.set_title("Interfered points")
+ax1.set_ylabel('Height difference between LiDARs (m)')
+#ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
 
@@ -130,16 +137,17 @@ else:
 
 
 
-print("Plotting Colored Mesh Graph..."),
-fig1, ax1 = plt.subplots(figsize=(16,9))
+fig1, ax1 = plt.subplots(figsize=(12,9))
 cmap = plt.get_cmap('jet')
+ax1.get_xaxis().tick_bottom()
+ax1.get_yaxis().tick_left()
 im = ax1.pcolormesh(errors_normalized, cmap=cmap)
-fig1.colorbar(im, ax=ax1)
-plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+fig1.colorbar(im, ax=ax1, format='%0.0e')
+plt.xticks(range(0, int(len(error_thresholds)/1), 4), error_thresholds[::4])
 plt.yticks(range(0, len(height_values), 1), height_values)  # Set locations and labels
 ax1.set_xlabel('Interference distance Threshold (m)')
-ax1.set_ylabel('Distance between LiDARs (m)')
-ax1.set_title("Interfered points")
+ax1.set_ylabel('Height difference between LiDARs (m)')
+#ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
 
@@ -154,15 +162,17 @@ print("Done! Colored Mesh saved on: " + colored_mesh_filename)
 #
 errors_diference = errors_diference - errors_normalized;
 print("Plotting Colored Mesh Graph..."),
-fig1, ax1 = plt.subplots(figsize=(16,9))
+fig1, ax1 = plt.subplots(figsize=(12,9))
 cmap = plt.get_cmap('jet')
+ax1.get_xaxis().tick_bottom()
+ax1.get_yaxis().tick_left()
 im = ax1.pcolormesh(errors_diference, cmap=cmap)
-fig1.colorbar(im, ax=ax1)
-plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
+fig1.colorbar(im, ax=ax1, format='%0.0e')
+plt.xticks(range(0, int(len(error_thresholds)/1), 4), error_thresholds[::4])
 plt.yticks(range(0, len(height_values), 1), height_values)  # Set locations and labels
 ax1.set_xlabel('Interference distance Threshold (m)')
-ax1.set_ylabel('Distance between LiDARs (m)')
-ax1.set_title("Interfered points")
+ax1.set_ylabel('Height difference between LiDARs (m)')
+#ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
 
