@@ -751,7 +751,7 @@ Comparing this magnitude with the results on Figure~\ref{fig:box-filter-outliers
 Comparing sub-figures (a) and (b), from figures~\ref{fig:distance:color-mesh},~\ref{fig:height:color-mesh} and~\ref{fig:los:color-mesh} we notice that their general aspect is similar, despite the values for each cell being different, revealing the metric chosen for analysis, the distance threshold, has
 more impact than the parameter under test (distance between sensors, height or \ac{los} obstruction) whose values are being varied. Another hypothesis is, due to the difference of sub-figures~\ref{fig:distance:difference-color-mesh},~\ref{fig:height:difference-color-mesh} and~\ref{fig:los:difference-color-mesh}, that the impact of the noise on the data is more relevant than the interference between \acp{lidar}. Therefore, since the number of points is statistically representative of the noise phenomenon, the sub-figure (a) and (b) look similar, but when the impact of the noise is ``removed'', the underlying interference behavior is revealed. 
 
-This interference behavior has an order of magnitude that is contained between $10^{-4}$ to $10^{-5}$, which in the all range of the data analyzed, is one to three orders of magnitude greater than the results obtained on sub-Section~\ref{subec:lidar-interference:room-outliers-experimental-setup}, which only considers the interference that is outside of the room dimensions. Our analysis reveals that such magnitude is a good minorant for the \ac{lidar} interference, but the major part of this interference has a more subtle behavior, affecting slightly the measurements of each point.
+This interference behavior has an order of magnitude that is contained between $10^{-4}$ to $10^{-5}$, which in the all range of the data analyzed, is one to three orders of magnitude greater than the results obtained on sub-Section~\ref{subsec:lidar-interference:room-outliers-experimental-setup}, which only considers the interference that is outside of the room dimensions. Our analysis reveals that such magnitude is a good minorant for the \ac{lidar} interference, but the major part of this interference has a more subtle behavior, affecting slightly the measurements of each point.
 
 Regarding the colormap scale, to the right of each image, its lowest scale value contains negative values, that have the same order of magnitude than the positive ones. Those results indicate that the ground truth bag, which was used to generate the ground truth model, is more poorly related to the model it generates than the interference bag. Two explanations are possible for such behavior:
 
@@ -942,7 +942,7 @@ Then, we postulate the hypothesis that \ac{lidar} noise is more present on regio
 
 
 
-\section{\acl{sota} Comparison}
+\section{Comparison with the \acl{sota}}
 \label{sec:lidar-interference:sota-comparison}
 Despite the experimental setups being quite different, since ours uses a multi-beam tridimensional \ac{lidar} and Kim's\etal and Popko's\etal using a single beam two-dimensional \ac{lidar}, we will attempt to establish comparisons between our results and theirs.
 
