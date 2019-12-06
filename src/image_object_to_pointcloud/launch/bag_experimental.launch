@@ -11,11 +11,8 @@ Description: TODO
    <!-- ARGUMENTS -->
    <!-- Kitti datasets -->
    <arg name="experimental_bags_folder_path"
-        value="/media/martinspedro/Elements/mine/CAMBADA/2019-08-29\ \(Setup\ B\)/" />
-  <!-- <arg name="experimental_bag"              default="Ground\ Truth/ground_truth_final.bag" /> -->
-    <arg name="experimental_bag"              default="Camera\ Calibration/camera_intrinsic_calibration.bag" /> 
-   <!-- <arg name="experimental_bag"              default="Multiple\ LiDAR\ Interference/Distance/6\ m/ground_truth.bag" /> -->
-   <!-- <arg name="experimental_bag"              default="Multiple\ LiDAR\ Interference/Direction/30/ground_truth.bag" /> -->
+        value="/media/martinspedro/Elements/mine/CAMBADA/2019-08-28\ \(Setup\ A\)/" />
+   <arg name="experimental_bag"              default="Multiple\ LiDAR\ Interference/Human/6\ m/interference_roi.bag" />
 
    <!-- Camera related -->
    <arg name="camera_raw_image"         default="/camera/image_raw" />
@@ -26,8 +23,8 @@ Description: TODO
 
    <!-- NODES -->
    <!-- Call rosbag node to publish LIDAR data using clocked time. Loop enabled -->
-   <node pkg="rosbag" type="play" name="KITTI_dataset"
-         args="$(arg experimental_bags_folder_path)$(arg experimental_bag) --clock -r 0.01 -u 10 -s 22" output="screen">
+   <node pkg="rosbag" type="play" name="Rosbag_Player"
+         args="$(arg experimental_bags_folder_path)$(arg experimental_bag) --clock -r 0.1" output="screen">
          <remap from="$(arg camera_raw_image)" to="$(arg darknet_node_raw_image)" />
          <remap from="$(arg camera_image_info)" to="$(arg default_camera_info)" />
    </node>
