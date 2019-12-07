@@ -2,7 +2,9 @@
  *  \file   exceptions.hpp
  *  \brief  Class to implemented a NotImplemented exception
  *
- *  Based on https://stackoverflow.com/questions/24469927/does-c-have-an-equivalent-to-nets-notimplementedexception
+ *  \author Pedro Martins (martinspedro@ua.pt)
+ *  \remark Based on
+ * https://stackoverflow.com/questions/24469927/does-c-have-an-equivalent-to-nets-notimplementedexception
  */
 
 #include <stdexcept>

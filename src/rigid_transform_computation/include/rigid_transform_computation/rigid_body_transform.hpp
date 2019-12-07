@@ -212,7 +212,7 @@ public:
 
   /*!
    * \brief Calculates the 6DoF rigid body transform between the origin and destination frames, given the solvePnP mode
-   * \param[in] msg Camera Parameters message smart pointer.
+   * \param[in] cam_info Camera Parameters message smart pointer.
    *
    * Stores the camera parameters on the LiDARCameraCalibrationData object
    */

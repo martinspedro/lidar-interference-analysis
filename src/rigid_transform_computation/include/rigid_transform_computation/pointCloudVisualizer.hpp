@@ -1,11 +1,9 @@
-/**
- * @file   point_cloud_coloring.cpp
- * @brief  Point Cloud Coloring node CPP File
+/*!
+ * \file   pointCloudVisualizer.hpp
+ * \brief  Header file for Point Cloud Visualizer Class
  *
- * @author Pedro Martins
- * @date   Created on May 18, 2019, 12:25
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
-
 
 #ifndef POINT_CLOUD_VISUALIZER_H
 #define POINT_CLOUD_VISUALIZER_H
@@ -22,58 +20,145 @@
 
 #include <pcl_ros/point_cloud.h>
 
+/*!
+ * \namespace point_cloud
+ * \brief Namespace for point cloud related operations
+ *
+ * It defines variables, typedefs, methods, classes and structures that are usefull for point cloud manipulation
+ */
+namespace point_cloud
+{
+typedef pcl::PointXYZI PointI;      //!< PCL point with Intensity
+typedef pcl::PointXYZRGB PointRGB;  //!< PCL point with Color
 
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;        //!< Point Cloud with only Euclidean Coordinates
+typedef pcl::PointCloud<pcl::PointXYZI> PointCloudI;      //!< Point Cloud with Intensity
+typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;  //!< Point Cloud with Color
 
+/*!
+ * \class PointCloudVisualizer
+ * \brief PCL Visualier with ROS integration and added functionalities for correspondences selection
+ *
+ * Class that uses an PCL visualizer to show Point Cloud 2 message.
+ * It is integrated with ROS but is detach from ROS simulated time for callback operations, supporting freeze time
+ */
+class PointCloudVisualizer
+{
+public:
+  /*!
+   * \brief Construct that creates an PCL window to visualize the Point Cloud feed to the topics given
+   *
+   * \param[in] point_cloud_topic string containing the Point Cloud topic name to be visualized
+   * \param[in] node_handler_name the ROS node handler name to be created
+   */
+  PointCloudVisualizer(std::string point_cloud_topic, std::string node_handler_name);
 
-namespace point_cloud {
-    typedef pcl::PointXYZI   PointI;
-    typedef pcl::PointXYZRGB PointRGB;
+  /*!
+   * \brief Constructor that creates an PCL window to visualize the Point Cloud feed to the topics given
+   *
+   * \param[in] point_cloud_topic string containing the Point Cloud topic name to be visualized
+   * \param[in] pose_topic string containing the topic name for the viewers pose to be published
+   * \param[in] node_handler_name the ROS node handler name to be created
+   */
+  PointCloudVisualizer(std::string point_cloud_topic, std::string pose_topic, std::string node_handler_name);
 
-    typedef pcl::PointCloud<pcl::PointXYZ>    PointCloud;
-    typedef pcl::PointCloud<pcl::PointXYZI>   PointCloudI;
-    typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
+  /*!
+   * \brief Destructor
+   *
+   * Call PCLCloudVisualizer close method and deallocates dynamic memory
+   */
+  ~PointCloudVisualizer();
 
+  /*!
+   * \brief Allows the selection of points in the visualizer
+   *
+   * Enables the callback associated to mouse clicks on the PCL_VISUALIZER
+   */
+  void registerPointPickingCallback(const uint8_t MODE);
 
+  /*!
+   * \brief Spins PCL Visualizer and ROS node
+   */
+  void spin();
 
-    class PointCloudVisualizer{
-        public:
-            PointCloudVisualizer(std::string point_cloud_topic, std::string node_handler_name);
-            PointCloudVisualizer(std::string point_cloud_topic, std::string pose_topic, std::string node_handler_name);
-            ~PointCloudVisualizer();
+  /*!
+   * \brief returns the current PCL Visualizer viewer Pose
+   *
+   * \return The tridimensional affine transform that contains the Pose of the viewer regarding th point cloud
+   * coordinate frame
+   */
+  Eigen::Affine3f getViewerPose();
 
-            void initPointCloudVisualizer();
-            void addNewPointCloudToVisualizer(const sensor_msgs::PointCloud2::ConstPtr &point_cloud_msg, std::string point_cloud_name);
+  static const uint8_t SINGLE_POINT_MODE = 0;  //!< Mode for a single point to be selected, on a Mouse event
 
-            void registerPointPickingCallback(const uint8_t MODE);
+private:
+  /*!
+   * \brief Initializes point Cloud Visualizer with pre defined parameters
+   */
+  void initPointCloudVisualizer();
 
+  /*!
+   * \brief Adds a Point Cloud to an already exisiting point cloud on the visualizer
+   * \param[in] point_cloud_msg ROS Point Cloud 2 message object
+   * \param[in] point_cloud_name Point Cloud Object name
+   */
+  void addNewPointCloudToVisualizer(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg,
+                                    std::string point_cloud_name);
 
-            static const uint8_t SINGLE_POINT_MODE = 0;
-            Eigen::Affine3f getViewerPose();
-            void spin();
+  /*!
+   * \brief Adds a Point Cloud to a already exisiting point cloud on the visualizer
+   * \param[in] pickingEvent PointPickingEvent object
+   * \param[in] viewerVoidPtr void pointer for user data. Used to pass a pointer for the ros::Publisher
+   *
+   * Gets the selected point coordinates in relation to the point cloud coordinate frame that
+   *
+   * \remark: See http://docs.pointclouds.org/trunk/classpcl_1_1visualization_1_1_point_picking_event.html
+   */
+  static void onPointPickingEvent(const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr);
 
-        private:
+  /*!
+   * \brief Callback for every PCL Point Image message
+   *
+   * \param[in] point_cloud_msg Point Cloud Message
+   *
+   * Updates the Point Cloud on the visualizer and computes the Pose
+   */
+  void viewerCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
 
-            std::string node_handler_name;
-            std::string point_cloud_topic;
-            std::string pose_topic;
+  /*!
+   * \brief Callback for every PCL Point Image message
+   *
+   * \param[in] point_cloud_msg Point Cloud Message
+   *
+   * Updates the Point Cloud on the visualizer, computes the Pose and publishes the pose using pose_pub
+   */
+  void viewerWithPoseCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
 
-            ros::NodeHandlePtr nh_;
-            ros::Subscriber point_cloud_sub;
-            ros::Publisher  pose_pub;
-            ros::Publisher  point_pub;
+  /*!
+   * \brief Sets the pose for a PCL Viewer
+   *
+   * \param[in] viewer Point Cloud viewer
+   * \param[in] viewer_pose 3D Pose to be set
+   */
+  void setViewerPose(pcl::visualization::PCLVisualizer& viewer, const Eigen::Affine3f& viewer_pose);
 
-            Eigen::Affine3f viewerPose;
+  std::string node_handler_name;  //!< Node Handler Name
+  std::string point_cloud_topic;  //!< Point Cloud Topic
+  std::string pose_topic;         //!< Pose Topic
 
-            PointCloud point_cloud;
-            PointCloud::Ptr cloudPtr;
+  ros::NodeHandlePtr nh_;           //!< ROS Node Handler Object
+  ros::Subscriber point_cloud_sub;  //!< ROS Point Cloud Subscriber
+  ros::Publisher pose_pub;          //!< ROS Pose Publisher
+  ros::Publisher point_pub;         //!< ROS selected Point Publisher (PointXYZI message)
 
-            pcl::visualization::PCLVisualizer::Ptr pcl_viewer;
+  Eigen::Affine3f viewerPose;  //!< Point Cloud Visualizer Viewer Pose
 
-            static void onPointPickingEvent (const pcl::visualization::PointPickingEvent& pickingEvent, void* viewerVoidPtr);
-            void viewerCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
-            void viewerWithPoseCallback(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg);
-    };
-}
+  PointCloud point_cloud;    //!< Point Cloud object
+  PointCloud::Ptr cloudPtr;  //!< Point Cloud Pointer
 
+  pcl::visualization::PCLVisualizer::Ptr pcl_viewer;  //!< PCL Visualizer Object
+};
 
- #endif // POINT_CLOUD_VISUALIZER_H
+}  // namespace point_cloud
+
+#endif  // POINT_CLOUD_VISUALIZER_H

@@ -1,5 +1,5 @@
 /*!
- *  \file   save_correspondences.cpp
+ *  \file   save_correspondences_client.cpp
  *  \brief  Implementation of a service client node to request that the registed 2D <-> 3D correspondences be saved on a
  * CSV file
  *  \author Pedro Martins (martinspedro@av.it.pt)
