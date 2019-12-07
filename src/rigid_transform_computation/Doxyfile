@@ -799,9 +799,7 @@ FILE_PATTERNS          = *.c \
                          *.py \
                          *.msg \
                          *.srv \
-                         *.cfg \
-                         *.launch \
-                         *.bash
+                         *.cfg
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
