@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rigid_transform_computation</name>
-  <version>0.6.0</version>
-  <description>The rigid_transform_computation package</description>
+  <version>1.0.0</version>
+  <description>ROS Package for determining the rigid body transformation between a Camera and a LiDAR</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="martinspedro@av.it.pt">Pedro Martins</maintainer>
+  <maintainer email="martinspedro@ua.pt">Pedro Martins</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>GPLv3</license>
+  <license>BSDv3</license>
+  <license>MPLv2</license>
+  <license>Boost Software License</license>
 
 
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
@@ -25,7 +27,7 @@
   <!-- Author tags are optional, multiple are allowed, one per tag -->
   <!-- Authors do not have to be maintainers, but could be -->
   <!-- Example: -->
-  <author email="martinspedro@av.it.pt">Pedro Martins</author>
+  <author email="martinspedro@ua.pt">Pedro Martins</author>
 
 
   <!-- The *depend tags are used to specify dependencies -->
@@ -61,6 +63,13 @@
   <build_depend>automatic_calibration</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>camera_info_manager</build_depend>
+  <build_depend>image_geometry</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_msgs</build_depend>
+  <build_depend>tf2_sensor_msgs</build_depend>
+  <build_depend>eigen_conversions</build_depend>
 
   <build_export_depend>cv_bridge</build_export_depend>
   <build_export_depend>image_transport</build_export_depend>
@@ -83,8 +92,16 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+  <exec_depend>automatic_calibration</exec_depend>
+  <exec_depend>camera_info_manager</exec_depend>
+  <exec_depend>image_geometry</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_msgs</exec_depend>
+  <exec_depend>tf2_sensor_msgs</exec_depend>
+  <exec_depend>eigen_conversions</exec_depend>
 
-
+  <doc_depend>doxygen</doc_depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
