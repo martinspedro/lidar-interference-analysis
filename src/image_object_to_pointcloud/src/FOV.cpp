@@ -1,3 +1,9 @@
+/*!
+ * \file   FOV.cpp
+ * \brief  Data structure that implements a field of view data type
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ */
 
 #include "image_object_to_pointcloud/FOV.hpp"
 
