@@ -1,28 +1,38 @@
+/*!
+ * \file   point_cloud_visualizer.cpp
+ * \brief  Simple ROS node to visualize the lIDAR Point clouds on PCL
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ */
+
 #include "automatic_calibration/automatic_calibration.hpp"
 
 // Create viewer object
 pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
 
+/*!
+ * \brief Callback to update the visualizer
+ * \param[in] point_cloud_msg Point Cloud 2 Object
+ */
+void callback(const sensor_msgs::PointCloud2ConstPtr& point_cloud_msg)
+{
+  // create Point Cloud with Intensity Field
+  PointCloudI point_cloud;
 
-void callback(const sensor_msgs::PointCloud2ConstPtr& point_cloud_msg) {
-    // create Point Cloud with Intensity Field
-    PointCloudI point_cloud;
+  // Convert ROS msg to Point Cloud
+  fromROSMsg(*point_cloud_msg, point_cloud);
 
-    // Convert ROS msg to Point Cloud
-    fromROSMsg(*point_cloud_msg, point_cloud);
+  // Create dynamic pointer to point cloud data
+  PointCloudI::Ptr cloudPtr(new PointCloudI);
+  *cloudPtr = point_cloud;
 
-    // Create dynamic pointer to point cloud data
-    PointCloudI::Ptr cloudPtr(new PointCloudI);
-    *cloudPtr = point_cloud;
-
-    // Add new data to viewer
-    viewer.showCloud(cloudPtr);
+  // Add new data to viewer
+  viewer.showCloud(cloudPtr);
 }
-
 
 int main(int argc, char** argv)
 {
-  //Initialize ROS
+  // Initialize ROS
   ros::init(argc, argv, "point_cloud_visualizer");
 
   ros::NodeHandle nh;

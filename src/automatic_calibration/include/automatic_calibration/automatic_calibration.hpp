@@ -7,8 +7,6 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 
-
-
 #include <iostream>
 
 // OPENCV
@@ -29,14 +27,14 @@
 /*******************************************************************************
  *                                 NAMESPACES
  ******************************************************************************/
-//using namespace std;
+//!< \todo remove this using namespace
 using namespace cv;
 using namespace pcl;
 
 /*******************************************************************************
  *                                 TYPEDEFS
  ******************************************************************************/
-typedef pcl::PointCloud<pcl::PointXYZ>  PointCloud;
-typedef pcl::PointCloud<pcl::PointXYZI> PointCloudI;
-typedef pcl::PointXYZRGB PointRGB;
-typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;        //!< Point Cloud with ZYZ points
+typedef pcl::PointCloud<pcl::PointXYZI> PointCloudI;      //!< Point Cloud with points with intensity
+typedef pcl::PointXYZRGB PointRGB;                        //!< Point with Color Information
+typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudRGB;  //!< Point Cloud with colored points
