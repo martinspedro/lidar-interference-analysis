@@ -319,7 +319,7 @@ AUTOLINK_SUPPORT       = YES
 # diagrams that involve STL classes more complete and accurate.
 # The default value is: NO.
 
-BUILTIN_STL_SUPPORT    = YES
+BUILTIN_STL_SUPPORT    = NO
 
 # If you use Microsoft's C++/CLI language, you should set this option to YES to
 # enable parsing support.
@@ -841,7 +841,7 @@ EXCLUDE_PATTERNS       = */matplotlib-cpp/*
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories use the pattern */test/*
 
-EXCLUDE_SYMBOLS        = 
+EXCLUDE_SYMBOLS        =
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include
@@ -2005,8 +2005,8 @@ SKIP_FUNCTION_MACROS   = YES
 # the path). If a tag file is not located in the directory in which doxygen is
 # run, you must also specify the path to the tagfile here.
 
-TAGFILES               = /doc/opencv.tag=http://docs.opencv.org/3.3.0 \
-                         /doc/cppreference-doxygen-web.tag=http://en.cppreference.com/w/
+TAGFILES               = doc/opencv.tag=http://docs.opencv.org/3.3.0 \
+                         doc/cppreference-doxygen-web.tag=http://en.cppreference.com/w/
 
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create a
