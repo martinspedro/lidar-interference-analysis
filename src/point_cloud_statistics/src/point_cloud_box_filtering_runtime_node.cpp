@@ -1,3 +1,16 @@
+/*!
+ * \file  point_cloud_box_filtering_runtime_node.cpp
+ * \brief Counts the number of outliers outside the room dimensions
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that counts the number of outliers on a point cloud, given the dimensions of a parallelelipiped that
+ * encloses the room. The point cloud topic must be opublished on the network.
+ *
+ * Outputs the statistcs and draws a Rviz marker with the room dimensions
+ * \remark This node is deprecated in favor of point_cloud_box_filtering_node
+ */
+
 #include <ros/ros.h>
 
 // PCL specific includes
@@ -21,6 +34,10 @@ typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 long int msg_count = 0, point_count = 0, out_points_count = 0, in_points_count = 0;
 
+/*!
+ * \brief Callback to count the number of inliers and outliers in each message
+ * \param[in] msg point cloud message
+ */
 void callback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   std::cout << "Callback" << std::endl;
