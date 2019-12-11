@@ -1,7 +1,8 @@
 /**
- * \file   organized_pointcloud.hpp
- * \brief
+ * \file   organized_velodyne_point_cloud.hpp
+ * \brief Organized Point cloud Class to store Velodyne data
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #ifndef ORGANIZED_VELODYNE_POINT_CLOUD_H
@@ -19,6 +20,12 @@ namespace point_cloud
 {
 namespace organized
 {
+/*!
+ * \class OrganizedVelodynePointCloud
+ * \brief Organized Point Cloud that inherits from OrganizedPointCloud and narrows it down to Velodyne Point Clouds
+ * cloud
+ *
+ */
 class OrganizedVelodynePointCloud : public OrganizedPointCloud<velodyne::PointXYZIR>
 {
 public:
@@ -68,8 +75,13 @@ public:
     }
   }
 
-  // \TODO This two functions are repeated from organized_point_cloud_with_container code and should be fixed
+  // \todo This two functions are repeated from organized_point_cloud_with_container code and should be fixed
 protected:
+  /*!
+   * \brief Compute polar angle
+   * \param[in] point velodyne point cloud point for computing the polar angle
+   * \return the polar angle, in degrees
+   */
   float getPolar(const velodyne::PointXYZIR point)
   {
     ROS_DEBUG_NAMED("call_stack", "[getPolar]");
@@ -77,6 +89,14 @@ protected:
     return asin(point.z / r) * point_cloud::organized::RADIAN_TO_DEGREE_F;
   }
 
+  /*!
+   * \brief Computes Laser ID of the organized Point Cloud Matrix
+   * \param[in] point velodyne point cloud point for computing the polar angle
+   * \return the corresponding laser ID
+   *
+   * Computes the the polar angle for a given point, shift it to be defined between [0, max(Laser ID)[ and then
+   * computes the corresponding Laser ID
+   */
   unsigned int computeLaserID(const velodyne::PointXYZIR point)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeLaserID]");

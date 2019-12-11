@@ -1,4 +1,4 @@
-/**
+/*!
  * \file   box_filter.cpp
  * \brief Rectangular filter for XYZ Point Clouds
  *

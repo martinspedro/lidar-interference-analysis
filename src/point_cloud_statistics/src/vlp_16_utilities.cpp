@@ -1,5 +1,5 @@
 /**
- * \file   vlp_16_utilities.cpp
+ * \file  vlp_16_utilities.cpp
  * \brief Constants used for VLP16
  *
  */
@@ -19,6 +19,9 @@ const unsigned int AZIMUTHAL_UNIQUE_ANGLES_COUNT =
     (unsigned int)ceil(point_cloud::organized::FULL_REVOLUTION_DEGREE_F / AZIMUTHAL_ANGULAR_RESOLUTION);
 
 // clang-format off
+/*
+ * map containing the correspondences between the angles rounded to the unit and the Laser ID/ring number on VLP-16
+ */
 const std::map<const int, const unsigned int> polar_degree_to_laser_id_map = {
   { -15,  0 },
   { -13,  1 },

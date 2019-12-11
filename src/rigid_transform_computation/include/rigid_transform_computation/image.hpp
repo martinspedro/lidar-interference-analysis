@@ -1,7 +1,8 @@
 /**
  * \file   image.hpp
- * \brief  Implementation of a class to store image topics
+ * \brief  Implementation of a class to store image topics names from ROS
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #ifndef IMAGE_H

@@ -1,7 +1,7 @@
 /*!
  *  \file CSV_manager.hpp
  *  \brief Basic implementation of a CSV file manager tailored for the rigid_transform_computation package
- *  \author Pedro Martins (martinspedro@av.it.pt)
+ *  \author Pedro Martins (martinspedro@ua.pt)
  *
  *  Header file of a basic file manager for CSV (Comma Separated Values) file-types, with read and write functionatilies
 

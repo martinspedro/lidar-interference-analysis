@@ -1,4 +1,4 @@
-/**
+/*!
  * \file   bar_chart_plotter.cpp
  * \brief Plots a Bar Chart using PCLPlotter
  *

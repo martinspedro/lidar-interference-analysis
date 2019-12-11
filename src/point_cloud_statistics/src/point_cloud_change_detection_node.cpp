@@ -1,8 +1,22 @@
-/**
- * \file   point_cloud_change_detection_node.cpp
- * \brief
+/*!
+ * \file  point_cloud_change_detection_node.cpp
+ * \brief Measures the rate of change between the point cloud voxels
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that uses the pcl::OctreePointCloudChangeDetector to analyze the difference between the voxel occupation of
+ * the ground truth model and interfered point cloud. It iterates over every point cloud frame and initializes an Octree
+ * with the ground truth model and them measures the number of voxels that change if that octree data is replaced by
+ * the point cloud of the interfered bag. The process is repeated for several voxel edge lengths
+ *
+ * It saves on a CSV file:
+ * - the voxel edge length used
+ * - the relative value of change of the ground truth model vs the ground truth bag
+ * - the relative value of change of the ground truth model vs the interference bag
+ * - the difference between the relative value of change of the ground truth model vs the interference bag and the
+ * ground truth model vs the ground truth bag
  */
+
 #define PCL_NO_PRECOMPILE
 
 // ROS Bag related includes

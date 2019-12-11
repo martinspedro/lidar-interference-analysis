@@ -1,7 +1,8 @@
 /**
  * \file   image.cpp
- * \brief  Implementation of a class to store image topics
+ * \brief  Implementation of a class to store image topics names from ROS
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #include "rigid_transform_computation/image.hpp"

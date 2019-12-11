@@ -1,7 +1,16 @@
-/**
- * \file   point_cloud_interference_analysis_node.cpp
- * \brief
+/*!
+ * \file  point_cloud_roi_interference_analysis_node.cpp
+ * \brief Analyzes interference on a ROI by measuring the distance between each point with and without interference
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that uses the OrganizedVelodynePointCloud to store ROI point cloud data and then the
+ * computeDistanceBetweenPointClouds to get the distance between the ground truth model fo the ROI and the point cloud
+ * frame being analized. The process is repeated for the ground truth bag file and the interference bag file of the ROI.
+ * Every point cloud frame is processed individually.
+ *
+ * It saves on a binary float vector:
+ * - Distance Difference between each pair of points (on the model and the point cloud)
  */
 
 // ROS Bag related includes

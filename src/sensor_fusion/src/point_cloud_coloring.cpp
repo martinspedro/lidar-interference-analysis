@@ -1,9 +1,8 @@
 /**
- * @file   point_cloud_coloring.cpp
- * @brief  Point Cloud Coloring node CPP File
+ * \file   point_cloud_coloring.cpp
+ * \brief  Point Cloud Coloring node CPP File
  *
- * @author Pedro Martins
- * @date   Created on May 18, 2019, 12:25
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #include "automatic_calibration/automatic_calibration.hpp"
@@ -44,14 +43,14 @@ geometry_msgs::TransformStamped transformStamped;  //!< Create geometric transfo
 
 ros::Publisher pub;  //!< ROS Publisher
 
-image_geometry::PinholeCameraModel cam_model_;
+image_geometry::PinholeCameraModel cam_model_;  //!< Camera Model Object
 
-/** @brief Colors Point Cloud Voxels function
+/** \brief Colors Point Cloud Points function
  *
- * Colors every point cloud voxel with the same color by iterating through each voxel RGB parameter
+ * Given a Point Cloud Pointer and a color, change the RGB of all points to that value
  *
- * @param[in] cloud Pointer to the XYZRGB PointCloud
- * @param[in] rgb   RGB triplet dataype
+ * \param[in] cloud Pointer to the XYZRGB PointCloud
+ * \param[in] rgb   RGB triplet dataype
  */
 void color_point_cloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud, color_t rgb)
 {
@@ -63,9 +62,11 @@ void color_point_cloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud, color_t rgb
   }
 }
 
-/** @brief Callback to color point cloud data
+/** \brief Callback to color point cloud data
  *
- * @param[in] point_cloud_msg PointCloud2 messages from ROS nodes
+ * \param[in] point_cloud_msg PointCloud2 messages from ROS nodes
+ *
+ * Converts the Point Cloud Data to a PointCloudRGB with color
  */
 void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
@@ -96,6 +97,7 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 
   pcl::toROSMsg(*cloudPtr, cloud_colored);
 
+  // Transforms Data from the LiDAR to the camera coordinate frame
   try
   {
     tf2::doTransform(cloud_colored, cloud_out, transformStamped);
@@ -112,9 +114,9 @@ void callback_pcl(const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
   pub.publish(cloud_out);
 }
 
-/** @brief Callback to process imagem stream
+/** \brief Callback to Visualize the imagem stream
  *
- * @param[in] msg Pointer to Image data messages from ROS nodes
+ * \param[in] msg Pointer to Image data messages from ROS nodes
  */
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -129,11 +131,15 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   }
 }
 
-/** @brief Callback to process imagem stream
+/** \brief Callback to process imagem stream
  *
- * @param[in] image Pointer to Image data messages from ROS nodes
- * @param[in] cam_info Information of camera calibration and frame characteristics
- * @param[in] point_cloud_msg PointCloud2 messages from ROS nodes
+ * \param[in] image Pointer to Image data messages from ROS nodes
+ * \param[in] cam_info Information of camera calibration and frame characteristics
+ * \param[in] point_cloud_msg PointCloud2 messages from ROS nodes
+ *
+ * Converts the point cloud to the image coordinate frame, projects the \f$3D\f$ LiDAR points \f$\rightarrow 2D\f$
+ * pixels  and the check for matches inside the image limits. If a match occur, select the pixel color and assign it
+ * to the point
  */
 void callback(const ImageConstPtr& image, const CameraInfoConstPtr& cam_info,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
@@ -229,13 +235,13 @@ void callback(const ImageConstPtr& image, const CameraInfoConstPtr& cam_info,
   pub.publish(cloudCameraPtr);
 }
 
-/** @brief Main code
+/** \brief Main code
  *
  * Node initialization and announcement of publishers and subscribers
  *
- * @param[in] argc
- * @param[in] argv
- * @return Node exit status
+ * \param[in] argc
+ * \param[in] argv
+ * \return Node exit status
  */
 int main(int argc, char** argv)
 {
@@ -249,7 +255,7 @@ int main(int argc, char** argv)
   tf2_ros::TransformListener tfListener(tfBuffer);
 
   // Select the transform required for the dataset
-  /// \TODO Optimize this to use arguments
+  /// \todo Optimize this to use arguments
   // transformStamped = tfBuffer.lookupTransform("camera_color_left", "velodyne", ros::Time(0), ros::Duration(20.0));
   transformStamped = tfBuffer.lookupTransform("camera_link", "velodyne", ros::Time(0), ros::Duration(20.0));
   // transformStamped = tfBuffer.lookupTransform("camera_link", "velo_link", ros::Time(0), ros::Duration(20.0));
