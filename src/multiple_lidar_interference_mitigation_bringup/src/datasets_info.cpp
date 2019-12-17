@@ -138,6 +138,8 @@ const std::string INTERFERENCE_BAG_POINTS_INTENSITY_VECTOR_BIN_NAME = "interfere
 const std::string INTERFERENCE_ANALYSIS_OCTREE_OCUPATION_BIN_NAME = "interference_analysis_octree_ocupation.csv";
 
 const std::string INTERFERENCE_BOX_FILTER_FILE_NAME = "interference_box_filter.csv";
+const std::string INTERFERENCE_DISTANCE_VS_LOS_BOX_FILTER_BAR_FILE = "interference_los_vs_distance_box_filter_outliers."
+                                                                     "png";
 
 const std::string GROUND_TRUTH_AVERAGE_POINT_DISTANCE_HIST_FILE_NAME = "ground_truth_average_point_distance_"
                                                                        "histogram.png";
