@@ -1,7 +1,9 @@
 /**
- * \file   point_cloud_statistics.cpp
- * \brief
+ * \file  point_cloud_statistics.cpp
+ * \brief Implementation file of point cloud statistics method
+ * \author Pedro Martins (martinspedro@ua.pt)
  *
+ * Implements ICP methods
  */
 
 #define PCL_NO_PRECOMPILE

@@ -1,8 +1,19 @@
-/**
- * \file   ground_truth_model_estimation_node.cpp
- * \brief Ground truth model estimation for pcl Point Clouds
+/*!
+ * \file  ground_truth_model_estimation_node.cpp
+ * \brief Ground truth model estimation using an Organized Point Cloud
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that uses the OrganizedPointCloudWithContainer to register all the points from the ground truth rosbag file
+ * With that, it computes the ground truth model using all the points and the converts the model to an
+ * OrganizedVelodynePointCloud object, which is saved on PCD file
+ *
+ * It saves on a binary float vector:
+ * - Laser and Azimuth intensity average and variance, using the intensity structure
+ * - Distance Average and Variance
+ * - Intensity Average and Variance
  */
+
 #define PCL_NO_PRECOMPILE
 
 #include <rosbag/bag.h>
@@ -38,8 +49,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/**
- * \struct intensity characteristics
+/*!
+ * \struct intensity
+ * \brief Structure for the point analysis that contains the intensity analysis
  */
 struct intensity
 {

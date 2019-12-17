@@ -1,9 +1,8 @@
 /**
- * @file   point_cloud_coloring.cpp
- * @brief  Point Cloud Coloring node CPP File
+ * \file   pointCloudVisualizer.cpp
+ * \brief  Implementation file for PointCloudVisualizer class
  *
- * @author Pedro Martins
- * @date   Created on May 18, 2019, 12:25
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #include "rigid_transform_computation/pointCloudVisualizer.hpp"
@@ -17,11 +16,11 @@
 
 using namespace point_cloud;
 
-const std::string POINT_CLOUD_VIEWER_NAME = "Point Cloud Viewer";
-const int DEFAULT_QUEUE_SIZE = 1;
-const int DEFAULT_POSE_QUEUE_SIZE = 10;
+const std::string POINT_CLOUD_VIEWER_NAME = "Point Cloud Viewer";  //!< Point Cloud Viewer Name
+const int DEFAULT_QUEUE_SIZE = 1;                                  //!< ROS Point Cloud Subscriber Queue Size
+const int DEFAULT_POSE_QUEUE_SIZE = 10;                            //!< ROS Pose Publisher Queue Size
 
-std::vector<pcl::PointXYZ> clicked_points;
+std::vector<pcl::PointXYZ> clicked_points;  //!< Vector containing the selected point
 
 PointCloudVisualizer::PointCloudVisualizer(std::string point_cloud_topic, std::string node_handler_name)
 {
@@ -121,7 +120,6 @@ void PointCloudVisualizer::viewerWithPoseCallback(const sensor_msgs::PointCloud2
   // std::cout << (this->viewerPose).matrix() << std::endl;
 }
 
-// http://docs.pointclouds.org/trunk/classpcl_1_1visualization_1_1_point_picking_event.html
 void PointCloudVisualizer::onPointPickingEvent(const pcl::visualization::PointPickingEvent& pickingEvent,
                                                void* viewerVoidPtr)
 {

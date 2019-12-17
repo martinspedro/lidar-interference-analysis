@@ -1,4 +1,4 @@
-/**
+/*!
  * \file  cloud_statistical_data.cpp
  * \brief Implementation of Statistical Cloud data class
  *

@@ -1,7 +1,8 @@
 /**
- * \file   organized_pointcloud.hpp
- * \brief
+ * \file  organized_point_cloud.hpp
+ * \brief Organized Point cloud Class to store generic data
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #ifndef ORGANIZED_POINT_CLOUD_H
@@ -18,6 +19,15 @@ namespace point_cloud
 {
 namespace organized
 {
+/*!
+ * \class OrganizedPointCloud
+ * \brief Organized Point Cloud that inherits from pcl::PointCloud and extends its capabilities for organized point
+ * cloud
+ * \tparam PointT Generic Point Type, defined to be PCL compatible
+ *
+ * This class inherits from  pcl::PointCloud
+ *
+ */
 template <class PointT>
 class OrganizedPointCloud : public pcl::PointCloud<PointT>
 {
@@ -25,11 +35,21 @@ public:
   using Ptr = boost::shared_ptr<OrganizedPointCloud>;
   using ConstPtr = boost::shared_ptr<const OrganizedPointCloud>;
 
+  /*!
+   * \brief Constructor
+   * \param[in] width organized point cloud matrix number of columns
+   * \param[in] height organized point cloud matrix number of rows
+   *
+   * Call the pcl::PointCloud constructor
+   */
   OrganizedPointCloud(unsigned int width, unsigned int height) : pcl::PointCloud<PointT>(width, height)
   {
     ROS_DEBUG_NAMED("call_stack", "[OrganizedPointCloud] with (%d, %d)", width, height);
   }
 
+  /*!
+   * \brief Replaces all points on the point cloud matrix using the blank object constructor
+   */
   void clearPointsFromPointcloud()
   {
     ROS_DEBUG_NAMED("call_stack", "[clearPointsFromPointcloud]");
@@ -43,12 +63,28 @@ public:
     }
   }
 
+  /*!
+   * \brief Compute azimuth angle
+   * \param[in] point the point cloud point for computing the azimuth
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   * \return the azimuthal angle, in degrees
+   * \remark Computation is done using atan2
+   */
   virtual float getAzimuth(const PointT point)
   {
     ROS_DEBUG_NAMED("call_stack", "[getAzimuth]");
     return atan2(point.y, point.x) * point_cloud::organized::RADIAN_TO_DEGREE_F;
   }
 
+  /*!
+   * \brief Compute azimuth index of the organized Point Cloud Matrix like Structure
+   * \param[in] point the point cloud point for computing the azimuth
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   * \return the azimuthal angle index
+   *
+   * Computes the the azimuth angle for a given point, shift it to be defined between [0, 360[ and then computes the
+   * corresponding index
+   */
   virtual unsigned int getAzimuthIndex(const PointT point)
   {
     ROS_DEBUG_NAMED("call_stack", "[getAzimuthIndex]");
@@ -63,12 +99,33 @@ public:
     return (unsigned int)(index);
   }
 
+  /*!
+   * \brief Compute Euclidean distance between a point and the Origin
+   * \param[in] point the point cloud point for computing the azimuth
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   * \return Euclidean Distance between the point and the Origin, in the units of the point
+   *
+   * The Euclidean distance between the points \f$(x, y, z)\f$ and the origin is
+    \f$\sqrt{x^2+y^2+z^2}\f$.
+   *
+   */
   virtual float computeEuclideanDistanceToOrigin(const PointT point)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeEuclideanDistanceToOrigin]");
     return std::sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
   }
 
+  /*!
+   * \brief Compute Euclidean distance between a point and the Origin
+   * \param[in] point1 the source point cloud point for computing the distance
+   * \param[in] point2 the target point cloud point for computing the distance
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   * \return Euclidean Distance between the point1 and the point2, in the units of the point
+   *
+   * The Euclidean distance between the two points \f$Point_1 = (x, y, z)\f$ and \f$Point_2 = (x, y, z)\f$ is
+   * \f$\sqrt{(point2.x-point2.x)^2+(point2.y-point1.y)^2+(point2.z-point1.z)^2}\f$.
+   *
+   */
   virtual float computeEuclideanDistance(const PointT point1, const PointT point2)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeEuclideanDistance]");
@@ -80,6 +137,14 @@ public:
     return std::sqrt(x_diff * x_diff + y_diff * y_diff + z_diff * z_diff);
   }
 
+  /*!
+   * \brief  Appends the point cloud to the organized point cloud, in an organized manner
+   * \param[in] unorganized_cloud unorganized point cloud to be stored
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   *
+   * Iterates over the input point cloud, unorganized, and appends the current point to the Container vector on its
+   * correspondent row and column.
+   */
   virtual void organizePointCloud(const pcl::PointCloud<PointT> unorganized_cloud)
   {
     ROS_DEBUG_NAMED("call_stack", "[organizePointCloud]");
@@ -113,6 +178,13 @@ public:
     }
   }
 
+  /*!
+   * \brief Computes the point to point distance between the method invocator and other cloud passed by argument
+   * \param[in] organized_point_cloud Organized Point Cloud object, to be compared with this
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   * \return the OrganizedPointCloud object containing the distance in each point
+   *
+   */
   OrganizedPointCloud<PointT> computeDistanceBetweenPointClouds(OrganizedPointCloud<PointT> organized_point_cloud)
   {
     ROS_DEBUG_NAMED("call_stack", "[computeDistanceBetweenPointClouds]");
@@ -134,7 +206,15 @@ public:
     return distance_map;
   }
 
-  /**
+  /*!
+   * \brief Computes the point to point distance between the method invocator and other cloud passed by argument
+   * \param[in] organized_point_cloud Organized Point Cloud object, to be compared with this
+   * \param[in] distance_vector vector containing the distances between the corresponding points from one cloud and the
+   * other
+   * \param[in] intensity_vector vector containing the intensity differences between the corresponding points from one
+   * cloud and the other
+   * \tparam PointT Generic Point Type, defined to be PCL compatible
+   *
    * \remark Despite the output being a vector, the distance and intensity calculations are pushed first by laser/ring
    * and then by azimuth. The output vector can be resized to a 1800 x 16 matrix, where eacha column represents a
    * laser/ring and each row a azimuth angle. If the vector accumulates results for consecutive frames, the number of

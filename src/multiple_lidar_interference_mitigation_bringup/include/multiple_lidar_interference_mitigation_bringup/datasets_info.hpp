@@ -1,6 +1,6 @@
 /**
  * \file   datasets_info.hpp
- * \brief  Set of constants usefull to manage the datasets
+ * \brief  Set of constants and methods usefull to manage the datasets
  *
  */
 
@@ -9,21 +9,133 @@
 
 #include <string>
 
+/*!
+ * \namespace datasets_path
+ * \brief namespace for datasets manipulation
+ */
 namespace datasets_path
 {
+/*!
+ * \brief Get full path to the test scenario
+ * \param[in] test_scenario_name string indicating the test scenario codename
+ * \return the full path to the scenario
+ * \throws std::out_of_range if test scenario codename is invalid
+ *
+ * Given a test scenario code name, returns the full path for that test scenario root folder
+ */
 const std::string getTestScenarioFullPath(const std::string test_scenario_name);
-const std::string getTestScenarioDatasetFullPath(const std::string test_name);
-const std::string getResultsFolderRelativePath(const std::string test_name);
-const std::string getGraphicsFolderRelativePath(const std::string test_name);
 
+/*!
+ * \brief Get full path to the test scenario dataset
+ * \param[in] dataset_name string indicating the dataset codename
+ * \return the full path to the dataset
+ * \throws std::out_of_range if dataset codename is invalid
+ *
+ * Given a test scenario dataset code name, returns the full path for that dataset root folder
+ */
+const std::string getTestScenarioDatasetFullPath(const std::string dataset_name);
+
+/*!
+ * \brief Get full path to the output results folder
+ * \param[in] result_file_name string indicating the result file codename
+ * \return the full path to the specific output results folder
+ * \throws std::out_of_range if result file codename is invalid
+ *
+ * Given a result file codename, returns the full path for the specific output results folder
+ */
+const std::string getResultsFolderRelativePath(const std::string result_file_name);
+
+/*!
+ * \brief Get full path to the output graphics folder
+ * \param[in] graphic_file_name string indicating the graphic file codename
+ * \return the full path to the specific output graphics folder
+ * \throws std::out_of_range if graphics folder codename is invalid
+ *
+ * Given a graphics folder codename, returns the full path for the specific output graphics folder
+ */
+const std::string getGraphicsFolderRelativePath(const std::string graphic_file_name);
+
+/*!
+ * \brief Get full path to the test scenario specific file
+ * \param[in] test_scenario_name string indicating the test scenario codename
+ * \param[in] file_name desired file name or codename
+ * \return the full path to the desired file on the test scenario
+ * \throws std::out_of_range if test scenario codename is invalid
+ *
+ * Given a test scenario code name and a file codename/name, returns the full path for that test scenario
+ * file name/codename
+ */
 const std::string constructFullPathToTestScenario(const std::string test_scenario_name, const std::string file_name);
+
+/*!
+ * \brief Get full path to the test scenario dataset specific file
+ * \param[in] dataset_name string indicating the dataset codename
+ * \param[in] file_name desired file name or codename
+ * \return the full path to the desired file on the dataset
+ * \throws std::out_of_range if dataset codename is invalid
+ *
+ * Given a test scenario dataset code name and a file codename/name, returns the full path for that dataset file
+ * name/codename
+ */
 const std::string constructFullPathToDataset(const std::string dataset_name, const std::string file_name);
+
+/*!
+ * \brief Get full path to the output results folder specific file
+ * \param[in] dataset_name string indicating the result file codename
+ * \param[in] results_name desired file name or codename of the result
+ * \return the full path to the specific output result file
+ * \throws std::out_of_range if result file codename is invalid
+ *
+ * Given a test scenario dataset code name and a file codename/name, returns the full path for that dataset file
+ * name/codename on the results folder
+ */
 const std::string constructFullPathToResults(const std::string dataset_name, const std::string results_name);
+
+/*!
+ * \brief Get full path to the output graphics folder specific file
+ * \param[in] dataset_name string indicating the result file codename
+ * \param[in] graphic_name desired file name or codename of the graphic
+ * \return the full path to the specific output graphic file
+ * \throws std::out_of_range if result file codename is invalid
+ *
+ * Given a test scenario dataset code name and a file codename/name, returns the full path for that dataset file
+ * name/codename on the graphics folder
+ */
 const std::string constructFullPathToGraphics(const std::string dataset_name, const std::string graphic_name);
 
+/*!
+ * \brief Creates and empty dir for the results output folder
+ * \param[in] dataset_name string indicating the result file codename
+ * \param[in] results_folder the name/codename of the folder to be created
+ * \return the full path to the specific output results folder
+ * \throws std::ios_base::failure if cannot create the folder
+ *
+ * Given a test scenario dataset code name and a folder codename/name, creates a empty folder wiht the name specified on
+ * results_folder on the dataset folder indicated by dataset_name, returning the full path to the folder
+ *
+ * \remark Folder permissions: user read, write and execute. Group read and write and others have tranverse permission
+ *
+ */
 const std::string makeResultsDirectory(const std::string dataset_name, const std::string results_folder);
+
+/*!
+ * \brief Creates and empty dir for the graphics output folder
+ * \param[in] dataset_name string indicating the result file codename
+ * \param[in] graphics_folder the name/codename of the folder to be created
+ * \return the full path to the specific output graphic folder
+ * \throws std::ios_base::failure if cannot create the folder
+ *
+ * Given a test scenario dataset code name and a folder codename/name, creates a empty folder wiht the name specified on
+ * graphics_folder on the dataset folder indicated by dataset_name, returning the full path to the folder
+ *
+ * \remark Folder permissions: user read, write and execute. Group read and write and others have tranverse permission
+ *
+ */
 const std::string makeGraphicsDirectory(const std::string dataset_name, const std::string graphics_folder);
 
+/*!
+ * \brief Prints all available datasets folder codename
+ */
 void printAvailableDatasetsCodenames(void);
 
 extern const std::string DATASETS_FULL_PATH;
@@ -204,6 +316,7 @@ extern const std::string ALIGNED_HEIGHT_AFFIX;
 extern const std::string ABOVE_HEIGHT_AFFIX;
 
 extern const std::string AFFIX_SEPARATOR;
+
 }  // namespace datasets_path
 
 #endif /* DATASETS_INFO_H */

@@ -1,3 +1,13 @@
+/*!
+ * \file  point_cloud_dimensions_analyzer_node.cpp
+ * \brief Detects the maximum and minimum dimensions of a point cloud
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that given a rosbag file, iterates over every frame, outputting its maximum and minimum dimensions. It also
+ * gives the maximum and the minimum dimensions for the bag file. Uses pcl::getMinMax3D
+ */
+
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <sensor_msgs/PointCloud2.h>

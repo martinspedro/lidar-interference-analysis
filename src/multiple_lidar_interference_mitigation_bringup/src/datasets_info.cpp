@@ -389,9 +389,9 @@ const std::string getTestScenarioFullPath(const std::string test_scenario_name)
   }
 }
 
-const std::string getTestScenarioDatasetFullPath(const std::string test_name)
+const std::string getTestScenarioDatasetFullPath(const std::string dataset_name)
 {
-  std::map<std::string, const std::string>::const_iterator it = datasets_map.find(test_name);
+  std::map<std::string, const std::string>::const_iterator it = datasets_map.find(dataset_name);
   if (it != datasets_map.end())
   {
     return it->second;  // return the value of the key
@@ -402,9 +402,9 @@ const std::string getTestScenarioDatasetFullPath(const std::string test_name)
   }
 }
 
-const std::string getResultsFolderRelativePath(const std::string test_name)
+const std::string getResultsFolderRelativePath(const std::string result_file_name)
 {
-  std::map<std::string, const std::string>::const_iterator it = results_map.find(test_name);
+  std::map<std::string, const std::string>::const_iterator it = results_map.find(result_file_name);
   if (it != results_map.end())
   {
     return it->second;  // return the value of the key
@@ -415,9 +415,9 @@ const std::string getResultsFolderRelativePath(const std::string test_name)
   }
 }
 
-const std::string getGraphicsFolderRelativePath(const std::string test_name)
+const std::string getGraphicsFolderRelativePath(const std::string graphic_file_name)
 {
-  std::map<std::string, const std::string>::const_iterator it = graphics_map.find(test_name);
+  std::map<std::string, const std::string>::const_iterator it = graphics_map.find(graphic_file_name);
   if (it != results_map.end())
   {
     return it->second;  // return the value of the key

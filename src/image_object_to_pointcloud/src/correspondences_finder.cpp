@@ -1,9 +1,10 @@
-/**
- * @file   correspondences.cpp
- * @brief  Point Cloud Coloring node CPP File
+/*!
+ * \file   correspondences_finder.cpp
+ * \brief  Node to determine the correspondences between a image ROI and an object in the point cloud
  *
- * @author Pedro Martins
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
+
 #define PCL_NO_PRECOMPILE  // must be included before any PCL include on this CPP file or HPP included before
 
 #include <ros/ros.h>
@@ -74,15 +75,18 @@
 #include "image_object_to_pointcloud/euclidian_cluster_filterConfig.h"
 
 // If defined, the node will publish a PoseArray containing the BBox major direction
-// #define PUBLISH_BBOX_POSES
+// #define PUBLISH_BBOX_POSES   //!< Pre compiler flag for computing the bounding boxes' pose
 
-const float NEAR_PLANE_DISTANCE = 1.0f;
-const float FAR_PLANE_DISTANCE = 40.0f;
+const float NEAR_PLANE_DISTANCE = 1.0f;  //!< Inferior distance boundary for rejecting the points
+const float FAR_PLANE_DISTANCE = 40.0f;  //!< Superior distance boundary for rejecting the points
 
-const double PIXEL_SIZE = 3.45e-6;
+const double PIXEL_SIZE = 3.45e-6;  //!< Manta G-504C pixel size
 
-const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyForCallback;
+const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  //!< queue size for syncPolicyForCallback;
 
+/*!
+ * Defines the coordinate frames name are used regarding the dataset under test (KITTI vs ours experimental dataset)
+ */
 #ifdef USE_WITH_KITTI
 const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_link";
@@ -91,12 +95,14 @@ const std::string LIDAR_TF2_REFERENCE_FRAME = "velodyne";
 const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
 #endif
 
-const bool EXTRACT_INDEX_FROM_POINT_CLOUD = true;
-const bool REMOVE_INDEX_FROM_POINT_CLOUD = false;
+const bool EXTRACT_INDEX_FROM_POINT_CLOUD =
+    true;  //!< EuclideanClusterExtraction parameter to Extract Indexes to a target point cloud
+const bool REMOVE_INDEX_FROM_POINT_CLOUD =
+    false;  //!< EuclideanClusterExtraction parameter to remove indexes from the source point cloud
 
-const float CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.10;  // in meters
-const unsigned int MIN_CLUSTER_SIZE = 100;
-const unsigned int MAX_CLUSTER_SIZE = 25000;
+const float CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE = 0.10;  //!< Distance Tolerance for the cluster extraction
+const unsigned int MIN_CLUSTER_SIZE = 100;               //!< Minimum number of poinbts for a cluster
+const unsigned int MAX_CLUSTER_SIZE = 25000;             //!< Maximum number of points in a cluster
 
 float dyn_rec_cluster_tolerance;        // = CLUSTER_L2_EUCLIDEAN_NORM_TOLERANCE;
 unsigned int dyn_rec_min_cluster_size;  // = MIN_CLUSTER_SIZE;
@@ -104,14 +110,26 @@ unsigned int dyn_rec_max_cluster_size;  // = MAX_CLUSTER_SIZE;
 
 const float VOXEL_GRID_LEAF_SIZE = 0.04f;  //!< Voxel length used for the Voxel Grid filter
 
-geometry_msgs::TransformStamped transformStamped;
+geometry_msgs::TransformStamped transformStamped;  //!< Tranformation between the camera and LiDAR coordinate frames
 
 ros::Publisher pub, pub_point_cloud_clusters, pub_bboxes;  //!< ROS Publisher
 
 #ifdef PUBLISH_BBOX_POSES
-ros::Publisher pub_bboxes_poses;
+ros::Publisher pub_bboxes_poses;  //!< ROS Publisher
 #endif
 
+/*!
+ * \brief Callback that publishes the clusters' point cloud and their bounding boxes
+ * \param[in] object_count the number of bounding boxes detected
+ * \param[in] b_boxes vector of the detected bounding boxes objects
+ * \param[in] cam_info camera info message, containing the camera parameters
+ * \param[in] point_cloud_msg Point cloud data
+ *
+ * This callback projects all the point cloud data to the image coordinate frame, and then verify which points
+ * correspond to a object detected on the image. It extracts the point cloud points that correspond to the same object,
+ * Voxelizes the cloud and performs a tailored cluster filtering, to retain only the objects of interest. For every
+ * cluster, it computes its bounding box and then publishes it so that it can be visualized in RViz
+ */
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
@@ -252,6 +270,13 @@ void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
 #endif
 }
 
+/*!
+ * \brief Dynamic reconfigure callback for Euclidean Cluster Extraction
+ * \param[in] config the structure containing the information of the reconfigure request
+ * \param[in] level bit mask for group reconfigurable parameters (not used)
+ *
+ * This callback updates the parameters of the pcl::EuclideanClusterExtraction
+ */
 void euclidianClusterFilterReconfigureCallback(image_object_to_pointcloud::euclidian_cluster_filterConfig& config,
                                                uint32_t level)
 {

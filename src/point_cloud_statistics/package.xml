@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>point_cloud_statistics</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>The point_cloud_statistics package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="martinspedro@todo.todo">martinspedro</maintainer>
+  <maintainer email="martinspedro@ua.pt">Pedro Martins</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
+  <license>BSD</license>
+  <license>Boost Software License</license>
+  <license>MPL2.0</license>
 
 
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
@@ -25,7 +27,7 @@
   <!-- Author tags are optional, multiple are allowed, one per tag -->
   <!-- Authors do not have to be maintainers, but could be -->
   <!-- Example: -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+  <author email="martinspedro@ua.pt">Pedro Martins</author>
 
 
   <!-- The *depend tags are used to specify dependencies -->
@@ -49,26 +51,35 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>multiple_lidar_interference_mitigation_bringup</build_depend>
-    <build_depend>velodyne_pointcloud</build_depend>
+  <build_depend>velodyne_pointcloud</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>rosbag</build_depend>
+
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>multiple_lidar_interference_mitigation_bringup</build_export_depend>
   <build_export_depend>velodyne_pointcloud</build_export_depend>
+  <build_export_depend>pcl_ros</build_export_depend>
+  <build_export_depend>rosbag</build_export_depend>
+
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>multiple_lidar_interference_mitigation_bringup</exec_depend>
   <exec_depend>velodyne_pointcloud</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>rosbag</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
-
+    <rosdoc config="rosdoc.yaml" />
   </export>
 </package>

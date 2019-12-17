@@ -1,3 +1,20 @@
+/*!
+ * \file  point_cloud_box_filtering_node.cpp
+ * \brief Counts the number of outliers outside the room dimensions
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that counts the number of outliers on a point cloud, given the dimensions of a parallelelipiped that
+ * encloses the room and a rosbag file with interference
+ *
+ * Saves a CSV file countainging:
+ * - number of point cloud messages
+ * - number of point cloud points
+ * - average number of points per message
+ * - number of inliers
+ * - number of outliers
+ */
+
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <sensor_msgs/PointCloud2.h>

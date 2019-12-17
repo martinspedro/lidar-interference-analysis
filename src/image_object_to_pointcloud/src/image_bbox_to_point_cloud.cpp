@@ -1,8 +1,9 @@
-/**
- * @file   correspondences.cpp
- * @brief  Point Cloud Coloring node CPP File
+/*!
+ * \file   image_bbox_to_point_cloud.cpp
+ * \brief  Node to determine the correspondences between a image ROI and an object in the point cloud
  *
- * @author Pedro Martins
+ * \author Pedro Martins (martinspedro@ua.pt)
+ * \warning The putput of this node is not correct
  */
 
 #define PCL_NO_PRECOMPILE        // must be included before any PCL include on this CPP file or HPP included before
@@ -94,20 +95,31 @@
 
 #include <string>
 
-const float NEAR_PLANE_DISTANCE = 1.0f;
-const float FAR_PLANE_DISTANCE = 100.0f;
+const float NEAR_PLANE_DISTANCE = 1.0f;  //!< Inferior distance boundary for rejecting the points
+const float FAR_PLANE_DISTANCE = 40.0f;  //!< Superior distance boundary for rejecting the points
 
-const double PIXEL_SIZE = 3.45e-6;
+const double PIXEL_SIZE = 3.45e-6;  //!< Manta G-504C pixel size
 
-const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  // queue size for syncPolicyForCallback;
+const unsigned int SYNC_POLICY_QUEUE_SIZE = 20;  //!< queue size for syncPolicyForCallback;
 
-const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";
-const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";
+const std::string LIDAR_TF2_REFERENCE_FRAME = "velo_link";           //!< LiDAR coordinate frame ID name
+const std::string CAMERA_TF2_REFERENCE_FRAME = "camera_color_left";  //!< Camera coordinate frame ID name
 
 ros::Publisher pub, pub_frustum_poses, pub_lidar_poses;  //!< ROS Publisher
 
-Eigen::Matrix4f g_camera_to_lidar_6DOF;
+Eigen::Matrix4f g_camera_to_lidar_6DOF;  //!< Camera to LiDAR Affine matrix
 
+/*!
+ * \brief Callback that publishes the clusters' point cloud and their bounding boxes
+ * \param[in] object_count the number of bounding boxes detected
+ * \param[in] b_boxes vector of the detected bounding boxes objects
+ * \param[in] cam_info camera info message, containing the camera parameters
+ * \param[in] point_cloud_msg Point cloud data
+ *
+ * For every bounding box object, this callback compute its FOV and rotation to aling it to the camera axis. Then it
+ * converts that rotation to the LiDAR coordinate frame and applies a pcl::frustumFilter to the point cloud to extract
+ * its bounding box. It also computes the pose of the frustum filter from the viewers perspective
+ */
 void callback(const darknet_ros_msgs::ObjectCountConstPtr& object_count,
               const darknet_ros_msgs::BoundingBoxesConstPtr& b_boxes, const sensor_msgs::CameraInfoConstPtr& cam_info,
               const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)

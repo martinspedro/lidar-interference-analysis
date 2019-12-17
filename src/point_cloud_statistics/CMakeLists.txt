@@ -17,7 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
   rosbag
   multiple_lidar_interference_mitigation_bringup
   velodyne_pointcloud
-  rosconsole
 )
 
 ## System dependencies are found with CMake's conventions

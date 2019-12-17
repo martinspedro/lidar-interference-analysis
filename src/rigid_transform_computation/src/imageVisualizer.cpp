@@ -1,9 +1,8 @@
 /**
- * @file   image_visualizer.cpp
- * @brief  Image Stream and Visualizer Header File
+ * \file   imageVisualizer.cpp
+ * \brief  ImageVisualizer Header File
  *
- * @author Pedro Martins
- * @date   @today
+ * \author Pedro Martins (martinspedro@ua.pt)
  */
 
 #include <opencv2/imgproc/imgproc.hpp>
@@ -16,11 +15,13 @@
 #include "rigid_transform_computation/Pixel.h"
 
 using namespace cv;
-const uint8_t DEFAULT_PIXEL_QUEUE_SIZE = 10;
-const std::string DEFAULT_CAMERA_TOPIC = "/camera";
 
-std::vector<cv::Point2i> clicked_pixels;
+const uint8_t DEFAULT_PIXEL_QUEUE_SIZE = 10;         //!< ROS Pixel Publisher Queue Size
+const std::string DEFAULT_CAMERA_TOPIC = "/camera";  //!< Default ROS topic for camera related messages
 
+std::vector<cv::Point2i> clicked_pixels;  //!< Vector containing the selected pixels
+
+// \TODO Change node output messages
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic, std::string clicked_pixel_topic) : it_(nh_)
 {
   std::cout << "Object Init" << std::endl;
@@ -47,6 +48,7 @@ ImageVisualizer::ImageVisualizer(std::string camera_root_topic, std::string clic
   std::cout << "Object Init Done" << std::endl;
 }
 
+// \TODO Change node output messages
 ImageVisualizer::ImageVisualizer(std::string camera_root_topic, std::string clicked_pixel_topic,
                                  std::string node_handler_name)
   : it_(nh_)
@@ -81,9 +83,6 @@ ImageVisualizer::~ImageVisualizer()
   delete this;
 }
 
-/** @brief Callback function for image visualization
- *
- */
 void ImageVisualizer::viewerCallback(const sensor_msgs::ImageConstPtr& msg)
 {
   try

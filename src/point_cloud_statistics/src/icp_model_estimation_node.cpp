@@ -1,7 +1,28 @@
-/**
- * \file   icp_model_estimation_node.cpp
- * \brief
+/*!
+ * \file  icp_model_estimation_node.cpp
+ * \brief Ground truth model estimation using ICP and Voxel Grid filter
  *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ *
+ * ROS node that uses the icp algorithm implemented on point_cloud_statistics.cpp
+ * It iteratively registers the point clouds against a model. Let \f[s_i = p_i + s_{i-1},\ \forall i \in [0, n-1]\f],
+ where:
+ * - \f$s\f$ is the stiched output
+ * - \f$p\f$ is the input point cloud
+ * - \f$i\f$ is the index of the iteration
+ * - \f$n\f$ is the number of point cloud messages
+ * - \f$s_0 = p_0\f$
+ * We get:
+ * \f{eqnarray*}{
+        s_0 &=& p_0\\
+        s_1 &=& p_1 + s_0\\
+        s_2 &=& p_2 + s_1\\
+        s_3 &=& p_3 + s_2\\
+        \ldots \\
+        s_{n-1} &=& p_{n-1} + s_{n-2}\\
+   \f}
+ *
+ * It then saves the generated ground truth model on a PCD file
  */
 
 #define PCL_NO_PRECOMPILE  // must be included before any PCL include on this CPP file or HPP included before
@@ -30,7 +51,8 @@
 
 #include "matplotlib-cpp/matplotlibcpp.h"
 
-const float VOXEL_EDGE_LENGTH = 0.05f;
+const float VOXEL_EDGE_LENGTH = 0.05f;  //!< Voxel edge length for the Voxel Grid filter
+
 int main(int argc, char** argv)
 {
   // Initialize ROS

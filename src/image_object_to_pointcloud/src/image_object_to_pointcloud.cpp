@@ -1,3 +1,9 @@
+/*!
+ * \file   image_object_to_pointcloud.cpp
+ * \brief  Implementation file of the utilities to compute the bounding box on the point cloud
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ */
 
 #define PCL_NO_PRECOMPILE
 #define EIGEN_RUNTIME_NO_MALLOC  // Define this symbol to enable runtime tests for allocations
@@ -77,7 +83,7 @@ void getLiDARPose(const PointCloudType::ConstPtr point_cloud_ptr, Eigen::Matrix4
 }
 
 void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ros_msgs::BoundingBox bounding_box,
-                       Eigen::Matrix4f& fov_bbox)
+                       Eigen::Matrix4f& rotation_bbox)
 {
   // Get middle point of the bounding box
   cv::Point2d bounding_box_center;
@@ -99,8 +105,8 @@ void getCameraRotation(image_geometry::PinholeCameraModel cam_model_, darknet_ro
   fov_lidar_quaternion.normalize();
 
   // Create Pure Rotation Affine Transform
-  fov_bbox = Eigen::Matrix4f::Identity();
-  fov_bbox.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
+  rotation_bbox = Eigen::Matrix4f::Identity();
+  rotation_bbox.block<3, 3>(0, 0) = (fov_lidar_quaternion.toRotationMatrix()).cast<float>();
 }
 
 Eigen::Matrix3d degenerateRotationMatrixToZ(Eigen::Matrix3d original_rotation_matrix)

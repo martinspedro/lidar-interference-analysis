@@ -1,3 +1,9 @@
+/*!
+ * \file   pinhole_camera_model_utilities.cpp
+ * \brief  General utilities header file for pinhole camera model operations
+ *
+ * \author Pedro Martins (martinspedro@ua.pt)
+ */
 
 #include <cmath>
 #include <ros/ros.h>
@@ -6,9 +12,6 @@
 
 namespace pinhole_camera
 {
-/**
- *   \remark ROS image_geometry package compatible
- */
 FOV getImageFOV(image_geometry::PinholeCameraModel cam_model)
 {
   cv::Size im_dimensions = cam_model.fullResolution();
@@ -25,9 +28,6 @@ FOV getImageFOV(image_geometry::PinholeCameraModel cam_model)
   return im_fov;
 }
 
-/**
- * \remark OpenCv compatible
- */
 FOV getImageFOV(cv::Size image_dimensions, cv::Matx33d intrinsic_matrix)
 {
   FOV im_fov;
