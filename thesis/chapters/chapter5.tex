@@ -275,7 +275,7 @@ The Near and Far Cut Planes may be defined by the data and \ac{lidar} constraint
 Due to point cloud data scarcity, both on the experimental and  \ac{kitti} dataset, a Far Plane of \SI{30}{\meter} is enough to guarantee that all the objects of interest on the \ac{fov} are present.
 
 \subsubsection{Implementation}
-Using the constrains and methods detailed before, a \ac{ros} node, \texttt{image\_bbox\_to\_point\_cloud\_node}, is written to perform frustum filtering on the point cloud using the image bounding boxes determined by \texttt{darknet-ros}. The node diagram is shown in Figure~\ref{fig:ros-graph-frustum}, in Appendix~\ref{appendix:appendix-diagram}, where the node \texttt{Kitti\_dataset} is a \texttt{rosbag} player and \texttt{darknet-ros} is the node described in Section~\ref{sec:object-detection:image}, responsible for image object detection. \texttt{Rviz} is the \ac{ros} visualizer, configured to show the transformations between the coordinate frames, the original point cloud and the frustum filtered point cloud.
+Using the constrains and methods detailed before, a \ac{ros} node, \texttt{image\_bbox\_to\_point\_cloud\_node}, is written to perform frustum filtering on the point cloud using the image bounding boxes determined by \texttt{darknet-ros}. The node diagram is shown in Figure~\ref{fig:ros-graph-frustum}, in Appendix~\ref{appendix:appendix-diagrams}, where the node \texttt{Kitti\_dataset} is a \texttt{rosbag} player and \texttt{darknet-ros} is the node described in Section~\ref{sec:object-detection:image}, responsible for image object detection. \texttt{Rviz} is the \ac{ros} visualizer, configured to show the transformations between the coordinate frames, the original point cloud and the frustum filtered point cloud.
 
 %\begin{figure}[t]
 %	\centering
@@ -339,7 +339,7 @@ The node is agnostic about the objects that are identified by the image object d
 			& \exists P \in [\min(bbox^i_x), \max(bbox^i_x)] \cap [\min(bbox^i_y), \max(bbox^i_y)] 
 \end{align}
 
-The node diagram is presented in Figure~\ref{fig:correspondences-finder-standalone}, on Appendix~\ref{appendix:appendix-diagram}. Similar to Figure~\ref{fig:bbox-correspondences-on-kitti}, the implementation requires the usage of \texttt{Darknet-ros} to compute the image bounding boxes. The two alternatives are completely interchangeable, publishing the same type of message (a point cloud) and receiving the same inputs: the original \ac{lidar} point cloud, coordinate frame transforms and \texttt{darknet-ros} bounding boxes message and the number of detected objects.
+The node diagram is presented in Figure~\ref{fig:correspondences-finder-standalone}, on Appendix~\ref{appendix:appendix-diagrams}. Similar to Figure~\ref{fig:bbox-correspondences-on-kitti}, the implementation requires the usage of \texttt{Darknet-ros} to compute the image bounding boxes. The two alternatives are completely interchangeable, publishing the same type of message (a point cloud) and receiving the same inputs: the original \ac{lidar} point cloud, coordinate frame transforms and \texttt{darknet-ros} bounding boxes message and the number of detected objects.
 
 %\begin{figure}[!ht]
 %	\centering
