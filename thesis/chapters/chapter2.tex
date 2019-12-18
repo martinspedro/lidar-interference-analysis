@@ -16,7 +16,7 @@ With those considerations in mind, we require the usage of a middleware, a softw
 \subsection{Middleware software libraries and Robotics} 
 Several middleware libraries, written in many languages, are available online, capable of message passing between programs, from which the following are feasible for our work:
 
-\begin{itemize}
+\begin{enumerate}
 	\item \textbf{PocoLibs:} an Open-Source library developed by OpenRobots that allows for communication between process on a computer system, with support for real-time~\cite{Pocolibs};
 	\item \textbf{\ac{lcm} library:} focused on low latency and high-bandwidth, this library is developed with real-time systems in mind, providing data marshalling and message passing between a publisher and subscriber~\cite{Huang2010b};
 	\item \textbf{ZeroMQ:} a framework with bindings for many languages that can be used to transport messages between process, \ac{tcp} or multicast, for example. Allows a series of different connection types~\cite{ZeroMQ}.
@@ -24,7 +24,7 @@ Several middleware libraries, written in many languages, are available online, c
 	\item \textbf{\ac{ros}:} a complex and extensive framework for developing and test robot software. It was developed with the goal of simplifying the task of building complex and robust robot behavior, independently of the hardware and mechanical platform. Offers a collection of tools, libraries and conventions~\cite{ROS};
 	\item \textbf{\ac{ros} 2:} a more recent iteration of the \ac{ros} development, focused on extending \ac{ros} capabilities to new use cases, such as multiple robot teams, small embedded platforms and real-time systems~\cite{ROS2};
 	\item \textbf{\ac{mrpt}:} a mobile robot library, written in C++, which aims to provide a set of tools and libraries for computer vision, motion planning and \ac{slam}. It also directly supports hardware and implements message passing middleware~\cite{MRPT};
-\end{itemize}
+\end{enumerate}
 
 While the first 4 listed alternatives are focused on generic communication between processes\footnote{Despite its name, \acf{yarp} is not a robotic operative system or framework, but instead a message passing framework for robots.}, inter-process and common communication protocols, the last 3 are oriented for robotics, providing a comprehensive set of tools for robotics development besides the message passing. The latter is preferred, since it has the potential to unburden us from the development of generic debug tools, data visualization and logging. Therefore, we exclude PocoLibs~\cite{Pocolibs}, \ac{lcm} library~\cite{Huang2010b}, ZeroMQ~\cite{ZeroMQ} and \ac{yarp}~\cite{Metta2006}.
 
@@ -55,7 +55,7 @@ Other older datasets were considered and tested. On the next sections, a brief s
 \subsection{Ford Campus \acl{lidar} dataset}
 Gathered in 2009, in Michigan, the Ford Campus \ac{lidar} dataset contains camera, \ac{lidar}, \acf{imu} and \acf{gps} data~\cite{Pandey2011}. The dataset consists of two test scenarios, one inside the Ford Research campus and the other on downtown Dearborn. A small subset of the former test scenario is also provided.
 
-The modified Ford F-250 pickup truck, which can be seen on Figure~\ref{fig:sota:ford_sensors}, uses 3 sensors for navigation~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E \ac{lidar}~\cite{VelodyneHDL64}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar. For more details about the sensors, their relative positioning, data formats and files see~\cite{Pandey2011}.
+The modified Ford F-250 pickup truck, which can be seen in Figure~\ref{fig:sota:ford_sensors}, uses 3 sensors for navigation~\cite{Pandey2011}: one 3D \ac{lidar}, Velodyne HDL-64E \ac{lidar}~\cite{VelodyneHDL64}; one camera: Point Grey Ladybug3 omnidirectional camera; and two 2D \acp{lidar}: Riegl LMS-Q120 lidar. For more details about the sensors, their relative positioning, data formats and files see~\cite{Pandey2011}.
 
 \begin{figure}[!ht]
 	\centering
@@ -74,7 +74,7 @@ Rectified and synced data is stored in \ac{matlab} \textit{.mat} files. Along wi
 \subsection{\acl{kitti} Dataset}
 A well known dataset for researchers of computer vision, autonomous driving and \ac{ml}, \ac{kitti} was recorded in 2011 and released to the public in 2013. This dataset contains various driving scenarios: suburban, highways, residential and campus areas; with trucks, cars, cyclists and persons. Alongside with data for testing, calibration measures are provided for all sensors.
 
-The test car, a Volkswagen Passat, is equipped with two stereo pairs, one with color and one with gray cameras, a \ac{lidar}, an \ac{imu} and a \ac{gps} sensor, is shown on Figure~\ref{fig:sota:kitti_sensors}. Data from all four cameras is stored on \ac{png} format, \ac{lidar} measurements stored as a binary float matrix, and \ac{gps} and \ac{imu} are saved textually. Additionally, the raw data logs containing the timestamps and the transformations between the sensors are also provided. Labeled data is also available for some test scenarios in \ac{xml} files.
+The test car, a Volkswagen Passat, is equipped with two stereo pairs, one with color and one with gray cameras, a \ac{lidar}, an \ac{imu} and a \ac{gps} sensor, is shown in Figure~\ref{fig:sota:kitti_sensors}. Data from all four cameras is stored on \ac{png} format, \ac{lidar} measurements stored as a binary float matrix, and \ac{gps} and \ac{imu} are saved textually. Additionally, the raw data logs containing the timestamps and the transformations between the sensors are also provided. Labeled data is also available for some test scenarios in \ac{xml} files.
 
 \begin{figure}[!ht]
 	\centering
@@ -123,7 +123,7 @@ The diversity of scenarios and size of the dataset is also an important aspect t
 																			 & Data parsing tools & \checkmark & \checkmark & \checkmark  \\ \rowcolor{white}
 																			 & Rectified data & \checkmark & \checkmark & \checkmark \\ \rowcolor{gray!10}
 																			 & Synced data & \checkmark & \checkmark &  \checkmark  \\  \rowcolor{white}
-																			 & Calibration parameters & \checkmark  & \checkmark  & \checkmark  \\ 
+																			 & Calibration parameters & \checkmark  & \checkmark  & \\ 
 	   \bottomrule
 		 \multicolumn{2}{l}{Raw data for sensors calibration} & \checkmark & \checkmark & \\ \rowcolor{gray!10}
 		\multicolumn{2}{l}{\ac{ros} data compatibility} &  & \checkmark\footnotemark & \checkmark \\
@@ -133,11 +133,12 @@ The diversity of scenarios and size of the dataset is also an important aspect t
 	\caption[Comparative analysis between the datasets.]{Comparison between the datasets more appropriated to this thesis objectives.}
 \label{tab:sota:datasets_comparison}
 \end{table}
+\addtocounter{footnote}{-1}
 \footnotetext{Other driving data includes, but it is not limited to: vehicle speed, joints states, twist, brakes, suspension, fuel level, \ac{can} bus data, steering, tire pressure, among many others.}
-
+\addtocounter{footnote}{1}
 \footnotetext{While Udacity dataset is the newest and provides direct out-off-the-shelf integration with \ac{ros}, that type of integration can also be achieved for \ac{kitti} by using other tools, such as \textit{kitti2bag}~\cite{TomasKrejci}.}
 
-Comparing the 3 datasets using the information on Table~\ref{tab:sota:datasets_comparison} and the previous sections, Udacity and \ac{kitti} are better suited to the purposes of this work. They provide a larger dataset than Ford, have \ac{ros} compatibility and the tools provided are open-source and not developed to be used on proprietary software.
+Comparing the 3 datasets using the information in Table~\ref{tab:sota:datasets_comparison} and the previous sections, Udacity and \ac{kitti} are better suited to the purposes of this work. They provide a larger dataset than Ford, have \ac{ros} compatibility and the tools provided are open-source and not developed to be used on proprietary software.
 
 Since Udacity dataset integrates more easily with \ac{ros} than \ac{kitti}, providing also some tools for \ac{ros} preliminary tests, learning and earlier development stages were based on this dataset. Later, due to the lack of calibration parameters and raw data for sensors calibration\footnote{Note that, despite the Udacity dataset not providing data to ease the calibration of its sensors, such as camera intrinsic calibration or the extrinsic calibration between \ac{lidar} and camera, such calibration parameters can be obtained from this data. Those parameters are not as accurate as those obtained using a proper calibration setup and are out the scope of this work (being another research topic on itself) and therefore no effort will be dedicated to this topic.}, \ac{kitti} dataset was used instead.
 
@@ -170,7 +171,7 @@ When describing camera models, several considerations should be made~\cite{Sturm
 For the application currently envisioned, global central camera models are considered. For a more detailed explanation of the topics above or an extensive overview of non-classical camera models, different types of projections and other aspects of modelling cameras, see~\cite{Sturm2010, camera_models}.
 
 \subsubsection{Pinhole Camera Model}
-Based on the pinhole effect, represented on Figure~\ref{fig:pinhole_effect}, the pinhole camera model is the most common camera model~\cite{camera_models}. The pinhole effect consists on using a small hole (or aperture) to spatially filter the light rays by angle of incidence, reducing the amount of light rays overlapping when coming from different incident angles through the pinhole, which otherwise would ``blur'' the image. 
+Based on the pinhole effect, represented in Figure~\ref{fig:pinhole_effect}, the pinhole camera model is the most common camera model~\cite{camera_models}. The pinhole effect consists on using a small hole (or aperture) to spatially filter the light rays by angle of incidence, reducing the amount of light rays overlapping when coming from different incident angles through the pinhole, which otherwise would ``blur'' the image. 
 
 \begin{figure}[!ht]
 	\centering
@@ -179,7 +180,7 @@ Based on the pinhole effect, represented on Figure~\ref{fig:pinhole_effect}, the
 	\label{fig:pinhole_effect}
 \end{figure}
 
-The pinhole camera model describes the perspective transformation on Equation~\eqref{eq:camera_transform} as a central projection where all light rays meet at the camera center, $\mathcal{F}_c$. A diagram of the pinhole camera is shown on Figure~\ref{fig:pinhole_camera_model}. 
+The pinhole camera model describes the perspective transformation on Equation~\eqref{eq:camera_transform} as a central projection where all light rays meet at the camera center, $\mathcal{F}_c$. A diagram of the pinhole camera is shown in Figure~\ref{fig:pinhole_camera_model}. 
 
 On this model, the z-axis is collinear with the optical axis\footnote{Also called principal axis. The two terms can be interchanged with no loss of context.}, aligned with the direction the camera is facing. The image plane is at $z = f$, where $f$ is the focal length, being intersected by the optical axis on the principal point, with coordinates $(c_x, c_y)$ on the image plane axis. Note that the principal point is not the origin of the referential on the image plane, but instead the middle point, being the origin located in the top left corner, with a downward y-axis.
 
@@ -208,7 +209,7 @@ The relation depicted in Equation~\eqref{eq:camera_transform} can be expressed i
 \end{bmatrix}, \qquad \text{if } w = 1.
 \end{equation}
 
-The projection matrix in a pinhole camera model is the result of multiplication of two matrices: the camera matrix (or matrix of the camera's intrinsic parameters), $K$; and a joint rotation and translation matrix, $[R|t]$, where $R$ is the rotation matrix and $t$ the translation vector. The combination of these matrices is given on Equation~\eqref{eq:projective_matrix} and the full camera transform is expanded on Equation~\eqref{eq:camera_transform_full}, through the replacement of Equation~\eqref{eq:projective_matrix} in~\ref{eq:camera_transform}.
+The projection matrix in a pinhole camera model is the result of multiplication of two matrices: the camera matrix (or matrix of the camera's intrinsic parameters), $K$; and a joint rotation and translation matrix, $[R|t]$, where $R$ is the rotation matrix and $t$ the translation vector. The combination of these matrices is given on Equation~\eqref{eq:projective_matrix} and the full camera transform is expanded on Equation~\eqref{eq:camera_transform_full}, through the replacement of Equation~\eqref{eq:projective_matrix} in Equation~\eqref{eq:camera_transform}.
 
 \begin{equation}
 	\label{eq:projective_matrix}
@@ -257,7 +258,7 @@ The joint rotational-translation matrix, $[R|t]$, is also known as the extrinsic
 \subsubsection{Cameras, Lenses and Distortion}
 Using a simple pinhole for filtering light rays 
 %, that would blur the image severely, 
-reduces the amount of light reaching the camera sensor. Therefore, a lens is used to collect the light and focus it onto the image plane, providing the same effects as the hole~\cite{Sturm2010}, while allowing more light to be captured. The paraxial refraction model is represented on Figure~\ref{fig:pinhole_with_lense}, from which we can consider the Pinhole Camera model by letting $z_0 = 0$, which implies $z' = f$ and the image is formed on the focal point.
+reduces the amount of light reaching the camera sensor. Therefore, a lens is used to collect the light and focus it onto the image plane, providing the same effects as the hole~\cite{Sturm2010}, while allowing more light to be captured. The paraxial refraction model is represented in Figure~\ref{fig:pinhole_with_lense}, from which we can consider the Pinhole Camera model by letting $z_0 = 0$, which implies $z' = f$ and the image is formed on the focal point.
 
 %pinhole effect with a lens is depicted 
 
@@ -268,7 +269,7 @@ reduces the amount of light reaching the camera sensor. Therefore, a lens is use
 	\label{fig:pinhole_with_lense}
 \end{figure}
 
-Since lenses introduce non-linear distortion, the pinhole camera model needs to be extended to included radial and tangential distortion parameters~\cite{Bouguet2010, manuapphotogrammetry, Heikkila1997}. Such parameters indicate how the non-linear distortion of the camera lenses affects the image projection on the camera plane~\cite{camera_models, Sturm2010} and how can this be corrected~\cite{Heikkila1997, Bouguet2010, opencv_doc}. The equations behind that expression are beyond the scope of this introduction and therefore will not be detailed here, but the effect of lens aberration can be seen on Figure~\ref{fig:lense_distortion_types}.
+Since lenses introduce non-linear distortion, the pinhole camera model needs to be extended to included radial and tangential distortion parameters~\cite{Bouguet2010, manuapphotogrammetry, Heikkila1997}. Such parameters indicate how the non-linear distortion of the camera lenses affects the image projection on the camera plane~\cite{camera_models, Sturm2010} and how can this be corrected~\cite{Heikkila1997, Bouguet2010, opencv_doc}. The equations behind that expression are beyond the scope of this introduction and therefore will not be detailed here, but the effect of lens aberration can be seen in Figure~\ref{fig:lense_distortion_types}.
 
 \begin{figure}[!ht]
 	\begin{subfigure}[c]{0.3\textwidth}
@@ -346,7 +347,7 @@ Since a goal of this work is to use Open-Source tools as far as possible (instea
 
 The maps produced by \ac{lidar}, commonly represented as point clouds or mesh clouds models (Figure~\ref{fig:bunny}), are one of the preferred method for \ac{slam} algorithms, which allow a vehicle without previous knowledge of its surroundings to autonomously navigate them, a crucial task for \ac{adas} on self-driving vehicles.
 
-Point clouds represent the spatial data measured by the \ac{lidar} as points on the tridimensional space. The objects represented on a point cloud are formless, as they have no relation with their ``adjacent'' points, as depicted on sub-Figure~\ref{fig:bunnyPointCloud}. A Mesh cloud representation of the point cloud on sub-Figure~\ref{fig:bunnyMeshCloud}, produced from by the point cloud on sub-Figure~\ref{fig:bunnyPointCloud}, is a representation of the same points united by lines, forming a mesh. A mesh cloud conveys form, as can be verified by comparing the point cloud with the mesh representation of the same data. A mesh cloud, contrary to a point cloud, can also represent a close form and therefore having a volume.
+Point clouds represent the spatial data measured by the \ac{lidar} as points on the tridimensional space. The objects represented on a point cloud are formless, as they have no relation with their ``adjacent'' points, as depicted in sub-Figure~\ref{fig:bunnyPointCloud}. A Mesh cloud representation of the point cloud in sub-Figure~\ref{fig:bunnyMeshCloud}, produced from by the point cloud in sub-Figure~\ref{fig:bunnyPointCloud}, is a representation of the same points united by lines, forming a mesh. A mesh cloud conveys form, as can be verified by comparing the point cloud with the mesh representation of the same data. A mesh cloud, contrary to a point cloud, can also represent a close form and therefore having a volume.
 
 \begin{figure}[!ht]
 	\centering
@@ -368,7 +369,7 @@ Point clouds represent the spatial data measured by the \ac{lidar} as points on 
 \subsection{\ac{lidar} classification based on the depth measurement principle}
 Regarding the type of signals and principles for measuring the scene distance, \acp{lidar} can be either \ac{cw} (emit a sinusoidal or square modulated signal), pulsed (emit a square pulse at fixed moments in time)~\cite{Payne2009, TexasLiDAR, SpringerOptics} or other more exotic and experimental types, that will not be addressed here, since they are out of the scope of this work.
 
-\ac{cw} \acp{lidar} continuously emit a modulated laser signal to their surroundings and, depending on the modulation technique, this signal can either be \ac{am} or \ac{fm}\cite{TexasLiDAR}. \ac{am}\ac{cw} \acp{lidar} operates by emitting a pseudo-random stream of binary data and coherently detecting the received signal. The phase shift distance, measured between the emitted and received signal, is directly related with the distance at which the pulse was reflected.
+\ac{cw} \acp{lidar} continuously emit a modulated \ac{laser} signal to their surroundings and, depending on the modulation technique, this signal can either be \ac{am} or \ac{fm}\cite{TexasLiDAR}. \ac{am}\ac{cw} \acp{lidar} operates by emitting a pseudo-random stream of binary data and coherently detecting the received signal. The phase shift distance, measured between the emitted and received signal, is directly related with the distance at which the pulse was reflected.
 
 If \ac{fm}\ac{cw} is used instead, the \ac{lidar} \ac{laser} sends a frequency chirp\footnote{A signal whose frequency varies linearly with time.} and coherently detects the received signal, estimating the distance at which the reflection occurred (i.e., the distance at which the object is), by the frequency shift between the emitted and reflected signals~\cite{Payne2009, TexasLiDAR}. Coherent detection can be performed by heterodyne or homodyne detection, but such details will not be addressed here. A brief description and comparison between the two detection modes applied to \ac{lidar} technology is given in~\cite{Conroy2009}, and the underlying theory can be consulted on~\cite{Carlson2010, SpringerOptics}.
 
@@ -400,7 +401,7 @@ To construct a rotating \ac{lidar}, a single pair of \acp{laser} and photodetect
 
 While a rotating \ac{lidar} consumes more power than the other counterparts, it can also achieve ranges until 100 meters~\cite{vlp16, Sullivan2016} or even 200 meters~\cite{VelodyneHDL64, Pandar40UserGuide, Sullivan2016}. To measure the depth on a rotational \ac{lidar}, \ac{tof} is the most common technique, being the pulse triggered at a defined angular step when rotating.
 
-Regarding rotating \acp{lidar} technology, only 5 relevant companies exist worldwide. Velodyne\cp~\cite{Velodyne}, HESAI\cp~\cite{Hesai}, RoboSense\cp~\cite{Robosense}, Ouster\cp~\cite{Ouster} and Quanergy\cp~\cite{Quanergy}. Velodyne is the undisputed market leader~\cite{Sullivan2016, Hecht2018}, with several rotating \ac{lidar} solutions, ranging from \SIrange{16}{128}{} laser beams.
+Regarding rotating \acp{lidar} technology, only 5 relevant companies exist worldwide. Velodyne\cp~\cite{Velodyne}, HESAI\cp~\cite{Hesai}, RoboSense\cp~\cite{Robosense}, Ouster\cp~\cite{Ouster} and Quanergy\cp~\cite{Quanergy}. Velodyne is the undisputed market leader~\cite{Sullivan2016, Hecht2018}, with several rotating \ac{lidar} solutions, ranging from \SIrange{16}{128}{} \ac{laser} beams.
 
 Quanergy is a \ac{lidar} company that is focused on bringing solid state \ac{lidar} to the market. They provide one mechanical rotation \ac{lidar} solution, but with only 8 beams, which is not suited for the demands of autonomous driving~\cite{Sullivan2016, Hecht2018}. 
 
@@ -408,7 +409,7 @@ Ouster is a startup that produces mechanical rotational \acp{lidar}. They have t
 
 HESAI and RoboSense are two Chinese \ac{lidar} manufacturers whose products are similar to Velodyne's. In fact, they are so similar that a lawsuit as been filled against them by Velodyne, for intellectual property issues~\cite{VelodyneLawsuit}. This lawsuit is due to Velodyne holding the patent on mechanical rotating \acp{lidar} with surround view\cite{Hall2011}, which ensures its dominance on the market of mechanical \acp{lidar}. 
 
-In fact, on their specifications, \acp{lidar} from Velodyne, HESAI, RoboSense or Ouster differences are laser position managing, range and vertical \ac{fov}. On the other hand, they severely differ in terms of prices, with top of the range Velodyne \ac{lidar} selling for $\$85000$ and the cheaper at some thousand dollars. 
+In fact, on their specifications, \acp{lidar} from Velodyne, HESAI, RoboSense or Ouster differences are \ac{laser} position managing, range and vertical \ac{fov}. On the other hand, they severely differ in terms of prices, with top of the range Velodyne \ac{lidar} selling for $\$85000$ and the cheaper at some thousand dollars. 
 
 For our work, since Velodyne's is the top of the market solution and the more mature, it makes sense to test \ac{lidar} interference on the most used solution, since if two \acp{lidar} will interfere on the road, the most likely scenario is that they are from Velodyne's.
 
@@ -418,13 +419,13 @@ Considering only point cloud software targeted to developers and not final users
 From the software that has not being excluded by the previous conditions, several point cloud processing libraries were researched and are detailed below:
 
 \begin{itemize}
-	\item \textbf{\ac{gcal}:}	a library containing geometric algorithms, written in C++, optimized for polygons and polyhedra processing, whose target are geographic information systems, such as computer aided design, molecular biology and robotics, among others~\cite{GCAL};
-	\item \textbf{\ac{pdal}:} written in C++, \ac{pdal} is an adaptation of \ac{gcal} optimized to handle point cloud data. It is more oriented for the user to define a process pipeline in JavaScript, from already available algorithms on its library than for the developer to implement its own~\cite{PDAL};
+	\item \textbf{\ac{cgal}:}	a library containing geometric algorithms, written in C++, optimized for polygons and polyhedra processing, whose target are geographic information systems, such as computer aided design, molecular biology and robotics, among others~\cite{CGAL};
+	\item \textbf{\ac{pdal}:} written in C++, \ac{pdal} is an adaptation of \ac{cgal} optimized to handle point cloud data. It is more oriented for the user to define a process pipeline in JavaScript, from already available algorithms on its library than for the developer to implement its own~\cite{PDAL};
 	\item \textbf{Open3D:} written in C++, Open3D is a library optimized for common operation in point cloud processing, providing voxelization, nearest neighbor search, normal estimation and visualization interfaces, among other utilities~\cite{Open3D};
 	\item \textbf{\acf{pcl}:} Open-Source and with an active community, \ac{pcl} is a large library for 2D/3D image processing and point cloud processing. It allows generic data types, has a comprehensive amount of state of the art algorithms and easily integrates with \ac{opencv} and \ac{ros}~\cite{PCL}.
 \end{itemize}
 
-All the alternatives are written in C++, the programming language of choice for this work. From the 4 libraries, \ac{gcal} is not optimized for point cloud data and \ac{pdal} intends to simplify routine point cloud processing, which is not aligned with the objectives of this thesis; for this reason, they are both excluded. Open3D and \ac{pcl} are reasonable alternatives, but \ac{pcl} modularity (allowing the user to define its data types) and extent of already implemented algorithms makes it a better solution than Open3D. Since we will also use \ac{opencv} and \ac{ros}, which \ac{pcl} allows integration with and this topic is widely detailed on forums, our choice for a point cloud processing library is \ac{pcl}.
+All the alternatives are written in C++, the programming language of choice for this work. From the 4 libraries, \ac{cgal} is not optimized for point cloud data and \ac{pdal} intends to simplify routine point cloud processing, which is not aligned with the objectives of this thesis; for this reason, they are both excluded. Open3D and \ac{pcl} are reasonable alternatives, but \ac{pcl} modularity (allowing the user to define its data types) and extent of already implemented algorithms makes it a better solution than Open3D. Since we will also use \ac{opencv} and \ac{ros}, which \ac{pcl} allows integration with and this topic is widely detailed on forums, our choice for a point cloud processing library is \ac{pcl}.
 
 \section{Camera and \ac{lidar} Extrinsic Calibration}
 \label{sec:sota:extrinsic_calibration}
@@ -471,7 +472,7 @@ From all the methods presented, our efforts will be placed on a semi-automatic s
 \label{sec:sota:sensor-fusion}
 Fusing sensory data is the task of combining different data formats, acquired by different sensors into a multi-modal view of the world. This multi-modal view not only allows a better interpretation of the individual data, but also allows the raise of higher context semantics, since fused data is more than the sum of its parts.
 
-Sensor data needs to be preceded by proper extrinsic sensor calibration before data can be fused. For monocular RGB cameras and \ac{lidar}, sensor fusion translates to augmenting the depth information of a point cloud by adding color from the image obtained with the camera or overlapping on the camera image the distances at which objects appear on \ac{lidar} data. An example of a colored point cloud (retrieved from~\cite{Gong2013}) can be seen on Figure~\ref{fig:colored_point_cloud_example} and an image overlapped with \ac{lidar} distance measurements (retrieved from~\cite{Bileschi2009}) can be seen on Figure~\ref{fig:image_with_lidar_distance}.
+Sensor data needs to be preceded by proper extrinsic sensor calibration before data can be fused. For monocular RGB cameras and \ac{lidar}, sensor fusion translates to augmenting the depth information of a point cloud by adding color from the image obtained with the camera or overlapping on the camera image the distances at which objects appear on \ac{lidar} data. An example of a colored point cloud (retrieved from~\cite{Gong2013}) can be seen in Figure~\ref{fig:colored_point_cloud_example} and an image overlapped with \ac{lidar} distance measurements (retrieved from~\cite{Bileschi2009}) can be seen in Figure~\ref{fig:image_with_lidar_distance}.
 
 \begin{figure}[!ht]
 	\centering
@@ -493,7 +494,7 @@ Sensor data needs to be preceded by proper extrinsic sensor calibration before d
 There are three major types of sensor fusion: 
 
 \begin{enumerate}
-	\item \textbf{Calibration + Fusion:} Sensors are first calibrated among themselves, using one of the techniques described on Section~\ref{sec:sota:extrinsic_calibration}, and then data is converted to a referential of choice and merged;
+	\item \textbf{Calibration + Fusion:} Sensors are first calibrated among themselves, using one of the techniques described in Section~\ref{sec:sota:extrinsic_calibration}, and then data is converted to a referential of choice and merged;
 	\item \textbf{Simultaneous Calibration and Fusion:} the implemented algorithms attempt to merge the data by minimizing an appropriated cost function. The final result consists on the multimodal merged data and the calculated extrinsic calibration parameters;
 	\item \textbf{``Direct'' Sensor Fusion:} Genetic algorithms, neural networks or other similar tools analyze \ac{lidar} and camera data, without knowing any previous information about them, and output the merged data in the desired format.
 \end{enumerate} 
@@ -638,7 +639,7 @@ In 2018, Axel Diehm\etal proposes a spatial temporal filter for eliminating a cr
 \subsection{Autonomous vehicles hacking through \ac{lidar} Interference}
 Jonathan Petit\etal presents a study on how to remotely attack automotive cameras and \acp{lidar} on vehicles~\cite{Petit2015}. They explore several methods of attack, such as relay, replaying and spoofing. Petit's work shows, for laboratory scenarios, how to make obstacles disappear and how to make the \ac{lidar} see ``ghost'' objects, for distances further than the distance of the spoofer. 
 
-Hocheol Shin\etal, two years later, presented an improved method that not only is able to spoof obstacles at a distance further than the distance of the spoofer, but also closer~\cite{Shin2017}. His work used common \acp{lidar}, such as Velodyne VLP-16~\cite{vlp16}. Shin\etal also found that the curved reception glass of \acp{lidar} allow for reflection of an attacking light source inside its case, allowing the attacker to be at a different direction that of the perceived attack. Despite their work being extremely experimental and not directly applied on real world scenarios, due to the laser alignment required for an effective attack on real driving scenarios, Petit\etal and Shin\etal research show that it is possible to attack a \ac{lidar} sensor and interfere with its measurements. Some results from Shin's research are shown on Figure~\ref{fig:shinInterference}.
+Hocheol Shin\etal, two years later, presented an improved method that not only is able to spoof obstacles at a distance further than the distance of the spoofer, but also closer~\cite{Shin2017}. His work used common \acp{lidar}, such as Velodyne VLP-16~\cite{vlp16}. Shin\etal also found that the curved reception glass of \acp{lidar} allow for reflection of an attacking light source inside its case, allowing the attacker to be at a different direction that of the perceived attack. Despite their work being extremely experimental and not directly applied on real world scenarios, due to the laser alignment required for an effective attack on real driving scenarios, Petit\etal and Shin\etal research show that it is possible to attack a \ac{lidar} sensor and interfere with its measurements. Some results from Shin's research are shown in Figure~\ref{fig:shinInterference}.
 
 \begin{figure}[!ht]
 	\centering
@@ -659,7 +660,7 @@ Hocheol Shin\etal, two years later, presented an improved method that not only i
 
 
 \subsection{Two-Dimensional Coplanar \ac{lidar} Interference}
-Gunzung Kim\etal, in 2015, presents the first results on multiple \ac{lidar} interference on their three papers~\cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single laser and photodetector are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is kept fixed, scanning a single line of the environment.}. Kim\etal setups consist of a box with $\SI{5.3}{\meter} \times \SI{4}{\meter}$~\cite{Kim2015a} or $\SI{5.3}{\meter} \times \SI{5.3}{\meter}$~\cite{Kim2015b, Kim2015c}, with the \acp{lidar} positioned inside. The walls are made of a non-glossy wood and the experimental setup is shown on Figure~\ref{fig:kim-setups}. His classification of interference is based on the determination of a majorant and minorant for the distance of the wall, with a 10\% tolerance around the mean value.
+Gunzung Kim\etal, in 2015, presents the first results on multiple \ac{lidar} interference on their three papers~\cite{Kim2015a, Kim2015b, Kim2015c}. The three papers are based on a SICK LMS-511, a 2D \ac{lidar}\footnote{A single \ac{laser} and photodetector are mounted on a rotating device, measuring several azimuthal angles when the motor rotates, but the polar angle is kept fixed, scanning a single line of the environment.}. Kim\etal setups consist of a box with $\SI{5.3}{\meter} \times \SI{4}{\meter}$~\cite{Kim2015a} or $\SI{5.3}{\meter} \times \SI{5.3}{\meter}$~\cite{Kim2015b, Kim2015c}, with the \acp{lidar} positioned inside. The walls are made of a non-glossy wood and the experimental setup is shown in Figure~\ref{fig:kim-setups}. His classification of interference is based on the determination of a majorant and minorant for the distance of the wall, with a 10\% tolerance around the mean value.
 
 \begin{figure}[!ht]
 	\centering
@@ -699,7 +700,7 @@ Kim\etal tests show the temporal and spatial locality of the data. Temporal loca
 
 The experiment conducted in~\cite{Kim2015a} captured a ground-truth model for 4 hours and the interference data for 50 hours. For a given angle position, Kim concluded that for his experimental setup, 4.4\% of the total number of full line scans were interfered, but that number only translates to one in every 2000 point (0.05\% interfered points for the total number of registered points). When considering the nature of interference, spatial interference is rare: 78\% of the interfered points are not interfered on their next measurement (against 15\% that are), and only 7\% of the angular positions are interfered consecutively 3 or more times, for a record of 13 (meaning \SI{0.5}{\second} of interference). For consecutive interference on nearby azimuthal angles on the same scan, only 30\% of the interference happens within single angular step and 26\% on a second. The largest consecutive number of angles with interference are 102, which translates to \SI{25.5}{\degree}.
 
-In~\cite{Kim2015b}, Kim~\etal reports new tests on \ac{lidar} interference, adding two new tests: a side-by-side with a small displacement and a face-to-face test. In~\cite{Kim2015c} a back-to-back test is also performed. Note that despite the experimental setup \textit{Side by side \#1} (Figure~\ref{fig:kim-side-by-side-1}) being identical to the setup on~\cite{Kim2015a}, disagreements on all evaluated metrics occur. Therefore, for this test, the results discussed before, taken from~\cite{Kim2015a}, and results presented on Table~\ref{tab:kim_2015_results}, based on~\cite{Kim2015b, Kim2015c}, are not in agreement. No explanations are provided for such difference and the issue is not addressed by Kim\etal on~\cite{Kim2015b, Kim2015c}.
+In~\cite{Kim2015b}, Kim~\etal reports new tests on \ac{lidar} interference, adding two new tests: a side-by-side with a small displacement and a face-to-face test. In~\cite{Kim2015c} a back-to-back test is also performed. Note that despite the experimental setup \textit{Side by side \#1} (Figure~\ref{fig:kim-side-by-side-1}) being identical to the setup on~\cite{Kim2015a}, disagreements on all evaluated metrics occur. Therefore, for this test, the results discussed before, taken from~\cite{Kim2015a}, and results presented in Table~\ref{tab:kim_2015_results}, based on~\cite{Kim2015b, Kim2015c}, are not in agreement. No explanations are provided for such difference and the issue is not addressed by Kim\etal on~\cite{Kim2015b, Kim2015c}.
 
 \begin{table}[!ht]
 	\centering
@@ -727,7 +728,7 @@ The third column, \textit{Relative Frequence of Interfered Points}, characterize
 % To the best of the author's knowledge, despite the relevance of the topic to a society of self-driving cars, there are only three different studies available
 
 
-In 2017, Kim\etal present the results on the above papers~\cite{Kim2015a, Kim2015b, Kim2015c}, extending its research by performing an intensity analysis~\cite{Kim2017}. His findings are that on a mutual interference scenario, the intensity of the received laser pulses varies significantly, confirming Hebert and Krotkov early findings that on a \ac{lidar} system range and intensity measures are not completely independent and interfering with one affects the results of other~\cite{Hebert}.
+In 2017, Kim\etal present the results on the above papers~\cite{Kim2015a, Kim2015b, Kim2015c}, extending its research by performing an intensity analysis~\cite{Kim2017}. His findings are that on a mutual interference scenario, the intensity of the received \ac{laser} pulses varies significantly, confirming Hebert and Krotkov early findings that on a \ac{lidar} system range and intensity measures are not completely independent and interfering with one affects the results of other~\cite{Hebert}.
 
 In the same paper, he also introduces a theoretical analysis of the multipath interference based on a Lambertian distribution for modelling the reflections on the walls~\cite{Kim2017}. The model lacks generality, as it assumes average values for several parameters and some simplifications on the multipath interference, but allows to conclude that:
 
