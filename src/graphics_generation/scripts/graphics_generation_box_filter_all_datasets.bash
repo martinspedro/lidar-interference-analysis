@@ -6,3 +6,4 @@ rosrun graphics_generation box_filter_direction_setups.py
 rosrun graphics_generation box_filter_height_setups.py
 rosrun graphics_generation box_filter_human_setups.py
 rosrun graphics_generation box_filter_LOS_setups.py
+rosrun graphics_generation box_filter_distance_vs_LOS_setups.py
