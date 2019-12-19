@@ -9,7 +9,13 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
-plt.rcParams.update({'font.size': 20})
+# activate latex text rendering
+matplotlib.rc('text', usetex=True)
+matplotlib.rc('text.latex', preamble=r'\usepackage{sfmath}')
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})  # font type similar to thesis
+matplotlib.rc('font', size=22)
+matplotlib.rc('axes', labelsize=28)
+matplotlib.rc('legend', fontsize=24)
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -70,15 +76,15 @@ width = 0.4
 distance_values_ticks = np.arange(2, 13, 2)
 rects = ax.bar(distance_values_ticks - width/2, errors_normalized_distance, width, log=True, label="With Direct Interference")
 rects = ax.bar(distance_values_ticks + width/2, errors_normalized_los, width, log=True, label="Without Direct Interference")
-ax.legend(prop={'size': 24})
-ax.set_xlabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
-ax.set_ylabel('Normalized relative number of Outliers', size=22, fontstyle='italic')
+ax.legend()
+ax.set_xlabel(r'\textsl{Distance between LiDARs} (m)')
+ax.set_ylabel(r'\textsl{Normalized relative number of Outliers}')
 #ax.set_title("Variation of outliers with distance between LiDARs")
 #ax.set_xticks(range(0, len(distance_values), 1), distance_values)
 fig.tight_layout()
 plt.show(block=False)
 
 print("Done! Saving Bar Chart figure... "),
-graphic_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_BOX_FILTER_BAR_FILE)
+graphic_filename = datasets_path.constructFullPathToTestScenario(test_codename, datasets_path.INTERFERENCE_DISTANCE_VS_LOS_BOX_FILTER_BAR_FILE)
 plt.savefig(graphic_filename)
 print("Done! Bar Graph saved on: " + graphic_filename)
