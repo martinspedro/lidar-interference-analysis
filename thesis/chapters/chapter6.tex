@@ -58,7 +58,7 @@ The tripod used for the experimental setup is a Velbon\cp~CX-460\texttrademark~t
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.4\textwidth]{img/experimental-setup/pandar40-on-tripod.jpg}
-\caption[HESAI Pandar40 \ac{lidar} on a Velbon CX-460 tripod.]{HESAI Pandar40 \ac{lidar} on a Velbon CX-460 tripod.}
+\caption[HESAI Pandar40 \acs{lidar} on a Velbon CX-460 tripod.]{HESAI Pandar40 \ac{lidar} on a Velbon CX-460 tripod.}
 \label{fig:pandar40-on-tripod}
 \end{figure}
 
@@ -75,7 +75,7 @@ Aveiro's \ac{it} Dark Room is an optical laboratory that is capable of blocking 
 All distance measures presented in this Chapter are taken using a LOMVUM LV66V \SI{80}{\meter} handheld laser rangefinder, which is used in this context as the distance calibration instrument. When taking measures, the orientation of the rangefinder was kept in the interval of $[\SI{-0.2}{\degree}, \SI{0.3}{\degree}]$. The error associated to each laser measurement, according to LOMVUM datasheet\footnote{No online manual was found. Measurement error determined by consulting the product printed datasheet, supplied with the device.} is \SI{1.5}{\milli\meter}. To minimize the error introduced by the human operator, 10 measurements were done and their average was taken using the LOMVUM's laser rangefinder capabilities.
 
 
-\subsection{Parameters under study}
+\subsection{Parameters Under Study}
 \label{subsec:lidar-interference:parameters-under-test}
 On \ac{irislab}, several tests were devised to tackle the problem of \ac{lidar} interference from different perspectives. Test scenarios were carried, where only one parameter is varied, in an attempt to understand the interference behaviour between data. The test parameters under study, from which different datasets were recorded are:
 
@@ -185,10 +185,10 @@ Considering the HESAI's \ac{lidar} is left to the Velodyne's \ac{lidar}, the occ
 \qquad
 \begin{subfigure}[t]{0.45\textwidth}
 	\includegraphics[width=\textwidth]{img/bosch/vlp16-test1.png}
-	\caption{Velodyne's VLP-16 data scatter plot}
+	\caption{Velodyne's VLP-16 data scatter plot.}
 	\label{fig:bosch-vlp16-1}
 \end{subfigure}
-\caption[Scatter plot top-view of both \acp{lidar} interference on the dataset provided by Bosch.]{Scatter plot of the data gathered by HESAI's Pandar40, (\subref{fig:bosch-pandar40}), and Velodyne's VLP-16, (\subref{fig:bosch-vlp16-1}). The measurements are plotted only on the X-Y plane, flattening the height of the points.}
+\caption[Scatter plot top-view of both \acsp{lidar} interference on the dataset provided by Bosch.]{Scatter plot of the data gathered by HESAI's Pandar40, (\subref{fig:bosch-pandar40}), and Velodyne's VLP-16, (\subref{fig:bosch-vlp16-1}). The measurements are plotted only on the X-Y plane, flattening the height of the points.}
 \label{fig:bosch-pandar-vs-vlp16}
 \end{figure}
 
@@ -325,7 +325,7 @@ In Figure~\ref{fig:box-filter-outliers-LOS}, the outlier analysis under a scenar
 
 Those findings make us believe that the most significant part of the outliers that are outside of the room are caused by direct interference. Two subsets of the graphics' data are monotonous descending: from \SIrange{2}{6}{\meter} and \SIrange{8}{12}{\meter}. Inside each of these subsets, the number of outliers reduces with the distance, but the behavior described on the distance test, were the major values of outliers occurred on short distances, is not verified here. We are also led to believe that at short distances, direct interference dominates, reason why on the distance setup without \ac{los} obstruction, the number of outliers is higher for short distances in comparison with \ac{los} obstruction.
 
-\subsubsection{Relative orientation}
+\subsubsection{Relative Orientation}
 To comprehend whether the orientation between the \acp{lidar} affects the number of outliers, the interferer \ac{lidar} orientation was changed, keeping their relative distance constant. Tests were performed with an angular step of \SI{30}{\degree}, creating 12 data points that are shown in Figure~\ref{fig:box-filter-outliers-direction}.
 
 \begin{figure}[!ht]
@@ -363,7 +363,7 @@ The white square on the left bottom of the figure is empty because the bag file 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\section{Ground-Truth Generation}
+\section{Ground-Truth Model Generation}
 \label{sec:lidar-interference:ground-truth-generation}
 To deepen our understanding of \ac{lidar} interference, the possibility that \ac{lidar} interference not only causes erroneous measures that are clearly outliers of the data, but also more subtle errors, possibly similar to sensor noise, must be considered. To test this premise, we need to compare the point clouds with interference with a known model of the environment, i.e., a ground-truth, that contains no interference.  
 
@@ -552,7 +552,7 @@ For all the distance values (\SIrange{1}{12}{\meter} with a step of \SI{1}{\mete
 	\label{fig:distance:octree-difference-color-mesh}
 \end{subfigure}
 
-\caption[Voxel-to-Voxel analysis when the distance between the \acp{lidar} is variated.]{Voxel-to-Voxel \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:distance:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:distance:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:distance:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the distance between the \acp{lidar} and the y-axis the different values of voxel edge length to which tests were made.}
+\caption[Voxel-to-Voxel analysis when the distance between the \acsp{lidar} is variated.]{Voxel-to-Voxel \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:distance:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:distance:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:distance:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the distance between the \acp{lidar} and the y-axis the different values of voxel edge length to which tests were made.}
 \label{fig:distance:octree-color-mesh}
 \end{figure}
 
@@ -586,7 +586,7 @@ For all the relative height values between the two \acp{lidar} (\SIlist[list-uni
 	\label{fig:height:octree-difference-color-mesh}
 \end{subfigure}
 
-\caption[Voxel-to-Voxel analysis when the height between the \acp{lidar} is variated.]{Voxel-to-Voxel \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:height:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:height:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:height:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the relative height between the \acp{lidar} optical center and the y-axis the different values of voxel edge length to which tests were made.}
+\caption[Voxel-to-Voxel analysis when the height between the \acsp{lidar} is variated.]{Voxel-to-Voxel \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:height:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:height:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:height:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the relative height between the \acp{lidar} optical center and the y-axis the different values of voxel edge length to which tests were made.}
 \label{fig:height:octree-color-mesh}
 \end{figure}
 
@@ -597,7 +597,7 @@ Despite a small variation of the relative number of modified voxels with the par
 The subtraction between the relative number of modified voxels on the interference and ground truth bags is shown in sub-Figure~\ref{fig:height:octree-difference-color-mesh}. On this image, in general, the subtraction yields positive results, which implies that due to interference, the number of changes on the interference bag are greater than on the ground truth bag. The order of magnitude of the number of modified voxels between the two datasets ranges from $10^{-4}$ to $10^{-3}$, which indicates that, on average one in each thousand voxels has changed its occupation status, due to its points being interfered and wrongly measured.
 
 
-\subsubsection{\acp{lidar} \acs{los} Obstruction}
+\subsubsection{\acsp{lidar} \acs{los} Obstruction}
 For all the distance values that the \acf{los} between the two \acp{lidar} was obstructed (\SIrange{1}{12}{\meter} with a step of \SI{2}{\meter}), the voxel edge length was varied from \SIrange{0.05}{0.45}{\meter}, with steps of \SI{0.05}{\meter}. The comparison between the ground truth model and the interference bag are shown in sub-Figure~\ref{fig:los:octree-interference-color-mesh} and the results of repeating the analysis between the ground truth model and the ground truth bag file used to generate it are shown in Figure~\ref{fig:los:octree-ground-truth-color-mesh}.
 
 \begin{figure}[!ht]
@@ -620,7 +620,7 @@ For all the distance values that the \acf{los} between the two \acp{lidar} was o
 	\label{fig:los:octree-difference-color-mesh}
 \end{subfigure}
 
-\caption[Voxel-to-Voxel analysis when the \acp{lidar} \acs{los} is obstructed and the distance between \acp{lidar} is variated.]{Voxel-to-Voxel \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:los:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:los:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:los:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the distance between the \acp{lidar} to which the \acp{lidar} \ac{los} was obstructed, and the y-axis the different values of voxel edge length to which tests were made.}
+\caption[Voxel-to-Voxel analysis when the \acsp{lidar} \acs{los} is obstructed and the distance between \acsp{lidar} is variated.]{Voxel-to-Voxel \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:los:octree-interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:los:octree-ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:los:octree-difference-color-mesh}). For every sub-figure, the x-axis shows the distance between the \acp{lidar} to which the \acp{lidar} \ac{los} was obstructed, and the y-axis the different values of voxel edge length to which tests were made.}
 \label{fig:los:octree-color-mesh}
 \end{figure}
 
@@ -631,7 +631,7 @@ Despite a small variation of the relative number of modified voxel with the para
 The subtraction between the relative number of modified voxels on the interference and ground truth bags (sub-Figure~\ref{fig:los:octree-difference-color-mesh}), On this image (and corresponding data), in major results of the subtraction are positive, which means that due to interference, the number of changes on the interference bag are greater than on the ground truth bag. The order of magnitude of the number of modified voxels between the two datasets ranges from $10^{-3}$ to $10^{-2}$, which indicates that, on average one in each ten to a hundred voxels has changed its occupation status, due to its points being interfered and wrongly measured.
 
 
-\subsubsection{Transversal Remarks to all the tests}
+\subsubsection{Transversal Remarks to All the Tests}
 Measuring the change detection has performed with the intent to classify, on a more macro-level, how does the interference affect the spatial organization of the point cloud. A voxel tridimensional structure was volume, whereas a point does not; which was believed to be a good analysis to better handle the spatial organization of the point cloud. A better understanding of the spatial organization would allow detecting which regions of the point cloud were affected by interference, which voxels were changed and remain unaffected by interference and how did they change.
 
 However, the results presented do not allow such interpretation. At first, ground truth model generation seems to undermine the results, since it appears that the comparison of the point clouds used to generate the ground truth model yields as many errors as the actual interfered data. Such similarity forced us to double check our implementations, but no mistakes were found. Subtracting one result from the other, while allowing the determination of the order of magnitude that described their differences, resulted in an absence of a clear pattern being found on the data.
@@ -676,7 +676,7 @@ To determine the magnitude of the interference for a specific value of a paramet
 	\fontsize{14}{18}\selectfont
 	\graphicspath{{img/lidar-interference/point-to-point-analysis/}}
 	\includesvg{img/lidar-interference/point-to-point-analysis/interference-principle}
-	\caption[Point-to-Point analysis principle for outlier classification]{Point-to-Point analysis principle for outlier classification. The ground truth model point is represented by a darker orange and the distance threshold in a lighter orange. On blue, two points under test are presented. If the distance between the point under test and the ground truth model point is greater than the distance threshold, the point is considered to be an interference.}
+	\caption[Point-to-Point analysis principle for outlier classification.]{Point-to-Point analysis principle for outlier classification. The ground truth model point is represented by a darker orange and the distance threshold in a lighter orange. On blue, two points under test are presented. If the distance between the point under test and the ground truth model point is greater than the distance threshold, the point is considered to be an interference.}
 	\label{fig:point-to-point-principle}
 \end{figure}
 
@@ -744,7 +744,7 @@ For all the distance values (\SIrange{1}{12}{\meter} with a step of \SI{1}{\mete
 	\label{fig:distance:difference-color-mesh}
 \end{subfigure}
 
-\caption[Point-to-Point analysis when the distance between \acp{lidar} is variated.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:distance:interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:distance:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:distance:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of distance, the parameter under test.}
+\caption[Point-to-Point analysis when the distance between \acsp{lidar} is variated.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:distance:interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:distance:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:distance:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of distance, the parameter under test.}
 \label{fig:distance:color-mesh}
 \end{figure}
 
@@ -777,7 +777,7 @@ For all the relative height values between the two \acp{lidar} (\SIlist[list-uni
 	\label{fig:height:difference-color-mesh}
 \end{subfigure}
 
-\caption[Point-to-Point analysis when the relative height  between \acp{lidar} optical center is variated.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:height:interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:height:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:height:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of relative height between the \acp{lidar}, the parameter under test.}
+\caption[Point-to-Point analysis when the relative height  between \acsp{lidar} optical center is variated.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:height:interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:height:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:height:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of relative height between the \acp{lidar}, the parameter under test.}
 \label{fig:height:color-mesh}
 \end{figure}
 
@@ -788,7 +788,7 @@ The difference between their normalized interference, shown in sub-Figure~\ref{f
 
 Comparing this magnitude ($10^{-4}$) with the results presented in Figure~\ref{fig:box-filter-outliers-height}, which are on the order of magnitude of $10^{-6}$, the normalized number of interfered points resulting from varying the relative height between the two \acp{lidar}, using point by point analysis is 1 to 2 orders of magnitude larger than the normalized number of outliers outside the room dimensions (which are clearly caused by interference), depicted on the bar chart of Figure~\ref{fig:box-filter-outliers-height}
 
-\subsubsection{\acp{lidar} \acl{los} Obstruction}
+\subsubsection{\acsp{lidar} \acl{los} Obstruction}
 For all the distances that the \acf{los} between the two \acp{lidar} was obstructed (\SIrange{2}{12}{\meter} with steps of \SI{2}{\meter}), the interference magnitude was analyzed with a varying threshold value, from \SIrange{0.05}{1.5}{\meter}, with steps of \SI{0.05}{\meter}. The results of the depth differences between the ground truth model and the interference bag are shown in sub-Figure~\ref{fig:los:interference-color-mesh} and the results of applying the same point-to-point analysis between the ground truth model and the ground truth bag file used to generate the ground truth model are shown in Figure~\ref{fig:los:ground-truth-color-mesh}.
 
 \begin{figure}[!ht]
@@ -811,7 +811,7 @@ For all the distances that the \acf{los} between the two \acp{lidar} was obstruc
 	\label{fig:los:difference-color-mesh}
 \end{subfigure}
 
-\caption[Point-to-Point analysis when the \acs{los} between the \acp{lidar} is obstructed and their relative distance is  variated.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:los:interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:los:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:los:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of the distance between the two \acp{lidar}, the parameter under test, with the obstacle that blocks their \ac{los} being placed at the medium distance between the two.}
+\caption[Point-to-Point analysis when the \acs{los} between the \acsp{lidar} is obstructed and their relative distance is  variated.]{Point-to-Point \ac{lidar} interference analysis when the parameter under test is the relative distance between the two \acp{lidar}, victim and interferer. In sub-Figure~(\subref{fig:los:interference-color-mesh}), the interfered bag is compared against the ground truth model and in sub-Figure~(\subref{fig:los:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:los:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of the distance between the two \acp{lidar}, the parameter under test, with the obstacle that blocks their \ac{los} being placed at the medium distance between the two.}
 \label{fig:los:color-mesh}
 \end{figure}
 
@@ -822,7 +822,7 @@ The subtraction of their normalized interference, shown in sub-Figure~\ref{fig:h
 Comparing this magnitude with the results in Figure~\ref{fig:box-filter-outliers-LOS}, whose magnitude varies from $10^{-7}$ to $10^{-6}$, the total number of interfered points for a \ac{los} obstruction scenario, with the distance between the two \acp{lidar} being varied, using point by point analysis is from 2 to 3 orders of magnitude larger than the normalized number of outliers outside the room dimensions (which are clearly caused by interference).
 
 
-\subsubsection{Transversal Remarks to all the tests}
+\subsubsection{Transversal Remarks to All the Tests}
 Comparing sub-figures (a) and (b), from figures~\ref{fig:distance:color-mesh},~\ref{fig:height:color-mesh} and~\ref{fig:los:color-mesh} we notice that their general aspect is similar, despite the values for each cell being different, revealing the metric chosen for analysis, the distance threshold, has
 more impact than the parameter under test (distance between sensors, height or \ac{los} obstruction) whose values are being varied. Another hypothesis is, due to the difference of sub-figures~\ref{fig:distance:difference-color-mesh},~\ref{fig:height:difference-color-mesh} and~\ref{fig:los:difference-color-mesh}, that the impact of the noise on the data is more relevant than the interference between \acp{lidar}. Therefore, since the number of points is statistically representative of the noise phenomenon, the sub-figure (a) and (b) look similar, but when the impact of the noise is ``removed'', the underlying interference behavior is revealed. 
 
@@ -847,7 +847,7 @@ The second hypothesis seems far-fetched, but considering that the normalized poi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INTERFERENCE ON ROI %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Interference on \acp{roi}}
+\section{Interference on \acsp{roi}}
 \label{sec:lidar-interference:interference-roi}
 The previous analysis on \ac{lidar} interference considers only outliers (Section~\ref{sec:lidar-interference:room-outliers}), voxel occupation change (Section~\ref{sec:lidar-interference:voxel-analysis}) or the distance between points in a point-to-point analysis in the entire point cloud (Section~\ref{sec:lidar-interference:point-to-point-analysis}). In this section we offer a complementary analysis, based on a point-to-point analysis of the interference, but focusing on specific objects of interest.
 
@@ -870,7 +870,7 @@ To tackle this issue, already expected, a different dataset was previously recor
 		$z_\text{max}$ & \SI{0.88}{\meter} \\
 		\bottomrule
 	\end{tabular}
-	\caption[Person position in relation to the \ac{lidar} coordinate frame on the \textit{Human} dataset.]{Person position in relation on the \ac{lidar} coordinate frame on the \textit{Human} dataset. Note that the \ac{lidar} axis, x is forward, y is leftwards and z is upwards. $z_\text{min}$ is the position of the feet and $z_\text{max}$ the top of the head.}
+	\caption[Person position in relation to the \acs{lidar} coordinate frame on the \textit{Human} dataset.]{Person position in relation on the \ac{lidar} coordinate frame on the \textit{Human} dataset. Note that the \ac{lidar} axis, x is forward, y is leftwards and z is upwards. $z_\text{min}$ is the position of the feet and $z_\text{max}$ the top of the head.}
 	\label{tab:human-position}
 \end{table}
 
@@ -879,7 +879,7 @@ In Figure~\ref{fig:human-test-scenario}, an example of the test scenario, taken 
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.6\textwidth]{img/lidar-interference/human/test-scenario-white-balanced.png}
-	\caption[Test scenario for analyzing the \ac{lidar} interference in \acp{roi}.]{Example of the \textit{Human} test scenario, used for analyzing the \ac{lidar} interference in \acp{roi}. The HESAI Pandar 40 \ac{lidar}, for the test scenario being shown, is placed at a distance of \SI{6}{\meter} from Velodyne VLP-16 and the person position is indicated in Table~\ref{tab:human-position}. A soccer ball, a chair and a human dummy are also present on the image.}
+	\caption[Test scenario for analyzing the \acs{lidar} interference in \acsp{roi}.]{Example of the \textit{Human} test scenario, used for analyzing the \ac{lidar} interference in \acp{roi}. The HESAI Pandar 40 \ac{lidar}, for the test scenario being shown, is placed at a distance of \SI{6}{\meter} from Velodyne VLP-16 and the person position is indicated in Table~\ref{tab:human-position}. A soccer ball, a chair and a human dummy are also present on the image.}
 	\label{fig:human-test-scenario}
 \end{figure}
 
@@ -925,7 +925,7 @@ To establish a comparison between the \ac{lidar} interference analysis on \ac{ro
 
 Using the algorithm detailed in sub-Section~\ref{subsec:lidar-interference:roi-implementation}, the bag files containing the point cloud points for the clusters on the \acp{roi} are generated, their ground truth models computed using \textit{Frame Registration} (see sub-Section~\ref{subsec:lidar-interference:frame-registration}) and analyzed used Point-to-Point analysis algorithm. After both analysis, done with the same algorithms, are completed, some remarks are given and the results are compared.
 
-\subsubsection{Without \acs{roi} extraction}
+\subsubsection{Without \acs{roi} Extraction}
 With the person placed on the \ac{lidar} coordinate frame at (\SI{5.01}{\meter}, \SI{-1.02}{\meter}), the distance between the two \acp{lidar} was incremented from \SIrange{3}{6}{\meter}, with steps of \SI{1}{\meter}, measured in the same conditions as the distance test (see sub-Section~\ref{subsec:lidar-interference:parameters-under-test} for more details). 
 
 The interference magnitude was analyzed with a varying distance threshold value, from \SIrange{0.05}{0.5}{\meter}, with steps of \SI{0.05}{\meter}. The results of the depth differences between the ground truth model and the interference bag are shown in sub-Figure~\ref{fig:human:interference-color-mesh} and the results of applying the same point-to-point analysis between the ground truth model and the ground truth bag file used to generate the ground truth model are shown in Figure~\ref{fig:human:ground-truth-color-mesh}.
@@ -953,7 +953,7 @@ The interference magnitude was analyzed with a varying distance threshold value,
 		\label{fig:human:difference-color-mesh}
 	\end{subfigure}
 
-	\caption[Point-to-Point analysis of the interference on the \textit{Human} dataset without \ac{roi} extraction. Results are presented for the ground-truth bag, interference bag and the subtraction of the results between the two.]{Point-to-Point \ac{lidar} interference analysis on the \textit{Human} dataset without \ac{roi} extraction. In sub-Figure~(\subref{fig:human:interference-color-mesh}), the interfered bag is compared with the ground truth model and in sub-Figure~(\subref{fig:human:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:human:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of the distance between the two \acp{lidar}} 
+	\caption[Point-to-Point analysis of the interference on the \textit{Human} dataset without \acs{roi} extraction. Results are presented for the ground-truth bag, interference bag and the subtraction of the results between the two.]{Point-to-Point \ac{lidar} interference analysis on the \textit{Human} dataset without \ac{roi} extraction. In sub-Figure~(\subref{fig:human:interference-color-mesh}), the interfered bag is compared with the ground truth model and in sub-Figure~(\subref{fig:human:ground-truth-color-mesh}), the ground truth bag file is compared with the ground truth model. The latter results are subtracted to the former, resulting in sub-Figure~(\subref{fig:human:difference-color-mesh}). For every sub-figure, the x-axis shows the threshold distance at which a depth difference is considered an interference and the y-axis shows the different values of the distance between the two \acp{lidar}} 
 	\label{fig:human:color-mesh}
 \end{figure}
 
@@ -1002,7 +1002,7 @@ The results of the depth differences between the ground truth model and the inte
 
 A small residual interference can be observed in Figure~\ref{fig:human:roi-interference-color-mesh} for distance thresholds greater than \SI{0.15}{\centi\meter}. We affirm that this behavior is due to interference since we see no similarities on the analysis of the ground truth bag, in Figure~\ref{fig:human:roi-ground-truth-color-mesh}.
 
-\subsection{Comparison between whole point cloud analysis and \acs{roi} extraction}
+\subsection{Comparison between Whole Point-Cloud Analysis and \acs{roi} Extraction}
 In this sub-Section, the same dataset was analyzed using the same algorithms, both for interference analysis and ground truth generation, only differing on the subset of data: the whole point cloud frame or a subset corresponding to a \ac{roi}.
 
 Comparing the ground truth model with the interference bag with and without \ac{roi} extraction (sub-Figure~\ref{fig:human:roi-interference-color-mesh} and sub-Figure~\ref{fig:human:interference-color-mesh}, respectively), one can see that they are quite similar on their behavior and the order of magnitude. Such results indicate that the local behavior of the interference seems to match its global behavior. However, when comparing the ground truth bag with and the \ac{roi} without interference (sub-Figure~\ref{fig:human:roi-ground-truth-color-mesh} and sub-Figure~\ref{fig:human:ground-truth-color-mesh}, respectively), the behavior differs: with \ac{roi} extraction the distance errors measured are one order of magnitude smaller and null after a threshold of \SI{0.15}{\centi\meter}. 

@@ -35,14 +35,14 @@ The camera used is an industrial 5 \ac{mp} RGB camera, from \acf{avt}, model Man
 		\toprule
 		\multicolumn{2}{l}{Specification} & Value \\ \midrule
 		\multicolumn{2}{l}{\emph{Camera}} & \\
-		\phantom{a} & Full Resolution (width vs height) & $2452 \times 2056$ pixels \\
+		\phantom{a} & Full Resolution (width vs height) & $\SI{2452}{} \times \SI{2056}{}$ pixels \\
 									& Shutter mode & Global \\
-									&	Maximum \ac{fps} at full resolution & $9.2$ \\ 
-									& \acs{adc}\footnotemark bit depth & $12$ bit \\\midrule 
+									&	Maximum \ac{fps} at full resolution & \SI{9.2}{} \\ 
+									& \acs{adc}\footnotemark bit depth & \SI{12}{} bit \\\midrule 
 									\multicolumn{2}{l}{\emph{Lens}} \\
-									&	Focal Length & $16$ mm \\
+									&	Focal Length & \SI{16}{\milli\meter} \\
 									&	Max aperture & $f/1.4$ \\
-									&	Minimum Object Distance & $300$ mm  \\
+									&	Minimum Object Distance & \SI{300}{\milli\meter}  \\
 		\bottomrule
 	\end{tabular}
 	\caption[Relevant specifications of the camera and its lens.]{Relevant specifications for \ac{avt} Manta G-504C RGB camera (from~\cite{MantaG504C})  and MVL16M1 Thorlabs\cp~lens (from~\cite{Thorlabs}).}
@@ -53,7 +53,7 @@ The camera used is an industrial 5 \ac{mp} RGB camera, from \acf{avt}, model Man
 
 To power the Manta G-504C, a benchtop power source was used. Further details about powering the camera and its electrical connections are presented on Appendix-B~\ref{sec:appendix-b}.
 
-\subsection{\ac{tof} \ac{lidar}}
+\subsection{\acs{tof} \acs{lidar}}
 The \ac{tof} \ac{lidar} used is a Velodyne VLP-16\texttrademark, a 16 beam \ac{lidar} that operates with a wavelength of \SI{903}{\nano\meter}. VLP-16 supports various measurements modes based on the return pulse (Strongest, Last, Dual) and can be connected to a \ac{gps} receiver for geopositioning and synchronization with an external clock. It also supports several rotation speeds, from 300 to 1200 \ac{rpm}, which result in different angular steps and point cloud refresh rate. The full specifications can be accessed on~\cite{VLP16} and the relevant specifications for this work are summarized in Table~\ref{tab:vlp16-specs}.
 
 \begin{table}[!ht]
@@ -63,7 +63,7 @@ The \ac{tof} \ac{lidar} used is a Velodyne VLP-16\texttrademark, a 16 beam \ac{l
 		\toprule
 		Specification & Value \\ \midrule
 		Wavelength    & \SI{903}{\nano\meter} \\
-		Motor \acs{rpm} & $600 \pm 3$ \\
+		Motor \acs{rpm} & $\SI{600}{} \pm \SI{3}{}$ \\
 		Angular step & \SI{0.2}{\degree} \\
 		Vertical \ac{fov} & \SI{30}{\degree} \\
 		Horizontal \ac{fov} & \SI{360}{\degree} \\
@@ -98,8 +98,8 @@ For each device a fixed \acf{ip} address was attributed, following the instructi
 	\label{tab:experimental-setup-ip}
 \end{table}
 
-\subsection{\ac{lidar} and Camera Interference}
-No significant interference is expected between the camera and the \ac{lidar}. Despite the camera lens having a transmission coefficient of $66\%$ at $\approx 900 nm$~\cite{Thorlabs}, and Sony ICX655, the camera sensor for the \ac{avt} Manta G-504C, having a Quantum Efficiency of $\approx 5\%$~\cite{MantaG504C}, \ac{avt} Manta G-504C is equipped with an \ac{ir} cut-filter.
+\subsection{\acs{lidar} and Camera Interference}
+No significant interference is expected between the camera and the \ac{lidar}. Despite the camera lens having a transmission coefficient of $66\%$ at $\approx \SI{900}{\nano\meter}$~\cite{Thorlabs}, and Sony ICX655, the camera sensor for the \ac{avt} Manta G-504C, having a Quantum Efficiency of $\approx 5\%$~\cite{MantaG504C}, \ac{avt} Manta G-504C is equipped with an \ac{ir} cut-filter.
 
 Despite the low sensibility of the camera and the presence of an \ac{ir} cut-filter, an experiment was conducted to verify the occurrence of interference. The experimental setup was switched on in a Dark Room without any other light sources and the camera feed was visualized. Besides the noise caused by the camera electronics operation, no signs of interference caused by the \ac{lidar} infrared beams could be observed on the camera image feed, since no bright spots were found. Therefore, no further work on \ac{lidar} to camera interference were carried
 
@@ -119,10 +119,10 @@ The act of calibrating a camera consists on determining its intrinsic parameters
 
 The calibration procedure undertaken uses a chessboard of $13 \times 9$ squares, with each square having an edge length of \SI{44.0}{\milli\meter}. The chessboard used can be seen in Figure~\ref{fig:chessboard}. It was laser printed on a \SI{100}{\gram} A2 paper and then glued to a plywood board.
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{img/experimental-setup/chessboard.jpg}
-	\caption{Chessboard used during camera calibration procedures. The chessboard was laser printed on A2 paper size, in real size, that was then glued to a plywood board.}
+	\caption[Chessboard used for the camera calibration procedures.]{Chessboard used during camera calibration procedures. The chessboard was laser printed on A2 paper size, in real size, that was then glued to a plywood board.}
 	\label{fig:chessboard}
 \end{figure}
 
@@ -195,7 +195,7 @@ For calibration, around 50 unique photos are taken for each setup. These images 
 	\label{fig:camera-calibration-images}
 \end{figure}
 
-\subsubsection{Frame Rate and Bandwidth concerns}
+\subsubsection{Frame Rate and Bandwidth Concerns}
 Despite the straightforwardness of the process, one of the secondary goals of this thesis is to produce a dataset of scenarios on which \ac{lidar} interference is present. Such goal implies that all data must be properly recorded, organized and stored, including calibration data. \ac{ros} provides \texttt{rosbag}, a package for recording and playing back messages exchanged in a \ac{ros} network, which is used to save data on an external hard-drive.
 
 However, preliminary tests with this tool indicate that it cannot save image topics at $9.2$~\ac{fps}. Other tests have shown that $8$~\ac{fps} is the best scenario where \texttt{rosbag} can record data without causing buffer flush due to overrun errors. 
@@ -216,7 +216,7 @@ However, decreasing the F-number reduces the Hyperfocal distance (see Equation~\
 
 The F-number needs to be adjusted not only to ensure the requirements of the exposure time are met and to maximize \acl{dof}, but also to ensure that exposure can be increased or decrease to accommodate the daylight intensity variations. Considering a maximum exposure time of \SI{100}{\milli\second}, only aperture values greater than $f/4.0$ result on a sharp image under those constraints. To maximize the \ac{dof}, the smaller F-number should be chosen, since \ac{dof} and the F-number are inversely proportional. Therefore, with such constrains, our experimental setup uses an F-number of $f/4.0$ and an exposure time that varies between \SIrange{80}{100}{\milli\second} during daylight.
 
-\subsubsection{\acl{dof} and calibration object}
+\subsubsection{\acl{dof} and Calibration Object}
 \label{subsec:calibration:dof-and-calibration-object}
 Solving Equation~\eqref{eq:hyperfocal_distance} and replacing its result in Equation~\eqref{eq:dof-subject-distance}, we can obtain $d$, the object distance at which the camera must be focused. The object to be focused is the calibrating pattern and the $DoF_{near}$ limit is select to be the distance at which the calibration pattern fills the camera~\ac{fov}. The calculations can be seen in Equation~\eqref{eq:hyperfocal-and-dof-values}.
 
@@ -246,7 +246,7 @@ To interact with the Manta AVT G-504C, \texttt{avt\_vimba\_camera} \ac{ros} pack
 The \ac{ros} node diagrams can be seen in Figure~\ref{fig:camera-calibration-rosgraph}. In sub-Figure~\ref{fig:camera-calibration-bag-rosgraph}, the nodes and topics for the calibration procedure using the data published by the \texttt{rosbag} tool. In sub-Figure~\ref{fig:camera-calibration-avt-rosgraph}, the nodes and topics for the calibration procedure using the data directly from the driver are shown. 
 
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 	\vspace{5mm}
 	\centering
 	\begin{subfigure}[c]{0.8\textwidth}
@@ -254,7 +254,6 @@ The \ac{ros} node diagrams can be seen in Figure~\ref{fig:camera-calibration-ros
 		\def\svgwidth{\columnwidth}
 		\graphicspath{{img/camera-calibration/}}
 		\includesvg{img/camera-calibration/bag-rosgraph-print}
-		%\includegraphics[width=0.8\textwidth]{img/camera-calibration/bag-rosgraph.png}
 		\caption{\ac{ros} node graph for the camera calibration procedure using the \texttt{rosbag} tool. \texttt{RosbagPlayer} is the node that plays back the data stored on the bag file.}
 		\label{fig:camera-calibration-bag-rosgraph}
 	\end{subfigure}
@@ -299,7 +298,7 @@ The camera was calibrated daily whenever experimental measures were taken. The c
 
 	
 
-\section{\ac{lidar} Intrinsic Calibration}
+\section{\acs{lidar} Intrinsic Calibration}
 \label{sec:calibration:lidar}
 Unlike a camera, \acp{lidar} do not possess a typical calibration procedure. For Velodyne VLP-16 reflectivity measurements are factory calibrated, in a procedure described in~\cite{vlp16} and a \ac{xml} file is provided with the \ac{lidar}, containing corrections for the \ac{lidar} operating parameters.
 
@@ -360,7 +359,7 @@ Several tests were performed with the possible algorithms for solving \ac{pnp}. 
 Although the planar chessboard used for intrinsic camera calibration was present during the extrinsic calibration, the algorithm implemented does not require the usage of a calibration object. For calibration, 6 points were selected in the point cloud and 6 pixels on the image: four of them correspond to the corners of the chessboard and two to a background object. The selected correspondences can be seen in Figure~\ref{fig:calibration-correspondences}: sub-Figure~(\subref{fig:extrinsic-calibration-correspondences:camera}) shows the selected pixels on the image, marked with red crosses; sub-Figure~(\subref{fig:extrinsic-calibration-correspondences:lidar}) shows the selected 3D points on the point cloud, marked as red spheres.
 
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 	\centering
 	\begin{subfigure}[c]{0.39\textwidth}
 		\includegraphics[width=\textwidth]{img/calibration/camera-extrinsic-calibration-points-draw.jpg}
@@ -404,14 +403,14 @@ Extrinsic camera and \ac{lidar} calibration was performed whenever experimental 
 	\end{align}
 \end{subequations}
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{img/calibration/extrinsic-calibration-frames.png}
 	\caption[Experimental setup TF tree coordinate frames.]{TF visualization on \texttt{Rviz} of the TF tree between the experimental setup coordinate frames. \texttt{velo\_link} and \texttt{camera\_link} represent the coordinate frames of the Velodyne VLP-16 \ac{lidar} and the Manta \ac{avt} G-504C, respectively. The \texttt{world} coordinate frame represents the positioning of the \ac{lidar} in the world, which in this case is an offset to the vertical positioning of the \ac{lidar}.}
 	\label{fig:extrinsic-calibration-frames}
 \end{figure}
 
-\subsection{Comparison with \ac{kitti}}
+\subsection{Comparison with \acs{kitti} Dataset}
 \label{subsec:calibration:kitti-comparison}
 
 On \ac{kitti}, the number of coordinate frames is greater and have more complex interactions. While on the experimental setup the coordinates frames are all fixed, on \ac{kitti}, there is only one fixed frame, \texttt{world}. The car coordinate frame is named \texttt{base\_link} and the transformation between the \texttt{base\_link} and the camera are time-dependent.

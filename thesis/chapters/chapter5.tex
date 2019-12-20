@@ -57,7 +57,7 @@ The image objection detection is done on a standard laptop with an Intel\cp~i7 \
 \end{table}
 
 
-\subsection{Integration with \ac{ros}}
+\subsection{Integration with \acs{ros}}
 \texttt{Darknet} (the \ac{nn} framework underlying \ac{yolo}) integrates with \ac{ros} using an Open-Source package developed by Marko Bjelonic~\cite{MarkoBjelonic}, \texttt{darknet-ros}. This package runs the Redmon's \texttt{Darknet} framework and wraps its configuration, input images and outputs results in a \ac{ros} node, containing an action server and several topics messages.
 
 To configure the operation of \texttt{darknet-ros}, a \ac{ros} launch file is used. This launch file specifies the network model, configuration, weights and other \ac{ros} parameters, and is adapted from \texttt{darknet-ros} package launch file~\cite{MarkoBjelonic}. 
@@ -77,14 +77,14 @@ Images are published at $\approx\SI{10}{\hertz}$ on the \ac{kitti} dataset and a
 
 Exemplary results are presented in Figures~\ref{fig:kitti-object-detection} and~\ref{fig:experimental-object-detection}, both for the \ac{kitti} dataset and experimental data captured with the setup described in Section~\ref{sec:calibration:experimental-setup}.
 	
-\subsubsection{\ac{kitti} Dataset}
+\subsubsection{\acs{kitti} Dataset}
 The previously described method is able to classify images at 1.3 to 1.8 \ac{fps}, on \ac{kitti} dataset. \ac{kitti} dataset majorly contains road scenarios, since the sensors are placed on a car and the setup is intended for self-driving vehicles (see Section~\ref{sec:sota:datasets}).
 
 In Figure~\ref{fig:kitti-object-detection}, two exemplary results of the image detection algorithm used on the \ac{kitti} dataset are presented. On the top sub-figure,~\ref{fig:kitti-yolo-3}, a road intersection with several cars is presented. Despite the car's orientation, color and size, every car is detected correctly. In the middle of the sub-figure, three errors occur. One of the errors is related to a wrong car bounding box that contains two cars instead of a single car. This bounding box is near the second error, an undetected truck, occluded by a tree, in front of the factory, to the right side of the image. The third error is related to a tree top mistakenly labelled as a traffic sign, near the factory were the undetected truck is parked. The third refers to the undetected truck, which is partially occluded by a tree.
 
 On the bottom sub-figure,~\ref{fig:kitti-yolo-2}, taken at the Karlsruhe Institute of Technology \textit{campus}, two errors are also present. In the center, a bounding box labelled as a person is actually a car and two road poles in a shadow area; and on the right, two persons are grouped together in one bounding box as if they were a single person.
 	
-\begin{figure}[ht!]
+\begin{figure}[!ht]
 	\centering
 	\begin{subfigure}[c]{0.8\textwidth}
 		\includegraphics[width=\textwidth]{img/object-detection/kitti-4.jpg}
@@ -97,12 +97,12 @@ On the bottom sub-figure,~\ref{fig:kitti-yolo-2}, taken at the Karlsruhe Institu
 		\caption{Object detection on Karlsruhe Institute of Technology \textit{campus}. There are two detection errors on this image. In the center, two road poles and a car are labelled as a person. On the right, two persons are grouped together in one bounding box.}
 		\label{fig:kitti-yolo-2}
 	\end{subfigure}
-	\caption[Image object detection results on \ac{kitti} dataset.]{Object detection results for the \ac{kitti} dataset, using \ac{yolo}v3 with a confidence threshold of 30\%, trained for the \ac{coco}'s image dataset. With the specifications present in Table~\ref{tab:computer-specs}, a 1.3 to 1.8 \ac{fps} were registered when classifying the images.}
+	\caption[Image object detection results on \acs{kitti} dataset.]{Object detection results for the \ac{kitti} dataset, using \ac{yolo}v3 with a confidence threshold of 30\%, trained for the \ac{coco}'s image dataset. With the specifications present in Table~\ref{tab:computer-specs}, a 1.3 to 1.8 \ac{fps} were registered when classifying the images.}
 	\label{fig:kitti-object-detection}
 \end{figure}
 
 
-\subsubsection{Experimental Data acquired}
+\subsubsection{Experimental Data Acquired}
 Exemplary results of the object detection method applied to the experimental data gathered on a \ac{msl} robotic football field, at the \acf{irislab}, are presented in Figure~\ref{fig:experimental-object-detection}. The confidence threshold of \ac{yolo} is set to 30\% and with the specifications present in Table~\ref{tab:computer-specs}, a 1.1 to 1.4 \ac{fps} were registered when classifying the images.
 
 Since experimental data was stored on raw format, as detailed on Section~\ref{sec:calibration:extrinsic}, de-Bayering and rectification of the raw image must be done, using the \texttt{image\_proc} package, before sending the data to the \texttt{Darknet} framework.
@@ -123,7 +123,7 @@ On the right sub-figure,~\ref{fig:experimental-yolo-1}, calibrated data is used 
 		\caption{}
 		\label{fig:experimental-yolo-1}
 	\end{subfigure}
-	\caption[Image object detection, using \ac{yolo}v3 on our experimental dataset.]{Object detection results for the experimental data gathered on a \ac{msl} robotic football field, at \ac{irislab}. \ac{yolo}v3 is used with a confidence threshold of 30\% and trained for the \ac{coco}'s image dataset. With the specifications present in Table~\ref{tab:computer-specs}, a 1.1 to 1.4 \ac{fps} were registered when classifying the images. Note that since the data was stored on a raw format, de-Bayerization and rectification need to be performed by \texttt{image\_proc} \ac{ros} package before the RGB images are feed to the \texttt{Darknet}. In sub-Figure~\ref{fig:experimental-yolo-2}, a human dummy is detected as a person and a knob is confused with a sports ball. On the back, the tv monitor is correctly classified, but the bounding box is smaller, since it is occluded by the robotic arm. In sub-Figure~\ref{fig:experimental-yolo-1}, despite the occlusion of the chair and person, \ac{yolo} is capable of recognizing them both with accuracy.}
+	\caption[Image object detection, using \acs{yolo}v3 on our experimental dataset.]{Object detection results for the experimental data gathered on a \ac{msl} robotic football field, at \ac{irislab}. \ac{yolo}v3 is used with a confidence threshold of 30\% and trained for the \ac{coco}'s image dataset. With the specifications present in Table~\ref{tab:computer-specs}, a 1.1 to 1.4 \ac{fps} were registered when classifying the images. Note that since the data was stored on a raw format, de-Bayerization and rectification need to be performed by \texttt{image\_proc} \ac{ros} package before the RGB images are feed to the \texttt{Darknet}. In sub-Figure~\ref{fig:experimental-yolo-2}, a human dummy is detected as a person and a knob is confused with a sports ball. On the back, the tv monitor is correctly classified, but the bounding box is smaller, since it is occluded by the robotic arm. In sub-Figure~\ref{fig:experimental-yolo-1}, despite the occlusion of the chair and person, \ac{yolo} is capable of recognizing them both with accuracy.}
 	\label{fig:experimental-object-detection}
 \end{figure}
 
@@ -132,7 +132,7 @@ Our tests with image object detection, in conjunction with \texttt{darknet-ros},
 
 Therefore we have the first (rigid body transformation between \ac{lidar} and camera) and the second (image object detection) pre-requisites for detecting \acp{roi} on the point cloud from \acp{roi} detected on the image.
 
-\section{Correspondences between objects in image and point-cloud}
+\section{Correspondences between Objects in Image and Point-Cloud}
 \label{sec:object-detection:correspondences-image-point-cloud}
 An experimental setup with an intrinsically calibrated camera and \ac{lidar}, on which their rigid body transformation is known\footnote{The method used to determine this rigid body transformation on our experimental dataset is outlined on Section~\ref{sec:calibration:extrinsic}. Chapter~\ref{chapter:calibration} details all the calibration procedures that are pre-required for this section. For \ac{kitti} dataset, such transformations are already given.}, allows data conversion between its two coordinate frames, as shown previously in Chapter~\ref{chapter:sensor-fusion}. 
 
@@ -189,7 +189,7 @@ Performing a frustum segmentation on the point cloud requires four steps:
 	\item Determine the limits of the near and far cut planes.
 \end{itemize}
 
-\subsubsection{Back-project the pixels to rays}
+\subsubsection{Back-project the Pixels to Rays}
 Projecting pixels to a ray (also called back projection) is the inverse process that is used to create an image on a camera\footnote{A camera projects the world points to a two-dimensional plane. See Sub-Section~\ref{subsec:sota:camera-geometry}}. The projection matrix defined in Equation~\eqref{eq:camera_transform_full}, if inverted, may be used to calculate the transformation matrix that  back projects pixels into rays.
 
 Since on our implementation, the transformation between different coordinate frames is done separately from the back-projection algorithm, the image pixels are already defined on the camera's coordinate frame. Therefore, the joint rotation and translation matrix, $\begin{bmatrix} R|t \end{bmatrix}$, is equal to the identity and a zero column vector, respectively, and does not need to be accounted for.
@@ -230,7 +230,7 @@ Following Hartley's and Zisserman's book~\cite{mvg_book}, our back-projection op
 	\end{bmatrix}
 \end{align}
 
-\subsubsection{Rotation from the \ac{lidar} coordinate frames to the bounding boxes' coordinate frame}
+\subsubsection{Rotation from the \acs{lidar} Coordinate Frames to the Bounding Boxes' Coordinate Frame}
 The rotation of the \ac{lidar} coordinate frame to each of the bounding boxes coordinate frames is obtained by calculating the angle between the two rays: the ray from the camera center to the image bounding box center and the ray from the camera center to the image center. 
 
 Let $B^\text{center}$ be the image bounding box center, which can be calculated using Equation~\eqref{eq:bboxes-pixel-center} and $C^\text{center}$ be the image center, that corresponds to the intrinsic camera parameters $c_i, \forall i \in \{x, y\}$, as denoted in Equation~\eqref{eq:image-pixel-center}.
@@ -252,7 +252,7 @@ By applying the rigid body transformation between the camera and the \ac{lidar} 
 
 Then, the rotation of the \ac{lidar} coordinate frame to a new frame oriented to the bounding box can then be obtained by calculating the quaternion that defines the angle of rotation between vector $\vec{c'}$ and $\vec{b'}$~\cite{mvg_book}. The rotation transformation can be denoted as $\mathbf{q}_{c'b'}$, which is capable of projecting a line from the coordinate frame of the bounding box, $b'$, to the \ac{lidar} coordinate frame, $c'$. Afterwards, the quaternion can be converted to a rotation matrix~\cite{Dai2015, mvg_book}, so that the rotation can be applied together with order rotations already obtained.
 
-\subsubsection{Horizontal and Vertical \ac{fov} of the pyramidal frustum}
+\subsubsection{Horizontal and Vertical \acs{fov} of the Pyramidal Frustum}
 The horizontal and vertical \ac{fov} are determined on the image plan. First, the angle between the image center and each of the bounding box limits (upper and lower) are calculated for the two dimensions, $x$ and $y$. Then, the difference between the upper and lower angles is computed to obtain the \ac{fov} on that axis.
 
 Let $\theta^\text{upper limit}_i$ denote the upper limit of the image bounding box, on the generic $i$ axis, that can be replaced by $x$ or $y$, and $\theta^\text{lower limit}_i$ represent the lower limit of that same axis. Consider the image axis origin to be at the center of the image and the \ac{fov} of the bounding box can be defined by $\Theta^\text{FOV}_i$ in Equation~\eqref{eq:image-fov}, for that same generic axis $i$.
@@ -269,7 +269,7 @@ With some trigonometry and camera geometry\footnote{Camera geometry is detailed 
 	\theta^\text{lower limit}_i = \tan\left(\frac{\min(i)}{f_i}\right), \qquad i \in \{x, y\} 
 \end{align}
 
-\subsubsection{Determine the near and far cut planes limits}
+\subsubsection{Determine the Near and Far Cut Planes Limits}
 The Near and Far Cut Planes may be defined by the data and \ac{lidar} constraints. Following the datasheet of the VLP-16~\cite{vlp16}, the \ac{lidar} used on the experimental setup, and HDL-64~\cite{VelodyneHDL64}, the \ac{lidar} used on the \ac{kitti} dataset, the Near Cut Plane is defined as \SI{1}{\meter}, since the \acp{lidar} cannot detect smaller distances.
 
 Due to point cloud data scarcity, both on the experimental and  \ac{kitti} dataset, a Far Plane of \SI{30}{\meter} is enough to guarantee that all the objects of interest on the \ac{fov} are present.
@@ -311,7 +311,7 @@ A mismatch on determining the correspondences between the \acp{roi} on the image
 The implementation was thoroughly debugged but the cause of the mismatch was not found. Therefore, a simpler algorithm to match the \acp{roi} between camera and \ac{lidar} was developed, to fulfill the thesis objective of computing correspondences between image and point cloud objects.
 
 
-\subsection{Projecting \ac{lidar} points to the image}
+\subsection{Projecting \acs{lidar} Points to the Image}
 \label{subsec:object-detection:projection-correspondences}
 
 The alternative method to establish correspondences is similar to the one used for Sensor Fusion, detailed in Chapter~\ref{chapter:sensor-fusion}. The difference between the implementation on the latter chapter and this is that instead of comparing if the projected \ac{lidar} points correspond to a pixel in the image, they must also be contained in an image bounding box. 
@@ -365,7 +365,7 @@ These outliers correspond to objects nearby of the detected object or to objects
 	\label{fig:projected-correspondences}
 \end{figure}
 
-\subsection{Comparison between the two methods}
+\subsection{Comparison between the Two Methods}
 The results of the two approaches can be compared in Figure~\ref{fig:rois-matching-comparison}. In orange, the results of Sub-Section~\ref{subsec:object-detection:ray-casting}, based on ray-casting and data conversion from the camera to \ac{lidar}; and in lilac, the results of Sub-Section~\ref{subsec:object-detection:projection-correspondences}, based on projecting the \ac{lidar} points to the image plan and verifying which points laid inside the image bounding boxes limits.
 
 
@@ -487,7 +487,7 @@ Visualization of the bounding boxes is achieved using the \texttt{RViz} \texttt{
 	\begin{subfigure}[c]{0.8\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{img/image-object-to-point-cloud/bboxes-side-view.png}
-		\caption{In blue, two bounding boxes represented for the two closest cars, of all the \acp{roi} that were projected on the point cloud.}
+		\caption{In blue, two bounding boxes represented for the two closest cars, of all the \acsp{roi} that were projected on the point cloud.}
 		\label{fig:bboxes-3d-kitti-side}
 	\end{subfigure}
 	\\ \vspace{4mm}
@@ -496,7 +496,7 @@ Visualization of the bounding boxes is achieved using the \texttt{RViz} \texttt{
 	\begin{subfigure}[c]{0.8\textwidth}
 		\centering	
 		\includegraphics[width=\textwidth]{img/image-object-to-point-cloud/bboxes-front-view.png}
-		\caption{On this sub-figure one can notice that not all the point cloud \acp{roi}' are within the bounding box.}
+		\caption{On this sub-figure one can notice that not all the point cloud \acsp{roi}' are within the bounding box.}
 		\label{fig:bboxes-3d-kitti-front}
 	\end{subfigure}
 \end{figure}
@@ -507,7 +507,7 @@ Visualization of the bounding boxes is achieved using the \texttt{RViz} \texttt{
 	\begin{subfigure}[c]{0.8\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{img/image-object-to-point-cloud/bboxes-top-view.png}
-		\caption{Two bounding boxes are presented in blue for the two closest cars, of all the \acp{roi} that were projected on the point cloud. The outliers of the \acp{roi} can also be seen, as several zones of the point cloud are filtered by the \texttt{correspondences\_finder\_node}.}
+		\caption{Two bounding boxes are presented in blue for the two closest cars, of all the \acsp{roi} that were projected on the point cloud. The outliers of the \acsp{roi} can also be seen, as several zones of the point cloud are filtered by the \texttt{correspondences\_finder\_node}.}
 		\label{fig:bboxes-3d-kitti-top}
 	\end{subfigure}
 	\caption[Comparison between the estimated tridimensional bounding boxes' dimensions and position and the point cloud data, object clusters and \acs{roi}.]{Point Cloud tridimensional bounding boxes estimation using the methods described on Sub-Section~\ref{subsec:object-detection:bounding-boxes-and-roi}. The 3D bounding boxes are estimated from the image bounding boxes (top of sub-figure). The dark gray point cloud represents the original point cloud gathered by the \ac{lidar} and the lilac zones correspond to the filtered point cloud using \texttt{correspondences\_finder\_node}, node used to filter the original point cloud. In blue, the point cloud bounding boxes are shown, which are estimated from the image bounding boxes, given on the top of the sub-figures. Three different scenarios are presented: side~\subref{fig:bboxes-3d-kitti-side}, front~\subref{fig:bboxes-3d-kitti-front} and top~\subref{fig:bboxes-3d-kitti-top}. The original point cloud is presented using points 4 pixels wide and 10\% of transparency. The filtered point cloud is presented with points 6 pixels wide and 70\% of transparency. Bounding boxes line width is set to \SI{0.1}{\meter}.} 

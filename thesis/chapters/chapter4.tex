@@ -1,4 +1,4 @@
-\chapter{\ac{lidar} and Camera Data Fusion}
+\chapter{\acs{lidar} and Camera Data Fusion}
 \label{chapter:sensor-fusion}
 
 Data fusion consists of combining the information from two or more sources of data, that can be of equal or different types, adding value to the data set and allowing newer insights that are not possible from the parts alone, such as a representation on which is possible to understand the depth differences  between objects that are colored for easier identification. Data fusion (and sensor fusion) are two widely topics used on several areas, such as Industry 4.0, robotics and autonomous vehicles; but on the context of this research, it means that the depth information from the \ac{lidar} is combined with the color data from the camera.
@@ -7,7 +7,7 @@ A pre-requisite to combine multiple sources of data is that the rigid body trans
 
 As detailed in Section~\ref{sec:sota:sensor-fusion}, two ways are possible for combining \ac{lidar} and camera data: presenting depth information overlaid on an image or color information on a point cloud. For the purpose of this work, we are only interested on the latter, as it provides, on our opinion, a better way to verify the correctness of the calibration of Chapter~\ref{chapter:calibration} and a more interesting \ac{lidar} interference analysis and possible mitigation.
 
-\section{Combining \ac{lidar} and Camera Data}
+\section{Combining \acs{lidar} and Camera Data}
 ``Point Cloud Coloring'' consists of augmenting the information contained on a point cloud by adding to each point a RGB triplet indicating the point's color. Velodyne point clouds, besides the Euclidean coordinates of the point, also contain the intensity measurement and the laser ID/ring number\footnote{Laser ID and ring number are two concepts that can be inter-changed without loss of context. The former is more commonly used on written text while the latter is used on the source code.} of the laser and photodetector pair.
 
 To add color data to the point cloud, two approaches can be used, depending on the source and target coordinate system:
@@ -19,7 +19,7 @@ To add color data to the point cloud, two approaches can be used, depending on t
 
 Both approaches have their advantages and drawbacks, which will be discussed on the next two sub-sections.
 
-\subsection{Camera $\rightarrow$ \ac{lidar}} 
+\subsection{Camera $\rightarrow$ \acs{lidar}} 
 Using the camera as the source coordinate system implies that the 2D pixel's information must be converted to a tridimensional format. However, when applying Equation~\eqref{eq:camera_transform_full}, depth and scale information are lost, and without further constraints, it is not possible to determine the position of the 3D point that gave origin to the image pixel\footnote{For more information, the reader is advised to research on Single View Geometry or see Part I of~\cite{mvg_book}.}. 
 
 Therefore, re-projecting pixels to a 3D coordinate system is an under-determined system of equations, causing the geometric representation of the system to be either a ray or a quadrangular pyramid, depending on the camera sensor being considered continuous or discrete, respectively. For simplification, from now on it is considered that the 3D representation of a pixel is a ray that contains the focal point and the pixel to be projected.
@@ -31,7 +31,7 @@ Once the pixels have been projected to rays on the camera coordinate frame, befo
 The major drawback of this method is that for high definition images, the considerations on reducing the number of projected pixels must be taken, since the number of rays to be computed can become impractical. For our experimental setup, not considering any optimizations, would require the computation of more than 5 million rays, their projection to the point cloud coordinate frame and matching with the point cloud points.
 
 
-\subsection{\ac{lidar} $\rightarrow$ Camera}
+\subsection{\acs{lidar} $\rightarrow$ Camera}
 \label{subsec:sensor-fusion-lidar-to-camera}
 Projecting \ac{lidar} data to the image can be performed by re-purposing Equation~\eqref{eq:camera_transform_full}: the object points are considered to be \ac{lidar} 3D point coordinates and the joint rotation and translation matrix are replaced by the rigid body transformation between the \ac{lidar} and the camera coordinate frame, which can be obtained by inverting the rigid body transformation determined in Section~\ref{sec:calibration:extrinsic}. As detailed in sub-Section~\ref{subsec:calibration:extrinsic-results}, this inversion, since we are using a quaternion notation, is equivalent to change the quaternion scalar component to its symmetric number, as depicted in Equation~\eqref{eq:quaternion-inversion}.
 
@@ -147,7 +147,7 @@ Another test, from the preliminary stages of the work, show the colored point cl
 	\label{fig:dark-room-sensor-fusion}
 \end{figure}
 
-\subsection{\ac{kitti}}
+\subsection{\acs{kitti} Dataset}
 \label{subsec:sensor-fusion:kitti}
 Applying the developed nodes to \ac{kitti} data set, which uses a Velodyne HDL-64E, with 64 pairs of laser beams and photodetectors, having 4 times more lines than our setup, results on the colored point cloud presented in Figure~\ref{fig:kitti-sensor-fusion}. This cloud has some differences when compared with the figures~\ref{fig:cambada-sensor-fusion} and~\ref{fig:dark-room-sensor-fusion}, such as:
 
@@ -176,7 +176,7 @@ In Figure~\ref{fig:kitti-sensor-fusion}, a mismatch between the top and bottom p
 \end{figure}
 
 
-\subsection{Impact of point cloud density}
+\subsection{Impact of Point Cloud Density}
 In Figure~\ref{fig:dark-room-sensor-fusion}, it is evident that coloring a point cloud results on the loss of many high level features that are present on an image. On the resulting colored point cloud can be difficult to distinguish any objects with the original image and if the viewer does not know the scene being displayed.
 
 Such loss of context and high level features is due to the scarce nature of a point cloud in relation to the camera. A 16-beam \ac{lidar} would only have 16 rows of depth data, while a 5\ac{mp} image will have 1920 rows of pixels. That relation means that only 0.83\% of the image rows will have correspondences on the point cloud. Such is the case of our experimental data.
