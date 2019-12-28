@@ -18,7 +18,7 @@ Several middleware libraries, written in many languages, are available online, c
 
 \begin{enumerate}
 	\item \textbf{PocoLibs:} an Open-Source library developed by OpenRobots that allows for communication between process on a computer system, with support for real-time~\cite{Pocolibs};
-	\item \textbf{\ac{lcm} library:} focused on low latency and high-bandwidth, this library is developed with real-time systems in mind, providing data marshalling and message passing between a publisher and subscriber~\cite{Huang2010b};
+	\item \textbf{\ac{lcm} library:} focused on low latency and high-bandwidth, this library is developed with real-time systems in mind, providing data marshalling and message passing between a publisher and subscriber~\cite{Huang2010};
 	\item \textbf{ZeroMQ:} a framework with bindings for many languages that can be used to transport messages between process, \ac{tcp} or multicast, for example. Allows a series of different connection types~\cite{ZeroMQ}.
 	\item \textbf{\ac{yarp}:} a collection of programs, written in C++, focused on enabling peer-to-peer communication, supporting \ac{tcp}, \ac{udp}, multicast, among many other protocols~\cite{Metta2006};
 	\item \textbf{\ac{ros}:} a complex and extensive framework for developing and test robot software. It was developed with the goal of simplifying the task of building complex and robust robot behavior, independently of the hardware and mechanical platform. Offers a collection of tools, libraries and conventions~\cite{ROS};
@@ -26,7 +26,7 @@ Several middleware libraries, written in many languages, are available online, c
 	\item \textbf{\ac{mrpt}:} a mobile robot library, written in C++, which aims to provide a set of tools and libraries for computer vision, motion planning and \ac{slam}. It also directly supports hardware and implements message passing middleware~\cite{MRPT};
 \end{enumerate}
 
-While the first 4 listed alternatives are focused on generic communication between processes\footnote{Despite its name, \acf{yarp} is not a robotic operative system or framework, but instead a message passing framework for robots.}, inter-process and common communication protocols, the last 3 are oriented for robotics, providing a comprehensive set of tools for robotics development besides the message passing. The latter is preferred, since it has the potential to unburden us from the development of generic debug tools, data visualization and logging. Therefore, we exclude PocoLibs~\cite{Pocolibs}, \ac{lcm} library~\cite{Huang2010b}, ZeroMQ~\cite{ZeroMQ} and \ac{yarp}~\cite{Metta2006}.
+While the first 4 listed alternatives are focused on generic communication between processes\footnote{Despite its name, \acf{yarp} is not a robotic operative system or framework, but instead a message passing framework for robots.}, inter-process and common communication protocols, the last 3 are oriented for robotics, providing a comprehensive set of tools for robotics development besides the message passing. The latter is preferred, since it has the potential to unburden us from the development of generic debug tools, data visualization and logging. Therefore, we exclude PocoLibs~\cite{Pocolibs}, \ac{lcm} library~\cite{Huang2010}, ZeroMQ~\cite{ZeroMQ} and \ac{yarp}~\cite{Metta2006}.
 
 Since our work is also not oriented for real-time applications, we will not consider \ac{ros} 2~\cite{ROS2}. Comparing the three robotic platforms, \ac{mrpt} is focused on robot mobility, \ac{slam}, computer vision and motion planning, while \ac{ros} is more generic and widely used, containing all the capabilities of \ac{mrpt}. Also, \ac{ros} is more widely accepted and has a larger community support.
 
@@ -64,7 +64,7 @@ The modified Ford F-250 pickup truck, which can be seen in Figure~\ref{fig:sota:
 	\label{fig:sota:ford_sensors}
 \end{figure}
 
-The data is provided in raw format, accompanied by log files with timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm} protocol for estimating delays between sensory data registration on master-slave systems, see~\cite{Huang2010a}.} logs with all raw data. The images from an omnidirectional camera %, a Point Grey Ladybug3, 
+The data is provided in raw format, accompanied by log files with timestamps, \ac{gps} and \ac{lcm}\footnote{For more information on \acf{lcm} protocol for estimating delays between sensory data registration on master-slave systems, see~\cite{Huang2010}.} logs with all raw data. The images from an omnidirectional camera %, a Point Grey Ladybug3, 
 are stored on \ac{ppm} and \ac{lidar} data %from a Velodyne HDL-64E
 on \ac{pcap} format, from the \ac{tcp} connection socket.%; two Riegl LMS-Q120 \acp{lidar} also provide more information on the scan.
 
