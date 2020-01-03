@@ -317,7 +317,7 @@ Following Zhang's algorithm, the correspondences between the 2D and 3D represent
 	\label{fig:opencv_calib_pattern}
 \end{figure}
 
-The intrinsic calibration matrix coefficients can then be refined using a maximum-likelihood estimation to minimize the error using a non-linear method, such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other optimizations are possible, such as Powell’ dog-leg non-linear least squares technique~\cite{Lourakis2005}. Further reading can be conducted on~\cite{mvg_book, Sturm2010, camera_models, Hata, Xu1996a}.
+The intrinsic calibration matrix coefficients can then be refined using a maximum-likelihood estimation to minimize the error using a non-linear method, such as Levenberg-Marquardt optimization~\cite{Levenberg1943}. Other optimizations are possible, such as Powell’ dog-leg non-linear least squares technique~\cite{Lourakis2005}. Further reading can be conducted on~\cite{mvg_book, Sturm2010, camera_models, Xu1996a}.
 
 Bouguet in 2010 provided a Camera Calibration toolbox for \ac{matlab}~\cite{Bouguet2010}, which serves as the basis for many camera calibration toolboxes nowadays, such as \ac{opencv}, which is also based on the work of Zhang~\cite{opencv}.
 
@@ -455,7 +455,7 @@ Using mutual information techniques, Taylor and Nieto's approach uses normalized
 \subsection{Other Calibration Methods}
 Other calibration techniques use data variation through time~\cite{Chien2017} or Deep learning on \ac{cnn}~\cite{Wang2018a}. Scaramuzza \etal introduce a simple technique for extrinsic calibration that does need calibration patterns~\cite{Scaramuzza}: instead it requires the user to manually select correspondences between the camera and \ac{lidar}, easing the selection with the transformation of point clouds to Bearing Angle images. Brabec offers advances on this method, using a semi-automatic process where correspondences between the camera and \ac{lidar} (presented as a directional image) data are selected by the user and refined using local correction and \ac{ransac} algorithms~\cite{brabec2014}.
 
-Varuna De Silva \etal propose an approach based on the geometric positioning of the sensors on the setup, determining the parameters through geometric description between them, later refining this estimate using depth maps and a non-linear refinement technique (Gaussian Process Regression)~\cite{DeSilva2018}. In another of their works, a planar calibration pattern with holes is used, followed by the same refinement technique~\cite{Silva2018}.
+Varuna De Silva \etal propose an approach based on the geometric positioning of the sensors on the setup, determining the parameters through geometric description between them, later refining this estimate using depth maps and a non-linear refinement technique (Gaussian Process Regression)~\cite{Silva2018}. In another of their works, a planar calibration pattern with holes is used, followed by the same refinement technique~\cite{Silva2018}.
 
 
 \subsection{Summary of Extrinsic Calibration Techniques}
@@ -465,7 +465,7 @@ Extrinsically calibration between the \ac{lidar} and camera, if performed using 
 
 Relying on \ac{nn}, time variation or other exotic techniques will only add unnecessary complexity to this work, which would deviate us from the intended goals. Fully automatic methods would also require a large amount of time to implement, validate and tune to the experimental setup data, which is impractical.
 
-From all the methods presented, our efforts will be placed on a semi-automatic solution, with refinement, that requires user interaction and then refines the calibration parameters estimated. Examples of such work are Taylor and Nieto's~\cite{Taylor2013}, Pandey's~\cite{Pandey2012},Scaramuzza~\cite{Scaramuzza}, Brabec~\cite{brabec2014} and Varuna~\cite{DeSilva2018}.
+From all the methods presented, our efforts will be placed on a semi-automatic solution, with refinement, that requires user interaction and then refines the calibration parameters estimated. Examples of such work are Taylor and Nieto's~\cite{Taylor2013}, Pandey's~\cite{Pandey2012},Scaramuzza~\cite{Scaramuzza}, Brabec~\cite{brabec2014} and Varuna~\cite{Silva2018}.
 
 
 \section{Sensor Fusion}
