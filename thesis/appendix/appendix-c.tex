@@ -1,5 +1,5 @@
 \begin{landscape}
-\section{Appendix C: \ac{ros} Implementation node diagrams} 
+\section{Appendix C: \acs{ros} Implementation Node Diagrams} 
 \label{appendix:appendix-diagrams}
 
 \begin{figure}[!ht]
@@ -7,7 +7,7 @@
 	\def\svgwidth{\columnwidth}
 	\graphicspath{{img/calibration/}}
 	\includesvg{img/calibration/extrinsic-calibration-rosgraph-print}
-	\caption{\ac{ros} node graph for the extrinsic calibration. The nodes are represented in  ellipses and the topics between them in rectangles. Rosbag Player is responsible reproducing the recorded topics.}
+	\caption[\acs{ros} node graph for the extrinsic calibration.]{\ac{ros} node graph for the extrinsic calibration. The nodes are represented in  ellipses and the topics between them in rectangles. Rosbag Player is responsible reproducing the recorded topics.}
 	\label{fig:extrinsic-calibration-rosgraph}
 \end{figure}
 
@@ -16,16 +16,15 @@
 	\def\svgwidth{\columnwidth}
 	\graphicspath{{img/sensor_fusion/}}
 		\includesvg{img/sensor_fusion/sensor-fusion-with-calibration-print}
-		\caption[\ac{ros} node graph implemented for coloring the point cloud.]{\ac{ros} graph with the nodes used in data fusion between the \ac{lidar} and camera. The camera and \ac{lidar} topics are separated visually, with the camera still requiring the \texttt{image\_proc} package to de-Bayering the raw image data. Data is fused on the node \texttt{Point\_Cloud\_Coloring}, using the RGB image, point cloud, camera parameters and rigid body transforms.}
+		\caption[\acs{ros} node graph implemented for coloring the point cloud.]{\ac{ros} graph with the nodes used in data fusion between the \ac{lidar} and camera. The camera and \ac{lidar} topics are separated visually, with the camera still requiring the \texttt{image\_proc} package to de-Bayering the raw image data. Data is fused on the node \texttt{Point\_Cloud\_Coloring}, using the RGB image, point cloud, camera parameters and rigid body transforms.}
 	\label{fig:sensor-fusion-rosgraph}
 \end{figure}
 
 
 \begin{figure}[!ht] \centering \def\svgwidth{\columnwidth}
 	\graphicspath{{img/image-object-to-point-cloud/}}
-	\includesvg{img/image-object-to-point-cloud/frustum-print} \caption[\ac{ros} node graph for the
-	point cloud frustum filter algorithm.]{\ac{ros} node graph corresponding to the implementation of
-the Point Cloud Frustum Filter node from the image bounding boxes.} \label{fig:ros-graph-frustum}
+	\includesvg{img/image-object-to-point-cloud/frustum-print} 
+	\caption[\acs{ros} node graph for the point cloud frustum filter algorithm.]{\ac{ros} node graph corresponding to the implementation of the Point Cloud Frustum Filter node from the image bounding boxes.} \label{fig:ros-graph-frustum}
 \end{figure}
 
 
@@ -34,7 +33,7 @@ the Point Cloud Frustum Filter node from the image bounding boxes.} \label{fig:r
 	\def\svgwidth{\columnwidth}
 	\graphicspath{{img/image-object-to-point-cloud/}}
 	\includesvg{img/image-object-to-point-cloud/correspondences-finder-standalone-print}	
-	\caption[\ac{ros} node diagram for the estimation ob point cloud bounding box from image bounding boxes of objects of interest.]{\ac{ros} node diagram for \texttt{correspondences\_finder} implementation. It uses \texttt{Darknet-ros} to compute the image bounding boxes and a \texttt{rosbag} player to publish \ac{kitti} dataset data. The node publishes a point cloud message, \texttt{filtered\_point\_cloud}, containing the \ac{lidar} \acp{roi}' points, selected from the input point cloud, \texttt{velodyne\_points}.}
+	\caption[\acs{ros} node diagram for the estimation ob point cloud bounding box from image bounding boxes of objects of interest.]{\ac{ros} node diagram for \texttt{correspondences\_finder} implementation. It uses \texttt{Darknet-ros} to compute the image bounding boxes and a \texttt{rosbag} player to publish \ac{kitti} dataset data. The node publishes a point cloud message, \texttt{filtered\_point\_cloud}, containing the \ac{lidar} \acp{roi}' points, selected from the input point cloud, \texttt{velodyne\_points}.}
 	\label{fig:correspondences-finder-standalone}
 \end{figure}
 
@@ -43,7 +42,7 @@ the Point Cloud Frustum Filter node from the image bounding boxes.} \label{fig:r
 	\def\svgwidth{\columnwidth}
 	\graphicspath{{img/lidar-interference/human/}}
 	\includesvg{img/lidar-interference/human/human-roi-generation-print}
-	\caption[\ac{ros} node graph to implement the \acp{roi} recording for later analysis.]{\ac{ros} node graph representing the nodes and their interactions to generate and record the point cloud clusters corresponding to the \ac{roi}'s in the image. \texttt{Rosbag\_Player} is responsible for playing the dataset data; \texttt{darknet\_ros} for computing the image bounding boxes and \texttt{correspondences\_finder} the point cloud corresponding to the object on the \ac{roi}. \texttt{/Bag\_Recorder} is a \ac{ros} bag record to save the data generated into a bag file.}
+	\caption[\acs{ros} node graph to implement the \acsp{roi} recording for later analysis.]{\ac{ros} node graph representing the nodes and their interactions to generate and record the point cloud clusters corresponding to the \ac{roi}'s in the image. \texttt{Rosbag\_Player} is responsible for playing the dataset data; \texttt{darknet\_ros} for computing the image bounding boxes and \texttt{correspondences\_finder} the point cloud corresponding to the object on the \ac{roi}. \texttt{/Bag\_Recorder} is a \ac{ros} bag record to save the data generated into a bag file.}
 	\label{fig:human-roi-generation}
 \end{figure}
 

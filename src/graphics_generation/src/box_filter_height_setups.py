@@ -9,7 +9,14 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
-plt.rcParams.update({'font.size': 20})
+# activate latex text rendering
+matplotlib.rc('text', usetex=True)
+matplotlib.rc('text.latex', preamble=r'\usepackage{sfmath}')
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})  # font type similar to thesis
+matplotlib.rc('font', size=22)
+matplotlib.rc('axes', labelsize=28)
+matplotlib.rc('legend', fontsize=24)
+
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -54,9 +61,9 @@ ax.get_yaxis().tick_left()
 
 plt.grid(True, which="minor", color='grey', linestyle='-', linewidth=0.5, alpha=0.5)
 rects = ax.barh(range(0, len(height_values), 1), errors_normalized, log=True, label=r'$\frac{\#\ of\ outliers}{\#\ of\ points}$', tick_label=height_values)
-ax.legend(prop={'size': 28})
-ax.set_xlabel('Normalized relative number of Outliers', size=22, fontstyle='italic')
-ax.set_ylabel('Height difference between the LiDARs (m)', size=22, fontstyle='italic')
+ax.legend()
+ax.set_xlabel(r'\textsl{Normalized relative number of Outliers}')
+ax.set_ylabel(r'\textsl{Height difference between the LiDARs} (m)')
 #ax.set_title("Variation of outliers with Height between LiDARs")
 #ax.set_xticks(range(0, len(height_values), 1), height_values)
 fig.tight_layout()

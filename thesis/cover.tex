@@ -45,7 +45,7 @@
 %%% |             |   | cs         |
 %%% ---------------   --------------
 %% Import the UA thesis template
-\usepackage[engineering,deti]{uaThesisTemplate}
+\usepackage[engineering,deti,final]{uaThesisTemplate}
 
 
 %% Optional packages for utf8 encoding and T1 fonts
@@ -93,7 +93,7 @@
 %%%  line as many times as you want, or remove it
 %%%  if you only want the portuguese title.
 %% Optional Titles in additional languages.
-\Title{\selectlanguage{english}Interference analysis in Time of Flight LIDARs}
+\Title{\selectlanguage{english}Interference Analysis in Time of Flight LiDARs}
 
 %%% OPTIONAL: add a quotation if you like.
 %% Optional Quotation
@@ -117,7 +117,7 @@
 %%% | auxiliar convidado     |
 %%% --------------------------
 %% Supervisor information
-\Supervisor{António Neves}{Professor Auxiliar}
+\Supervisor{António Neves}{Auxiliar}
 
 %%% OPTIONAL: you can add a second supervisor.
 %%%
@@ -164,20 +164,23 @@ Telecomunicações}
 \Acknowledgements{Obrigado, \\
 Aos meus pais, por me apoiarem e confiarem em mim. \\ 
 À minha irmã, por ainda achar que estudei para saber montar e arranjar computadores.\\
-Ao meu irmão, por parecer interessado quando falo de robôs e tecnologia.\\ À Bárbara, pela paciência
-e pelo apoio, no meu pior e no meu melhor. \\ Ao Zé, Coutinho e Bernardo, por nunca me terem deixado
-sozinho neste caminho. \\ À HART e a todos os que fizeram dela o que foi, por me ajudarem
-a consolidar o gosto por robótica e LiDAR.\\ Ao NEEET, à equipa do ENE3 e a todos os que ajudaram
-a construir o que hoje é o núcleo de estudantes de Engenharia Eletrónica e Telecomunicações, em
-especial o Carvalho e o Ricardo, pela camaradagem.\\ Ao BEST, e em especial, à Maria, Vala,
-Catarina, Jorge, Pacheco, Mariana, Dinis, Mateus, por todo o apoio, amizade e mensagens de
-encorajamento.\\
+Ao meu irmão, por parecer interessado quando falo de robôs e tecnologia.\\ 
+À Bárbara, pela paciência e pelo apoio, no meu pior e no meu melhor. \\ 
+Ao Zé, Coutinho, Bernardo, Samuel e Bia por nunca me terem deixado sozinho neste caminho. \\ 
+
+À HART e a todos os que fizeram dela o que foi, por me ajudarem a consolidar o gosto por robótica e LiDAR.\\ 
+
+Ao NEEET, à equipa do ENE3 e a todos os que ajudaram a construir o que hoje é o núcleo de estudantes de Engenharia Eletrónica e Telecomunicações, em especial o Carvalho e o Ricardo, pela camaradagem.\\ 
+
+Ao BEST, e em especial, à Maria, Vala, Catarina, Jorge, Pacheco, Mariana, Dinis, Mateus, por todo o apoio, amizade e mensagens de encorajamento.\\
 
 Um especial agradecimento aos meus orientadores e co-orientadores, António Neves, Miguel Drummond
 e André Albuquerque, pela confiança e autonomia para explorar o problema, e pela disponibilidade
 para me ajudarem.\\
 
 À Bosch Car Multimedia, um agradecimento pela confiança e cedência dos equipamentos. \\
+
+Ao IRIS Lab, pela cedência do espaço para obter os datasets experimentais. \\
 
 À Universidade de Aveiro e ao Instituto de Telecomunicações, por me acolherem, fazerem-me crescer
 e ajudarem-me ao longos destes árduos 5 anos.\\
@@ -192,7 +195,7 @@ A todos, \\ os meus sinceros agradecimentos!}
 %%% Don't remove the \selectlanguage statement or you will end with incorrect hyphenation
 %% Mandatory Keywords and Abstract in Portuguese
 \Abstract{Palavras Chave}{LiDAR, interferência entre LiDARs, camera, deteção de objetos, carros
-autónomos, point cloud, ROS} {Resumo}{\selectlanguage{portuguese}\input{abstract/abstract-pt.tex}}
+autónomos, point cloud, ROS}{Resumo}{\selectlanguage{portuguese}\input{abstract/abstract-pt.tex}}
 
 %%% OPTIONAL: you can write the keywords and
 %%%  abstract in other languages. You can repeat
@@ -202,7 +205,7 @@ autónomos, point cloud, ROS} {Resumo}{\selectlanguage{portuguese}\input{abstrac
 %%% You can modify the language to any other supported by Latex
 %% Optional Keywords and Abstract in additional languages.
 \Abstract{Keywords}{LiDAR, LiDAR interference, camera, object detection, autonomous cars, point
-cloud, ROS.}		{Abstract}{\selectlanguage{english}\input{abstract/abstract-en.tex}}
+cloud, ROS.}{Abstract}{\selectlanguage{english}\input{abstract/abstract-en.tex}}
 
 %%% Edit the Jury President information.
 %% First Member will be the President of the Jury
@@ -212,11 +215,9 @@ cloud, ROS.}		{Abstract}{\selectlanguage{english}\input{abstract/abstract-en.tex
 %%%  members of the jury as many times as necessary.
 %% Additional members of the Jury
 \JuriMember{Professor Doutor Vítor Manuel Ferreira dos Santos}{Professor Associado c/ Agregação da
-Universidade de Aveiro} \JuriMember{Doutor Miguel Vidal Drummond}{Investigador Auxiliar do Instituto
+Universidade de Aveiro} 
+\JuriMember{Doutor Miguel Vidal Drummond}{Investigador Auxiliar do Instituto
 de Telecomunicações}
-%\JuriMember{Prof. Doutor João Antunes da Silva}{professor associado da Faculdade de Engenharia da Universidade do Porto}
-%\JuriMember{Prof. Doutor João Antunes da Silva}{professor associado da Faculdade de Engenharia da Universidade do Porto}
-%\JuriMember{Prof. Doutor João Antunes da Silva}{professor associado da Faculdade de Engenharia da Universidade do Porto}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

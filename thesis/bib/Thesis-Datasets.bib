@@ -9,67 +9,81 @@ title = {{Open Dataset – Waymo}},
 url = {https://waymo.com/open/},
 urldate = {2019-10-20}
 }
-@misc{TomasKrejci,
-author = {{Tomas Krejci}},
-title = {{GitHub - tomas789/kitti2bag: Convert KITTI dataset to ROS bag file the easy way!}},
-url = {https://github.com/tomas789/kitti2bag}
-}
-@article{Lin2014a,
-abstract = {We present a new dataset with the goal of advancing the state-of-the-art in object recognition by placing the question of object recognition in the context of the broader question of scene understanding. This is achieved by gathering images of complex everyday scenes containing common objects in their natural context. Objects are labeled using per-instance segmentations to aid in precise object localization. Our dataset contains photos of 91 objects types that would be easily recognizable by a 4 year old. With a total of 2.5 million labeled instances in 328k images, the creation of our dataset drew upon extensive crowd worker involvement via novel user interfaces for category detection, instance spotting and instance segmentation. We present a detailed statistical analysis of the dataset in comparison to PASCAL, ImageNet, and SUN. Finally, we provide baseline performance analysis for bounding box and segmentation detection results using a Deformable Parts Model.},
-archivePrefix = {arXiv},
-arxivId = {arXiv:1405.0312v3},
-author = {Lin, Tsung Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'{a}}r, Piotr and Zitnick, C. Lawrence},
-doi = {10.1007/978-3-319-10602-1_48},
-eprint = {arXiv:1405.0312v3},
-file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Lin et al/Microsoft COCO Common objects in context. Lin et al.. 2014.pdf:pdf},
-issn = {16113349},
-journal = {Lect. Notes Comput. Sci. (including Subser. Lect. Notes Artif. Intell. Lect. Notes Bioinformatics)},
-number = {PART 5},
-pages = {740--755},
-title = {{Microsoft COCO: Common objects in context}},
-volume = {8693 LNCS},
-year = {2014}
-}
-@techreport{vlp16,
-institution = {Velodyne LiDAR, Inc.},
-title = {{VLP-16 User Manual}},
-year = {2019}
-}
-@article{Geiger2013a,
-abstract = {We present a novel dataset captured from a VW station wagon for use in mobile robotics and autonomous driving research. In total, we recorded 6 hours of traffic scenarios at 10-100 Hz using a variety of sensor modalities such as high- resolution color and grayscale stereo cameras, a Velodyne 3D laser scanner and a high-precision GPS/IMU inertial navigation system. The scenarios are diverse, capturing real-world traffic situations and range from freeways over rural areas to inner- city scenes with many static and dynamic objects. Our data is calibrated, synchronized and timestamped, and we provide the rectified and raw image sequences. Our dataset also contains object labels in the form of 3D tracklets and we provide online benchmarks for stereo, optical flow, object detection and other tasks. This paper describes our recording platform, the data format and the utilities that we provide},
-author = {Geiger, A and Lenz, P and Stiller, C and Urtasun, R},
-file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Geiger et al/Vision meets robotics The KITTI dataset. The International Journal of Robotics Research. Geiger et al.. 2013.pdf:pdf},
-journal = {Int. J. Robot. Res. - IJRR},
-number = {October},
-pages = {1--6},
-title = {{Vision meets robotics: The KITTI dataset. The International Journal of Robotics Research}},
-year = {2013}
-}
-@article{Huang2010,
+@inproceedings{Huang2010,
 abstract = {We describe the Lightweight Communications and Marshalling (LCM) library for message passing and data marshalling. The primary goal of LCM is to simplify the development of low-latency message passing systems, especially for real-time robotics research applications. Messages can be transmitted between different processes using LCM's publish/subscribe message-passing system. A platform- and language-independent type specification language separates message description from implementation. Message specifications are automatically compiled into language-specific bindings, eliminating the need for users to implement marshalling code while guaranteeing run-time type safety. LCM is notable in providing a real-time deep traffic inspection tool that can decode and display message traffic with minimal user effort and no impact on overall system performance. This and other features emphasize LCM's focus on simplifying both the development and debugging of message passing systems. In this paper, we explain the design of LCM, evaluate its performance, and describe its application to a number of autonomous land, underwater, and aerial robots. {\textcopyright}2010 IEEE.},
 author = {Huang, Albert S. and Olson, Edwin and Moore, David C.},
+booktitle = {IEEE/RSJ 2010 Int. Conf. Intell. Robot. Syst. IROS 2010 - Conf. Proc.},
 doi = {10.1109/IROS.2010.5649358},
 file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Huang, Olson, Moore/LCM Lightweight Communications and Marshalling. Huang, Olson, Moore. 2010.pdf:pdf},
 isbn = {9781424466757},
-journal = {IEEE/RSJ 2010 Int. Conf. Intell. Robot. Syst. IROS 2010 - Conf. Proc.},
 number = {Lcm},
 pages = {4057--4062},
 title = {{LCM: Lightweight Communications and Marshalling}},
+url = {https://lcm-proj.github.io/ https://github.com/lcm-proj/lcm},
 year = {2010}
 }
-@misc{udacity,
-title = {{self-driving-car/datasets at master {\textperiodcentered} udacity/self-driving-car {\textperiodcentered} GitHub}},
-url = {https://github.com/udacity/self-driving-car/tree/master/datasets},
-urldate = {2019-10-20}
-}
 @article{nuScenes2019,
+abstract = {Robust detection and tracking of objects is crucial for the deployment of autonomous vehicle technology. Image-based benchmark datasets have driven development in computer vision tasks such as object detection, tracking and segmentation of agents in the environment. Most autonomous vehicles, however, carry a combination of cameras and range sensors such as lidar and radar. As machine learning based methods for detection and tracking become more prevalent, there is a need to train and evaluate such methods on datasets containing range sensor data along with images. In this work we present nuTonomy scenes (nuScenes), the first published dataset to carry the full autonomous vehicle sensor suite: 6 cameras, 5 radars and 1 lidar, all with full 360 degree field of view. nuScenes comprises 1000 scenes, each 20s long and fully annotated with 3D bounding boxes for 23 classes and 8 attributes. It has 7x as many annotations and 100x as many images as the pioneering KITTI dataset. We define novel 3D detection and tracking metrics. We also provide careful dataset analysis as well as baselines for lidar and image based detection and tracking. Data, development kit and more information are available online at www.nuscenes.org.},
 archivePrefix = {arXiv},
 arxivId = {1903.11027},
 author = {Caesar, Holger and Bankiti, Varun and Lang, Alex H. and Vora, Sourabh and Liong, Venice Erin and Xu, Qiang and Krishnan, Anush and Pan, Yu and Baldan, Giancarlo and Beijbom, Oscar},
 eprint = {1903.11027},
 journal = {arXiv Prepr.},
+month = {mar},
 title = {{nuScenes: A multimodal dataset for autonomous driving}},
-url = {https://www.nuscenes.org/},
+url = {https://www.nuscenes.org/ http://arxiv.org/abs/1903.11027},
+year = {2019}
+}
+@misc{TomasKrejci,
+author = {{Tomas Krejci}},
+publisher = {Tomas Krejci - Github},
+title = {{Convert KITTI dataset to ROS bag file the easy way!}},
+url = {https://github.com/tomas789/kitti2bag}
+}
+@inproceedings{Huang2010,
+abstract = {We describe the Lightweight Communications and Marshalling (LCM) library for message passing and data marshalling. The primary goal of LCM is to simplify the development of low-latency message passing systems, especially for real-time robotics research applications. Messages can be transmitted between different processes using LCM's publish/subscribe message-passing system. A platform- and language-independent type specification language separates message description from implementation. Message specifications are automatically compiled into language-specific bindings, eliminating the need for users to implement marshalling code while guaranteeing run-time type safety. LCM is notable in providing a real-time deep traffic inspection tool that can decode and display message traffic with minimal user effort and no impact on overall system performance. This and other features emphasize LCM's focus on simplifying both the development and debugging of message passing systems. In this paper, we explain the design of LCM, evaluate its performance, and describe its application to a number of autonomous land, underwater, and aerial robots. {\textcopyright}2010 IEEE.},
+author = {Huang, Albert S. and Olson, Edwin and Moore, David C.},
+booktitle = {IEEE/RSJ 2010 Int. Conf. Intell. Robot. Syst. IROS 2010 - Conf. Proc.},
+doi = {10.1109/IROS.2010.5649358},
+file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Huang, Olson, Moore/LCM Lightweight Communications and Marshalling. Huang, Olson, Moore. 2010.pdf:pdf},
+isbn = {9781424466757},
+number = {Lcm},
+pages = {4057--4062},
+title = {{LCM: Lightweight Communications and Marshalling}},
+url = {https://lcm-proj.github.io/ https://github.com/lcm-proj/lcm},
+year = {2010}
+}
+@incollection{Lin2014a,
+abstract = {We present a new dataset with the goal of advancing the state-of-the-art in object recognition by placing the question of object recognition in the context of the broader question of scene understanding. This is achieved by gathering images of complex everyday scenes containing common objects in their natural context. Objects are labeled using per-instance segmentations to aid in precise object localization. Our dataset contains photos of 91 objects types that would be easily recognizable by a 4 year old. With a total of 2.5 million labeled instances in 328k images, the creation of our dataset drew upon extensive crowd worker involvement via novel user interfaces for category detection, instance spotting and instance segmentation. We present a detailed statistical analysis of the dataset in comparison to PASCAL, ImageNet, and SUN. Finally, we provide baseline performance analysis for bounding box and segmentation detection results using a Deformable Parts Model.},
+archivePrefix = {arXiv},
+arxivId = {1405.0312},
+author = {Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'{a}}r, Piotr and Zitnick, C. Lawrence},
+booktitle = {Lect. Notes Comput. Sci. (including Subser. Lect. Notes Artif. Intell. Lect. Notes Bioinformatics)},
+doi = {10.1007/978-3-319-10602-1_48},
+eprint = {1405.0312},
+file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Lin et al/Microsoft COCO Common objects in context. Lin et al.. 2014.pdf:pdf},
+issn = {16113349},
+month = {may},
+number = {PART 5},
+pages = {740--755},
+title = {{Microsoft COCO: Common Objects in Context}},
+url = {http://link.springer.com/10.1007/978-3-319-10602-1{\_}48},
+volume = {8693 LNCS},
+year = {2014}
+}
+@misc{udacity,
+author = {Udacity},
+title = {{Udacity Self Driving Cara Nanodegree}},
+url = {https://github.com/udacity/self-driving-car https://github.com/udacity/self-driving-car/tree/master/datasets},
+urldate = {2019-03-12}
+}
+@techreport{VLP16,
+address = {San Jose},
+author = {Inc., Velodyne},
+file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Rev/VLP-16 User Manual. Rev. 2019.pdf:pdf;::},
+institution = {Velodyne LiDAR Inc.},
+pages = {71},
+title = {{VLP-16 User Manual}},
 year = {2019}
 }
 @article{Pandey2011,
@@ -86,4 +100,14 @@ title = {{Ford Campus vision and lidar data set}},
 url = {http://robots.engin.umich.edu/SoftwareData/Ford},
 volume = {30},
 year = {2011}
+}
+@article{Geiger2013a,
+abstract = {We present a novel dataset captured from a VW station wagon for use in mobile robotics and autonomous driving research. In total, we recorded 6 hours of traffic scenarios at 10-100 Hz using a variety of sensor modalities such as high- resolution color and grayscale stereo cameras, a Velodyne 3D laser scanner and a high-precision GPS/IMU inertial navigation system. The scenarios are diverse, capturing real-world traffic situations and range from freeways over rural areas to inner- city scenes with many static and dynamic objects. Our data is calibrated, synchronized and timestamped, and we provide the rectified and raw image sequences. Our dataset also contains object labels in the form of 3D tracklets and we provide online benchmarks for stereo, optical flow, object detection and other tasks. This paper describes our recording platform, the data format and the utilities that we provide},
+author = {Geiger, A and Lenz, P and Stiller, C and Urtasun, R},
+file = {:media/martinspedro/DATA/UA/Thesis/Organized Research/Geiger et al/Vision meets robotics The KITTI dataset. The International Journal of Robotics Research. Geiger et al.. 2013.pdf:pdf},
+journal = {Int. J. Robot. Res. - IJRR},
+number = {October},
+pages = {1--6},
+title = {{Vision meets robotics: The KITTI dataset}},
+year = {2013}
 }

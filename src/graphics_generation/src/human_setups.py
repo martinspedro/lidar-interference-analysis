@@ -9,7 +9,13 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
-plt.rcParams.update({'font.size': 20})
+# activate latex text rendering
+matplotlib.rc('text', usetex=True)
+matplotlib.rc('text.latex', preamble=r'\usepackage{sfmath}')
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})  # font type similar to thesis
+matplotlib.rc('font', size=22)
+matplotlib.rc('axes', labelsize=28)
+matplotlib.rc('legend', fontsize=24)
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -76,8 +82,8 @@ im = ax1.pcolormesh(errors_normalized, cmap=cmap)
 fig1.colorbar(im, ax=ax1, format='%0.0e')
 plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
 plt.yticks(range(0, len(human_values), 1), human_values)  # Set locations and labels
-ax1.set_xlabel('Interference distance Threshold (m)', size=22, fontstyle='italic')
-ax1.set_ylabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
+ax1.set_xlabel(r'\textsl{Interference distance Threshold} (m)')
+ax1.set_ylabel(r'\textsl{Distance between LiDARs} (m)')
 #ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
@@ -147,8 +153,8 @@ im = ax1.pcolormesh(errors_normalized, cmap=cmap)
 fig1.colorbar(im, ax=ax1, format='%0.0e')
 plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
 plt.yticks(range(0, len(human_values), 1), human_values)  # Set locations and labels
-ax1.set_xlabel('Interference distance Threshold (m)', size=22, fontstyle='italic')
-ax1.set_ylabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
+ax1.set_xlabel(r'\textsl{Interference distance Threshold} (m)')
+ax1.set_ylabel(r'\textsl{Distance between LiDARs} (m)')
 #ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
@@ -175,8 +181,8 @@ im = ax1.pcolormesh(errors_diference, cmap=cmap)
 fig1.colorbar(im, ax=ax1, format='%0.0e')
 plt.xticks(range(0, len(error_thresholds), 1), error_thresholds)
 plt.yticks(range(0, len(human_values), 1), human_values)  # Set locations and labels
-ax1.set_xlabel('Interference distance Threshold (m)', size=22, fontstyle='italic')
-ax1.set_ylabel('Distance between LiDARs (m)', size=22, fontstyle='italic')
+ax1.set_xlabel(r'\textsl{Interference distance Threshold} (m)')
+ax1.set_ylabel(r'\textsl{Distance between LiDARs} (m)')
 #ax1.set_title("Interfered points")
 fig1.tight_layout()
 plt.show(block=False)
