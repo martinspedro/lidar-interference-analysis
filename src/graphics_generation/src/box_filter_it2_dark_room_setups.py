@@ -9,7 +9,13 @@ import matplotlib.pyplot as plt
 
 from datasets_path import datasets_path
 
-plt.rcParams.update({'font.size': 20})
+# activate latex text rendering
+matplotlib.rc('text', usetex=True)
+matplotlib.rc('text.latex', preamble=r'\usepackage{sfmath}')
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})  # font type similar to thesis
+matplotlib.rc('font', size=22)
+matplotlib.rc('axes', labelsize=28)
+matplotlib.rc('legend', fontsize=24)
 
 # if number of arguments is invalid
 if len(sys.argv) != 1:
@@ -50,7 +56,7 @@ for i in range(0, len(height_strings), 1):
 
 
 print("Plotting Colored Mesh Graph..."),
-fig, ax = plt.subplots(figsize=(16,14))
+fig, ax = plt.subplots(figsize=(12,9))
 
 # Remove the plot frame lines
 ax.spines["top"].set_visible(False)
@@ -65,8 +71,8 @@ im = ax.pcolormesh(errors_normalized, cmap=cmap)
 fig.colorbar(im, ax=ax, format='%0.0e')
 plt.xticks(range(0, len(distance_values)), distance_values)  # Set locations and labels
 plt.yticks(range(0, len(height_values)), height_values)      # Set locations and labels
-ax.set_xlabel('Distance difference between the LiDARs (m) ', size=22, fontstyle='italic')
-ax.set_ylabel('Height difference between the LiDARs (m)', size=22, fontstyle='italic')
+ax.set_xlabel(r'\textsl{Distance difference between the LiDARs} (m)')
+ax.set_ylabel(r'\textsl{Height difference between the LiDARs} (m)')
 #ax.set_title("Variation of outliers with the distance and height between LiDARs")
 fig.tight_layout()
 plt.show(block=False)
